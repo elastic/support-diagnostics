@@ -1,0 +1,19 @@
+{
+  "author": {
+    "name": "Elasticsearch",
+    "company": "Elasticsearch BV"
+  },
+  "name": "elasticsearch-support-diagnostics",
+  "description": "Support diagnostics plugin for elasticsearch",
+  "version": "1.0.0",
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/elasticsearch/elasticsearch-support-diagnostics.git"
+  },
+  "bugs": {
+    "url": "https://github.com/elasticsearch/elasticsearch-support-diagnostics/issues"
+  },
+  "devDependencies": {},
+  "dependencies": {},
+  "license": "Apache License"
+}
