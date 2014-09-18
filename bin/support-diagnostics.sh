@@ -77,7 +77,8 @@ connectionTest=`curl -s -S -XGET $eshost 2>&1`
 if [ $? -ne 0 ]
 then
     echo "Error connecting to $eshost: $connectionTest"
-    rmdir $outputdir
+#   DON'T DELETE THE OUTPUT DIR!  IT MIGHT BE / or /opt!
+#   rmdir $outputdir
     exit 1
 fi
 
