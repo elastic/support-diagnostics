@@ -284,7 +284,7 @@ else
     printf "\nDone. Created $outputdir.tar\n\n"
 
 fi
-rm -rf $outputdir
+#rm -rf $outputdir
 
 
 exit 0
