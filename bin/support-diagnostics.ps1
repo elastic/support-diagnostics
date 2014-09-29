@@ -36,12 +36,12 @@ If ($n) {
     $targetNode = $n
 }
 
-if ($o) {
+If ($o) {
     $outputDir = $o
 }
 
 New-Item $outputDir -Type directory | Out-Null
-if (!(Test-Path $outputDir)) {
+If (!(Test-Path $outputDir)) {
     Write-Host Cannot write output file.
     Exit
 }
@@ -172,7 +172,7 @@ If ($nc) {
 $zipFile = $outputDir+'.zip'
 $source = $pwd.Path+'\'+$outputDir
 $destination = $pwd.Path+'\'+$zipFile
-if ($o) {
+If ($o) {
     $source = $outputDir
     $destination = $zipFile
 }
