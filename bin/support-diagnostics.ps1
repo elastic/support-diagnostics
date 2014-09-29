@@ -150,7 +150,7 @@ If ($esVersion.StartsWith("0.9")) {
     Write-Host 'Getting _cat/plugins'
     Invoke-WebRequest $esHost'/_cat/plugins?v' -OutFile $outputDir/plugins.txt
 
-    Write-Host 'Getting _/recovery'
+    Write-Host 'Getting _cat/recovery'
     Invoke-WebRequest $esHost'/_cat/recovery?v' -OutFile $outputDir/cat_recovery.json
 }
 
