@@ -178,6 +178,4 @@ If ($o) {
 }
 [System.IO.Compression.ZipFile]::CreateFromDirectory($source, $destination, $compressionLevel, $false)
 
-Remove-Item $outputDir -Force -Recurse
-
 Write-Host `nDone.  Created $zipFile`n`n
