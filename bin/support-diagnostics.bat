@@ -1,0 +1,1 @@
+powershell -ExecutionPolicy Bypass -File support-diagnostics.ps1
