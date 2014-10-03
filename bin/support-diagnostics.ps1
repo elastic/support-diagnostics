@@ -56,7 +56,7 @@ If ($connectionTest.StatusCode -ne 200) {
  
 $nodenameStatus = (Invoke-WebRequest ($esHost+'_nodes/'+$targetNode+'/settings?pretty')).RawContent | Select-String '"nodes" : { }'
 If ($nodenameStatus) {
-    Write-Host `n`nThe node/host name '$hostname' does not appear to be connected to your cluster.  This script will continue, however without gathering the log files or elasticsearch.yml`n`n
+    Write-Host `n`nThe node/host name $hostName does not appear to be connected to your cluster.  This script will continue, however without gathering the log files or elasticsearch.yml`n`n
 }
 
 # Get the ES version
@@ -81,7 +81,7 @@ If (!(Test-Path $esConfigPath)) {
     # Sometimes the API returns a relative path.  If so, try prepending the home directory
     $esConfigPath = $esHomePath+'\'+$esConfigPath
     If (!(Test-Path $esConfigPath)) {
-        Write-Host `nCould not get your elasticsearch config.  Please add your elasticsearch config directory to the $outputDir+'.zip' or to your ticket.`n`n
+        Write-Host `nCould not get your elasticsearch config.  Please add your elasticsearch config directory to the $outputDir'.zip' or to your ticket.`n`n
         $esConfigPath = ''
     }
 }
