@@ -6,7 +6,7 @@ to assist users with gathering diagnostic data about their cluster and nodes.
 
 Installation:
 
-	./bin/plugin --install elasticsearch/elasticsearch-support-diagnostics/1.0.0
+	./bin/plugin --install elasticsearch/elasticsearch-support-diagnostics
 
 
 ### Support Diagnostics Script
