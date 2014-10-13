@@ -12,17 +12,17 @@
 timestamp=$(date +"%Y%m%d-%H%M%S")
 
 # set defaults
-outputdir="support-diagnostics.$timestamp.$(hostname)"
+outputdir="support-diagnostics.$(hostname).$timestamp"
 eshost="localhost:9200"
 
 # pick up command line options
 while [ $# -gt 0 ]
 do
-    case "$1" in	
+    case "$1" in
 	-h | --h | --help)  cat <<EOM
 support-diagnostics.sh
 
-This script is used to gather diagnotistic information for elasticsearch support. 
+This script is used to gather diagnotistic information for elasticsearch support.
 In order to gather the elasticsearch config and logs you must run this on a node within your elasticsearch cluster.
 
   -h  This help message
@@ -148,18 +148,18 @@ then
     #Grab yml location from the API
     localNodeConfig=$(curl -s -S -XGET "$eshost/_nodes/$targetNode/settings?pretty" | grep -m1 -ohE "\"$configType\" : \".*?\"")
 
-    #Ensure the above curl succeeded 
+    #Ensure the above curl succeeded
     if [ $(echo $localNodeConfig |grep -q "\"$configType\" : \""; echo $?) -eq 0 ]
     then
 	#get just the config including full path
 	esConfigPath=$(echo $localNodeConfig | sed -e "s/\"$configType\" : \"//" -e 's/"//')
-	
+
 	echo "Getting config"
 	cpStatus=-1
 
 	#Check if the config directory we found exists
 	if [ -d "$esConfigPath" ]
-	then 
+	then
 	    mkdir $outputdir/config
 	    cp -r $esConfigPath/* $outputdir/config/
 
@@ -288,4 +288,3 @@ fi
 
 
 exit 0
-

@@ -24,7 +24,7 @@ Param(
 $esHost = 'http://localhost:9200/'
 $timestamp = Get-Date -format yyyyMMdd-HHmmss
 $hostName = [System.Net.Dns]::GetHostName()
-$outputDir = 'support-diagnostics'+'.'+$timestamp+'.'+$hostname
+$outputDir = 'support-diagnostics'+'.'+$hostname+'.'+$timestamp
 $targetNode = '_local'
 
 If ($H) {
@@ -53,7 +53,7 @@ If ($connectionTest.StatusCode -ne 200) {
     Write-Host Error connecting to $esHost
     Exit
 }
- 
+
 $nodenameStatus = (Invoke-WebRequest ($esHost+'_nodes/'+$targetNode+'/settings?pretty')).RawContent | Select-String '"nodes" : { }'
 If ($nodenameStatus) {
     Write-Host `n`nThe node/host name $hostName does not appear to be connected to your cluster.  This script will continue, however without gathering the log files or elasticsearch.yml`n`n
