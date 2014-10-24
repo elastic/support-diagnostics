@@ -152,6 +152,9 @@ If ($esVersion.StartsWith("0.9")) {
 
     Write-Host 'Getting _cat/recovery'
     Invoke-WebRequest $esHost'/_cat/recovery?v' -OutFile $outputDir/cat_recovery.json
+
+    Write-Host 'Getting _cat/shards'
+    Invoke-WebRequest $esHost'/_cat/shards?v' -OutFile $outputDir/cat_shards.txt
 }
 
 Write-Host 'Running netstat'
