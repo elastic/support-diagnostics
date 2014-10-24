@@ -136,8 +136,8 @@ If ($esVersion.StartsWith("0.9")) {
 
     Write-Host 'Getting indices stats'
     Invoke-WebRequest $esHost'/_stats?all&pretty&human' -OutFile $outputDir/indices_stats.json
+# API calls that only work with 1.0+
 } Else {
-    # API calls that only work with >1.0
     Write-Host 'Getting _nodes/stats'
     Invoke-WebRequest $esHost'/_nodes/stats?pretty&human' -OutFile $outputDir/nodes_stats.json
 
@@ -150,11 +150,18 @@ If ($esVersion.StartsWith("0.9")) {
     Write-Host 'Getting _cat/plugins'
     Invoke-WebRequest $esHost'/_cat/plugins?v' -OutFile $outputDir/plugins.txt
 
-    Write-Host 'Getting _cat/recovery'
-    Invoke-WebRequest $esHost'/_cat/recovery?v' -OutFile $outputDir/cat_recovery.json
-
     Write-Host 'Getting _cat/shards'
     Invoke-WebRequest $esHost'/_cat/shards?v' -OutFile $outputDir/cat_shards.txt
+
+    # API calls that only work with 1.1+
+    If (-Not $esVersion.StartsWith("1.0")) {
+        Write-Host 'Getting _recovery'
+        Invoke-WebRequest $esHost'/_recovery?detailed&pretty&human' -OutFile $outputDir/recovery.json
+    # API calls that only work with 1.0
+    } Else {
+        Write-Host 'Getting _cat/recovery'
+        Invoke-WebRequest $esHost'/_cat/recovery?v' -OutFile $outputDir/cat_recovery.txt
+    }
 }
 
 Write-Host 'Running netstat'
