@@ -227,8 +227,8 @@ if [[ $esVersion =~ 0.90.* ]]; then
     echo "Getting indices stats"
     curl -XGET "$eshost/_stats?all&pretty&human" >> $outputdir/indices_stats.json 2> /dev/null
 
+#api calls that only work with 1.0+
 else
-    #api calls that only work with >1.0
     echo "Getting _nodes/stats"
     curl -XGET "$eshost/_nodes/stats?pretty&human" >> $outputdir/nodes_stats.json 2> /dev/null
 
@@ -241,12 +241,18 @@ else
     echo "Getting _cat/plugins"
     curl -XGET "$eshost/_cat/plugins?v" >> $outputdir/plugins.txt 2> /dev/null
 
-    echo "Getting _/recovery"
-    curl -XGET "$eshost/_cat/recovery?v" >> $outputdir/cat_recovery.json 2> /dev/null
-
     echo "Getting _cat/shards"
     curl -XGET "$eshost/_cat/shards?v" >> $outputdir/cat_shards.txt 2> /dev/null
 
+    #api calls that only work with 1.1+
+    if [[ ! $esVersion =~ 1.0.* ]]; then
+        echo "Getting _recovery"
+        curl -XGET "$eshost/_recovery?detailed&pretty&human" >> $outputdir/recovery.json 2> /dev/null
+    #api calls that only work with 1.0
+    else
+        echo "Getting _cat/recovery"
+        curl -XGET "$eshost/_cat/recovery?v" >> $outputdir/cat_recovery.txt 2> /dev/null
+    fi
 fi
 
 
