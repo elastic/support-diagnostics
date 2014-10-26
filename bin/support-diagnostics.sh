@@ -12,14 +12,14 @@
 timestamp=$(date +"%Y%m%d-%H%M%S")
 
 # set defaults
-outputdir="support-diagnostics.$(hostname).$timestamp"
 eshost="localhost:9200"
+targetNode='_local'
 
 # pick up command line options
 while [ $# -gt 0 ]
 do
     case "$1" in
-	-h | --h | --help)  cat <<EOM
+        -h | --h | --help)  cat <<EOM
 support-diagnostics.sh
 
 This script is used to gather diagnotistic information for elasticsearch support.
@@ -31,9 +31,9 @@ In order to gather the elasticsearch config and logs you must run this on a node
   -o  Script output directory (optional, defaults to ./support-diagnostics.[timestamp].[hostname])
   -nc Disable compression (optional)
 EOM
-	    exit 1;;
+            exit 1;;
         -H)  eshost=$2;;
-        -n)  nodename=$2;;
+        -n)  targetNode=$2;;
         -nc) nocompression=true;;
         -o)  outputdir=$2;;
 
@@ -41,10 +41,14 @@ EOM
     shift
 done
 
-
 #Ensure curl exists, or exit as there is nothing more we can do
 command -v curl >/dev/null 2>&1 || { printf "ERROR: curl is not installed\n"; exit 1; }
 
+# if the output directory was not passed in, then set the default
+if [ -z "$outputdir" ]
+then
+    outputdir="support-diagnostics.$(hostname).$targetNode.$timestamp"
+fi
 
 # check dump file
 mkdir $outputdir/
@@ -82,24 +86,11 @@ then
     exit 1
 fi
 
-#see if nodename was passed. if not just use the _local
-if [ -z "$nodename" ]
-then
-    hostname=$(hostname)
-    targetNode='_local'
-else
-    hostname=$nodename
-    targetNode=$nodename
-
-fi
-
 #run a sanity check of the nodename by ensuring we get data back on that node
 nodenameStatus=$(curl -s -S -XGET "$eshost/_nodes/$targetNode/settings?pretty" |grep -q '"nodes" : { }'; echo $?)
 if [ $nodenameStatus -eq 0 ]
 then
-    printf "\n\nThe node/host name $hostname does not appear to be connected to your cluster. This script will continue, however without gathering the log files or elasticsearch.yml\n\n"
-
-
+    printf "\n\nThe host and node name (\"$eshost\" and \"$targetNode\") does not appear to be connected to your cluster. This script will continue, however without gathering the log files or elasticsearch.yml\n\n"
 fi
 
 #get the es version
@@ -134,15 +125,15 @@ then
     localNodePaths=$(echo $localNodePaths |sed -e 's/"//' -e 's/path : {//' | tr ',' '\n' | sed 's/}//g')
 
     while read lineItem; do
-	IFS=' : ' read -a currentItem <<< "$lineItem"
-	case "${currentItem[0]}" in
-	    "$logType")
-		esLogsPath=${currentItem[1]}
-		;;
-	    "$homeType")
-		esHomePath=${currentItem[1]}
-		;;
-	esac
+        IFS=' : ' read -a currentItem <<< "$lineItem"
+        case "${currentItem[0]}" in
+            "$logType")
+                esLogsPath=${currentItem[1]}
+                ;;
+            "$homeType")
+                esHomePath=${currentItem[1]}
+                ;;
+        esac
     done <<<"$localNodePaths"
 
     #Grab yml location from the API
@@ -151,41 +142,41 @@ then
     #Ensure the above curl succeeded
     if [ $(echo $localNodeConfig |grep -q "\"$configType\" : \""; echo $?) -eq 0 ]
     then
-	#get just the config including full path
-	esConfigPath=$(echo $localNodeConfig | sed -e "s/\"$configType\" : \"//" -e 's/"//')
+        #get just the config including full path
+        esConfigPath=$(echo $localNodeConfig | sed -e "s/\"$configType\" : \"//" -e 's/"//')
 
-	echo "Getting config"
-	cpStatus=-1
+        echo "Getting config"
+        cpStatus=-1
 
-	#Check if the config directory we found exists
-	if [ -d "$esConfigPath" ]
-	then
-	    mkdir $outputdir/config
-	    cp -r $esConfigPath/* $outputdir/config/
+        #Check if the config directory we found exists
+        if [ -d "$esConfigPath" ]
+        then
+            mkdir $outputdir/config
+            cp -r $esConfigPath/* $outputdir/config/
 
-	    cpStatus=$?
+            cpStatus=$?
 
-	#Sometimes the api returns a relative path, if so prepend try prepending the home dir
-	elif [ -d "$esHomePath/$esConfigPath" ]
-	then
-	    mkdir $outputdir/config
-	    cp -r $esHomePath/$esConfigPath/* $outputdir/config/
+        #Sometimes the api returns a relative path, if so try prepending the home dir
+        elif [ -d "$esHomePath/$esConfigPath" ]
+        then
+            mkdir $outputdir/config
+            cp -r $esHomePath/$esConfigPath/* $outputdir/config/
 
-	    cpStatus=$?
-	fi
+            cpStatus=$?
+        fi
 
-	#We couldn't find the config.
-	if [ $cpStatus != 0 ]
-	then
-	    printf "\nERROR: Could not get your elasticsearch config. Please add your elasticsearch config directory to the $outputdir.tar or to your ticket\n\n"
-	fi
+        #We couldn't find the config.
+        if [ $cpStatus != 0 ]
+        then
+            printf "\nERROR: Could not get your elasticsearch config. Please add your elasticsearch config directory to the $outputdir.tar or to your ticket\n\n"
+        fi
 
-	echo "Getting logs"
-	mkdir $outputdir/logs
-	cp $esLogsPath/*.log $outputdir/logs/
+        echo "Getting logs"
+        mkdir $outputdir/logs
+        cp $esLogsPath/*.log $outputdir/logs/
 
     else
-	printf "\nERROR: Could not determine config directory location from api. Please add your config directory to the $outputdir.tar or to your ticket\n\n"
+        printf "\nERROR: Could not determine config directory location from api. Please add your config directory to the $outputdir.tar or to your ticket\n\n"
     fi
 
 else
