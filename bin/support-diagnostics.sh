@@ -244,6 +244,9 @@ else
     echo "Getting _/recovery"
     curl -XGET "$eshost/_cat/recovery?v" >> $outputdir/cat_recovery.json 2> /dev/null
 
+    echo "Getting _cat/shards"
+    curl -XGET "$eshost/_cat/shards?v" >> $outputdir/cat_shards.txt 2> /dev/null
+
 fi
 
 
