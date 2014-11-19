@@ -21,24 +21,26 @@ Param(
 )
 
 # Set defaults
-$esHost = 'http://localhost:9200/'
+$esHostPort = 'localhost:9200'
 $timestamp = Get-Date -format yyyyMMdd-HHmmss
-$hostName = [System.Net.Dns]::GetHostName()
-$outputDir = 'support-diagnostics'+'.'+$hostname+'.'+$timestamp
+$outputDir = $o
 $targetNode = '_local'
 
 If ($H) {
-    $esHost = 'http://'+$H+'/'
+    $esHostPort = $H
 }
 
 If ($n) {
-    $hostName = $n
     $targetNode = $n
 }
 
-If ($o) {
-    $outputDir = $o
+# Cannot be defaulted without the target node being set
+If (! $o) {
+    $hostName = [System.Net.Dns]::GetHostName()
+    $outputDir = 'support-diagnostics.'+$hostName+'.'+$targetNode+'.'+$timestamp
 }
+
+$esHost = 'http://' + $esHostPort + '/'
 
 New-Item $outputDir -Type directory | Out-Null
 If (!(Test-Path $outputDir)) {
@@ -56,7 +58,7 @@ If ($connectionTest.StatusCode -ne 200) {
 
 $nodenameStatus = (Invoke-WebRequest ($esHost+'_nodes/'+$targetNode+'/settings?pretty')).RawContent | Select-String '"nodes" : { }'
 If ($nodenameStatus) {
-    Write-Host `n`nThe node/host name $hostName does not appear to be connected to your cluster.  This script will continue, however without gathering the log files or elasticsearch.yml`n`n
+    Write-Host `n`nThe host and node name (\"$esHostPort\" and \"$targetNode\") does not appear to be connected to your cluster.  This script will continue, however without gathering the log files or elasticsearch.yml`n`n
 }
 
 # Get the ES version
