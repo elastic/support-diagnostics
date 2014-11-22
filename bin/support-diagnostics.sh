@@ -271,6 +271,11 @@ fi
 echo "Running ps"
 ps -ef | grep elasticsearch >> $outputdir/elasticsearch-process.txt
 
+echo "Running df"
+df -k >> $outputdir/fsinfo.txt
+
+echo "Running mount"
+mount >> $outputdir/mount.txt
 
 echo "Output complete.  Creating tarball."
 tarfile=$outputdir.tar

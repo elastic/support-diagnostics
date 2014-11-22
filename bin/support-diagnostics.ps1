@@ -175,6 +175,9 @@ ps | sort -desc cpu | select -first 30 | Out-File $outputDir/top.txt
 Write-Host 'Running ps'
 Get-Process -Name *elasticsearch* | Out-File $outputDir/elasticsearch-process.txt
 
+Write-Host 'Running fsutil'
+fsutil fsinfo drives | Out-File $outputDir/fsinfo.txt
+
 Write-Host 'Output complete.  Creating zip.'
 Add-Type -Assembly System.IO.Compression.FileSystem
 $compressionLevel = [System.IO.Compression.CompressionLevel]::Optimal
