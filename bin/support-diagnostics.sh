@@ -203,6 +203,9 @@ curl -XGET "$eshost/_cluster/state?pretty" >> $outputdir/cluster_state.json 2> /
 echo "Getting _cluster/stats"
 curl -XGET "$eshost/_cluster/stats?pretty&human" >> $outputdir/cluster_stats.json 2> /dev/null
 
+echo "Getting _count"
+curl -XGET "$eshost/_count?pretty" >> $outputdir/count.json 2> /dev/null
+
 echo "Getting nodes info"
 curl -XGET "$eshost/_nodes/?all&pretty&human" >> $outputdir/nodes.json 2> /dev/null
 

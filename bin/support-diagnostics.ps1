@@ -125,6 +125,9 @@ Invoke-WebRequest $esHost'/_cluster/state?pretty' -OutFile $outputDir/cluster_st
 Write-Host 'Getting _cluster/stats'
 Invoke-WebRequest $esHost'/_cluster/stats?pretty&human' -OutFile $outputDir/cluster_stats.json
 
+Write-Host 'Getting _count'
+Invoke-WebRequest $esHost'/_count?pretty' -OutFile $outputDir/count.json
+
 Write-Host 'Getting nodes info'
 Invoke-WebRequest $esHost'/_nodes/?all&pretty&human' -OutFile $outputDir/nodes.json
 
