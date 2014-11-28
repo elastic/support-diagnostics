@@ -209,6 +209,9 @@ curl -XGET "$eshost/_cluster/health?pretty" >> $outputdir/cluster_health.json 2>
 echo "Getting _cluster/pending_tasks"
 curl -XGET "$eshost/_cluster/pending_tasks?pretty&human" >> $outputdir/cluster_pending_tasks.json 2> /dev/null
 
+echo "Getting _count"
+curl -XGET "$eshost/_count?pretty" >> $outputdir/count.json 2> /dev/null
+
 echo "Getting nodes info"
 curl -XGET "$eshost/_nodes/?all&pretty&human" >> $outputdir/nodes.json 2> /dev/null
 

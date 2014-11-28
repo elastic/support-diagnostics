@@ -131,6 +131,9 @@ Invoke-WebRequest $esHost'/_cluster/health?pretty' -OutFile $outputDir/cluster_h
 Write-Host 'Getting _cluster/pending_tasks'
 Invoke-WebRequest $esHost'/_cluster/pending_tasks?pretty&human' -OutFile $outputDir/cluster_pending_tasks.json
 
+Write-Host 'Getting _count'
+Invoke-WebRequest $esHost'/_count?pretty' -OutFile $outputDir/count.json
+
 Write-Host 'Getting nodes info'
 Invoke-WebRequest $esHost'/_nodes/?all&pretty&human' -OutFile $outputDir/nodes.json
 
