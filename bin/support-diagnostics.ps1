@@ -125,6 +125,12 @@ Invoke-WebRequest $esHost'/_cluster/state?pretty' -OutFile $outputDir/cluster_st
 Write-Host 'Getting _cluster/stats'
 Invoke-WebRequest $esHost'/_cluster/stats?pretty&human' -OutFile $outputDir/cluster_stats.json
 
+Write-Host 'Getting _cluster/health'
+Invoke-WebRequest $esHost'/_cluster/health?pretty' -OutFile $outputDir/cluster_health.json
+
+Write-Host 'Getting _cluster/pending_tasks'
+Invoke-WebRequest $esHost'/_cluster/pending_tasks?pretty&human' -OutFile $outputDir/cluster_pending_tasks.json
+
 Write-Host 'Getting nodes info'
 Invoke-WebRequest $esHost'/_nodes/?all&pretty&human' -OutFile $outputDir/nodes.json
 
