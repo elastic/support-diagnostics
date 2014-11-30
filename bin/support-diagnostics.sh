@@ -14,6 +14,8 @@ timestamp=$(date +"%Y%m%d-%H%M%S")
 # set defaults
 eshost="localhost:9200"
 targetNode='_local'
+repeat=1
+interval=30
 
 # pick up command line options
 while [ $# -gt 0 ]
@@ -30,12 +32,16 @@ In order to gather the elasticsearch config and logs you must run this on a node
   -n  On a host with multiple nodes, specify the node name to gather data for. Value should match node.name as defined in elasticsearch.yml
   -o  Script output directory (optional, defaults to ./support-diagnostics.[timestamp].[hostname])
   -nc Disable compression (optional)
+  -r  Collect stats r times (optional, in conjunction with -i , defaults to 1)
+  -i  Interval in seconds between stats collections (optional, in conjunction with -r , defaults to 30 secs)
 EOM
             exit 1;;
         -H)  eshost=$2;;
         -n)  targetNode=$2;;
         -nc) nocompression=true;;
         -o)  outputdir=$2;;
+        -r)  repeat=$2;;
+        -i)  interval=$2;;
 
     esac
     shift
@@ -184,7 +190,11 @@ else
 fi
 
 
+
 #api calls that work with all versions
+
+#grab settings
+echo "Collecting version, mappings, settings"
 echo "Getting version"
 curl -XGET "$eshost" >> $outputdir/version.json 2> /dev/null
 
@@ -197,88 +207,112 @@ curl -XGET "$eshost/_settings?pretty" >> $outputdir/settings.json 2> /dev/null
 echo "Getting _cluster/settings"
 curl -XGET "$eshost/_cluster/settings?pretty" >> $outputdir/cluster_settings.json 2> /dev/null
 
-echo "Getting _cluster/state"
-curl -XGET "$eshost/_cluster/state?pretty" >> $outputdir/cluster_state.json 2> /dev/null
 
-echo "Getting _cluster/stats"
-curl -XGET "$eshost/_cluster/stats?pretty&human" >> $outputdir/cluster_stats.json 2> /dev/null
+#grab stats
+#execute multiple times if $repeat is > 1
+i=1
+while [ $i -le $repeat ]
+    do
+        if [ $i -eq 1 ]
+            then
+                idx=""
+            else
+                idx=".$i"
+        fi
 
-echo "Getting _cluster/health"
-curl -XGET "$eshost/_cluster/health?pretty" >> $outputdir/cluster_health.json 2> /dev/null
+        echo "Collecting stats $i/$repeat"
 
-echo "Getting _cluster/pending_tasks"
-curl -XGET "$eshost/_cluster/pending_tasks?pretty&human" >> $outputdir/cluster_pending_tasks.json 2> /dev/null
+        date=`date  +%Y-%m-%d_%H_%M_%S`
+        echo "Getting _cluster/state"
+        curl -XGET "$eshost/_cluster/state?pretty" >> $outputdir/cluster_state.json$idx.$date 2> /dev/null
 
-echo "Getting _count"
-curl -XGET "$eshost/_count?pretty" >> $outputdir/count.json 2> /dev/null
+        echo "Getting _cluster/stats"
+        curl -XGET "$eshost/_cluster/stats?pretty&human" >> $outputdir/cluster_stats.json$idx.$date 2> /dev/null
 
-echo "Getting nodes info"
-curl -XGET "$eshost/_nodes/?all&pretty&human" >> $outputdir/nodes.json 2> /dev/null
+        echo "Getting _cluster/health"
+        curl -XGET "$eshost/_cluster/health?pretty" >> $outputdir/cluster_health.json$idx.$date 2> /dev/null
 
-echo "Getting _nodes/hot_threads"
-curl -XGET "$eshost/_nodes/hot_threads?threads=10" >> $outputdir/nodes_hot_threads.txt 2> /dev/null
+        echo "Getting _cluster/pending_tasks"
+        curl -XGET "$eshost/_cluster/pending_tasks?pretty&human" >> $outputdir/cluster_pending_tasks.json$idx.$date 2> /dev/null
 
+        echo "Getting _count"
+        curl -XGET "$eshost/_count?pretty" >> $outputdir/count.json$idx.$date 2> /dev/null
 
-#api calls that only work with 0.90
-if [[ $esVersion =~ 0.90.* ]]; then
-    echo "Getting _nodes/stats"
-    curl -XGET "$eshost/_nodes/stats?all&pretty&human" >> $outputdir/nodes_stats.json 2> /dev/null
+        echo "Getting nodes info"
+        curl -XGET "$eshost/_nodes/?all&pretty&human" >> $outputdir/nodes.json$idx.$date 2> /dev/null
 
-    echo "Getting indices stats"
-    curl -XGET "$eshost/_stats?all&pretty&human" >> $outputdir/indices_stats.json 2> /dev/null
-
-#api calls that only work with 1.0+
-else
-    echo "Getting _nodes/stats"
-    curl -XGET "$eshost/_nodes/stats?pretty&human" >> $outputdir/nodes_stats.json 2> /dev/null
-
-    echo "Getting indices stats"
-    curl -XGET "$eshost/_stats?pretty&human" >> $outputdir/indices_stats.json 2> /dev/null
-
-    echo "Getting _cat/allocation"
-    curl -XGET "$eshost/_cat/allocation?v" >> $outputdir/allocation.txt 2> /dev/null
-
-    echo "Getting _cat/plugins"
-    curl -XGET "$eshost/_cat/plugins?v" >> $outputdir/plugins.txt 2> /dev/null
-
-    echo "Getting _cat/shards"
-    curl -XGET "$eshost/_cat/shards?v" >> $outputdir/cat_shards.txt 2> /dev/null
-
-    #api calls that only work with 1.1+
-    if [[ ! $esVersion =~ 1.0.* ]]; then
-        echo "Getting _recovery"
-        curl -XGET "$eshost/_recovery?detailed&pretty&human" >> $outputdir/recovery.json 2> /dev/null
-    #api calls that only work with 1.0
-    else
-        echo "Getting _cat/recovery"
-        curl -XGET "$eshost/_cat/recovery?v" >> $outputdir/cat_recovery.txt 2> /dev/null
-    fi
-fi
+        echo "Getting _nodes/hot_threads"
+        curl -XGET "$eshost/_nodes/hot_threads?threads=10" >> $outputdir/nodes_hot_threads.txt$idx.$date 2> /dev/null
 
 
-echo "Running netstat"
-if [ "$(uname)" == "Darwin" ]; then
-    netstat -an >> $outputdir/netstat.txt
-elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
-    netstat -anp >> $outputdir/netstat.txt
-fi
+        #api calls that only work with 0.90
+        if [[ $esVersion =~ 0.90.* ]]; then
+            echo "Getting _nodes/stats"
+            curl -XGET "$eshost/_nodes/stats?all&pretty&human" >> $outputdir/nodes_stats.json$idx.$date 2> /dev/null
 
-echo "Running top"
-if [ "$(uname)" == "Darwin" ]; then
-    top -l 1 >> $outputdir/top.txt
-elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
-    top -b -n1 >> $outputdir/top.txt
-fi
+            echo "Getting indices stats"
+            curl -XGET "$eshost/_stats?all&pretty&human" >> $outputdir/indices_stats.json$idx.$date 2> /dev/null
 
-echo "Running top with threads (Linux only)"
-if [ "$(uname)" == "Darwin" ]; then
-    echo "This is a Mac.  Not running top -H."
-elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
-    top -b -n1 -H >> $outputdir/top_threads.txt
-fi
+        #api calls that only work with 1.0+
+        else
+            echo "Getting _nodes/stats"
+            curl -XGET "$eshost/_nodes/stats?pretty&human" >> $outputdir/nodes_stats.json$idx.$date 2> /dev/null
 
-echo "Running ps"
-ps -ef | grep elasticsearch >> $outputdir/elasticsearch-process.txt
+            echo "Getting indices stats"
+            curl -XGET "$eshost/_stats?pretty&human" >> $outputdir/indices_stats.json$idx.$date 2> /dev/null
+
+            echo "Getting _cat/allocation"
+            curl -XGET "$eshost/_cat/allocation?v" >> $outputdir/allocation.txt$idx.$date 2> /dev/null
+
+            echo "Getting _cat/plugins"
+            curl -XGET "$eshost/_cat/plugins?v" >> $outputdir/plugins.txt$idx.$date 2> /dev/null
+
+            echo "Getting _cat/shards"
+            curl -XGET "$eshost/_cat/shards?v" >> $outputdir/cat_shards.txt$idx.$date 2> /dev/null
+
+            #api calls that only work with 1.1+
+            if [[ ! $esVersion =~ 1.0.* ]]; then
+                echo "Getting _recovery"
+                curl -XGET "$eshost/_recovery?detailed&pretty&human" >> $outputdir/recovery.json$idx.$date 2> /dev/null
+            #api calls that only work with 1.0
+            else
+                echo "Getting _cat/recovery"
+                curl -XGET "$eshost/_cat/recovery?v" >> $outputdir/cat_recovery.txt$idx.$date 2> /dev/null
+            fi
+        fi
+
+
+        echo "Running netstat"
+        if [ "$(uname)" == "Darwin" ]; then
+            netstat -an >> $outputdir/netstat$idx.$date.txt
+        elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+            netstat -anp >> $outputdir/netstat$idx.$date.txt
+        fi
+
+        echo "Running top"
+        if [ "$(uname)" == "Darwin" ]; then
+            top -l 1 >> $outputdir/top$idx.$date.txt
+        elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+            top -b -n1 >> $outputdir/top$idx.$date.txt
+        fi
+
+        echo "Running top with threads (Linux only)"
+        if [ "$(uname)" == "Darwin" ]; then
+            echo "This is a Mac.  Not running top -H."
+        elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+            top -b -n1 -H >> $outputdir/top_threads$idx.$date.txt
+        fi
+
+        echo "Running ps"
+        ps -ef | grep elasticsearch >> $outputdir/elasticsearch-process$idx.$date.txt
+        i=$[i+1]
+        if [ $i -lt $repeat ]
+            then
+                echo "Sleeping $interval second(s)..."
+                sleep $interval
+        fi
+
+done
 
 
 echo "Output complete.  Creating tarball."
