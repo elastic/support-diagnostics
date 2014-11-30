@@ -208,7 +208,7 @@ echo "Getting _cluster/settings"
 curl -XGET "$eshost/_cluster/settings?pretty" >> $outputdir/cluster_settings.json 2> /dev/null
 
 
-#grab stats#
+#grab stats
 #execute multiple times if $repeat is > 1
 i=1
 while [ $i -le $repeat ]
