@@ -230,10 +230,10 @@ if [[ $esVersion =~ 0.90.* ]]; then
 #api calls that only work with 1.0+
 else
     echo "Getting _nodes/stats"
-    curl -XGET "$eshost/_nodes/stats?pretty&human" >> $outputdir/nodes_stats.json 2> /dev/null
+    curl -XGET "$eshost/_nodes/stats?field=*&pretty&human" >> $outputdir/nodes_stats.json 2> /dev/null
 
     echo "Getting indices stats"
-    curl -XGET "$eshost/_stats?pretty&human" >> $outputdir/indices_stats.json 2> /dev/null
+    curl -XGET "$eshost/_stats?field=*&pretty&human" >> $outputdir/indices_stats.json 2> /dev/null
 
     echo "Getting _cat/allocation"
     curl -XGET "$eshost/_cat/allocation?v" >> $outputdir/allocation.txt 2> /dev/null
