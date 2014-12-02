@@ -7,18 +7,18 @@ to assist users with gathering diagnostic data about their cluster and nodes.
 Installation:
 
 	./bin/plugin --install elasticsearch/elasticsearch-support-diagnostics
-
+	
 
 ### Support Diagnostics Script
 
-The diagnostic script is installed in `./bin/support-diagnostics.sh` (or `./bin/support-diagnostics.bat` on Windows).
+The diagnostic script is installed in `./bin/support-diagnostics.sh` (or `.\bin\support-diagnostics.bat` on Windows).
 
 In order to gather the elasticsearch config and logs you must run the script on a node within your elasticsearch cluster.  If local data, such as top or netstat are required, it should be run on each node in the cluster.  Otherwise, running the script on a single node is sufficient.
 
 ### Usage
 
     -h  This help message
-    -H  Elasticsearch hostname:port (defaults to $eshost)
+    -H  Elasticsearch hostname:port (defaults to localhost:9200)
     -n  On a host with multiple nodes, specify the node name to gather data for. Value should match node.name as defined in elasticsearch.yml
     -o  Script output directory (optional, defaults to support-diagnostics.[timestamp].[hostname])
     -nc Disable compression (optional)
