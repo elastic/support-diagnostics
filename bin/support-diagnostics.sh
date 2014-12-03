@@ -26,7 +26,7 @@ This script is used to gather diagnotistic information for elasticsearch support
 In order to gather the elasticsearch config and logs you must run this on a node within your elasticsearch cluster.
 
   -h  This help message
-  -H  Elasticsearch hostname:port (defaults to $eshost)
+  -H  Elasticsearch hostname:port (defaults to localhost:9200)
   -n  On a host with multiple nodes, specify the node name to gather data for. Value should match node.name as defined in elasticsearch.yml
   -o  Script output directory (optional, defaults to ./support-diagnostics.[timestamp].[hostname])
   -nc Disable compression (optional)
