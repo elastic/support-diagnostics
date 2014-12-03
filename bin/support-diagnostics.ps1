@@ -150,10 +150,10 @@ If ($esVersion.StartsWith("0.9")) {
 # API calls that only work with 1.0+
 } Else {
     Write-Host 'Getting _nodes/stats'
-    Invoke-WebRequest $esHost'/_nodes/stats?pretty&human' -OutFile $outputDir/nodes_stats.json
+    Invoke-WebRequest $esHost'/_nodes/stats?field=*&pretty&human' -OutFile $outputDir/nodes_stats.json
 
     Write-Host 'Getting indices stats'
-    Invoke-WebRequest $esHost'/_stats?pretty&human' -OutFile $outputDir/indices_stats.json
+    Invoke-WebRequest $esHost'/_stats?field=*&pretty&human' -OutFile $outputDir/indices_stats.json
 
     Write-Host 'Getting _cat/allocation'
     Invoke-WebRequest $esHost'/_cat/allocation?v' -OutFile $outputDir/allocation.txt
