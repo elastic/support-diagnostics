@@ -11,7 +11,7 @@ Installation:
 
 ### Support Diagnostics Script
 
-The diagnostic script is installed in `./bin/support-diagnostics.sh` (or `.\bin\support-diagnostics.bat` on Windows).
+The diagnostic script is installed in `./bin/support-diagnostics/support-diagnostics.sh` (or `.\bin\support-diagnostics\support-diagnostics.bat` on Windows).
 
 In order to gather the elasticsearch config and logs you must run the script on a node within your elasticsearch cluster.  If local data, such as top or netstat are required, it should be run on each node in the cluster.  Otherwise, running the script on a single node is sufficient.
 
