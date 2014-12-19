@@ -111,31 +111,31 @@ Write-Host 'Getting version'
 Invoke-WebRequest $esHost -OutFile $outputDir/version.json
 
 Write-Host "Getting _mapping"
-Invoke-WebRequest $esHost'/_mapping?pretty' -OutFile $outputDir/mapping.json
+Invoke-WebRequest $esHost'/_mapping' -OutFile $outputDir/mapping.json
 
 Write-Host 'Getting _settings'
-Invoke-WebRequest $esHost'/_settings?pretty' -OutFile $outputDir/settings.json
+Invoke-WebRequest $esHost'/_settings' -OutFile $outputDir/settings.json
 
 Write-Host 'Getting _cluster/settings'
-Invoke-WebRequest $esHost'/_cluster/settings?pretty' -OutFile $outputDir/cluster_settings.json
+Invoke-WebRequest $esHost'/_cluster/settings' -OutFile $outputDir/cluster_settings.json
 
 Write-Host 'Getting _cluster/state'
-Invoke-WebRequest $esHost'/_cluster/state?pretty' -OutFile $outputDir/cluster_state.json
+Invoke-WebRequest $esHost'/_cluster/state' -OutFile $outputDir/cluster_state.json
 
 Write-Host 'Getting _cluster/stats'
-Invoke-WebRequest $esHost'/_cluster/stats?pretty&human' -OutFile $outputDir/cluster_stats.json
+Invoke-WebRequest $esHost'/_cluster/stats?human' -OutFile $outputDir/cluster_stats.json
 
 Write-Host 'Getting _cluster/health'
-Invoke-WebRequest $esHost'/_cluster/health?pretty' -OutFile $outputDir/cluster_health.json
+Invoke-WebRequest $esHost'/_cluster/health' -OutFile $outputDir/cluster_health.json
 
 Write-Host 'Getting _cluster/pending_tasks'
-Invoke-WebRequest $esHost'/_cluster/pending_tasks?pretty&human' -OutFile $outputDir/cluster_pending_tasks.json
+Invoke-WebRequest $esHost'/_cluster/pending_tasks?human' -OutFile $outputDir/cluster_pending_tasks.json
 
 Write-Host 'Getting _count'
 Invoke-WebRequest $esHost'/_count?pretty' -OutFile $outputDir/count.json
 
 Write-Host 'Getting nodes info'
-Invoke-WebRequest $esHost'/_nodes/?all&pretty&human' -OutFile $outputDir/nodes.json
+Invoke-WebRequest $esHost'/_nodes/?all&human' -OutFile $outputDir/nodes.json
 
 Write-Host 'Getting _nodes/hot_threads'
 Invoke-WebRequest $esHost'/_nodes/hot_threads?threads=10' -OutFile $outputDir/nodes_hot_threads.txt
@@ -143,17 +143,17 @@ Invoke-WebRequest $esHost'/_nodes/hot_threads?threads=10' -OutFile $outputDir/no
 # API calls that only work with 0.90
 If ($esVersion.StartsWith("0.9")) {
     Write-Host 'Getting _nodes/stats'
-    Invoke-WebRequest $esHost'/_nodes/stats?all&pretty&human' -OutFile $outputDir/nodes_stats.json
+    Invoke-WebRequest $esHost'/_nodes/stats?all&human' -OutFile $outputDir/nodes_stats.json
 
     Write-Host 'Getting indices stats'
-    Invoke-WebRequest $esHost'/_stats?all&pretty&human' -OutFile $outputDir/indices_stats.json
+    Invoke-WebRequest $esHost'/_stats?all&human' -OutFile $outputDir/indices_stats.json
 # API calls that only work with 1.0+
 } Else {
     Write-Host 'Getting _nodes/stats'
-    Invoke-WebRequest $esHost'/_nodes/stats?field=*&pretty&human' -OutFile $outputDir/nodes_stats.json
+    Invoke-WebRequest $esHost'/_nodes/stats?field=*&human' -OutFile $outputDir/nodes_stats.json
 
     Write-Host 'Getting indices stats'
-    Invoke-WebRequest $esHost'/_stats?field=*&pretty&human' -OutFile $outputDir/indices_stats.json
+    Invoke-WebRequest $esHost'/_stats?field=*&human' -OutFile $outputDir/indices_stats.json
 
     Write-Host 'Getting _cat/allocation'
     Invoke-WebRequest $esHost'/_cat/allocation?v' -OutFile $outputDir/allocation.txt
@@ -167,7 +167,7 @@ If ($esVersion.StartsWith("0.9")) {
     # API calls that only work with 1.1+
     If (-Not $esVersion.StartsWith("1.0")) {
         Write-Host 'Getting _recovery'
-        Invoke-WebRequest $esHost'/_recovery?detailed&pretty&human' -OutFile $outputDir/recovery.json
+        Invoke-WebRequest $esHost'/_recovery?detailed&human' -OutFile $outputDir/recovery.json
     # API calls that only work with 1.0
     } Else {
         Write-Host 'Getting _cat/recovery'

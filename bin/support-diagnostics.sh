@@ -189,31 +189,31 @@ echo "Getting version"
 curl -XGET "$eshost" >> $outputdir/version.json 2> /dev/null
 
 echo "Getting _mapping"
-curl -XGET "$eshost/_mapping?pretty" >> $outputdir/mapping.json 2> /dev/null
+curl -XGET "$eshost/_mapping" >> $outputdir/mapping.json 2> /dev/null
 
 echo "Getting _settings"
-curl -XGET "$eshost/_settings?pretty" >> $outputdir/settings.json 2> /dev/null
+curl -XGET "$eshost/_settings" >> $outputdir/settings.json 2> /dev/null
 
 echo "Getting _cluster/settings"
-curl -XGET "$eshost/_cluster/settings?pretty" >> $outputdir/cluster_settings.json 2> /dev/null
+curl -XGET "$eshost/_cluster/settings" >> $outputdir/cluster_settings.json 2> /dev/null
 
 echo "Getting _cluster/state"
-curl -XGET "$eshost/_cluster/state?pretty" >> $outputdir/cluster_state.json 2> /dev/null
+curl -XGET "$eshost/_cluster/state" >> $outputdir/cluster_state.json 2> /dev/null
 
 echo "Getting _cluster/stats"
-curl -XGET "$eshost/_cluster/stats?pretty&human" >> $outputdir/cluster_stats.json 2> /dev/null
+curl -XGET "$eshost/_cluster/stats?human" >> $outputdir/cluster_stats.json 2> /dev/null
 
 echo "Getting _cluster/health"
-curl -XGET "$eshost/_cluster/health?pretty" >> $outputdir/cluster_health.json 2> /dev/null
+curl -XGET "$eshost/_cluster/health" >> $outputdir/cluster_health.json 2> /dev/null
 
 echo "Getting _cluster/pending_tasks"
-curl -XGET "$eshost/_cluster/pending_tasks?pretty&human" >> $outputdir/cluster_pending_tasks.json 2> /dev/null
+curl -XGET "$eshost/_cluster/pending_tasks?human" >> $outputdir/cluster_pending_tasks.json 2> /dev/null
 
 echo "Getting _count"
-curl -XGET "$eshost/_count?pretty" >> $outputdir/count.json 2> /dev/null
+curl -XGET "$eshost/_count" >> $outputdir/count.json 2> /dev/null
 
 echo "Getting nodes info"
-curl -XGET "$eshost/_nodes/?all&pretty&human" >> $outputdir/nodes.json 2> /dev/null
+curl -XGET "$eshost/_nodes/?all&human" >> $outputdir/nodes.json 2> /dev/null
 
 echo "Getting _nodes/hot_threads"
 curl -XGET "$eshost/_nodes/hot_threads?threads=10" >> $outputdir/nodes_hot_threads.txt 2> /dev/null
@@ -222,18 +222,18 @@ curl -XGET "$eshost/_nodes/hot_threads?threads=10" >> $outputdir/nodes_hot_threa
 #api calls that only work with 0.90
 if [[ $esVersion =~ 0.90.* ]]; then
     echo "Getting _nodes/stats"
-    curl -XGET "$eshost/_nodes/stats?all&pretty&human" >> $outputdir/nodes_stats.json 2> /dev/null
+    curl -XGET "$eshost/_nodes/stats?all&human" >> $outputdir/nodes_stats.json 2> /dev/null
 
     echo "Getting indices stats"
-    curl -XGET "$eshost/_stats?all&pretty&human" >> $outputdir/indices_stats.json 2> /dev/null
+    curl -XGET "$eshost/_stats?all&human" >> $outputdir/indices_stats.json 2> /dev/null
 
 #api calls that only work with 1.0+
 else
     echo "Getting _nodes/stats"
-    curl -XGET "$eshost/_nodes/stats?field=*&pretty&human" >> $outputdir/nodes_stats.json 2> /dev/null
+    curl -XGET "$eshost/_nodes/stats?field=*&human" >> $outputdir/nodes_stats.json 2> /dev/null
 
     echo "Getting indices stats"
-    curl -XGET "$eshost/_stats?field=*&pretty&human" >> $outputdir/indices_stats.json 2> /dev/null
+    curl -XGET "$eshost/_stats?field=*&human" >> $outputdir/indices_stats.json 2> /dev/null
 
     echo "Getting _cat/allocation"
     curl -XGET "$eshost/_cat/allocation?v" >> $outputdir/allocation.txt 2> /dev/null
@@ -247,7 +247,7 @@ else
     #api calls that only work with 1.1+
     if [[ ! $esVersion =~ 1.0.* ]]; then
         echo "Getting _recovery"
-        curl -XGET "$eshost/_recovery?detailed&pretty&human" >> $outputdir/recovery.json 2> /dev/null
+        curl -XGET "$eshost/_recovery?detailed&human" >> $outputdir/recovery.json 2> /dev/null
     #api calls that only work with 1.0
     else
         echo "Getting _cat/recovery"
