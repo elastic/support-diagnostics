@@ -15,7 +15,7 @@ timestamp=$(date +"%Y%m%d-%H%M%S")
 eshost="localhost:9200"
 targetNode='_local'
 repeat=1
-interval=30
+interval=60
 
 # pick up command line options
 while [ $# -gt 0 ]
@@ -213,105 +213,98 @@ curl -XGET "$eshost/_cluster/settings?pretty" >> $outputdir/cluster_settings.jso
 i=1
 while [ $i -le $repeat ]
     do
-        if [ $i -eq 1 ]
-            then
-                idx=""
-            else
-                idx=".$i"
-        fi
-
         echo "Collecting stats $i/$repeat"
 
-        date=`date  +%Y-%m-%d_%H_%M_%S`
+        timestamp=`date  +%Y%m%d-%H%M%S`
         echo "Getting _cluster/state"
-        curl -XGET "$eshost/_cluster/state?pretty" >> $outputdir/cluster_state.json$idx.$date 2> /dev/null
+        curl -XGET "$eshost/_cluster/state?pretty" >> $outputdir/cluster_state.$timestamp.json 2> /dev/null
 
         echo "Getting _cluster/stats"
-        curl -XGET "$eshost/_cluster/stats?pretty&human" >> $outputdir/cluster_stats.json$idx.$date 2> /dev/null
+        curl -XGET "$eshost/_cluster/stats?pretty&human" >> $outputdir/cluster_stats.$timestamp.json 2> /dev/null
 
         echo "Getting _cluster/health"
-        curl -XGET "$eshost/_cluster/health?pretty" >> $outputdir/cluster_health.json$idx.$date 2> /dev/null
+        curl -XGET "$eshost/_cluster/health?pretty" >> $outputdir/cluster_health.$timestamp.json 2> /dev/null
 
         echo "Getting _cluster/pending_tasks"
-        curl -XGET "$eshost/_cluster/pending_tasks?pretty&human" >> $outputdir/cluster_pending_tasks.json$idx.$date 2> /dev/null
+        curl -XGET "$eshost/_cluster/pending_tasks?pretty&human" >> $outputdir/cluster_pending_tasks.$timestamp.json 2> /dev/null
 
         echo "Getting _count"
-        curl -XGET "$eshost/_count?pretty" >> $outputdir/count.json$idx.$date 2> /dev/null
+        curl -XGET "$eshost/_count?pretty" >> $outputdir/count.$timestamp.json 2> /dev/null
 
         echo "Getting nodes info"
-        curl -XGET "$eshost/_nodes/?all&pretty&human" >> $outputdir/nodes.json$idx.$date 2> /dev/null
+        curl -XGET "$eshost/_nodes/?all&pretty&human" >> $outputdir/nodes.$timestamp.json 2> /dev/null
 
         echo "Getting _nodes/hot_threads"
-        curl -XGET "$eshost/_nodes/hot_threads?threads=10" >> $outputdir/nodes_hot_threads.txt$idx.$date 2> /dev/null
+        curl -XGET "$eshost/_nodes/hot_threads?threads=10" >> $outputdir/nodes_hot_threads.$timestamp.txt 2> /dev/null
 
 
         #api calls that only work with 0.90
         if [[ $esVersion =~ 0.90.* ]]; then
             echo "Getting _nodes/stats"
-            curl -XGET "$eshost/_nodes/stats?all&pretty&human" >> $outputdir/nodes_stats.json$idx.$date 2> /dev/null
+            curl -XGET "$eshost/_nodes/stats?all&pretty&human" >> $outputdir/nodes_stats.$timestamp.json 2> /dev/null
 
             echo "Getting indices stats"
-            curl -XGET "$eshost/_stats?all&pretty&human" >> $outputdir/indices_stats.json$idx.$date 2> /dev/null
+            curl -XGET "$eshost/_stats?all&pretty&human" >> $outputdir/indices_stats.$timestamp.json 2> /dev/null
 
         #api calls that only work with 1.0+
         else
             echo "Getting _nodes/stats"
-            curl -XGET "$eshost/_nodes/stats?pretty&human" >> $outputdir/nodes_stats.json$idx.$date 2> /dev/null
+            curl -XGET "$eshost/_nodes/stats?pretty&human" >> $outputdir/nodes_stats.$timestamp.json 2> /dev/null
 
             echo "Getting indices stats"
-            curl -XGET "$eshost/_stats?pretty&human" >> $outputdir/indices_stats.json$idx.$date 2> /dev/null
+            curl -XGET "$eshost/_stats?pretty&human" >> $outputdir/indices_stats.$timestamp.json 2> /dev/null
 
             echo "Getting _cat/allocation"
-            curl -XGET "$eshost/_cat/allocation?v" >> $outputdir/allocation.txt$idx.$date 2> /dev/null
+            curl -XGET "$eshost/_cat/allocation?v" >> $outputdir/allocation.$timestamp.txt 2> /dev/null
 
             echo "Getting _cat/plugins"
-            curl -XGET "$eshost/_cat/plugins?v" >> $outputdir/plugins.txt$idx.$date 2> /dev/null
+            curl -XGET "$eshost/_cat/plugins?v" >> $outputdir/plugins.$timestamp.txt 2> /dev/null
 
             echo "Getting _cat/shards"
-            curl -XGET "$eshost/_cat/shards?v" >> $outputdir/cat_shards.txt$idx.$date 2> /dev/null
+            curl -XGET "$eshost/_cat/shards?v" >> $outputdir/cat_shards.$timestamp.txt 2> /dev/null
 
             #api calls that only work with 1.1+
             if [[ ! $esVersion =~ 1.0.* ]]; then
                 echo "Getting _recovery"
-                curl -XGET "$eshost/_recovery?detailed&pretty&human" >> $outputdir/recovery.json$idx.$date 2> /dev/null
+                curl -XGET "$eshost/_recovery?detailed&pretty&human" >> $outputdir/recovery.$timestamp.json 2> /dev/null
             #api calls that only work with 1.0
             else
                 echo "Getting _cat/recovery"
-                curl -XGET "$eshost/_cat/recovery?v" >> $outputdir/cat_recovery.txt$idx.$date 2> /dev/null
+                curl -XGET "$eshost/_cat/recovery?v" >> $outputdir/cat_recovery.$timestamp.txt 2> /dev/null
             fi
         fi
 
 
         echo "Running netstat"
         if [ "$(uname)" == "Darwin" ]; then
-            netstat -an >> $outputdir/netstat$idx.$date.txt
+            netstat -an >> $outputdir/netstat$idx_$date.txt
         elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
-            netstat -anp >> $outputdir/netstat$idx.$date.txt
+            netstat -anp >> $outputdir/netstat$idx_$date.txt
         fi
 
         echo "Running top"
         if [ "$(uname)" == "Darwin" ]; then
-            top -l 1 >> $outputdir/top$idx.$date.txt
+            top -l 1 >> $outputdir/top$idx_$date.txt
         elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
-            top -b -n1 >> $outputdir/top$idx.$date.txt
+            top -b -n1 >> $outputdir/top$idx_$date.txt
         fi
 
         echo "Running top with threads (Linux only)"
         if [ "$(uname)" == "Darwin" ]; then
             echo "This is a Mac.  Not running top -H."
         elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
-            top -b -n1 -H >> $outputdir/top_threads$idx.$date.txt
+            top -b -n1 -H >> $outputdir/top_threads$idx_$date.txt
         fi
 
         echo "Running ps"
-        ps -ef | grep elasticsearch >> $outputdir/elasticsearch-process$idx.$date.txt
-        i=$[i+1]
+        ps -ef | grep elasticsearch >> $outputdir/elasticsearch-process$idx_$date.txt
+
         if [ $i -lt $repeat ]
             then
                 echo "Sleeping $interval second(s)..."
                 sleep $interval
         fi
-
+        i=$[i+1]
 done
 
 
