@@ -5,7 +5,7 @@
   },
   "name": "elasticsearch-support-diagnostics",
   "description": "Support diagnostics plugin for elasticsearch",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "repository": {
     "type": "git",
     "url": "http://github.com/elasticsearch/elasticsearch-support-diagnostics.git"
