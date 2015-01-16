@@ -64,6 +64,12 @@ then
     exit 1
 fi
 
+if [ $repeat -le 0 ]
+then
+	echo "Repeat option (-r) must be a positive interger greater then 0"
+	exit 1
+fi
+
 # Cribbed from ES startup script.  Only works if we place this script in the elasticsearch/bin
 CDPATH=""
 SCRIPT="$0"
