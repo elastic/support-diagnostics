@@ -277,27 +277,27 @@ while [ $i -le $repeat ]
 
         echo "Running netstat"
         if [ "$(uname)" == "Darwin" ]; then
-            netstat -an >> $outputdir/netstat$idx_$date.txt
+            netstat -an >> $outputdir/netstat.$timestamp.txt
         elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
-            netstat -anp >> $outputdir/netstat$idx_$date.txt
+            netstat -anp >> $outputdir/netstat.$timestamp.txt
         fi
 
         echo "Running top"
         if [ "$(uname)" == "Darwin" ]; then
-            top -l 1 >> $outputdir/top$idx_$date.txt
+            top -l 1 >> $outputdir/top.$timestamp.txt
         elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
-            top -b -n1 >> $outputdir/top$idx_$date.txt
+            top -b -n1 >> $outputdir/top.$timestamp.txt
         fi
 
         echo "Running top with threads (Linux only)"
         if [ "$(uname)" == "Darwin" ]; then
             echo "This is a Mac.  Not running top -H."
         elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
-            top -b -n1 -H >> $outputdir/top_threads$idx_$date.txt
+            top -b -n1 -H >> $outputdir/top_threads.$timestamp.txt
         fi
 
         echo "Running ps"
-        ps -ef | grep elasticsearch >> $outputdir/elasticsearch-process$idx_$date.txt
+        ps -ef | grep elasticsearch >> $outputdir/elasticsearch-process.$timestamp.txt
 
         if [ $i -lt $repeat ]
             then
