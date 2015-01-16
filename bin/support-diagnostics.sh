@@ -33,7 +33,7 @@ In order to gather the elasticsearch config and logs you must run this on a node
   -o  Script output directory (optional, defaults to ./support-diagnostics.[timestamp].[hostname])
   -nc Disable compression (optional)
   -r  Collect stats r times (optional, in conjunction with -i , defaults to 1)
-  -i  Interval in seconds between stats collections (optional, in conjunction with -r , defaults to 30 secs)
+  -i  Interval in seconds between stats collections (optional, in conjunction with -r , defaults to 60 secs)
 EOM
             exit 1;;
         -H)  eshost=$2;;
