@@ -4,20 +4,26 @@
 .DESCRIPTION
     This script is used to gather diagnotistic information for elasticsearch support.  In order to gather the elasticsearch config and logs you must run this on a node within your elasticsearch cluster.
 .PARAMETER H
-    Elasticsearch hostname:port (defaults to $eshost)
+    Elasticsearch hostname:port (defaults to localhost:9200)
 .PARAMETER n
     On a host with multiple nodes, specify the node name to gather data for. Value should match node.name as defined in elasticsearch.yml
 .PARAMETER o
     Script output directory (optional, defaults to ./support-diagnostics.[timestamp].[hostname])
 .PARAMETER nc
     Disable compression (optional)
+.PARAMETER r
+    Repeat
+.PARAMETER i
+    Interval
 #>
 
 Param(
     [string]$H,
     [string]$n,
     [string]$o,
-    [switch]$nc
+    [switch]$nc,
+    [int]$r,
+    [int]$i
 )
 
 # Set defaults
@@ -25,6 +31,8 @@ $esHostPort = 'localhost:9200'
 $timestamp = Get-Date -format yyyyMMdd-HHmmss
 $outputDir = $o
 $targetNode = '_local'
+$repeat = 1
+$interval = 60
 
 If ($H) {
     $esHostPort = $H
@@ -38,6 +46,14 @@ If ($n) {
 If (! $o) {
     $hostName = [System.Net.Dns]::GetHostName()
     $outputDir = 'support-diagnostics.'+$hostName+'.'+$targetNode+'.'+$timestamp
+}
+
+If ($r) {
+    $repeat = $r
+}
+
+If ($i) {
+    $interval = $i
 }
 
 $esHost = 'http://' + $esHostPort + '/'
@@ -119,70 +135,85 @@ Invoke-WebRequest $esHost'/_settings?pretty' -OutFile $outputDir/settings.json
 Write-Host 'Getting _cluster/settings'
 Invoke-WebRequest $esHost'/_cluster/settings?pretty' -OutFile $outputDir/cluster_settings.json
 
-Write-Host 'Getting _cluster/state'
-Invoke-WebRequest $esHost'/_cluster/state?pretty' -OutFile $outputDir/cluster_state.json
+#grab stats
+#execute multiple times if $repeat is > 1
+[int]$n=1
 
-Write-Host 'Getting _cluster/stats'
-Invoke-WebRequest $esHost'/_cluster/stats?pretty&human' -OutFile $outputDir/cluster_stats.json
+while($n -le $repeat) {
+        $timestamp = Get-Date -format yyyyMMdd-HHmmss
+        Write-Host "Collecting stats $n/$repeat"
+        Write-Host 'Getting _cluster/state'
+        Invoke-WebRequest $esHost'/_cluster/state?pretty' -OutFile $outputDir/cluster_state.$timestamp.json
 
-Write-Host 'Getting _cluster/health'
-Invoke-WebRequest $esHost'/_cluster/health?pretty' -OutFile $outputDir/cluster_health.json
+        Write-Host 'Getting _cluster/stats'
+        Invoke-WebRequest $esHost'/_cluster/stats?pretty&human' -OutFile $outputDir/cluster_stats.$timestamp.json
 
-Write-Host 'Getting _cluster/pending_tasks'
-Invoke-WebRequest $esHost'/_cluster/pending_tasks?pretty&human' -OutFile $outputDir/cluster_pending_tasks.json
+        Write-Host 'Getting _cluster/health'
+        Invoke-WebRequest $esHost'/_cluster/health?pretty' -OutFile $outputDir/cluster_health.$timestamp.json
 
-Write-Host 'Getting _count'
-Invoke-WebRequest $esHost'/_count?pretty' -OutFile $outputDir/count.json
+        Write-Host 'Getting _cluster/pending_tasks'
+        Invoke-WebRequest $esHost'/_cluster/pending_tasks?pretty&human' -OutFile $outputDir/cluster_pending_tasks.$timestamp.json
 
-Write-Host 'Getting nodes info'
-Invoke-WebRequest $esHost'/_nodes/?all&pretty&human' -OutFile $outputDir/nodes.json
+        Write-Host 'Getting _count'
+        Invoke-WebRequest $esHost'/_count?pretty' -OutFile $outputDir/count.$timestamp.json
 
-Write-Host 'Getting _nodes/hot_threads'
-Invoke-WebRequest $esHost'/_nodes/hot_threads?threads=10' -OutFile $outputDir/nodes_hot_threads.txt
+        Write-Host 'Getting nodes info'
+        Invoke-WebRequest $esHost'/_nodes/?all&pretty&human' -OutFile $outputDir/nodes.$timestamp.json
 
-# API calls that only work with 0.90
-If ($esVersion.StartsWith("0.9")) {
-    Write-Host 'Getting _nodes/stats'
-    Invoke-WebRequest $esHost'/_nodes/stats?all&pretty&human' -OutFile $outputDir/nodes_stats.json
+        Write-Host 'Getting _nodes/hot_threads'
+        Invoke-WebRequest $esHost'/_nodes/hot_threads?threads=10' -OutFile $outputDir/nodes_hot_threads.$timestamp.txt
 
-    Write-Host 'Getting indices stats'
-    Invoke-WebRequest $esHost'/_stats?all&pretty&human' -OutFile $outputDir/indices_stats.json
-# API calls that only work with 1.0+
-} Else {
-    Write-Host 'Getting _nodes/stats'
-    Invoke-WebRequest $esHost'/_nodes/stats?pretty&human' -OutFile $outputDir/nodes_stats.json
+        # API calls that only work with 0.90
+        If ($esVersion.StartsWith("0.9")) {
+            Write-Host 'Getting _nodes/stats'
+            Invoke-WebRequest $esHost'/_nodes/stats?all&pretty&human' -OutFile $outputDir/nodes_stats.$timestamp.json
 
-    Write-Host 'Getting indices stats'
-    Invoke-WebRequest $esHost'/_stats?pretty&human' -OutFile $outputDir/indices_stats.json
+            Write-Host 'Getting indices stats'
+            Invoke-WebRequest $esHost'/_stats?all&pretty&human' -OutFile $outputDir/indices_stats.$timestamp.json
+        # API calls that only work with 1.0+
+        } Else {
+            Write-Host 'Getting _nodes/stats'
+            Invoke-WebRequest $esHost'/_nodes/stats?pretty&human' -OutFile $outputDir/nodes_stats.$timestamp.json
 
-    Write-Host 'Getting _cat/allocation'
-    Invoke-WebRequest $esHost'/_cat/allocation?v' -OutFile $outputDir/allocation.txt
+            Write-Host 'Getting indices stats'
+            Invoke-WebRequest $esHost'/_stats?pretty&human' -OutFile $outputDir/indices_stats.$timestamp.json
 
-    Write-Host 'Getting _cat/plugins'
-    Invoke-WebRequest $esHost'/_cat/plugins?v' -OutFile $outputDir/plugins.txt
+            Write-Host 'Getting _cat/allocation'
+            Invoke-WebRequest $esHost'/_cat/allocation?v' -OutFile $outputDir/allocation.$timestamp.txt
 
-    Write-Host 'Getting _cat/shards'
-    Invoke-WebRequest $esHost'/_cat/shards?v' -OutFile $outputDir/cat_shards.txt
+            Write-Host 'Getting _cat/plugins'
+            Invoke-WebRequest $esHost'/_cat/plugins?v' -OutFile $outputDir/plugins.$timestamp.txt
 
-    # API calls that only work with 1.1+
-    If (-Not $esVersion.StartsWith("1.0")) {
-        Write-Host 'Getting _recovery'
-        Invoke-WebRequest $esHost'/_recovery?detailed&pretty&human' -OutFile $outputDir/recovery.json
-    # API calls that only work with 1.0
-    } Else {
-        Write-Host 'Getting _cat/recovery'
-        Invoke-WebRequest $esHost'/_cat/recovery?v' -OutFile $outputDir/cat_recovery.txt
+            Write-Host 'Getting _cat/shards'
+            Invoke-WebRequest $esHost'/_cat/shards?v' -OutFile $outputDir/cat_shards.$timestamp.txt
+
+            # API calls that only work with 1.1+
+            If (-Not $esVersion.StartsWith("1.0")) {
+                Write-Host 'Getting _recovery'
+                Invoke-WebRequest $esHost'/_recovery?detailed&pretty&human' -OutFile $outputDir/recovery.$timestamp.json
+            # API calls that only work with 1.0
+            } Else {
+                Write-Host 'Getting _cat/recovery'
+                Invoke-WebRequest $esHost'/_cat/recovery?v' -OutFile $outputDir/cat_recovery.$timestamp.txt
+            }
+        }
+
+        Write-Host 'Running netstat'
+        netstat -an | Out-File $outputDir/netstat.$timestamp.txt
+
+        Write-Host 'Running top'
+        ps | sort -desc cpu | select -first 30 | Out-File $outputDir/top.$timestamp.txt
+
+        Write-Host 'Running ps'
+        Get-Process -Name *elasticsearch* | Out-File $outputDir/elasticsearch-process.$timestamp.txt
+
+    if ($n -lt $repeat) {
+            Write-Output "Sleeping $interval second(s)..."
+            Start-Sleep -s $interval
     }
+    $n=$n+1
 }
 
-Write-Host 'Running netstat'
-netstat | Out-File $outputDir/netstat.txt
-
-Write-Host 'Running top'
-ps | sort -desc cpu | select -first 30 | Out-File $outputDir/top.txt
-
-Write-Host 'Running ps'
-Get-Process -Name *elasticsearch* | Out-File $outputDir/elasticsearch-process.txt
 
 Write-Host 'Output complete.  Creating zip.'
 Add-Type -Assembly System.IO.Compression.FileSystem
