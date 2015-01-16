@@ -34,6 +34,10 @@ In order to gather the elasticsearch config and logs you must run this on a node
   -nc Disable compression (optional)
   -r  Collect stats r times (optional, in conjunction with -i , defaults to 1)
   -i  Interval in seconds between stats collections (optional, in conjunction with -r , defaults to 60 secs)
+  -a  Authentication type. Either 'basic' or 'cookie' (optional)
+  -A  Authentication credentials. Either a path to the auth cookie file or the basic auth usename. You will be prompted for the password unless you specify -p.
+  -p  Password for authentication. To be used with -A if having this script prompt for a password is undesiarable.
+
 EOM
             exit 1;;
         -H)  eshost=$2;;
@@ -42,6 +46,9 @@ EOM
         -o)  outputdir=$2;;
         -r)  repeat=$2;;
         -i)  interval=$2;;
+	-a)  authType=$2;;
+	-A)  authCreds=$2;;
+	-p)  password=$2;;
 
     esac
     shift
@@ -60,14 +67,78 @@ fi
 mkdir $outputdir/
 if [ ! -e $outputdir ]
 then
-    echo "Cannot write output file."
+    printf "Cannot write output file\n\n"
     exit 1
 fi
 
 if [ $repeat -le 0 ]
 then
-	echo "Repeat option (-r) must be a positive interger greater then 0"
+	prinf "Repeat option (-r) must be a positive interger greater then 0\n\n"
 	exit 1
+fi
+
+#Check if user wants auth support
+curlCmd=''
+if [ $authType ] 
+then
+
+    #Ensure valid auth type
+    if [ $authType != "basic" ] &&  [ $authType != "cookie" ]
+    then
+	printf "Authentication type must be either cookie or basic\n\n"
+	exit 1
+    fi
+
+    #ensure auth creds are passed
+    if [ -z $authCreds ] 
+    then
+	printf "Authentication credentials must be used when -a is passed. See --help\n\n"
+	exit 1
+    fi
+
+    #if using cookie, make sure cookie file exists
+    if  [ $authType == "cookie" ]
+    then
+
+	if [ ! -r $authCreds ]
+	then
+	    printf "Authetication cookie '$authCreds' is not readable or does not exist\n\n"
+	    exit 1
+	fi
+
+	#cookie based validation, set up cookie auth
+	curlCmd="curl --cookie $authCreds"	
+
+    else
+	#not using cookie, so setup basic auth
+	
+	#check if user provided password via flag, if not prompt. This also captures -p with no value
+	if [ -z $password ] 
+	then
+	    printf "Enter authentication password (not displayed): "
+	    read -s password
+	    printf "\n"
+	fi
+	#using -k to work around in house/self sign certs
+	curlCmd="curl -k --user $authCreds:$password"
+
+	#test to make sure the auth is right, or exit as things will silently fail
+	authStatus=$($curlCmd --silent  -XGET "$eshost/")
+	authCheck=`echo $authStatus | grep '"status" : 200' > /dev/null; echo $?`
+
+	if [ $authCheck -ne 0 ]
+	then
+	    printf "Authentication failed: \n$authStatus\n\n"
+	    exit 1;
+	fi
+    fi
+
+
+
+else
+    #setup curl command without auth support
+    curlCmd='curl'
+
 fi
 
 # Cribbed from ES startup script.  Only works if we place this script in the elasticsearch/bin
@@ -89,7 +160,7 @@ done
 echo "Getting your configuration from the elasticsearch API"
 
 #ensure we can connect to the host, or exit as there is nothing more we can do
-connectionTest=`curl -s -S -XGET $eshost 2>&1`
+connectionTest=`$curlCmd -s -S -XGET $eshost 2>&1`
 if [ $? -ne 0 ]
 then
     echo "Error connecting to $eshost: $connectionTest"
@@ -99,14 +170,14 @@ then
 fi
 
 #run a sanity check of the nodename by ensuring we get data back on that node
-nodenameStatus=$(curl -s -S -XGET "$eshost/_nodes/$targetNode/settings?pretty" |grep -q '"nodes" : { }'; echo $?)
+nodenameStatus=$($curlCmd -s -S -XGET "$eshost/_nodes/$targetNode/settings?pretty" |grep -q '"nodes" : { }'; echo $?)
 if [ $nodenameStatus -eq 0 ]
 then
     printf "\n\nThe host and node name (\"$eshost\" and \"$targetNode\") does not appear to be connected to your cluster. This script will continue, however without gathering the log files or elasticsearch.yml\n\n"
 fi
 
 #get the es version
-esVersion=$(curl -s -S -XGET "$eshost/" |grep  '"number" : "'| sed -e 's/"number" : "//' -e 's/"//' )
+esVersion=$($curlCmd -s -S -XGET "$eshost/" |grep  '"number" : "'| sed -e 's/"number" : "//' -e 's/"//' )
 configType='conf'
 pathType='"path" : {'
 logType='logs'
@@ -124,9 +195,9 @@ fi
 #Get the desired node's settings and clean it up a bit
 #if this is osx, then drop the -m1 from the grep as grep on osx does not work with -A.
 if [ "$(uname)" == "Darwin" ]; then
-    localNodePaths=$(curl -s -S -XGET "$eshost/_nodes/$targetNode/settings?pretty" |grep -A7  "$pathType" | sed 's/"//g')
+    localNodePaths=$($curlCmd -s -S -XGET "$eshost/_nodes/$targetNode/settings?pretty" |grep -A7  "$pathType" | sed 's/"//g')
 else
-    localNodePaths=$(curl -s -S -XGET "$eshost/_nodes/$targetNode/settings?pretty" |grep -m1 -A7 "$pathType" | sed 's/"//g')
+    localNodePaths=$($curlCmd -s -S -XGET "$eshost/_nodes/$targetNode/settings?pretty" |grep -m1 -A7 "$pathType" | sed 's/"//g')
 fi
 
 #Figure out of the above curl succeeded
@@ -149,7 +220,7 @@ then
     done <<<"$localNodePaths"
 
     #Grab yml location from the API
-    localNodeConfig=$(curl -s -S -XGET "$eshost/_nodes/$targetNode/settings?pretty" | grep -m1 -ohE "\"$configType\" : \".*?\"")
+    localNodeConfig=$($curlCmd -s -S -XGET "$eshost/_nodes/$targetNode/settings?pretty" | grep -m1 -ohE "\"$configType\" : \".*?\"")
 
     #Ensure the above curl succeeded
     if [ $(echo $localNodeConfig |grep -q "\"$configType\" : \""; echo $?) -eq 0 ]
@@ -202,16 +273,16 @@ fi
 #grab settings
 echo "Collecting version, mappings, settings"
 echo "Getting version"
-curl -XGET "$eshost" >> $outputdir/version.json 2> /dev/null
+$curlCmd -XGET "$eshost" >> $outputdir/version.json 2> /dev/null
 
 echo "Getting _mapping"
-curl -XGET "$eshost/_mapping?pretty" >> $outputdir/mapping.json 2> /dev/null
+$curlCmd -XGET "$eshost/_mapping?pretty" >> $outputdir/mapping.json 2> /dev/null
 
 echo "Getting _settings"
-curl -XGET "$eshost/_settings?pretty" >> $outputdir/settings.json 2> /dev/null
+$curlCmd -XGET "$eshost/_settings?pretty" >> $outputdir/settings.json 2> /dev/null
 
 echo "Getting _cluster/settings"
-curl -XGET "$eshost/_cluster/settings?pretty" >> $outputdir/cluster_settings.json 2> /dev/null
+$curlCmd -XGET "$eshost/_cluster/settings?pretty" >> $outputdir/cluster_settings.json 2> /dev/null
 
 
 #grab stats
@@ -223,60 +294,60 @@ while [ $i -le $repeat ]
 
         timestamp=`date  +%Y%m%d-%H%M%S`
         echo "Getting _cluster/state"
-        curl -XGET "$eshost/_cluster/state?pretty" >> $outputdir/cluster_state.$timestamp.json 2> /dev/null
+        $curlCmd -XGET "$eshost/_cluster/state?pretty" >> $outputdir/cluster_state.$timestamp.json 2> /dev/null
 
         echo "Getting _cluster/stats"
-        curl -XGET "$eshost/_cluster/stats?pretty&human" >> $outputdir/cluster_stats.$timestamp.json 2> /dev/null
+        $curlCmd -XGET "$eshost/_cluster/stats?pretty&human" >> $outputdir/cluster_stats.$timestamp.json 2> /dev/null
 
         echo "Getting _cluster/health"
-        curl -XGET "$eshost/_cluster/health?pretty" >> $outputdir/cluster_health.$timestamp.json 2> /dev/null
+        $curlCmd -XGET "$eshost/_cluster/health?pretty" >> $outputdir/cluster_health.$timestamp.json 2> /dev/null
 
         echo "Getting _cluster/pending_tasks"
-        curl -XGET "$eshost/_cluster/pending_tasks?pretty&human" >> $outputdir/cluster_pending_tasks.$timestamp.json 2> /dev/null
+        $curlCmd -XGET "$eshost/_cluster/pending_tasks?pretty&human" >> $outputdir/cluster_pending_tasks.$timestamp.json 2> /dev/null
 
         echo "Getting _count"
-        curl -XGET "$eshost/_count?pretty" >> $outputdir/count.$timestamp.json 2> /dev/null
+        $curlCmd -XGET "$eshost/_count?pretty" >> $outputdir/count.$timestamp.json 2> /dev/null
 
         echo "Getting nodes info"
-        curl -XGET "$eshost/_nodes/?all&pretty&human" >> $outputdir/nodes.$timestamp.json 2> /dev/null
+        $curlCmd -XGET "$eshost/_nodes/?all&pretty&human" >> $outputdir/nodes.$timestamp.json 2> /dev/null
 
         echo "Getting _nodes/hot_threads"
-        curl -XGET "$eshost/_nodes/hot_threads?threads=10" >> $outputdir/nodes_hot_threads.$timestamp.txt 2> /dev/null
+        $curlCmd -XGET "$eshost/_nodes/hot_threads?threads=10" >> $outputdir/nodes_hot_threads.$timestamp.txt 2> /dev/null
 
 
         #api calls that only work with 0.90
         if [[ $esVersion =~ 0.90.* ]]; then
             echo "Getting _nodes/stats"
-            curl -XGET "$eshost/_nodes/stats?all&pretty&human" >> $outputdir/nodes_stats.$timestamp.json 2> /dev/null
+            $curlCmd -XGET "$eshost/_nodes/stats?all&pretty&human" >> $outputdir/nodes_stats.$timestamp.json 2> /dev/null
 
             echo "Getting indices stats"
-            curl -XGET "$eshost/_stats?all&pretty&human" >> $outputdir/indices_stats.$timestamp.json 2> /dev/null
+            $curlCmd -XGET "$eshost/_stats?all&pretty&human" >> $outputdir/indices_stats.$timestamp.json 2> /dev/null
 
         #api calls that only work with 1.0+
         else
             echo "Getting _nodes/stats"
-            curl -XGET "$eshost/_nodes/stats?pretty&human" >> $outputdir/nodes_stats.$timestamp.json 2> /dev/null
+            $curlCmd -XGET "$eshost/_nodes/stats?pretty&human" >> $outputdir/nodes_stats.$timestamp.json 2> /dev/null
 
             echo "Getting indices stats"
-            curl -XGET "$eshost/_stats?pretty&human" >> $outputdir/indices_stats.$timestamp.json 2> /dev/null
+            $curlCmd -XGET "$eshost/_stats?pretty&human" >> $outputdir/indices_stats.$timestamp.json 2> /dev/null
 
             echo "Getting _cat/allocation"
-            curl -XGET "$eshost/_cat/allocation?v" >> $outputdir/allocation.$timestamp.txt 2> /dev/null
+            $curlCmd -XGET "$eshost/_cat/allocation?v" >> $outputdir/allocation.$timestamp.txt 2> /dev/null
 
             echo "Getting _cat/plugins"
-            curl -XGET "$eshost/_cat/plugins?v" >> $outputdir/plugins.$timestamp.txt 2> /dev/null
+            $curlCmd -XGET "$eshost/_cat/plugins?v" >> $outputdir/plugins.$timestamp.txt 2> /dev/null
 
             echo "Getting _cat/shards"
-            curl -XGET "$eshost/_cat/shards?v" >> $outputdir/cat_shards.$timestamp.txt 2> /dev/null
+            $curlCmd -XGET "$eshost/_cat/shards?v" >> $outputdir/cat_shards.$timestamp.txt 2> /dev/null
 
             #api calls that only work with 1.1+
             if [[ ! $esVersion =~ 1.0.* ]]; then
                 echo "Getting _recovery"
-                curl -XGET "$eshost/_recovery?detailed&pretty&human" >> $outputdir/recovery.$timestamp.json 2> /dev/null
+                $curlCmd -XGET "$eshost/_recovery?detailed&pretty&human" >> $outputdir/recovery.$timestamp.json 2> /dev/null
             #api calls that only work with 1.0
             else
                 echo "Getting _cat/recovery"
-                curl -XGET "$eshost/_cat/recovery?v" >> $outputdir/cat_recovery.$timestamp.txt 2> /dev/null
+                $curlCmd -XGET "$eshost/_cat/recovery?v" >> $outputdir/cat_recovery.$timestamp.txt 2> /dev/null
             fi
         fi
 
