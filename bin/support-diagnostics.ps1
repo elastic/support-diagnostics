@@ -12,9 +12,9 @@
 .PARAMETER nc
     Disable compression (optional)
 .PARAMETER r
-    Repeat
+    Collect stats r times (optional, in conjunction with -i , defaults to 1)
 .PARAMETER i
-    Interval
+    Interval in seconds between stats collections (optional, in conjunction with -r , defaults to 60 secs)
 #>
 
 Param(
