@@ -89,13 +89,6 @@ then
 	exit 1
     fi
 
-    #ensure auth creds are passed
-    if [ -z $authCreds ] 
-    then
-	printf "Authentication credentials must be used when -a is passed. See --help\n\n"
-	exit 1
-    fi
-
     #if using cookie, make sure cookie file exists
     if  [ $authType == "cookie" ]
     then
@@ -112,6 +105,13 @@ then
     else
 	#not using cookie, so setup basic auth
 	
+	#ensure auth creds are passed
+	if [ -z $authCreds ]
+	then
+	    printf "Authentication credentials must be used when -a is passed. See --help\n\n"
+	    exit 1
+	fi
+
 	#check if user provided password via flag, if not prompt. This also captures -p with no value
 	if [ -z $password ] 
 	then
