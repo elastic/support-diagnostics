@@ -100,7 +100,7 @@ then
 	fi
 
 	#cookie based validation, set up cookie auth
-	curlCmd="curl --cookie $authCreds"	
+	curlCmd="curl -s -S --cookie $authCreds"
 
     else
 	#not using cookie, so setup basic auth
@@ -120,10 +120,10 @@ then
 	    printf "\n"
 	fi
 	#using -k to work around in house/self sign certs
-	curlCmd="curl -k --user $authCreds:$password"
+	curlCmd="curl -s -S -k --user $authCreds:$password"
 
 	#test to make sure the auth is right, or exit as things will silently fail
-	authStatus=$($curlCmd --silent  -XGET "$eshost/")
+	authStatus=$($curlCmd -XGET "$eshost/")
 	authCheck=`echo $authStatus | grep '"status" : 200' > /dev/null; echo $?`
 
 	if [ $authCheck -ne 0 ]
@@ -137,7 +137,7 @@ then
 
 else
     #setup curl command without auth support
-    curlCmd='curl'
+    curlCmd='curl -s -S'
 
 fi
 
