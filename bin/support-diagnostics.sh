@@ -34,13 +34,10 @@ In order to gather the elasticsearch config and logs you must run this on a node
   -nc Disable compression (optional)
   -r  Collect stats r times (optional, in conjunction with -i , defaults to 1)
   -i  Interval in seconds between stats collections (optional, in conjunction with -r , defaults to 60 secs)
-
   -a  Authentication type. Either 'basic' or 'cookie' (optional)
-  -A  Authentication credentials. Either a path to the auth cookie file or the basic auth username. You will be prompted for the password unless you specify -p.  (optional)
-  -p  Password for authentication. To be used with -A if having this script prompt for a password is undesiarable.  (optional)
+  -A  Authentication credentials. Either a path to the auth cookie file or the basic auth usename. You will be prompted for the password unless you specify -p.
+  -p  Password for authentication. To be used with -A if having this script prompt for a password is undesiarable.
 
-  -c  PKCS#12 client certificate file for authentication. You will be prompted for the password for this certificate unless you specify -C  (optional)
-  -C  Password for client certificate. To be used with -c if having this script prompt for a password is undesiarable.  (optional)
 EOM
             exit 1;;
         -H)  eshost=$2;;
@@ -52,9 +49,6 @@ EOM
 	-a)  authType=$2;;
 	-A)  authCreds=$2;;
 	-p)  password=$2;;
-	-c)  certificate=$2;;
-	-C)  certPassword=$2;;
-
 
     esac
     shift
@@ -128,6 +122,15 @@ then
 	#using -k to work around in house/self sign certs
 	curlCmd="curl -k --user $authCreds:$password"
 
+	#test to make sure the auth is right, or exit as things will silently fail
+	authStatus=$($curlCmd --silent  -XGET "$eshost/")
+	authCheck=`echo $authStatus | grep '"status" : 200' > /dev/null; echo $?`
+
+	if [ $authCheck -ne 0 ]
+	then
+	    printf "Authentication failed: \n$authStatus\n\n"
+	    exit 1;
+	fi
     fi
 
 
@@ -137,41 +140,6 @@ else
     curlCmd='curl'
 
 fi
-
-#check if using certificate
-if [ $certificate ]
-then
-    #ensure file exists
-    if [ ! -r $certificate ]
-    then
-	printf "Authetication certificate '$certificate' is not readable or does not exist\n\n"
-	exit 1
-    fi
-
-    #check if user provided password via flag, if not prompt. This also captures -p with no value
-    if [ -z $certPassword ]
-    then
-	printf "Enter certificate password (not displayed): "
-	read -s certPassword
-	printf "\n"
-    fi
-
-    #modify curl command to support certs
-    curlCmd="$curlCmd --cert-type PKCS#12 --cert  $certificate:$certPassword"
-fi
-
-
-#test to make sure the auth is right, or exit as things will silently fail
-#curl will report back unknown err if certs fail
-authStatus=$($curlCmd --silent -S  -XGET "$eshost/" 2>&1 )
-authCheck=`echo $authStatus | grep '"status" : 200' > /dev/null; echo $?`
-
-if [ $authCheck -ne 0 ]
-then
-    printf "Authentication failed: \n$authStatus\n\n"
-    exit 1;
-fi
-
 
 # Cribbed from ES startup script.  Only works if we place this script in the elasticsearch/bin
 CDPATH=""
