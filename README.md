@@ -22,6 +22,8 @@ In order to gather the elasticsearch config and logs you must run the script on 
     -n  On a host with multiple nodes, specify the node name to gather data for. Value should match node.name as defined in elasticsearch.yml
     -o  Script output directory (optional, defaults to support-diagnostics.[timestamp].[hostname])
     -nc Disable compression (optional)
+    -r  Collect stats r times (optional, in conjunction with -i , defaults to 1)
+    -i  Interval in seconds between stats collections (optional, in conjunction with -r , defaults to 30 secs)
 
 ### Running on Windows
 
