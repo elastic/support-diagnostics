@@ -98,7 +98,12 @@ If ($a) {
 			$password = $p
 		}
 		Else {
-			$password = Read-Host 'Enter authentication password' -AsSecureString
+			$secPassword = Read-Host 'Enter authentication password' -AsSecureString
+			#convert to a string
+			$Ptr = [System.Runtime.InteropServices.Marshal]::SecureStringToCoTaskMemUnicode($secPassword)
+			$password = [System.Runtime.InteropServices.Marshal]::PtrToStringUni($Ptr)
+			[System.Runtime.InteropServices.Marshal]::ZeroFreeCoTaskMemUnicode($Ptr)
+
 		}
 
 		#ignore self sign certs
