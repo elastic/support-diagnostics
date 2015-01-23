@@ -11,10 +11,13 @@ IF /I "%~1"=="-n" SET n="%~2"
 IF /I "%~1"=="-nc" SET nc=1
 IF /I "%~1"=="-r" SET r="%~2"
 IF /I "%~1"=="-i" SET i="%~2"
+IF /I "%~1"=="-a" SET a="%~2"
+IF /I "%~1"=="-c" SET c="%~2"
+IF /I "%~1"=="-p" SET p="%~2"
 SHIFT & GOTO loop
 :cont
 
-SET Command="& '%PowerShellScript%' -H '%H%' -o '%o%' -n '%n%' -r '%r%' -i '%i%'"
+SET Command="& '%PowerShellScript%' -H '%H%' -o '%o%' -n '%n%' -r '%r%' -i '%i%' -a '%a%' -c '%c%' -p '%p%'"
 IF "%nc%" == "1" (
 	SET Command=%Command% -nc
 )
@@ -27,3 +30,6 @@ SET n=
 SET nc=
 SET r=
 SET i=
+SET a=
+SET c=
+SET p=

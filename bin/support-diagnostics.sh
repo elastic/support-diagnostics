@@ -35,8 +35,8 @@ In order to gather the elasticsearch config and logs you must run this on a node
   -r  Collect stats r times (optional, in conjunction with -i , defaults to 1)
   -i  Interval in seconds between stats collections (optional, in conjunction with -r , defaults to 60 secs)
   -a  Authentication type. Either 'basic' or 'cookie' (optional)
-  -A  Authentication credentials. Either a path to the auth cookie file or the basic auth usename. You will be prompted for the password unless you specify -p.
-  -p  Password for authentication. To be used with -A if having this script prompt for a password is undesiarable.
+  -c  Authentication credentials. Either a path to the auth cookie file or the basic auth usename. You will be prompted for the password unless you specify -p.
+  -p  Password for authentication. To be used with -c if having this script prompt for a password is undesiarable.
 
 EOM
             exit 1;;
@@ -47,7 +47,7 @@ EOM
         -r)  repeat=$2;;
         -i)  interval=$2;;
 	-a)  authType=$2;;
-	-A)  authCreds=$2;;
+	-c)  authCreds=$2;;
 	-p)  password=$2;;
 
     esac
@@ -89,6 +89,13 @@ then
 	exit 1
     fi
 
+    #ensure auth creds (user or cookie) are passed
+    if [ -z $authCreds ]
+    then
+	printf "Authentication credentials must be used when -a is passed. See --help\n\n"
+	exit 1
+    fi
+
     #if using cookie, make sure cookie file exists
     if  [ $authType == "cookie" ]
     then
@@ -105,12 +112,6 @@ then
     else
 	#not using cookie, so setup basic auth
 	
-	#ensure auth creds are passed
-	if [ -z $authCreds ]
-	then
-	    printf "Authentication credentials must be used when -a is passed. See --help\n\n"
-	    exit 1
-	fi
 
 	#check if user provided password via flag, if not prompt. This also captures -p with no value
 	if [ -z $password ] 
