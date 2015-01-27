@@ -24,6 +24,10 @@ In order to gather the elasticsearch config and logs you must run the script on 
     -nc Disable compression (optional)
     -r  Collect stats r times (optional, in conjunction with -i , defaults to 1)
     -i  Interval in seconds between stats collections (optional, in conjunction with -r , defaults to 30 secs)
+    -a  Authentication type. Either 'basic' or 'cookie' (optional)
+    -c  Authentication credentials. Either a path to the auth cookie file or the basic auth usename. You will be prompted for the password unless you specify -p.
+    -p  Password for authentication. To be used with -c if having this script prompt for a password is undesiarable.
+
 
 ### Running on Windows
 
