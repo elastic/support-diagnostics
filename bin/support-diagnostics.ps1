@@ -4,7 +4,7 @@
 .DESCRIPTION
     This script is used to gather diagnotistic information for elasticsearch support.  In order to gather the elasticsearch config and logs you must run this on a node within your elasticsearch cluster.
 .PARAMETER H
-    Elasticsearch hostname:port (defaults to localhost:9200)
+    Elasticsearch protocol://hostname:port (defaults to http://localhost:9200)
 .PARAMETER n
     On a host with multiple nodes, specify the node name to gather data for. Value should match node.name as defined in elasticsearch.yml
 .PARAMETER o
@@ -15,19 +15,28 @@
     Collect stats r times (optional, in conjunction with -i , defaults to 1)
 .PARAMETER i
     Interval in seconds between stats collections (optional, in conjunction with -r , defaults to 60 secs)
+.PARAMETER a
+    Authentication type. Either 'basic' or 'cookie'. Cookie is not yet implemented. (optional)
+.PARAMETER c
+    Authentication credentials. Either a path to the auth cookie file or the basic auth usename. You will be prompted for the password unless you specify -p.
+.PARAMETER p
+    Password for authentication. To be used with -A if having this script prompt for a password is undesiarable.
 #>
 
 Param(
-    [string]$H,
-    [string]$n,
-    [string]$o,
-    [switch]$nc,
-    [int]$r,
-    [int]$i
+	[string]$H,
+	[string]$n,
+	[string]$o,
+	[switch]$nc,
+	[int]$r,
+	[int]$i,
+	[string]$A,
+	[string]$c,
+	[string]$p
 )
 
 # Set defaults
-$esHostPort = 'localhost:9200'
+$esHostPort = 'http://localhost:9200'
 $timestamp = Get-Date -format yyyyMMdd-HHmmss
 $outputDir = $o
 $targetNode = '_local'
@@ -49,14 +58,141 @@ If (! $o) {
 }
 
 If ($r) {
-    $repeat = $r
+	$repeat = $r
 }
 
 If ($i) {
-    $interval = $i
+	$interval = $i
 }
 
-$esHost = 'http://' + $esHostPort + '/'
+$esHost = $esHostPort
+
+#cookie isn't implemented yet, but putting the basis of it here to finish it
+If ($a) {
+
+	#ensure valid auth type
+	If ($a -ne 'cookie' -and $a -ne 'basic') {
+		Write-Host Authentication type must be either cookie or basic
+		Exit
+	}
+
+	#ensure auth creds (user or cookie) are passed
+	If (! $c) {
+		Write-Host Authentication credentials must be used when -a is passed.
+		Exit
+	}
+
+
+	#if using cookie, make sure cookie file exists
+	If ($a -eq 'cookie') {
+
+		Write-Host Sorry, cookie authentication has not been implemented yet. If you require this option please use the bash script.
+		Exit
+
+	}
+	#not using cookie, so setup basic auth
+	Else
+	{
+		#check if user provided password via flag, if not prompt.
+		If ($p) {
+			$password = $p
+		}
+		Else {
+			$secPassword = Read-Host 'Enter authentication password' -AsSecureString
+			#convert to a string
+			$Ptr = [System.Runtime.InteropServices.Marshal]::SecureStringToCoTaskMemUnicode($secPassword)
+			$password = [System.Runtime.InteropServices.Marshal]::PtrToStringUni($Ptr)
+			[System.Runtime.InteropServices.Marshal]::ZeroFreeCoTaskMemUnicode($Ptr)
+
+		}
+
+		#ignore self sign certs
+		add-type @"
+using System.Net;
+using System.Security.Cryptography.X509Certificates;
+public class TrustAllCertsPolicy : ICertificatePolicy {
+	public bool CheckValidationResult(
+		ServicePoint srvPoint, X509Certificate certificate,
+		WebRequest request, int certificateProblem) {$authHeader
+							     return true;
+							     }
+}
+"@
+
+		#generate a cred string that can be used in the webrequest
+		$base64AuthInfo = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(("{0}:{1}" -f $c,$password)))
+		$authHeader = @{Authorization=('Basic {0}' -f $base64AuthInfo)}
+
+		[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
+
+		#test connection
+		$connectionTest = Invoke-WebRequest -Headers $authHeader -Uri $esHostPort
+		If ($connectionTest.StatusCode -ne 200) {
+			Write-Host Error connecting to $esHost
+			Exit
+		}
+
+		Write-Host 'Getting your configuration from the elasticsearch API'
+
+		$nodenameStatus = (Invoke-WebRequest -Headers $authHeader -Uri $esHost/_nodes/$targetNode/settings?pretty).RawContent | Select-String '"nodes" : { }'
+		If ($nodenameStatus) {
+			Write-Host `n`nThe host and node name (\"$esHostPort\" and \"$targetNode\") does not appear to be connected to your cluster.  This script will continue, however without gathering the log files or elasticsearch.yml`n`n
+		}
+
+		# Get the ES version
+		$esVersion= (Invoke-RestMethod  -Headers $authHeader -Uri $esHost).version.number
+		$nodes = (Invoke-RestMethod  -Headers $authHeader -Uri $esHost/_nodes/$targetNode/settings?pretty).nodes
+
+}
+
+}
+Else {
+	#not using authentication
+	$connectionTest = Invoke-WebRequest -Uri $esHostPort
+	If ($connectionTest.StatusCode -ne 200) {
+		Write-Host Error connecting to $esHost
+		Exit
+	}
+
+	Write-Host 'Getting your configuration from the elasticsearch API'
+
+	$nodenameStatus = (Invoke-WebRequest -Uri $esHost/_nodes/$targetNode/settings?pretty).RawContent | Select-String '"nodes" : { }'
+	If ($nodenameStatus) {
+		Write-Host `n`nThe host and node name (\"$esHostPort\" and \"$targetNode\") does not appear to be connected to your cluster.  This script will continue, however without gathering the log files or elasticsearch.yml`n`n
+	}
+
+	# Get the ES version
+	$esVersion= (Invoke-RestMethod $esHost).version.number
+	$nodes = (Invoke-RestMethod -Uri $esHost/_nodes/$targetNode/settings?pretty).nodes
+
+}
+
+
+
+#function to preform requests
+Function preformRequest ($uri, $dstFile)
+{
+
+	#if any sort of auth is used
+	If ($a) {
+
+		If ($a -eq 'cookie') {
+			Invoke-WebRequest -Uri $uri -OutFile $dstFile
+		}
+		#not using cookie, so setup basic auth
+		Else
+		{
+			Invoke-WebRequest -Headers $authHeader -Uri $uri -OutFile $dstFile
+		}
+	}
+
+	#not using authentication, preform normal request
+	Else {
+		Invoke-WebRequest -Uri $uri -OutFile $dstFile
+	}
+
+}
+
 
 New-Item $outputDir -Type directory | Out-Null
 If (!(Test-Path $outputDir)) {
@@ -64,23 +200,8 @@ If (!(Test-Path $outputDir)) {
     Exit
 }
 
-Write-Host 'Getting your configuration from the elasticsearch API'
 
-$connectionTest = Invoke-WebRequest $esHost
-If ($connectionTest.StatusCode -ne 200) {
-    Write-Host Error connecting to $esHost
-    Exit
-}
 
-$nodenameStatus = (Invoke-WebRequest ($esHost+'_nodes/'+$targetNode+'/settings?pretty')).RawContent | Select-String '"nodes" : { }'
-If ($nodenameStatus) {
-    Write-Host `n`nThe host and node name (\"$esHostPort\" and \"$targetNode\") does not appear to be connected to your cluster.  This script will continue, however without gathering the log files or elasticsearch.yml`n`n
-}
-
-# Get the ES version
-$esVersion= (Invoke-RestMethod $esHost).version.number
-
-$nodes = (Invoke-RestMethod ($esHost+'_nodes/'+$targetNode+'/settings?pretty')).nodes
 $nodesPropertyName = $nodes.psobject.properties.name
 $nodeSettings = $nodes.$nodesPropertyName.settings
 
@@ -124,16 +245,16 @@ If ($esLogsPath) {
 
 # API calls that work with all versions
 Write-Host 'Getting version'
-Invoke-WebRequest $esHost -OutFile $outputDir/version.json
+preformRequest "$esHost" "$outputDir/version.json"
 
 Write-Host "Getting _mapping"
-Invoke-WebRequest $esHost'/_mapping?pretty' -OutFile $outputDir/mapping.json
+preformRequest "$esHost/_mapping?pretty" "$outputDir/mapping.json"
 
 Write-Host 'Getting _settings'
-Invoke-WebRequest $esHost'/_settings?pretty' -OutFile $outputDir/settings.json
+preformRequest "$esHost/_settings?pretty" "$outputDir/settings.json"
 
 Write-Host 'Getting _cluster/settings'
-Invoke-WebRequest $esHost'/_cluster/settings?pretty' -OutFile $outputDir/cluster_settings.json
+preformRequest "$esHost/_cluster/settings?pretty" "$outputDir/cluster_settings.json"
 
 #grab stats
 #execute multiple times if $repeat is > 1
@@ -143,58 +264,59 @@ while($n -le $repeat) {
         $timestamp = Get-Date -format yyyyMMdd-HHmmss
         Write-Host "Collecting stats $n/$repeat"
         Write-Host 'Getting _cluster/state'
-        Invoke-WebRequest $esHost'/_cluster/state?pretty' -OutFile $outputDir/cluster_state.$timestamp.json
+
+	preformRequest "$esHost/_cluster/state?pretty" "$outputDir/cluster_state.$timestamp.json"
 
         Write-Host 'Getting _cluster/stats'
-        Invoke-WebRequest $esHost'/_cluster/stats?pretty&human' -OutFile $outputDir/cluster_stats.$timestamp.json
+       preformRequest "$esHost/_cluster/stats?pretty&human"  "$outputDir/cluster_stats.$timestamp.json"
 
         Write-Host 'Getting _cluster/health'
-        Invoke-WebRequest $esHost'/_cluster/health?pretty' -OutFile $outputDir/cluster_health.$timestamp.json
+        preformRequest "$esHost/_cluster/health?pretty" "$outputDir/cluster_health.$timestamp.json"
 
         Write-Host 'Getting _cluster/pending_tasks'
-        Invoke-WebRequest $esHost'/_cluster/pending_tasks?pretty&human' -OutFile $outputDir/cluster_pending_tasks.$timestamp.json
+        preformRequest "$esHost/_cluster/pending_tasks?pretty&human" "$outputDir/cluster_pending_tasks.$timestamp.json"
 
         Write-Host 'Getting _count'
-        Invoke-WebRequest $esHost'/_count?pretty' -OutFile $outputDir/count.$timestamp.json
+        preformRequest "$esHost/_count?pretty" "$outputDir/count.$timestamp.json"
 
         Write-Host 'Getting nodes info'
-        Invoke-WebRequest $esHost'/_nodes/?all&pretty&human' -OutFile $outputDir/nodes.$timestamp.json
+        preformRequest "$esHost/_nodes/?all&pretty&human" "$outputDir/nodes.$timestamp.json"
 
         Write-Host 'Getting _nodes/hot_threads'
-        Invoke-WebRequest $esHost'/_nodes/hot_threads?threads=10' -OutFile $outputDir/nodes_hot_threads.$timestamp.txt
+        preformRequest "$esHost/_nodes/hot_threads?threads=10" "$outputDir/nodes_hot_threads.$timestamp.txt"
 
         # API calls that only work with 0.90
         If ($esVersion.StartsWith("0.9")) {
             Write-Host 'Getting _nodes/stats'
-            Invoke-WebRequest $esHost'/_nodes/stats?all&pretty&human' -OutFile $outputDir/nodes_stats.$timestamp.json
+            preformRequest "$esHost/_nodes/stats?all&pretty&human" "$outputDir/nodes_stats.$timestamp.json"
 
             Write-Host 'Getting indices stats'
-            Invoke-WebRequest $esHost'/_stats?all&pretty&human' -OutFile $outputDir/indices_stats.$timestamp.json
+            preformRequest "$esHost/_stats?all&pretty&human" "$outputDir/indices_stats.$timestamp.json"
         # API calls that only work with 1.0+
         } Else {
             Write-Host 'Getting _nodes/stats'
-            Invoke-WebRequest $esHost'/_nodes/stats?pretty&human' -OutFile $outputDir/nodes_stats.$timestamp.json
+            preformRequest "$esHost/_nodes/stats?pretty&human" "$outputDir/nodes_stats.$timestamp.json"
 
             Write-Host 'Getting indices stats'
-            Invoke-WebRequest $esHost'/_stats?pretty&human' -OutFile $outputDir/indices_stats.$timestamp.json
+            preformRequest "$esHost/_stats?pretty&human" "$outputDir/indices_stats.$timestamp.json"
 
             Write-Host 'Getting _cat/allocation'
-            Invoke-WebRequest $esHost'/_cat/allocation?v' -OutFile $outputDir/allocation.$timestamp.txt
+            preformRequest "$esHost/_cat/allocation?v" "$outputDir/allocation.$timestamp.txt"
 
             Write-Host 'Getting _cat/plugins'
-            Invoke-WebRequest $esHost'/_cat/plugins?v' -OutFile $outputDir/plugins.$timestamp.txt
+            preformRequest "$esHost/_cat/plugins?v" "$outputDir/plugins.$timestamp.txt"
 
             Write-Host 'Getting _cat/shards'
-            Invoke-WebRequest $esHost'/_cat/shards?v' -OutFile $outputDir/cat_shards.$timestamp.txt
+            preformRequest "$esHost/_cat/shards?v" "$outputDir/cat_shards.$timestamp.txt"
 
             # API calls that only work with 1.1+
             If (-Not $esVersion.StartsWith("1.0")) {
                 Write-Host 'Getting _recovery'
-                Invoke-WebRequest $esHost'/_recovery?detailed&pretty&human' -OutFile $outputDir/recovery.$timestamp.json
+                preformRequest "$esHost/_recovery?detailed&pretty&human" "$outputDir/recovery.$timestamp.json"
             # API calls that only work with 1.0
             } Else {
                 Write-Host 'Getting _cat/recovery'
-                Invoke-WebRequest $esHost'/_cat/recovery?v' -OutFile $outputDir/cat_recovery.$timestamp.txt
+                preformRequest "$esHost/_cat/recovery?v" "$outputDir/cat_recovery.$timestamp.txt"
             }
         }
 
