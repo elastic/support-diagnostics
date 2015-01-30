@@ -1,7 +1,7 @@
 elasticsearch-support-diagnostics
 =================================
 
-**_Note:_ This branch is for the java rewrite of the support plugin. Please do not use this in production, use the master branch. **
+**Note: This branch is for the java rewrite of the support plugin (2.0). Please do not use this in production, use the master branch.**
 
 
 support-diagnostics is an elasticsearch plugin designed
