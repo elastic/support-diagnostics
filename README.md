@@ -14,8 +14,8 @@ to assist users with gathering diagnostic data about their cluster and nodes.
 
 ### Usage
 
-	Linux:	/bin/plugin/support-diagnostics/support-diagnostics
-	Windows: /bin/plugin/support-diagnostics/support-diagnostics.bat
+	Linux:	./bin/plugin/support-diagnostics/support-diagnostics
+	Windows: ./bin/plugin/support-diagnostics/support-diagnostics.bat
 	
 	-h  This help message
 	-H  Elasticsearch hostname:port (defaults to localhost:9200)
