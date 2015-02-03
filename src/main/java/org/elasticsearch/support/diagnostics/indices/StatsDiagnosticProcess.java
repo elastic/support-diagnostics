@@ -37,6 +37,6 @@ class StatsDiagnosticProcess extends UnversionedHttpRequestDiagnosticProcess {
      */
     @Inject
     StatsDiagnosticProcess(HttpRequestFactory httpRequestFactory) {
-        super("_stats?pretty&human", "stats.json", httpRequestFactory);
+        super("_stats?all&pretty&human", "stats.json", httpRequestFactory);
     }
 }
