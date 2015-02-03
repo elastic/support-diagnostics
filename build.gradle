@@ -36,3 +36,10 @@ tasks.withType(Test) {
     it.key.startsWith("tests.")
   }
 }
+
+//pass args through, ex: gradle run -PappArgs="['-h']"
+run {
+    if ( project.hasProperty("appArgs") ) {
+        args Eval.me(appArgs)
+    }
+}

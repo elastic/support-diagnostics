@@ -34,6 +34,8 @@ public class IndicesModule extends AbstractModule {
     protected void configure() {
         Multibinder<DiagnosticProcess> multibinder = Multibinder.newSetBinder(binder(), DiagnosticProcess.class);
 
+	// _count
+	multibinder.addBinding().to(CountDiagnosticProcess.class);
         // _mapping
         multibinder.addBinding().to(MappingDiagnosticProcess.class);
         // _recovery?detailed

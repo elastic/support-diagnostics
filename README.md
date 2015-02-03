@@ -5,7 +5,8 @@ elasticsearch-support-diagnostics
 
 
 support-diagnostics is an elasticsearch plugin designed
-to assist users with gathering diagnostic data about their cluster and nodes.
+to assist users with gathering diagnostic data about their cluster and nodes. 
+Supports elasticsearch 1.0.0 and above.
 
 ### Installation:
 
@@ -15,7 +16,7 @@ to assist users with gathering diagnostic data about their cluster and nodes.
 ### Usage
 
 	Linux:	./bin/plugin/support-diagnostics/support-diagnostics
-	Windows: ./bin/plugin/support-diagnostics/support-diagnostics.bat
+	Windows: .\bin\plugin\support-diagnostics\support-diagnostics.bat
 	
 	-h  This help message
 	-H  Elasticsearch hostname:port (defaults to localhost:9200)

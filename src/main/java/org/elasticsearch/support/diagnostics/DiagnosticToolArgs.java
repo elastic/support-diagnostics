@@ -47,7 +47,7 @@ public interface DiagnosticToolArgs {
      * @return Never blank.
      */
     @Option(defaultValue = "localhost:9200",
-            description = "Elasticsearch hostname:port (defaults to localhost:9200)",
+            description = "Elasticsearch hostname:port .Defaults: localhost:9200 (optional)",
             exactly = 1,
             pattern = "\\S+:\\d{1,5}$",
             shortName = "H")
@@ -61,7 +61,7 @@ public interface DiagnosticToolArgs {
      * @return Never blank.
      */
     @Option(defaultValue = "_local",
-            description = "On a host with multiple nodes, specify the node name to gather data for. Value should match node.name as defined in elasticsearch.yml",
+            description = "On a host with multiple nodes, specify the node name to gather data for. Value should match node.name as defined in elasticsearch.yml (optional)",
             exactly = 1,
             pattern = ".+",
             shortName = "n")
@@ -78,8 +78,82 @@ public interface DiagnosticToolArgs {
      * @see Paths#get(String, String...)
      */
     @Option(defaultToNull = true,
-            description = "The optional output directory to use instead of './support-diagnostics.[hostname].[node].[timestamp]'",
+            description = "The optional output directory to use instead of './support-diagnostics.[hostname].[node].[timestamp]' (optional)",
             exactly = 1,
             shortName = "o")
     String getOutputDirectory();
+
+    /**
+     * Number of collection runs
+     * <p />
+     * Default: 1
+     * <p />
+     *
+     * @return Never blank.
+     */
+    @Option(defaultToNull = true,
+            description = "Number of times to collect stats. Default: 1 (optional)",
+	    pattern = "^[1-9][0-9]*$",
+            exactly = 1,
+            shortName = "r")
+    Integer getStatRuns();
+
+    /**
+     * Delay between interval runs
+     * <p />
+     * Default: 60
+     * <p />
+     *
+     * @return Never blank.
+     */
+    @Option(defaultToNull = true,
+            description = "Interval in seconds between stats collections. Default: 60. (optional)",
+	    pattern = "^[1-9][0-9]*$",
+            exactly = 1,
+            shortName = "i")
+    Integer getStatInterval();
+
+    /**
+     * Auth type
+     * <p />
+     * Default: null
+     * <p />
+     *
+     * @return Never blank.
+     */
+    @Option(defaultToNull = true,
+            description = "Authentication type. Either 'basic' or 'cookie'. Default: none. (optional)",
+            exactly = 1,
+            shortName = "a")
+    String getAuthType();
+
+
+    /**
+     * Auth creds
+     * <p />
+     * Default: null
+     * <p />
+     *
+     * @return Never blank.
+     */
+    @Option(defaultToNull = true,
+            description = "Authentication credentials. Either a path to the auth cookie file or the basic auth usename. You will be prompted for the password unless you specify -p. Default: none. (optional)",
+            exactly = 1,
+            shortName = "c")
+    String getAuthCreds();
+
+    /**
+     * Password for auth
+     * <p />
+     * Default: null
+     * <p />
+     *
+     * @return Never blank.
+     */
+    @Option(defaultToNull = true,
+            description = "Password for authentication. To be used with -c if having this script prompt for a password is undesiarable. Default: none. (optional)",
+            exactly = 1,
+            shortName = "a")
+    String getAuthPassword();
+
 }
