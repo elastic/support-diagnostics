@@ -79,7 +79,7 @@ fi
 
 #Check if user wants auth support
 curlCmd=''
-if [ $authType ] 
+if [ $authType ]
 then
 
     #Ensure valid auth type
@@ -111,10 +111,10 @@ then
 
     else
 	#not using cookie, so setup basic auth
-	
+
 
 	#check if user provided password via flag, if not prompt. This also captures -p with no value
-	if [ -z $password ] 
+	if [ -z $password ]
 	then
 	    printf "Enter authentication password (not displayed): "
 	    read -s password
@@ -288,6 +288,15 @@ $curlCmd -XGET "$eshost/_cluster/settings?pretty" >> $outputdir/cluster_settings
 echo "Getting _licenses"
 $curlCmd -XGET "$eshost/_licenses?pretty" >> $outputdir/licenses.json 2> /dev/null
 
+
+# Grab iptables rules.  Note this only grabs the filter tables.
+# If customers are doing any nat'ing we will need them to run
+# the extra commands (iptables/ip6tables -S -t nat) but we prob
+# don't need these for most issues.
+echo "Dumping any iptables rules"
+command -v iptables >/dev/null 2>&1 && iptables -S > $outputdir/iptables-rules.txt 2> /dev/null
+command -v ip6tables >/dev/null 2>&1 && ip6tables -S > $outputdir/ip6tables-rules.txt 2> /dev/null
+
 #grab stats
 #execute multiple times if $repeat is > 1
 i=1
@@ -384,6 +393,7 @@ while [ $i -le $repeat ]
                 echo "Sleeping $interval second(s)..."
                 sleep $interval
         fi
+
         i=$[i+1]
 done
 
