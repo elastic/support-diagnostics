@@ -256,6 +256,9 @@ preformRequest "$esHost/_settings?pretty" "$outputDir/settings.json"
 Write-Host 'Getting _cluster/settings'
 preformRequest "$esHost/_cluster/settings?pretty" "$outputDir/cluster_settings.json"
 
+Write-Host 'Getting _alias'
+preformRequest "$esHost/_alias?pretty" "$outputDir/alias.json"
+
 Write-Host 'Getting _licenses'
 preformRequest "$esHost/_licenses?pretty" "$outputDir/licenses.json"
 

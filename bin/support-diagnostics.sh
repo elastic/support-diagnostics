@@ -285,6 +285,9 @@ $curlCmd -XGET "$eshost/_settings?pretty" >> $outputdir/settings.json 2> /dev/nu
 echo "Getting _cluster/settings"
 $curlCmd -XGET "$eshost/_cluster/settings?pretty" >> $outputdir/cluster_settings.json 2> /dev/null
 
+echo "Getting _alias"
+$curlCmd -XGET "$eshost/_alias?pretty" >> $outputdir/alias.json 2> /dev/null
+
 echo "Getting _licenses"
 $curlCmd -XGET "$eshost/_licenses?pretty" >> $outputdir/licenses.json 2> /dev/null
 
