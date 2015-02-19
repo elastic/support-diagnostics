@@ -46,10 +46,10 @@ public interface DiagnosticToolArgs {
      *
      * @return Never blank.
      */
-    @Option(defaultValue = "localhost:9200",
-            description = "Elasticsearch hostname:port .Defaults: localhost:9200 (optional)",
+    @Option(defaultValue = "http://localhost:9200",
+            description = "Elasticsearch http(s)://hostname:port . Default: http://localhost:9200 (optional)",
             exactly = 1,
-            pattern = "\\S+:\\d{1,5}$",
+            pattern = "^http\\S+:\\d{1,5}$",
             shortName = "H")
     String getHostPort();
 
@@ -93,7 +93,7 @@ public interface DiagnosticToolArgs {
      */
     @Option(defaultToNull = true,
             description = "Number of times to collect stats. Default: 1 (optional)",
-	    pattern = "^[1-9][0-9]*$",
+	        pattern = "^[1-9][0-9]*$",
             exactly = 1,
             shortName = "r")
     Integer getStatRuns();
@@ -108,7 +108,7 @@ public interface DiagnosticToolArgs {
      */
     @Option(defaultToNull = true,
             description = "Interval in seconds between stats collections. Default: 60. (optional)",
-	    pattern = "^[1-9][0-9]*$",
+            pattern = "^[1-9][0-9]*$",
             exactly = 1,
             shortName = "i")
     Integer getStatInterval();
@@ -122,7 +122,8 @@ public interface DiagnosticToolArgs {
      * @return Never blank.
      */
     @Option(defaultToNull = true,
-            description = "Authentication type. Either 'basic' or 'cookie'. Default: none. (optional)",
+            description = "Authentication type. Enable authentication by specifying either 'basic' or 'cookie'. Default: none. (optional)",
+            pattern = "^basic|cookie$",
             exactly = 1,
             shortName = "a")
     String getAuthType();
@@ -153,7 +154,7 @@ public interface DiagnosticToolArgs {
     @Option(defaultToNull = true,
             description = "Password for authentication. To be used with -c if having this script prompt for a password is undesiarable. Default: none. (optional)",
             exactly = 1,
-            shortName = "a")
+            shortName = "p")
     String getAuthPassword();
 
 }

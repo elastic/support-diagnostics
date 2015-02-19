@@ -54,6 +54,8 @@ public class ClusterModule extends AbstractModule {
         multibinder.addBinding().to(WaitHotThreadsDiagnosticProcess.class);
         // _nodes/hot_threads?type=block
         multibinder.addBinding().to(BlockHotThreadsDiagnosticProcess.class);
+	// _licenses
+	multibinder.addBinding().to(LicensesDiagnosticProcess.class);
         // [root]
         multibinder.addBinding().to(VersionDiagnosticProcess.class);
     }

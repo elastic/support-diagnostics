@@ -34,18 +34,18 @@ import java.util.regex.Pattern;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * The {@code HostPortPreprocessor} takes the provided host:port from the command line arguments and verifies that they
- * work by extracting the Elasticsearch from the base response.
+ * The {@code AuthPreprocessor} takes the provided auth type from the command line arguments and preforms some
+ * some validation on
  */
-public class HostPortPreprocessor extends CommandLinePreprocessor {
+public class AuthPreprocessor extends CommandLinePreprocessor {
     /**
      * The key associated with the output directory's path.
      */
-    public static final String BASE_URL_STRING = HostPortPreprocessor.class.getName() + ".url";
+    public static final String BASE_URL_STRING = AuthPreprocessor.class.getName() + ".url";
     /**
      * The key associated with a boolean flag indicating whether the directory was created by this process.
      */
-    public static final String VERSION_STRING = HostPortPreprocessor.class.getName() + ".version";
+    public static final String VERSION_STRING = AuthPreprocessor.class.getName() + ".version";
 
     /**
      * Extracts the version number from the default GET response from "http://host:port/" to Elasticsearch.
@@ -59,14 +59,14 @@ public class HostPortPreprocessor extends CommandLinePreprocessor {
     private final HttpRequestFactory factory;
 
     /**
-     * Create a new {@link HostPortPreprocessor}.
+     * Create a new {@link AuthPreprocessor}.
      *
      * @param args Parsed command line arguments.
      * @param factory The HTTP Request factory used for confirming the URL
      * @throws NullPointerException if any parameter are {@code null}
      */
     @Inject
-    HostPortPreprocessor(DiagnosticToolArgs args, HttpRequestFactory factory) {
+    AuthPreprocessor(DiagnosticToolArgs args, HttpRequestFactory factory) {
         super(args);
 
         // required
@@ -80,7 +80,7 @@ public class HostPortPreprocessor extends CommandLinePreprocessor {
     public ImmutableMap<String, String> run(ImmutableMap<String, String> settings) {
 
         //We cannot assume what the protocol will be, so the user must pass it
-        String baseUrl = args.getHostPort() + "/";
+        String baseUrl =  args.getHostPort() + "/";
 
         // version is parsed from the response of the baseUrl
         String version;
