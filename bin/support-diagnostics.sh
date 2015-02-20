@@ -24,7 +24,7 @@ do
         -h | --h | --help)  cat <<EOM
 support-diagnostics.sh
 
-This script is used to gather diagnotistic information for elasticsearch support.
+This script is used to gather diagnostics information for elasticsearch support.
 In order to gather the elasticsearch config and logs you must run this on a node within your elasticsearch cluster.
 
   -h  This help message
@@ -102,7 +102,7 @@ then
 
 	if [ ! -r $authCreds ]
 	then
-	    printf "Authetication cookie '$authCreds' is not readable or does not exist\n\n"
+	    printf "Authentication cookie '$authCreds' is not readable or does not exist\n\n"
 	    exit 1
 	fi
 
