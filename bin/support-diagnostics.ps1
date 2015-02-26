@@ -286,7 +286,7 @@ while($n -le $repeat) {
         preformRequest "$esHost/_nodes/?all&pretty&human" "$outputDir/nodes.$timestamp.json"
 
         Write-Host 'Getting _nodes/hot_threads'
-        preformRequest "$esHost/_nodes/hot_threads?threads=10" "$outputDir/nodes_hot_threads.$timestamp.txt"
+        preformRequest "$esHost/_nodes/hot_threads?threads=10000" "$outputDir/nodes_hot_threads.$timestamp.txt"
 
         # API calls that only work with 0.90
         If ($esVersion.StartsWith("0.9")) {
