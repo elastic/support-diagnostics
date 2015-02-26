@@ -39,6 +39,6 @@ class CpuHotThreadsDiagnosticProcess extends UnversionedHttpRequestDiagnosticPro
     @Inject
     CpuHotThreadsDiagnosticProcess(HttpRequestFactory httpRequestFactory) {
         super("_nodes/hot_threads?type=cpu", "nodes_hot_threads_cpu.txt", httpRequestFactory,
-              "_nodes/hot_threads?threads=10&type=cpu");
+              "_nodes/hot_threads?threads=10000&type=cpu");
     }
 }

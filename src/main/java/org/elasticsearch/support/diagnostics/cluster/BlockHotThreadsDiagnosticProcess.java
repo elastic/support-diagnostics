@@ -39,6 +39,6 @@ class BlockHotThreadsDiagnosticProcess extends UnversionedHttpRequestDiagnosticP
     @Inject
     BlockHotThreadsDiagnosticProcess(HttpRequestFactory httpRequestFactory) {
         super("_nodes/hot_threads?type=block", "nodes_hot_threads_block.txt", httpRequestFactory,
-              "_nodes/hot_threads?threads=10&type=block");
+              "_nodes/hot_threads?threads=10000&type=block");
     }
 }

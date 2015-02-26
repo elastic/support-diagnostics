@@ -39,6 +39,6 @@ class WaitHotThreadsDiagnosticProcess extends UnversionedHttpRequestDiagnosticPr
     @Inject
     WaitHotThreadsDiagnosticProcess(HttpRequestFactory httpRequestFactory) {
         super("_nodes/hot_threads?type=wait", "nodes_hot_threads_wait.txt", httpRequestFactory,
-              "_nodes/hot_threads?threads=10&type=wait");
+              "_nodes/hot_threads?threads=10000&type=wait");
     }
 }
