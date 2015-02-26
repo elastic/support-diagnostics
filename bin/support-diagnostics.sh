@@ -315,7 +315,7 @@ while [ $i -le $repeat ]
         $curlCmd -XGET "$eshost/_nodes/?all&pretty&human" >> $outputdir/nodes.$timestamp.json 2> /dev/null
 
         echo "Getting _nodes/hot_threads"
-        $curlCmd -XGET "$eshost/_nodes/hot_threads?threads=10" >> $outputdir/nodes_hot_threads.$timestamp.txt 2> /dev/null
+        $curlCmd -XGET "$eshost/_nodes/hot_threads?threads=10000" >> $outputdir/nodes_hot_threads.$timestamp.txt 2> /dev/null
 
 
         #api calls that only work with 0.90
