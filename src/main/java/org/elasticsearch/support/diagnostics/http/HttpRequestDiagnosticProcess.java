@@ -233,7 +233,9 @@ public abstract class HttpRequestDiagnosticProcess extends AbstractDiagnosticPro
                 message.append("Ensure that this machine can see the specified host/URL.");
             }
 
-            throw rethrowableException(outputFile, message.toString(), e);
+            //don't throw an error unless the user has debuggin enabled. some apis won't exist if certain plugins are not installed.
+            LOGGER.debug(message.toString(), e);
+
         }
     }
 }
