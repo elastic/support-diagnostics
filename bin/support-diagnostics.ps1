@@ -259,6 +259,9 @@ preformRequest "$esHost/_cluster/settings?pretty" "$outputDir/cluster_settings.j
 Write-Host 'Getting _licenses'
 preformRequest "$esHost/_licenses?pretty" "$outputDir/licenses.json"
 
+Write-Host 'Getting _licenses'
+preformRequest "$esHost/_segments?pretty&human" "$outputDir/segments.json"
+
 #grab stats
 #execute multiple times if $repeat is > 1
 [int]$n=1

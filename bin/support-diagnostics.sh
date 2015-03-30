@@ -288,6 +288,9 @@ $curlCmd -XGET "$eshost/_cluster/settings?pretty" >> $outputdir/cluster_settings
 echo "Getting _licenses"
 $curlCmd -XGET "$eshost/_licenses?pretty" >> $outputdir/licenses.json 2> /dev/null
 
+echo "Getting _segments"
+$curlCmd -XGET "$eshost/_segments?pretty&human" >> $outputdir/segments.json 2> /dev/null
+
 #grab stats
 #execute multiple times if $repeat is > 1
 i=1
