@@ -138,7 +138,7 @@ public interface DiagnosticToolArgs {
      * @return Never blank.
      */
     @Option(defaultToNull = true,
-            description = "Authentication credentials. Either a path to the auth cookie file or the basic auth usename. You will be prompted for the password unless you specify -p. Default: none. (optional)",
+            description = "Authentication credentials. Either a path to the auth cookie file or the basic auth username. You will be prompted for the password unless you specify -p. Default: none. (optional)",
             exactly = 1,
             shortName = "c")
     String getAuthCreds();

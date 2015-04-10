@@ -26,8 +26,8 @@ import org.elasticsearch.support.diagnostics.http.VersionedHttpRequestDiagnostic
 import org.elasticsearch.support.diagnostics.settings.Version;
 
 /**
- * {@code AliasDiagnosticProcess} performs a request to <code>{baseUrl}/_cat/aliases?v</code> and writes to
- * <code>"cat_aliases.txt"</code>.
+ * {@code AliasDiagnosticProcess} performs a request to <code>{baseUrl}/_alias?pretty</code> and writes to
+ * <code>"alias.json"</code>.
  * <p />
  * The <code>_cat/aliases</code> API was not added until Elasticsearch 1.0.0.
  */
@@ -38,6 +38,6 @@ class AliasDiagnosticProcess extends VersionedHttpRequestDiagnosticProcess {
      */
     @Inject
     AliasDiagnosticProcess(HttpRequestFactory httpRequestFactory) {
-        super("_cat/aliases?v", "cat_aliases.txt", httpRequestFactory, Version.VERSION_1_0, null);
+        super("_alias?pretty", "alias.json", httpRequestFactory, Version.VERSION_1_0, null);
     }
 }
