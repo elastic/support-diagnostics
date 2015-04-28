@@ -280,6 +280,16 @@ fi
 echo "Running ps"
 ps -ef | grep elasticsearch >> $outputdir/elasticsearch-process.txt
 
+echo "Collecting OS information"
+uname -a >> $outputdir/uname.txt
+df -h && df -ih >> $outputdir/df.txt
+mount >> $outputdir/mount.txt
+if [ "$(uname)" == "Darwin" ]; then
+  exit
+elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+    free -m >> $outputdir/free_memory.txt
+fi
+ifconfig -a >> $outputdir/ifconfig.txt
 
 echo "Output complete.  Creating tarball."
 tarfile=$outputdir.tar
