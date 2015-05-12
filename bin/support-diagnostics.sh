@@ -9,6 +9,12 @@
 # - Collect JVM stats
 # - Add facility to automatically post to ZD or S3
 
+log() {
+    local _msg=$*
+    echo "$_msg"
+    echo "$_msg" >> "$output_log"
+}
+
 timestamp=$(date +"%Y%m%d-%H%M%S")
 
 # set defaults
@@ -71,28 +77,30 @@ then
     exit 1
 fi
 
+output_log=${outputdir}/support-diagnostics.log
+
 if [ $repeat -le 0 ]
 then
-	prinf "Repeat option (-r) must be a positive interger greater then 0\n\n"
+	log "Repeat option (-r) must be a positive interger greater then 0"
 	exit 1
 fi
 
 #Check if user wants auth support
 curlCmd=''
-if [ $authType ] 
+if [ $authType ]
 then
 
     #Ensure valid auth type
     if [ $authType != "basic" ] &&  [ $authType != "cookie" ]
     then
-	printf "Authentication type must be either cookie or basic\n\n"
+	log "Authentication type must be either cookie or basic"
 	exit 1
     fi
 
     #ensure auth creds (user or cookie) are passed
     if [ -z $authCreds ]
     then
-	printf "Authentication credentials must be used when -a is passed. See --help\n\n"
+	log "Authentication credentials must be used when -a is passed. See --help"
 	exit 1
     fi
 
@@ -102,7 +110,7 @@ then
 
 	if [ ! -r $authCreds ]
 	then
-	    printf "Authentication cookie '$authCreds' is not readable or does not exist\n\n"
+	    log "Authentication cookie '$authCreds' is not readable or does not exist"
 	    exit 1
 	fi
 
@@ -111,10 +119,10 @@ then
 
     else
 	#not using cookie, so setup basic auth
-	
+
 
 	#check if user provided password via flag, if not prompt. This also captures -p with no value
-	if [ -z $password ] 
+	if [ -z $password ]
 	then
 	    printf "Enter authentication password (not displayed): "
 	    read -s password
@@ -129,7 +137,7 @@ then
 
 	if [ $authCheck -ne 0 ]
 	then
-	    printf "Authentication failed: \n$authStatus\n\n"
+	    log "Authentication failed:" && log "$authStatus"
 	    exit 1;
 	fi
     fi
@@ -158,13 +166,13 @@ while [ -h "$SCRIPT" ] ; do
     fi
 done
 
-echo "Getting your configuration from the elasticsearch API"
+log "Getting your configuration from the elasticsearch API"
 
 #ensure we can connect to the host, or exit as there is nothing more we can do
 connectionTest=`$curlCmd -s -S -XGET $eshost 2>&1`
 if [ $? -ne 0 ]
 then
-    echo "Error connecting to $eshost: $connectionTest"
+    log "Error connecting to $eshost: $connectionTest"
 #   DON'T DELETE THE OUTPUT DIR!  IT MIGHT BE / or /opt!
 #   rmdir $outputdir
     exit 1
@@ -174,7 +182,7 @@ fi
 nodenameStatus=$($curlCmd -s -S -XGET "$eshost/_nodes/$targetNode/settings?pretty" |grep -q '"nodes" : { }'; echo $?)
 if [ $nodenameStatus -eq 0 ]
 then
-    printf "\n\nThe host and node name (\"$eshost\" and \"$targetNode\") does not appear to be connected to your cluster. This script will continue, however without gathering the log files or elasticsearch.yml\n\n"
+    log "The host and node name (\"$eshost\" and \"$targetNode\") does not appear to be connected to your cluster. This script will continue, however without gathering the log files or elasticsearch.yml"
 fi
 
 #get the es version
@@ -186,7 +194,7 @@ homeType='home'
 
 #the api changes between 0.90 and 1.x
 if [[ $esVersion =~ 0.90.* ]]; then
-    echo "Detected a pre 1.x version of elasticsearch"
+    log "Detected a pre 1.x version of elasticsearch"
     configType='path.conf'
     pathType='"path.home" : "'
     logType='path.logs'
@@ -229,7 +237,7 @@ then
         #get just the config including full path
         esConfigPath=$(echo $localNodeConfig | sed -e "s/\"$configType\" : \"//" -e 's/"//')
 
-        echo "Getting config"
+        log "Getting config"
         cpStatus=-1
 
         #Check if the config directory we found exists
@@ -252,19 +260,19 @@ then
         #We couldn't find the config.
         if [ $cpStatus != 0 ]
         then
-            printf "\nERROR: Could not get your elasticsearch config. Please add your elasticsearch config directory to the $outputdir.tar or to your ticket\n\n"
+            log "ERROR: Could not get your elasticsearch config. Please add your elasticsearch config directory to the $outputdir.tar or to your ticket"
         fi
 
-        echo "Getting logs"
+        log "Getting logs"
         mkdir $outputdir/logs
         cp $esLogsPath/*.log $outputdir/logs/
 
     else
-        printf "\nERROR: Could not determine config directory location from api. Please add your config directory to the $outputdir.tar or to your ticket\n\n"
+        log "ERROR: Could not determine config directory location from api. Please add your config directory to the $outputdir.tar or to your ticket"
     fi
 
 else
-    printf "\nERROR: Could not determine elasticsearch paths location from api. Please add your elasticsearch config and log directories to the $outputdir.tar or to your ticket\n\n"
+    log "ERROR: Could not determine elasticsearch paths location from api. Please add your elasticsearch config and log directories to the $outputdir.tar or to your ticket"
 fi
 
 
@@ -272,26 +280,26 @@ fi
 #api calls that work with all versions
 
 #grab settings
-echo "Collecting version, mappings, settings"
-echo "Getting version"
+log "Collecting version, mappings, settings"
+log "Getting version"
 $curlCmd -XGET "$eshost" >> $outputdir/version.json 2> /dev/null
 
-echo "Getting _mapping"
+log "Getting _mapping"
 $curlCmd -XGET "$eshost/_mapping?pretty" >> $outputdir/mapping.json 2> /dev/null
 
-echo "Getting _settings"
+log "Getting _settings"
 $curlCmd -XGET "$eshost/_settings?pretty" >> $outputdir/settings.json 2> /dev/null
 
-echo "Getting _cluster/settings"
+log "Getting _cluster/settings"
 $curlCmd -XGET "$eshost/_cluster/settings?pretty" >> $outputdir/cluster_settings.json 2> /dev/null
 
-echo "Getting _alias"
+log "Getting _alias"
 $curlCmd -XGET "$eshost/_alias?pretty" >> $outputdir/alias.json 2> /dev/null
 
-echo "Getting _licenses"
+log "Getting _licenses"
 $curlCmd -XGET "$eshost/_licenses?pretty" >> $outputdir/licenses.json 2> /dev/null
 
-echo "Getting _segments"
+log "Getting _segments"
 $curlCmd -XGET "$eshost/_segments?pretty&human" >> $outputdir/segments.json 2> /dev/null
 
 #grab stats
@@ -299,111 +307,111 @@ $curlCmd -XGET "$eshost/_segments?pretty&human" >> $outputdir/segments.json 2> /
 i=1
 while [ $i -le $repeat ]
     do
-        echo "Collecting stats $i/$repeat"
+        log "Collecting stats $i/$repeat"
 
         timestamp=`date  +%Y%m%d-%H%M%S`
-        echo "Getting _cluster/state"
+        log "Getting _cluster/state"
         $curlCmd -XGET "$eshost/_cluster/state?pretty" >> $outputdir/cluster_state.$timestamp.json 2> /dev/null
 
-        echo "Getting _cluster/stats"
+        log "Getting _cluster/stats"
         $curlCmd -XGET "$eshost/_cluster/stats?pretty&human" >> $outputdir/cluster_stats.$timestamp.json 2> /dev/null
 
-        echo "Getting _cluster/health"
+        log "Getting _cluster/health"
         $curlCmd -XGET "$eshost/_cluster/health?pretty" >> $outputdir/cluster_health.$timestamp.json 2> /dev/null
 
-        echo "Getting _cluster/pending_tasks"
+        log "Getting _cluster/pending_tasks"
         $curlCmd -XGET "$eshost/_cluster/pending_tasks?pretty&human" >> $outputdir/cluster_pending_tasks.$timestamp.json 2> /dev/null
 
-        echo "Getting _count"
+        log "Getting _count"
         $curlCmd -XGET "$eshost/_count?pretty" >> $outputdir/count.$timestamp.json 2> /dev/null
 
-        echo "Getting nodes info"
+        log "Getting nodes info"
         $curlCmd -XGET "$eshost/_nodes/?all&pretty&human" >> $outputdir/nodes.$timestamp.json 2> /dev/null
 
-        echo "Getting _nodes/hot_threads"
+        log "Getting _nodes/hot_threads"
         $curlCmd -XGET "$eshost/_nodes/hot_threads?threads=10000" >> $outputdir/nodes_hot_threads.$timestamp.txt 2> /dev/null
 
 
         #api calls that only work with 0.90
         if [[ $esVersion =~ 0.90.* ]]; then
-            echo "Getting _nodes/stats"
+            log "Getting _nodes/stats"
             $curlCmd -XGET "$eshost/_nodes/stats?all&pretty&human" >> $outputdir/nodes_stats.$timestamp.json 2> /dev/null
 
-            echo "Getting indices stats"
+            log "Getting indices stats"
             $curlCmd -XGET "$eshost/_stats?all&pretty&human" >> $outputdir/indices_stats.$timestamp.json 2> /dev/null
 
         #api calls that only work with 1.0+
         else
-            echo "Getting _nodes/stats"
+            log "Getting _nodes/stats"
             $curlCmd -XGET "$eshost/_nodes/stats?pretty&human" >> $outputdir/nodes_stats.$timestamp.json 2> /dev/null
 
-            echo "Getting indices stats"
+            log "Getting indices stats"
             $curlCmd -XGET "$eshost/_stats?pretty&human" >> $outputdir/indices_stats.$timestamp.json 2> /dev/null
 
-            echo "Getting _cat/allocation"
+            log "Getting _cat/allocation"
             $curlCmd -XGET "$eshost/_cat/allocation?v" >> $outputdir/allocation.$timestamp.txt 2> /dev/null
 
-            echo "Getting _cat/plugins"
+            log "Getting _cat/plugins"
             $curlCmd -XGET "$eshost/_cat/plugins?v" >> $outputdir/plugins.$timestamp.txt 2> /dev/null
 
-            echo "Getting _cat/shards"
+            log "Getting _cat/shards"
             $curlCmd -XGET "$eshost/_cat/shards?v" >> $outputdir/cat_shards.$timestamp.txt 2> /dev/null
 
             #api calls that only work with 1.1+
             if [[ ! $esVersion =~ 1.0.* ]]; then
-                echo "Getting _recovery"
+                log "Getting _recovery"
                 $curlCmd -XGET "$eshost/_recovery?detailed&pretty&human" >> $outputdir/recovery.$timestamp.json 2> /dev/null
             #api calls that only work with 1.0
             else
-                echo "Getting _cat/recovery"
+                log "Getting _cat/recovery"
                 $curlCmd -XGET "$eshost/_cat/recovery?v" >> $outputdir/cat_recovery.$timestamp.txt 2> /dev/null
             fi
         fi
 
 
-        echo "Running netstat"
+        log "Running netstat"
         if [ "$(uname)" == "Darwin" ]; then
             netstat -an >> $outputdir/netstat.$timestamp.txt
         elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
             netstat -anp >> $outputdir/netstat.$timestamp.txt
         fi
 
-        echo "Running top"
+        log "Running top"
         if [ "$(uname)" == "Darwin" ]; then
             top -l 1 >> $outputdir/top.$timestamp.txt
         elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
             top -b -n1 >> $outputdir/top.$timestamp.txt
         fi
 
-        echo "Running top with threads (Linux only)"
+        log "Running top with threads (Linux only)"
         if [ "$(uname)" == "Darwin" ]; then
-            echo "This is a Mac.  Not running top -H."
+            log "This is a Mac.  Not running top -H."
         elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
             top -b -n1 -H >> $outputdir/top_threads.$timestamp.txt
         fi
 
-        echo "Running ps"
+        log "Running ps"
         ps -ef | grep elasticsearch >> $outputdir/elasticsearch-process.$timestamp.txt
 
         if [ $i -lt $repeat ]
             then
-                echo "Sleeping $interval second(s)..."
+                log "Sleeping $interval second(s)..."
                 sleep $interval
         fi
         i=$[i+1]
 done
 
 
-echo "Output complete.  Creating tarball."
+log "Output complete.  Creating tarball."
 tarfile=$outputdir.tar
 
-command -v tar >/dev/null 2>&1 || { printf "tar is not installed, cannot package the gathered data. Please manually create an archive of $outputdir\n"; exit 1; }
+command -v tar >/dev/null 2>&1 || { log "tar is not installed, cannot package the gathered data. Please manually create an archive of $outputdir"; exit 1; }
 tar cf $tarfile $outputdir/*
 if [ ! $nocompression ]; then
     gzip $tarfile
-    printf "\nDone. Created $outputdir.tar.gz\n\n"
+    log "Done. Created $outputdir.tar.gz"
 else
-    printf "\nDone. Created $outputdir.tar\n\n"
+    log "Done. Created $outputdir.tar"
 
 fi
 #rm -rf $outputdir
