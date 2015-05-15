@@ -16,6 +16,7 @@ eshost="localhost:9200"
 targetNode='_local'
 repeat=1
 interval=60
+curlTimeout=30
 
 # pick up command line options
 while [ $# -gt 0 ]
@@ -37,6 +38,7 @@ In order to gather the elasticsearch config and logs you must run this on a node
   -a  Authentication type. Either 'basic' or 'cookie' (optional)
   -c  Authentication credentials. Either a path to the auth cookie file or the basic auth usename. You will be prompted for the password unless you specify -p.
   -p  Password for authentication. To be used with -c if having this script prompt for a password is undesiarable.
+  -t  Amount of time to wait for a REST API call (with curl) to return before cancelling.
 
 EOM
             exit 1;;
@@ -49,6 +51,7 @@ EOM
 	-a)  authType=$2;;
 	-c)  authCreds=$2;;
 	-p)  password=$2;;
+        -t)  curlTimeout=$2;;
 
     esac
     shift
@@ -79,7 +82,7 @@ fi
 
 #Check if user wants auth support
 curlCmd=''
-if [ $authType ] 
+if [ $authType ]
 then
 
     #Ensure valid auth type
@@ -111,10 +114,10 @@ then
 
     else
 	#not using cookie, so setup basic auth
-	
+
 
 	#check if user provided password via flag, if not prompt. This also captures -p with no value
-	if [ -z $password ] 
+	if [ -z $password ]
 	then
 	    printf "Enter authentication password (not displayed): "
 	    read -s password
@@ -142,6 +145,9 @@ else
 
 fi
 
+# Add --max-time curl parameter
+curlCmd="${curlCmd} --max-time ${curlTimeout}"
+
 # Cribbed from ES startup script.  Only works if we place this script in the elasticsearch/bin
 CDPATH=""
 SCRIPT="$0"
@@ -161,7 +167,7 @@ done
 echo "Getting your configuration from the elasticsearch API"
 
 #ensure we can connect to the host, or exit as there is nothing more we can do
-connectionTest=`$curlCmd -s -S -XGET $eshost 2>&1`
+connectionTest=`$curlCmd -XGET $eshost 2>&1`
 if [ $? -ne 0 ]
 then
     echo "Error connecting to $eshost: $connectionTest"
@@ -171,14 +177,14 @@ then
 fi
 
 #run a sanity check of the nodename by ensuring we get data back on that node
-nodenameStatus=$($curlCmd -s -S -XGET "$eshost/_nodes/$targetNode/settings?pretty" |grep -q '"nodes" : { }'; echo $?)
+nodenameStatus=$($curlCmd -XGET "$eshost/_nodes/$targetNode/settings?pretty" |grep -q '"nodes" : { }'; echo $?)
 if [ $nodenameStatus -eq 0 ]
 then
     printf "\n\nThe host and node name (\"$eshost\" and \"$targetNode\") does not appear to be connected to your cluster. This script will continue, however without gathering the log files or elasticsearch.yml\n\n"
 fi
 
 #get the es version
-esVersion=$($curlCmd -s -S -XGET "$eshost/" |grep  '"number" : "'| sed -e 's/"number" : "//' -e 's/"//' )
+esVersion=$($curlCmd -XGET "$eshost/" |grep  '"number" : "'| sed -e 's/"number" : "//' -e 's/"//' )
 configType='conf'
 pathType='"path" : {'
 logType='logs'
@@ -196,9 +202,9 @@ fi
 #Get the desired node's settings and clean it up a bit
 #if this is osx, then drop the -m1 from the grep as grep on osx does not work with -A.
 if [ "$(uname)" == "Darwin" ]; then
-    localNodePaths=$($curlCmd -s -S -XGET "$eshost/_nodes/$targetNode/settings?pretty" |grep -A7  "$pathType" | sed 's/"//g')
+    localNodePaths=$($curlCmd -XGET "$eshost/_nodes/$targetNode/settings?pretty" |grep -A7  "$pathType" | sed 's/"//g')
 else
-    localNodePaths=$($curlCmd -s -S -XGET "$eshost/_nodes/$targetNode/settings?pretty" |grep -m1 -A7 "$pathType" | sed 's/"//g')
+    localNodePaths=$($curlCmd -XGET "$eshost/_nodes/$targetNode/settings?pretty" |grep -m1 -A7 "$pathType" | sed 's/"//g')
 fi
 
 #Figure out of the above curl succeeded
@@ -221,7 +227,7 @@ then
     done <<<"$localNodePaths"
 
     #Grab yml location from the API
-    localNodeConfig=$($curlCmd -s -S -XGET "$eshost/_nodes/$targetNode/settings?pretty" | grep -m1 -ohE "\"$configType\" : \".*?\"")
+    localNodeConfig=$($curlCmd -XGET "$eshost/_nodes/$targetNode/settings?pretty" | grep -m1 -ohE "\"$configType\" : \".*?\"")
 
     #Ensure the above curl succeeded
     if [ $(echo $localNodeConfig |grep -q "\"$configType\" : \""; echo $?) -eq 0 ]
