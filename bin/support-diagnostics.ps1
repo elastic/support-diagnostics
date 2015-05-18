@@ -21,6 +21,8 @@
     Authentication credentials. Either a path to the auth cookie file or the basic auth usename. You will be prompted for the password unless you specify -p.
 .PARAMETER p
     Password for authentication. To be used with -A if having this script prompt for a password is undesiarable.
+.PARAMETER t
+	Max time (in seconds) before a Invoke-Webrequest call to Elasticsearch will timeout.
 #>
 
 Param(
@@ -32,7 +34,8 @@ Param(
 	[int]$i,
 	[string]$A,
 	[string]$c,
-	[string]$p
+	[string]$p,
+	[int]$t
 )
 
 # Set defaults
@@ -42,6 +45,7 @@ $outputDir = $o
 $targetNode = '_local'
 $repeat = 1
 $interval = 60
+$timeout = 30
 
 If ($H) {
     $esHostPort = $H
@@ -63,6 +67,10 @@ If ($r) {
 
 If ($i) {
 	$interval = $i
+}
+
+If ($t) {
+	$timeout = 30
 }
 
 $esHost = $esHostPort
@@ -126,7 +134,7 @@ public class TrustAllCertsPolicy : ICertificatePolicy {
 		[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
 
 		#test connection
-		$connectionTest = Invoke-WebRequest -Headers $authHeader -Uri $esHostPort
+		$connectionTest = Invoke-WebRequest -TimeoutSec $timeout -Headers $authHeader -Uri $esHostPort
 		If ($connectionTest.StatusCode -ne 200) {
 			Write-Host Error connecting to $esHost
 			Exit
@@ -134,7 +142,7 @@ public class TrustAllCertsPolicy : ICertificatePolicy {
 
 		Write-Host 'Getting your configuration from the elasticsearch API'
 
-		$nodenameStatus = (Invoke-WebRequest -Headers $authHeader -Uri $esHost/_nodes/$targetNode/settings?pretty).RawContent | Select-String '"nodes" : { }'
+		$nodenameStatus = (Invoke-WebRequest -TimeoutSec $timeout -Headers $authHeader -Uri $esHost/_nodes/$targetNode/settings?pretty).RawContent | Select-String '"nodes" : { }'
 		If ($nodenameStatus) {
 			Write-Host `n`nThe host and node name (\"$esHostPort\" and \"$targetNode\") does not appear to be connected to your cluster.  This script will continue, however without gathering the log files or elasticsearch.yml`n`n
 		}
@@ -148,7 +156,7 @@ public class TrustAllCertsPolicy : ICertificatePolicy {
 }
 Else {
 	#not using authentication
-	$connectionTest = Invoke-WebRequest -Uri $esHostPort
+	$connectionTest = Invoke-WebRequest -TimeoutSec $timeout -Uri $esHostPort
 	If ($connectionTest.StatusCode -ne 200) {
 		Write-Host Error connecting to $esHost
 		Exit
@@ -156,7 +164,7 @@ Else {
 
 	Write-Host 'Getting your configuration from the elasticsearch API'
 
-	$nodenameStatus = (Invoke-WebRequest -Uri $esHost/_nodes/$targetNode/settings?pretty).RawContent | Select-String '"nodes" : { }'
+	$nodenameStatus = (Invoke-WebRequest -TimeoutSec $timeout -Uri $esHost/_nodes/$targetNode/settings?pretty).RawContent | Select-String '"nodes" : { }'
 	If ($nodenameStatus) {
 		Write-Host `n`nThe host and node name (\"$esHostPort\" and \"$targetNode\") does not appear to be connected to your cluster.  This script will continue, however without gathering the log files or elasticsearch.yml`n`n
 	}
@@ -177,18 +185,18 @@ Function preformRequest ($uri, $dstFile)
 	If ($a) {
 
 		If ($a -eq 'cookie') {
-			Invoke-WebRequest -Uri $uri -OutFile $dstFile
+			Invoke-WebRequest -TimeoutSec $timeout -Uri $uri -OutFile $dstFile
 		}
 		#not using cookie, so setup basic auth
 		Else
 		{
-			Invoke-WebRequest -Headers $authHeader -Uri $uri -OutFile $dstFile
+			Invoke-WebRequest -TimeoutSec $timeout -Headers $authHeader -Uri $uri -OutFile $dstFile
 		}
 	}
 
 	#not using authentication, preform normal request
 	Else {
-		Invoke-WebRequest -Uri $uri -OutFile $dstFile
+		Invoke-WebRequest -TimeoutSec $timeout -Uri $uri -OutFile $dstFile
 	}
 
 }
