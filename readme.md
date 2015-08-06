@@ -35,7 +35,7 @@ The diagnostic application performs three functions.  First it will execute a se
 * The application will create a zipped archive file containing a collection of statistics acquired from the cluster and any specific logging or configuration information for the nodes(s) residing on the host from which it is run.
 * When you are authenticating via Shield specify the user id and use one of the password flags: -p --password, --pwd.  Do not specify the password on the command line. You will receive a prompt to enter it after you hit the enter key and the entered text will be hidden.
 * HTTPS connections are enabled using the -s, --ssl, or --https flags.  As with the password, use the option alone with no content.
-* The commands used to retrieve the cluster stats are contained in the stats.yml in the installation directory.  If you wish to modify these commands simply customize the settings to your needs.
+* The commands used to retrieve the cluster stats are contained in the diags.yml in the installation directory.  If you wish to modify these commands simply customize the settings to your needs.
 * Logback is used for logging, and the configuration is contained in the logback.xml file in the installation directory.  If you wish to modify these commands simply customize the settings to your needs.
 * Unless the log file is modified to change the output file, detailed logging and diagnostics will be written to <user home>/es-diags/logs/stats.log.
 
