@@ -8,7 +8,7 @@
     <fileSets>
 
         <fileSet>
-            <directory>${project.basedir}/bin</directory>
+            <directory>${project.basedir}/scripts</directory>
             <outputDirectory>.</outputDirectory>
             <includes>
                 <include>*</include>
