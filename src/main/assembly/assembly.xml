@@ -1,0 +1,35 @@
+<assembly>
+    <id>dist</id>
+    <!-- Specifies that our binary distribution is a zip package -->
+    <formats>
+        <format>zip</format>
+    </formats>
+
+    <fileSets>
+
+        <fileSet>
+            <directory>${project.basedir}/bin</directory>
+            <outputDirectory>.</outputDirectory>
+            <includes>
+                <include>*</include>
+            </includes>
+        </fileSet>
+
+        <fileSet>
+            <directory>${project.basedir}/src/main/resources</directory>
+            <outputDirectory>.</outputDirectory>
+            <includes>
+                <include>*</include>
+            </includes>
+        </fileSet>
+
+        <fileSet>
+            <directory>${project.build.directory}</directory>
+            <outputDirectory>.</outputDirectory>
+            <includes>
+                <include>support-diagnostics.jar</include>
+            </includes>
+        </fileSet>
+
+    </fileSets>
+</assembly>

@@ -1,0 +1,45 @@
+# REST timeout settings - note:values are in milliseconds
+requestTimeout: 30000
+connectTimeout: 30000
+
+textFileExtensions:
+  - allocation
+  - cat_shards
+  - nodes_hot_threads
+  - plugins
+
+restQueries:
+  alias: "_alias?pretty"
+  allocation: "_cat/allocation?v"
+  cat_shards: "_cat/shards"
+  cluster_health: "_cluster/health?pretty"
+  cluster_pending_tasks: "_cluster/pending_tasks?pretty&amp;human"
+  cluster_settings: "_cluster/settings?pretty"
+  cluster_state: "_cluster/state?pretty"
+  cluster_stats: "_cluster/stats?pretty&amp;human"
+  count: "_count?pretty"
+  indices_stats: "_stats?pretty&amp;human"
+  licenses: "_licenses?pretty"
+  mapping: "_mapping?pretty"
+  nodes_hot_threads: "_nodes/hot_threads?threads=10000"
+  nodes_stats: "_nodes/stats?pretty&amp;human"
+  nodes: "_nodes/?all&amp;pretty&amp;human"
+  plugins: "_cat/plugins?v"
+  recovery: "_cat/recovery?v"
+  segments: "_segments?pretty&amp;human"
+  settings: "_settings?pretty"
+
+linuxOS:
+  top: "top -b -n1"
+  netstat: netstat -an"
+  ps: "ps -ef"
+  top_threads: "top -b -n1 -H"
+
+macOS:
+  top: "top -l 1"
+  netstat: "netstat -an"
+  ps: "ps -ef"
+
+winOS:
+  ps: "tasklist /v"
+  netstat: "netstat -ano"
