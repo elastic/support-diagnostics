@@ -436,7 +436,7 @@ public class DiagnosticService {
         InputStream is;
         try {
             is = this.getClass().getClassLoader().getResourceAsStream("diags.yml");
-            return SystemUtils.readUYaml(is, true);
+            return SystemUtils.readYaml(is, true);
 
         } catch (Exception e) {
             logger.error("Error retriving configuration", e);

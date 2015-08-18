@@ -111,7 +111,7 @@ public class SystemUtils {
         }
     }
 
-    public static Map readUYaml(InputStream inputStream, boolean isBlock){
+    public static Map readYaml(InputStream inputStream, boolean isBlock){
         Map doc = new LinkedHashMap();
 
         try{
