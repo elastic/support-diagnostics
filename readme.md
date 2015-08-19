@@ -13,6 +13,8 @@ The support diagnostic utilities consists of two self contained, executable Java
 
 ## Run Requirements
 * JRE - Oracle or OpenJDK, 1.7 or 1.8
+* JAVA_HOME environment variable must point to the Java installation directory.
+* Account running the utility must have read access to the Elasticsearch files and write access to the output location.
 * For the diagnostics collector Linux, Windows, and Mac OSX are supported.
 
 ## Instructions For Building
