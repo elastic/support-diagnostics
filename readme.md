@@ -21,7 +21,7 @@ The support diagnostic utilities consists of two self contained, executable Java
 * Install Maven and ensure that both the JAVA_HOME and MAVEN_HOME environment variables are set correctly.
 * Open a terminal window and navigate to the *es-support-diagnostics folder.
 * Run the command *mvn clean package*
-* A zip containing the complete distribution will be placed into the */es-support-diagnostics/target* folder.
+* A zip containing the complete distribution will be placed into the */es-support-diags/target* folder.
 
 ## Usage instructions
 ### diagnostics-stats overview
