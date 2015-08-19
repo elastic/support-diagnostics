@@ -8,13 +8,11 @@
     </appender>
 
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${user.home}/es-diags/logs/stats.log</file>
+        <file>${user.dir}/diag-logs/diagnostics.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- daily rollover -->
             <fileNamePattern>logFile.%d{yyyy-MM-dd}.log</fileNamePattern>
-
-            <!-- keep 2 weeks' worth of history -->
-            <maxHistory>14</maxHistory>
+            <maxHistory>2</maxHistory>
         </rollingPolicy>
 
         <encoder>

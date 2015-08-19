@@ -37,7 +37,7 @@ The diagnostic application performs three functions.  First it will execute a se
 * HTTPS connections are enabled using the -s, --ssl, or --https flags.  As with the password, use the option alone with no content.
 * The commands used to retrieve the cluster stats are contained in the diags.yml in the installation directory.  If you wish to modify these commands simply customize the settings to your needs.
 * Logback is used for logging, and the configuration is contained in the logback.xml file in the installation directory.  If you wish to modify these commands simply customize the settings to your needs.
-* Unless the log file is modified to change the output file, detailed logging and diagnostics will be written to <user home>/es-diags/logs/stats.log.
+* Unless the log file is modified to change the output file, detailed logging and diagnostics will be written to <working directory>/diag-logs/logs/diagnostics.log.
 
 ### Help command content
 ``````
