@@ -7,6 +7,8 @@ import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
 import java.nio.channels.FileChannel;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -129,5 +131,12 @@ public class SystemUtils {
             throw new RuntimeException("Error reading configuration");
         }
         return doc;
+    }
+
+    public static String getFileFromPath(String path){
+        Path p = Paths.get(path);
+        String file = p.getFileName().toString();
+        return file;
+
     }
 }

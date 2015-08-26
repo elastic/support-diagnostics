@@ -345,7 +345,7 @@ public class DiagnosticService {
                 String configFileLoc = determineConfigLocation(conf, config, home);
 
                 // Copy the config file
-                SystemUtils.copyFile(configFileLoc, nodeDir + SystemProperties.fileSeparator + "elasticsearch.yml");
+                SystemUtils.copyFile(configFileLoc, nodeDir + SystemProperties.fileSeparator + SystemUtils.getFileFromPath(configFileLoc));
 
                 if ("".equals(logs)) {
                     logs = home + SystemProperties.fileSeparator + "logs";

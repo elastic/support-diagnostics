@@ -32,7 +32,7 @@ The diagnostic application performs three functions.  First it will execute a se
 ### diagnostics-stats step by step
 * Unzip the support-diagnostics-dist.zip to the directory from which you intend to run the application.  You will need sufficient permissions to execute the application.
 * Run the application via the diagnostics.sh or diagnostics.bat script.
-* Executing the application with no options or an invalid one will display the help command output.
+* Executing the application with --? or --help will display the help command output.
 * The host name or IP address can be any node on the cluster that has HTTP access enabled.  Client, master, or data nodes will all succeed as long as they have a working HTTP listening port.
 * The application will create a zipped archive file containing a collection of statistics acquired from the cluster and any specific logging or configuration information for the nodes(s) residing on the host from which it is run.
 * When you are authenticating via Shield specify the user id and use one of the password flags: -p --password, --pwd.  Do not specify the password on the command line. You will receive a prompt to enter it after you hit the enter key and the entered text will be hidden.
