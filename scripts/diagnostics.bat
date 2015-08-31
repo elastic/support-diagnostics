@@ -1,9 +1,13 @@
 @echo off
 setlocal
 
-if not defined JAVA_HOME (
-  echo No JAVA_HOME defined - please set to the location of your Java installation.
-  goto EOF
+set JAVA_EXEC=java
+if not defined JAVA_HOME ( 
+  set JAVA_EXEC=java
+  echo No Java Home was found. Using current path. If execution fails please install Java and make sure it is in the search path or exposed via the JAVA_HOME environment variable.
+) else (
+  echo JAVA_HOME found, using %JAVA_HOME%
+  set JAVA_EXEC=%JAVA_HOME%\bin\java
 )
 
 if not defined DIAG_JAVA_OPTIONS ( 
@@ -11,7 +15,5 @@ if not defined DIAG_JAVA_OPTIONS (
 )
 
 %JAVA_EXEC% %DIAG)JAVA_OPTIONS% -cp .\;support-diagnostics.jar com.elastic.support.DiagnosticApp %*
-
-:EOF
 
 endlocal
