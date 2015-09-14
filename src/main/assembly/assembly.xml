@@ -16,6 +16,14 @@
         </fileSet>
 
         <fileSet>
+            <directory>${project.basedir}</directory>
+            <outputDirectory>.</outputDirectory>
+            <includes>
+                <include>readme.md</include>
+            </includes>
+        </fileSet>
+
+        <fileSet>
             <directory>${project.basedir}/src/main/resources</directory>
             <outputDirectory>.</outputDirectory>
             <includes>
