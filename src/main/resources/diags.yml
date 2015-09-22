@@ -7,6 +7,7 @@ textFileExtensions:
   - cat_shards
   - nodes_hot_threads
   - plugins
+  - version
 
 restQueries:
   alias: "_alias?pretty"
@@ -28,6 +29,7 @@ restQueries:
   recovery: "_cat/recovery?v"
   segments: "_segments?pretty&amp;human"
   settings: "_settings?pretty"
+  version: ""
 
 linuxOS:
   top: "top -b -n1"
