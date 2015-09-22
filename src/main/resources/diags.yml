@@ -8,10 +8,30 @@ textFileExtensions:
   - nodes_hot_threads
   - plugins
   - version
+  - cat_master
+  - cat_nodes
+  - cat_indices
+  - cat_count
+  - cat_segments
+  - cat_health
+  - cat_pending_tasks
+  - cat_aliases
+  - cat_thread_pool
+  - cat_fielddata
 
 restQueries:
   alias: "_alias?pretty"
   allocation: "_cat/allocation?v"
+  cat_master: "/_cat/master?v"
+  cat_nodes: "/_cat/nodes?v"
+  cat_indices: "/_cat/indices?v"
+  cat_count: "/_cat/count?v"
+  cat_segments: "/_cat/segments?v"
+  cat_health: "/_cat/health?v"
+  cat_pending_tasks: "/_cat/pending_tasks?v"
+  cat_aliases: "/_cat/aliases?v"
+  cat_thread_pool: "/_cat/thread_pool?v"
+  cat_fielddata: "/_cat/fielddata?v"
   cat_shards: "_cat/shards"
   cluster_health: "_cluster/health?pretty"
   cluster_pending_tasks: "_cluster/pending_tasks?pretty&amp;human"
