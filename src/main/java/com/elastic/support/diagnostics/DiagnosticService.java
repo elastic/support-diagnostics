@@ -6,6 +6,7 @@ import com.elastic.support.SystemUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
@@ -268,14 +269,14 @@ public class DiagnosticService {
     public void zipResults(String dir) {
 
         try {
-            File file = new File(dir);
+            File srcDir = new File(dir);
             ZipOutputStream out = new ZipOutputStream(new FileOutputStream(dir + ".zip"));
             out.setLevel(ZipOutputStream.DEFLATED);
-            SystemUtils.zipDir("", file, out);
-            logger.debug("Archive " + dir + ".zip was created");
-            file.delete();
-            logger.debug("Temp directory " + dir + " was deleted.");
+            SystemUtils.zipDir("", srcDir, out);
             out.close();
+            logger.debug("Archive " + dir + ".zip was created");
+            FileUtils.deleteDirectory(srcDir);
+            logger.debug("Temp directory " + dir + " was deleted.");
 
         } catch (Exception ioe) {
             logger.error("Couldn't create archive.\n", ioe);
@@ -344,8 +345,9 @@ public class DiagnosticService {
 
                 String configFileLoc = determineConfigLocation(conf, config, home);
 
-                // Copy the config file
-                SystemUtils.copyFile(configFileLoc, nodeDir + SystemProperties.fileSeparator + SystemUtils.getFileFromPath(configFileLoc));
+                // Copy the config directory
+                //zipConfig(configFileLoc, nodeDir  + SystemProperties.fileSeparator + "config.zip");
+                FileUtils.copyDirectory(new File(configFileLoc), new File(nodeDir));
 
                 if ("".equals(logs)) {
                     logs = home + SystemProperties.fileSeparator + "logs";
@@ -374,7 +376,9 @@ public class DiagnosticService {
 
         //Check for the config location
         if (!"".equals(config)) {
-            configFileLoc = config;
+            int idx = config.lastIndexOf(SystemProperties.fileSeparator);
+            configFileLoc = config.substring(0, idx);
+
         } else if (!"".equals(conf)) {
             configFileLoc = conf + "elasticsearch.yml";
         } else {
@@ -443,26 +447,23 @@ public class DiagnosticService {
             throw new RuntimeException("Could not retrieve configuration - was a valid absolute path specified?");
         }
     }
-
-    public void zipResults(String dir, String hostName) {
+/*
+    public void zipConfig(String dir, String destination) {
 
         try {
             File file = new File(dir);
-            String zipFileName = dir + "-" + hostName + ".zip";
-            ZipOutputStream out = new ZipOutputStream(new FileOutputStream(zipFileName));
+            ZipOutputStream out = new ZipOutputStream(new FileOutputStream(destination));
             out.setLevel(ZipOutputStream.DEFLATED);
             SystemUtils.zipDir("", file, out);
-            logger.debug("Archive " + zipFileName);
-            file.delete();
-            logger.debug("Temp directory " + dir + " was deleted.");
+            logger.debug("Archive " + destination);
             out.close();
 
         } catch (Exception ioe) {
             logger.error("Couldn't create archive.\n", ioe);
-            throw new RuntimeException(("Error creating compressed archive from statistics files." ));
+            throw new RuntimeException(("Error creating compressed archive from config files." ));
         }
     }
-
+*/
 
 }
 

@@ -28,12 +28,11 @@ public class SystemUtils {
             assert files != null;
             byte[] buf = new byte[1024];
 
-
             for (File fl : files) {
                 if (fl.isDirectory()) {
-                    out.putNextEntry(new ZipEntry(fl.getName() + SystemProperties.fileSeparator));
-                    zipDir(fl.getName() + SystemProperties.fileSeparator, fl, out);
-                    fl.delete();
+                    out.putNextEntry(new ZipEntry(relPath + fl.getName() + SystemProperties.fileSeparator));
+                    SystemUtils.zipDir(relPath + fl.getName() + SystemProperties.fileSeparator, fl, out);
+                    //fl.delete();
                     continue;
 
                 }
@@ -48,7 +47,7 @@ public class SystemUtils {
                 // Complete the entry
                 out.closeEntry();
                 in.close();
-                fl.delete();
+                //fl.delete();
             }
         } catch (Exception e) {
             logger.error("Couldn't create archive.\n", e);
@@ -56,6 +55,43 @@ public class SystemUtils {
 
         }
     }
+
+    public static void zipDir(File file, ZipOutputStream out) {
+        try {
+
+
+            File[] files = file.listFiles();
+            assert files != null;
+            byte[] buf = new byte[1024];
+
+
+            for (File fl : files) {
+                if (fl.isDirectory()) {
+                    zipDir(fl, out);
+                    continue;
+
+                }
+                FileInputStream in = new FileInputStream(fl);
+                // Add ZIP entry to output stream.
+                out.putNextEntry(new ZipEntry(fl.getName()));
+                // Transfer bytes from the file to the ZIP file
+                int len;
+                while ((len = in.read(buf)) > 0) {
+                    out.write(buf, 0, len);
+                }
+                // Complete the entry
+                out.closeEntry();
+                in.close();
+            }
+
+
+        } catch (Exception e) {
+            logger.error("Couldn't create archive.\n", e);
+            throw new RuntimeException(("Error creating compressed archive from statistics files."));
+
+        }
+    }
+
 
     public static boolean deleteDir(String filePath) {
         File file = new File(filePath);
