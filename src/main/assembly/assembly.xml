@@ -39,5 +39,13 @@
             </includes>
         </fileSet>
 
+        <fileSet>
+            <directory>${project.build.directory}/lib</directory>
+            <outputDirectory>./lib</outputDirectory>
+            <includes>
+                <include>*</include>
+            </includes>
+        </fileSet>
+
     </fileSets>
 </assembly>

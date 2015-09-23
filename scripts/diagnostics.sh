@@ -15,4 +15,4 @@ fi
 
 [[ ${DIAG_JAVA_OPTS} == "" ]] && export DIAG_JAVA_OPTS="-Xmx512m"
 echo "Using ${DIAG_JAVA_OPTS} for options."
-"$JAVA" $DIAG_JAVA_OPTS -cp .:support-diagnostics.jar com.elastic.support.DiagnosticApp "$@"
+"$JAVA" $DIAG_JAVA_OPTS -cp .:./lib/*:support-diagnostics.jar com.elastic.support.DiagnosticApp "$@"

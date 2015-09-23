@@ -60,7 +60,7 @@ public class DiagnosticService {
         // Set up where we want to put the results - it may come in from the command line
         String outputDir = setOutputDir(inputs);
         System.out.println("Results will be written to: " + outputDir);
-        String tempDir = outputDir + SystemProperties.fileSeparator + clusterName + "-diagnostics";
+        String tempDir = outputDir + SystemProperties.fileSeparator + clusterName + " cluster-diagnostics";
 
         // Create the temp directory - delete if first if it exists from a previous run
         try {
@@ -340,7 +340,7 @@ public class DiagnosticService {
                 String home = n.path("home").asText();
 
                 // Create a directory for this node
-                String nodeDir = target + SystemProperties.fileSeparator + name;
+                String nodeDir = target + SystemProperties.fileSeparator + name + " node-log and config";
                 Files.createDirectories(Paths.get(nodeDir));
 
                 String configFileLoc = determineConfigLocation(conf, config, home);
@@ -447,23 +447,6 @@ public class DiagnosticService {
             throw new RuntimeException("Could not retrieve configuration - was a valid absolute path specified?");
         }
     }
-/*
-    public void zipConfig(String dir, String destination) {
-
-        try {
-            File file = new File(dir);
-            ZipOutputStream out = new ZipOutputStream(new FileOutputStream(destination));
-            out.setLevel(ZipOutputStream.DEFLATED);
-            SystemUtils.zipDir("", file, out);
-            logger.debug("Archive " + destination);
-            out.close();
-
-        } catch (Exception ioe) {
-            logger.error("Couldn't create archive.\n", ioe);
-            throw new RuntimeException(("Error creating compressed archive from config files." ));
-        }
-    }
-*/
 
 }
 
