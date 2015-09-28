@@ -6,6 +6,9 @@ import com.elastic.support.SystemUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
+import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,18 +18,22 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.zip.ZipOutputStream;
+import java.util.zip.GZIPOutputStream;
 
 public class DiagnosticService {
 
     private static final Logger logger = LoggerFactory.getLogger(DiagnosticService.class);
+    private static final String UTC_DATE_FORMAT = "MM/dd/yyyy KK:mm:ss a Z";
 
     private RestTemplate restTemplate;
 
@@ -39,8 +46,8 @@ public class DiagnosticService {
 
         // Create an SSL enabled version - it will work for regular HTTP as well.
         // Note that it will function like a browser where you tell it to go ahead and trust an unknown CA
-        int connectTimeout = (Integer)configMap.get("connectTimeout");
-        int requestTimeout =  (Integer)configMap.get("requestTimeout");
+        int connectTimeout = (Integer) configMap.get("connectTimeout");
+        int requestTimeout = (Integer) configMap.get("requestTimeout");
 
         DiagnosticRequestFactory diagnosticRequestFactory = new DiagnosticRequestFactory(connectTimeout, requestTimeout);
         restTemplate = new RestTemplate(diagnosticRequestFactory.getSslReqFactory());
@@ -50,12 +57,10 @@ public class DiagnosticService {
         // by just submitting the host/port combo
         Map resultMap = this.getVersionData(inputs.getUrl(), request);
         String clusterName = (String) resultMap.get("cluster_name");
-        Map versionMap = (Map) resultMap.get("version");
-        String version = (String) versionMap.get("number");
 
         // use the appropriate combination of statements - overlay the current with the prior ones
         // if using an older version
-        Map<String, String> statements = getConfiguredStatements(version, configMap);
+        Map<String, String> statements = (Map<String, String>) configMap.get("restQueries");
 
         // Set up where we want to put the results - it may come in from the command line
         String outputDir = setOutputDir(inputs);
@@ -64,7 +69,7 @@ public class DiagnosticService {
 
         // Create the temp directory - delete if first if it exists from a previous run
         try {
-            SystemUtils.deleteDir(tempDir);
+            FileUtils.deleteDirectory(new File(tempDir));
             Files.createDirectories(Paths.get(tempDir));
         } catch (IOException e) {
             logger.error("Temp dir could not be created", e);
@@ -76,7 +81,7 @@ public class DiagnosticService {
 
         Set<Map.Entry<String, String>> entries = statements.entrySet();
 
-        for(Map.Entry<String, String> entry: entries){
+        for (Map.Entry<String, String> entry : entries) {
             logger.debug("Generating full diagnostic.");
             String queryName = entry.getKey();
             String query = entry.getValue();
@@ -87,18 +92,7 @@ public class DiagnosticService {
         logger.debug("Finished retrieving queries.");
         processOsCmds(configMap, tempDir, inputs);
         zipResults(tempDir);
-
         System.out.println("Finished archiving results and deleting temp directories");
-
-    }
-
-    public Map<String, String> getConfiguredStatements(String version, Map configMap) {
-
-        // use the appropriate combination of statements - overlay the current with the prior ones
-        // if using an older version
-        Map<String, String> statements = (Map<String, String>) configMap.get("restQueries");
-
-        return statements;
 
     }
 
@@ -168,7 +162,7 @@ public class DiagnosticService {
             logger.debug(result);
 
         } catch (RestClientException e) {
-            if(query.contains("license")){
+            if (query.contains("license")) {
                 logger.error("could not retrive license file.");
                 return "no licenses installed";
             }
@@ -197,7 +191,7 @@ public class DiagnosticService {
 
             Map<String, Object> cluster = new HashMap<>();
             cluster.put("clusterName", clusterName);
-            cluster.put("collectionDate", SystemUtils.getUtcDateString());
+            cluster.put("collectionDate", getUtcDateString());
             List nodeList = new ArrayList();
             cluster.put("nodes", nodeList);
 
@@ -266,24 +260,31 @@ public class DiagnosticService {
         return new HttpEntity<>(headers);
 
     }
+
     public void zipResults(String dir) {
 
         try {
             File srcDir = new File(dir);
-            ZipOutputStream out = new ZipOutputStream(new FileOutputStream(dir + ".zip"));
-            out.setLevel(ZipOutputStream.DEFLATED);
-            SystemUtils.zipDir("", srcDir, out);
-            out.close();
+            FileOutputStream fout = new FileOutputStream(dir + ".tar.gz");
+            GZIPOutputStream gzout = new GZIPOutputStream(fout);
+            TarArchiveOutputStream taos = new TarArchiveOutputStream(gzout);
+            taos.setBigNumberMode(TarArchiveOutputStream.BIGNUMBER_STAR);
+            taos.setLongFileMode(TarArchiveOutputStream.LONGFILE_GNU);
+
+            //out.setLevel(ZipOutputStream.DEFLATED);
+            archiveResults(taos, srcDir, "");
+            taos.close();
             logger.debug("Archive " + dir + ".zip was created");
             FileUtils.deleteDirectory(srcDir);
             logger.debug("Temp directory " + dir + " was deleted.");
 
         } catch (Exception ioe) {
             logger.error("Couldn't create archive.\n", ioe);
-            throw new RuntimeException(("Error creating compressed archive from statistics files." ));
+            throw new RuntimeException(("Error creating compressed archive from statistics files."));
         }
     }
-    public Set getIpAndHostData(){
+
+    public Set getIpAndHostData() {
 
         // Check system for NIC's to get ip's and hostnames
         HashSet ipAndHosts = new HashSet();
@@ -302,13 +303,40 @@ public class DiagnosticService {
                     ipAndHosts.add(inet.getHostAddress());
                 }
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             logger.error("Error occurred acquiring IP's and hostnames", e);
         }
 
         logger.debug("IP and Hostname list:" + ipAndHosts);
         return ipAndHosts;
+    }
+
+
+    public void archiveResults(TarArchiveOutputStream taos, File file, String path) {
+
+        try {
+
+            String relPath = path + "/" + file.getName();
+            TarArchiveEntry tae = new TarArchiveEntry(file, relPath);
+            taos.putArchiveEntry(tae);
+
+            if (file.isFile()) {
+                BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file));
+                IOUtils.copy(bis, taos);
+                taos.closeArchiveEntry();
+                bis.close();
+
+            } else if (file.isDirectory()) {
+                taos.closeArchiveEntry();
+                for (File childFile : file.listFiles()) {
+                    archiveResults(taos, childFile, relPath);
+                }
+            }
+
+        } catch (IOException e) {
+            logger.error("Archive Error", e);
+        }
+
     }
 
     public boolean processLogAndConfigFiles(String manifestString, String target) {
@@ -329,7 +357,7 @@ public class DiagnosticService {
 
                 // if the host we're on doesn't match up with the node entry
                 // then bypass it and move to the next node
-                if (! (ipAndHosts.contains(ip) || ipAndHosts.contains(hostName) ) ) {
+                if (!(ipAndHosts.contains(ip) || ipAndHosts.contains(hostName))) {
                     continue;
                 }
 
@@ -346,18 +374,18 @@ public class DiagnosticService {
                 String configFileLoc = determineConfigLocation(conf, config, home);
 
                 // Copy the config directory
-                //zipConfig(configFileLoc, nodeDir  + SystemProperties.fileSeparator + "config.zip");
-                FileUtils.copyDirectory(new File(configFileLoc), new File(nodeDir));
+                FileUtils.copyDirectory(new File(configFileLoc), new File(nodeDir + SystemProperties.fileSeparator + "config"));
 
                 if ("".equals(logs)) {
                     logs = home + SystemProperties.fileSeparator + "logs";
                 }
 
-                // Copy the main and slow logs
-                SystemUtils.copyFile(logs + SystemProperties.fileSeparator + clusterName + ".log", nodeDir + SystemProperties.fileSeparator + clusterName + ".log");
+                FileUtils.copyDirectory(new File(logs),  new File(nodeDir + SystemProperties.fileSeparator + "logs"));
+
+                /*SystemUtils.copyFile(logs + SystemProperties.fileSeparator + clusterName + ".log", nodeDir + SystemProperties.fileSeparator + clusterName + ".log");
                 SystemUtils.copyFile(logs + SystemProperties.fileSeparator + clusterName + "_index_indexing_slowlog.log", nodeDir + SystemProperties.fileSeparator + clusterName + "_index_indexing_slowlog.log");
                 SystemUtils.copyFile(logs + SystemProperties.fileSeparator + clusterName + "_index_search_slowlog.log", nodeDir + SystemProperties.fileSeparator + clusterName + "_index_search_slowlog.log");
-
+                */
                 logger.debug("processed node:\n" + name);
                 processed = true;
             }
@@ -370,7 +398,7 @@ public class DiagnosticService {
 
     }
 
-    public String determineConfigLocation(String conf, String config, String home){
+    public String determineConfigLocation(String conf, String config, String home) {
 
         String configFileLoc;
 
@@ -396,8 +424,7 @@ public class DiagnosticService {
             return "linuxOS";
         } else if (osName.contains("darwin") || osName.contains("mac os x")) {
             return "macOS";
-        }
-        else {
+        } else {
             logger.error("Failed to detect operating system!");
             throw new RuntimeException("Unsupported OS");
         }
@@ -440,13 +467,40 @@ public class DiagnosticService {
         InputStream is;
         try {
             is = this.getClass().getClassLoader().getResourceAsStream("diags.yml");
-            return SystemUtils.readYaml(is, true);
+            return readYaml(is, true);
 
         } catch (Exception e) {
             logger.error("Error retriving configuration", e);
             throw new RuntimeException("Could not retrieve configuration - was a valid absolute path specified?");
         }
     }
+
+    public String getUtcDateString(){
+        Date curDate = new Date();
+        SimpleDateFormat format = new SimpleDateFormat(UTC_DATE_FORMAT);
+        return format.format(curDate);
+    }
+
+    public  Map readYaml(InputStream inputStream, boolean isBlock){
+        Map doc = new LinkedHashMap();
+
+        try{
+            DumperOptions options = new DumperOptions();
+            if(isBlock){
+                options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+            }
+
+            Yaml yaml=new Yaml(options);
+            doc = (Map)yaml.load(inputStream);
+
+        }
+        catch (  Exception e) {
+            logger.error("Not able to read config file ", e);
+            throw new RuntimeException("Error reading configuration");
+        }
+        return doc;
+    }
+
 
 }
 

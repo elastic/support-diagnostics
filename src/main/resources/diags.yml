@@ -54,14 +54,14 @@ restQueries:
 linuxOS:
   top: "top -b -n1"
   netstat: netstat -an"
-  ps: "ps -ef"
+  process-list: "ps -ef"
   top_threads: "top -b -n1 -H"
 
 macOS:
   top: "top -l 1"
   netstat: "netstat -an"
-  ps: "ps -ef"
+  process-list: "ps -ef"
 
 winOS:
-  ps: "tasklist /v"
+  process-list: "tasklist /v"
   netstat: "netstat -ano"
