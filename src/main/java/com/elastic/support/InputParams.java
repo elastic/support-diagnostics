@@ -4,7 +4,7 @@ import com.beust.jcommander.*;
 
 public class InputParams {
 
-    @Parameter(names = { "--?", "--help" }, help=true)
+    @Parameter(names = { "-h", "--?", "--help" }, help=true)
     private boolean help;
 
     @Parameter(names = {"--host", }, description = "Hostname, IP Address, or localhost if a node is present on this host that is part of the cluster and that has HTTP access enabled.")
