@@ -2,7 +2,6 @@ package com.elastic.support.diagnostics;
 
 import com.elastic.support.InputParams;
 import com.elastic.support.SystemProperties;
-import com.elastic.support.SystemUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.codec.binary.Base64;
@@ -382,10 +381,6 @@ public class DiagnosticService {
 
                 FileUtils.copyDirectory(new File(logs),  new File(nodeDir + SystemProperties.fileSeparator + "logs"));
 
-                /*SystemUtils.copyFile(logs + SystemProperties.fileSeparator + clusterName + ".log", nodeDir + SystemProperties.fileSeparator + clusterName + ".log");
-                SystemUtils.copyFile(logs + SystemProperties.fileSeparator + clusterName + "_index_indexing_slowlog.log", nodeDir + SystemProperties.fileSeparator + clusterName + "_index_indexing_slowlog.log");
-                SystemUtils.copyFile(logs + SystemProperties.fileSeparator + clusterName + "_index_search_slowlog.log", nodeDir + SystemProperties.fileSeparator + clusterName + "_index_search_slowlog.log");
-                */
                 logger.debug("processed node:\n" + name);
                 processed = true;
             }
