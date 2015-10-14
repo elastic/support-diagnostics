@@ -343,6 +343,10 @@ public class DiagnosticService {
         boolean processed = false;
         try {
             Set ipAndHosts = this.getIpAndHostData();
+            // Hack alert:
+            // Explicitly add 127.0.1.1 to get around an issue where the hosts file has an entry for this
+            ipAndHosts.add("127.0.1.1");
+
             JsonNode rootNode = new ObjectMapper().readTree(manifestString);
             JsonNode nodes = rootNode.path("nodes");
             String clusterName = rootNode.path("clusterName").textValue();
