@@ -44,7 +44,7 @@ restQueries:
   mapping: "_mapping?pretty"
   nodes_hot_threads: "_nodes/hot_threads?threads=10000"
   nodes_stats: "_nodes/stats?pretty&human"
-  nodes: "_nodes/?all&pretty&human"
+  nodes: "_nodes?all&pretty&human"
   plugins: "_cat/plugins?v"
   recovery: "_cat/recovery?v"
   segments: "_segments?pretty&human"
