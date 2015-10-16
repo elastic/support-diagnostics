@@ -43,7 +43,20 @@ class DiagnosticApp {
         }
 
         try {
-            new DiagnosticService().run(inputs);
+            DiagnosticService diags = new DiagnosticService();
+            int reps = inputs.getReps();
+            long interval = inputs.getInterval() * 1000;
+
+            for (int i = 1; i <= reps; i++) {
+                diags.run(inputs);
+                System.out.println("Run " + i + " of " + reps + " completed.");
+                if (reps > 1) {
+                    if (i < reps) {
+                        System.out.println("Next run will occur in " + inputs.getInterval() + " seconds.\n");
+                        Thread.sleep(interval);
+                    }
+                }
+            }
         }
         catch (RuntimeException re){
             System.out.println("An error occurred while retrieving statistics. " + re.getMessage());

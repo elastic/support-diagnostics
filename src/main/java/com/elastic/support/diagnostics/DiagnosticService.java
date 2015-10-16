@@ -9,6 +9,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
@@ -21,24 +22,27 @@ import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.jar.Manifest;
 import java.util.zip.GZIPOutputStream;
 
 public class DiagnosticService {
 
     private static final Logger logger = LoggerFactory.getLogger(DiagnosticService.class);
     private static final String UTC_DATE_FORMAT = "MM/dd/yyyy KK:mm:ss a Z";
+    private static final String FILE_DATE_FORMAT = "yyyyMMdd-KKmmssa";
 
     private RestTemplate restTemplate;
 
     public void run(InputParams inputs) {
 
         logger.debug(inputs.toString());
+
+        String ver = getToolVersion() ;
 
         // Get the yaml config file, either default or passed in
         Map configMap = retrieveConfiguration();
@@ -80,12 +84,20 @@ public class DiagnosticService {
 
         Set<Map.Entry<String, String>> entries = statements.entrySet();
 
+        String manifestString = null;
+
         for (Map.Entry<String, String> entry : entries) {
             logger.debug("Generating full diagnostic.");
             String queryName = entry.getKey();
             String query = entry.getValue();
             logger.debug(": now processing " + queryName + ", " + query);
-            runDiagnosticQuery(configMap, inputs.getUrl(), queryName, query, tempDir, request);
+            String result = runDiagnosticQuery(configMap, inputs.getUrl(), queryName, query, tempDir, request);
+
+            //If it's nodes then we add to the the collection file output
+            if (queryName.equalsIgnoreCase("nodes")) {
+                manifestString = writeClusterManifest(result, tempDir);
+                processLogAndConfigFiles(manifestString, tempDir, inputs.isArchivedLogs());
+            }
         }
 
         logger.debug("Finished retrieving queries.");
@@ -111,10 +123,10 @@ public class DiagnosticService {
         return versionMap;
     }
 
-    public void runDiagnosticQuery(Map configMap, String url, String key, String query, String target, HttpEntity<String> request) {
+    public String runDiagnosticQuery(Map configMap, String url, String key, String query, String target, HttpEntity<String> request) {
 
         List textFileExtensions = (List) configMap.get("textFileExtensions");
-        String result;
+        String result = "";
 
         try {
             result = submitRequest(url, query, request);
@@ -131,12 +143,6 @@ public class DiagnosticService {
             logger.debug("Done writing:" + filename);
             System.out.println("Statistic " + key + " was retrieved and saved to disk.");
 
-            //If it's nodes then we add to the the collection file output
-            if (key.equalsIgnoreCase("nodes")) {
-                String manifestString = writeClusterManifest(result, target);
-                processLogAndConfigFiles(manifestString, target);
-            }
-
         } catch (IOException ioe) {
             // If something goes wrong write the detail stuff to the log and then rethrow a RuntimeException
             // that will be caught at the top level and will contain a more generic user message
@@ -148,6 +154,8 @@ public class DiagnosticService {
                 logger.error("Error retrieving the following diagnostic:  " + key + " - this stat will not be included.", e);
             }
         }
+
+        return result;
     }
 
     public String submitRequest(String url, String query, HttpEntity<String> request) {
@@ -189,6 +197,7 @@ public class DiagnosticService {
             Iterator<JsonNode> it = nodes.iterator();
 
             Map<String, Object> cluster = new HashMap<>();
+            cluster.put("diagToolVersion", getToolVersion());
             cluster.put("clusterName", clusterName);
             cluster.put("collectionDate", getUtcDateString());
             List nodeList = new ArrayList();
@@ -264,7 +273,7 @@ public class DiagnosticService {
 
         try {
             File srcDir = new File(dir);
-            FileOutputStream fout = new FileOutputStream(dir + ".tar.gz");
+            FileOutputStream fout = new FileOutputStream(dir + "-" + getFileDateString() + ".tar.gz");
             GZIPOutputStream gzout = new GZIPOutputStream(fout);
             TarArchiveOutputStream taos = new TarArchiveOutputStream(gzout);
             taos.setBigNumberMode(TarArchiveOutputStream.BIGNUMBER_STAR);
@@ -282,34 +291,6 @@ public class DiagnosticService {
             throw new RuntimeException(("Error creating compressed archive from statistics files."));
         }
     }
-
-    public Set getIpAndHostData() {
-
-        // Check system for NIC's to get ip's and hostnames
-        HashSet ipAndHosts = new HashSet();
-
-        try {
-            Enumeration<NetworkInterface> nics = NetworkInterface.getNetworkInterfaces();
-
-            while (nics.hasMoreElements()) {
-                NetworkInterface nic = nics.nextElement();
-                ipAndHosts.add(nic.getDisplayName());
-                Enumeration<InetAddress> inets = nic.getInetAddresses();
-
-                while (inets.hasMoreElements()) {
-                    InetAddress inet = inets.nextElement();
-                    ipAndHosts.add(inet.getHostAddress());
-                    ipAndHosts.add(inet.getHostAddress());
-                }
-            }
-        } catch (Exception e) {
-            logger.error("Error occurred acquiring IP's and hostnames", e);
-        }
-
-        logger.debug("IP and Hostname list:" + ipAndHosts);
-        return ipAndHosts;
-    }
-
 
     public void archiveResults(TarArchiveOutputStream taos, File file, String path) {
 
@@ -338,19 +319,13 @@ public class DiagnosticService {
 
     }
 
-    public boolean processLogAndConfigFiles(String manifestString, String target) {
+    public void processLogAndConfigFiles(String manifestString, String target, boolean isArchivedLogs) {
 
-        boolean processed = false;
         try {
-            Set ipAndHosts = this.getIpAndHostData();
-            // Hack alert:
-            // Explicitly add 127.0.1.1 to get around an issue where the hosts file has an entry for this
-            ipAndHosts.add("127.0.1.1");
+            String machineHost = this.getHostName();
 
             JsonNode rootNode = new ObjectMapper().readTree(manifestString);
             JsonNode nodes = rootNode.path("nodes");
-            String clusterName = rootNode.path("clusterName").textValue();
-
             Iterator<JsonNode> it = nodes.iterator();
 
             while (it.hasNext()) {
@@ -360,40 +335,45 @@ public class DiagnosticService {
 
                 // if the host we're on doesn't match up with the node entry
                 // then bypass it and move to the next node
-                if (!(ipAndHosts.contains(ip) || ipAndHosts.contains(hostName))) {
-                    continue;
+                if(hostName.equals(machineHost)) {
+                    String name = n.path("name").asText();
+                    String config = n.path("config").asText();
+                    String conf = n.path("conf").asText();
+                    String logs = n.path("logs").asText();
+                    String home = n.path("home").asText();
+
+                    // Create a directory for this node
+                    String nodeDir = target + SystemProperties.fileSeparator + name + " node-log and config";
+                    Files.createDirectories(Paths.get(nodeDir));
+
+                    String configFileLoc = determineConfigLocation(conf, config, home);
+
+                    // Copy the config directory
+                    FileUtils.copyDirectory(new File(configFileLoc), new File(nodeDir + SystemProperties.fileSeparator + "config"));
+
+                    if ("".equals(logs)) {
+                        logs = home + SystemProperties.fileSeparator + "logs";
+                    }
+
+                    String logPattern = "*.log";
+                    if(isArchivedLogs) {
+                        logPattern = "*.*";
+                    }
+
+                    File logDir = new File(logs);
+                    File logDest = new File(nodeDir + SystemProperties.fileSeparator + "logs");
+;
+                    FileFilter fileFilter = new WildcardFileFilter(logPattern);
+                    FileUtils.copyDirectory(logDir, logDest, fileFilter, true);
+
+                    logger.debug("processed node:\n" + name);
                 }
 
-                String name = n.path("name").asText();
-                String config = n.path("config").asText();
-                String conf = n.path("conf").asText();
-                String logs = n.path("logs").asText();
-                String home = n.path("home").asText();
-
-                // Create a directory for this node
-                String nodeDir = target + SystemProperties.fileSeparator + name + " node-log and config";
-                Files.createDirectories(Paths.get(nodeDir));
-
-                String configFileLoc = determineConfigLocation(conf, config, home);
-
-                // Copy the config directory
-                FileUtils.copyDirectory(new File(configFileLoc), new File(nodeDir + SystemProperties.fileSeparator + "config"));
-
-                if ("".equals(logs)) {
-                    logs = home + SystemProperties.fileSeparator + "logs";
-                }
-
-                FileUtils.copyDirectory(new File(logs),  new File(nodeDir + SystemProperties.fileSeparator + "logs"));
-
-                logger.debug("processed node:\n" + name);
-                processed = true;
             }
         } catch (Exception e) {
             logger.error("Error processing the nodes manifest:\n", e);
             throw new RuntimeException("Error processing node");
         }
-
-        return processed;
 
     }
 
@@ -427,6 +407,27 @@ public class DiagnosticService {
             logger.error("Failed to detect operating system!");
             throw new RuntimeException("Unsupported OS");
         }
+    }
+
+    public String getHostName() {
+        String s = null;
+
+        try {
+
+            Process p = Runtime.getRuntime().exec("hostname");
+
+            BufferedReader stdInput = new BufferedReader(new
+                    InputStreamReader(p.getInputStream()));
+
+            BufferedReader stdError = new BufferedReader(new
+                    InputStreamReader(p.getErrorStream()));
+            s = stdInput.readLine();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return s;
     }
 
     public void processOsCmds(Map configMap, String targetDir, InputParams inputs) {
@@ -480,6 +481,12 @@ public class DiagnosticService {
         return format.format(curDate);
     }
 
+    public String getFileDateString(){
+        Date curDate = new Date();
+        SimpleDateFormat format = new SimpleDateFormat(FILE_DATE_FORMAT);
+        return format.format(curDate);
+    }
+
     public  Map readYaml(InputStream inputStream, boolean isBlock){
         Map doc = new LinkedHashMap();
 
@@ -498,6 +505,11 @@ public class DiagnosticService {
             throw new RuntimeException("Error reading configuration");
         }
         return doc;
+    }
+
+    public String getToolVersion(){
+        String ver = DiagnosticService.class.getPackage().getImplementationVersion() ;
+        return (ver != null) ? ver : "Debug";
     }
 
 

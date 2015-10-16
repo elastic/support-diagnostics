@@ -3,13 +3,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.elasticsearch</groupId>
-    <artifactId>es-support-diagnostics</artifactId>
-    <version>1.0</version>
+    <artifactId>support-diagnostics</artifactId>
+    <version>2.0</version>
     <packaging>jar</packaging>
     <name>Support Diagnostics Utilities</name>
 
     <properties>
-        <version>1.0</version>
+        <version>2.0</version>
     </properties>
     <dependencies>
         <dependency>
@@ -96,7 +96,7 @@
     </dependencies>
 
     <build>
-        <finalName>support-diagnostics</finalName>
+        <!--<finalName>support-diagnostics</finalName>-->
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
@@ -117,6 +117,25 @@
                     <verbose>true</verbose>
                     <fork>true</fork>
                     <compilerVersion>1.8</compilerVersion>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.6</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addDefaultImplementationEntries>
+                                true
+                            </addDefaultImplementationEntries>
+                            <addClasspath>false</addClasspath>
+                        </manifest>
+                        <manifestEntries>
+                            <Implementation-Version>${project.version}</Implementation-Version>
+                        </manifestEntries>
+                    </archive>
                 </configuration>
             </plugin>
 

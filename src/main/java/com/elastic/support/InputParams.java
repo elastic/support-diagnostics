@@ -23,8 +23,16 @@ public class InputParams {
     private String outputDir = "cwd";
 
     @Parameter(names = { "-s", "--ssl", "--https"}, description = "Use SSL?  No value required, only the option.")
-    private
-    boolean isSsl = false;
+    private boolean isSsl = false;
+
+    @Parameter(names={"-r", "--reps"}, description = "Number of times to execute the diagnostic. Use to create multiple runs at timed intervals.")
+    private  int reps = 1;
+
+    @Parameter(names={"-i", "--interval"}, description = "Elapsed time in seconds between diangostic runs when in repeating mode.  Minimum value is 30.")
+    private long interval = 30;
+
+    @Parameter(names={ "--archivedLogs"}, description = "Get archived logs in addition to current ones if present - No value required, only the option.")
+    private boolean archivedLogs;
 
     private boolean secured = false;
 
@@ -92,6 +100,32 @@ public class InputParams {
         this.help = help;
     }
 
+    public int getReps() {
+        return reps;
+    }
+
+    public void setReps(int reps) {
+        if (reps < 1) { throw new IllegalArgumentException("Number of repetitions must be at least 1.");}
+        this.reps = reps;
+    }
+
+    public long getInterval() {
+        return interval;
+    }
+
+    public void setInterval(long interval) {
+        if (interval < 30) { throw new IllegalArgumentException("Delay interval must be at least 30.");}
+
+        this.interval = interval;
+    }
+
+    public boolean isArchivedLogs() {
+        return archivedLogs;
+    }
+
+    public void setArchivedLogs(boolean archivedLogs) {
+        this.archivedLogs = archivedLogs;
+    }
 
     public String getUrl(){
         String protocol;

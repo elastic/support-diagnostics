@@ -65,5 +65,14 @@ The diagnostic application performs three functions.  First it will execute a se
        Hidden from the command line on entry.
     -u, --user
        Username
+    -r, --reps
+       Number of times to execute the diagnostic. Use to create multiple runs at timed intervals.
+    -i --interval
+       Elapsed time in seconds between diangostic runs when in repeating mode.  Minimum value is 30.
+    --archivedLogs
+       Get archived logs in addition to current ones if present - No value required, only the option.
 
 ``````
+### Examples
+ * ./diagnostics.sh -r 3 -i 60 -o /temp/diagnostic-runs
+ * ./diagnostics.sh --port 9244 -u admin -p -s
