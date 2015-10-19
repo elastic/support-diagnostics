@@ -54,6 +54,7 @@ restQueries:
 linuxOS:
   top: "top -b -n1"
   netstat: "netstat -an"
+  ss: "ss"
   process-list: "ps -ef"
   top_threads: "top -b -n1 -H"
   uname: "uname -a"
