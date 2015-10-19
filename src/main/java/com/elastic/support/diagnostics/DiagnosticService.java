@@ -387,9 +387,9 @@ public class DiagnosticService {
             configFileLoc = config.substring(0, idx);
 
         } else if (!"".equals(conf)) {
-            configFileLoc = conf + "elasticsearch.yml";
+            configFileLoc = conf ;
         } else {
-            configFileLoc = home + SystemProperties.fileSeparator + "config" + SystemProperties.fileSeparator + "elasticsearch.yml";
+            configFileLoc = home + SystemProperties.fileSeparator + "config";
         }
 
         return configFileLoc;
