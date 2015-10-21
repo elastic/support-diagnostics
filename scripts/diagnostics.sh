@@ -15,7 +15,7 @@ fi
 
 [[ ${DIAG_DEBUG} != "" ]] && export DIAG_DEBUG_OPTS=" -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=y"
 
-[[ ${DIAG_JAVA_OPTS} == "" ]] && export DIAG_JAVA_OPTS="-Xmx512m"
+[[ ${DIAG_JAVA_OPTS} == "" ]] && export DIAG_JAVA_OPTS="-Xms256m -Xmx2000m"
 
 echo "Using ${DIAG_JAVA_OPTS} ${DIAG_DEBUG_OPTS} for options."
 "$JAVA" $DIAG_JAVA_OPTS ${DIAG_DEBUG_OPTS} -cp .:./lib/*  com.elastic.support.DiagnosticApp "$@"
