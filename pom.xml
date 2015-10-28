@@ -8,9 +8,6 @@
     <packaging>jar</packaging>
     <name>Support Diagnostics Utilities</name>
 
-    <properties>
-        <version>1.7</version>
-    </properties>
     <dependencies>
         <dependency>
             <groupId>org.springframework</groupId>
