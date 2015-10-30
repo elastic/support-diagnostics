@@ -1,4 +1,4 @@
-package com.elastic.support;
+package com.elastic.support.diagnostics;
 
 import com.beust.jcommander.*;
 
@@ -7,10 +7,10 @@ public class InputParams {
     @Parameter(names = { "-h", "--?", "--help" }, help=true)
     private boolean help;
 
-    @Parameter(names = {"--host", }, description = "Hostname, IP Address, or localhost if a node is present on this host that is part of the cluster and that has HTTP access enabled.")
-    private String host="localhost";
+    @Parameter(names = {"--host", }, description = "Required field.  Hostname, IP Address, or localhost.  HTTP access must be enabled.", required = true)
+    private String host;
 
-    @Parameter(names = { "--port", "--listen" }, description = "HTTP or HTTPS listening port.")
+    @Parameter(names = { "--port" }, description = "HTTP or HTTPS listening port.")
     private int port = 9200;
 
     @Parameter(names = { "-u", "--user" }, description = "Username")

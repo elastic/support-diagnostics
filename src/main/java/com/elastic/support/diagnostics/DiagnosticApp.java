@@ -1,15 +1,8 @@
-package com.elastic.support;
+package com.elastic.support.diagnostics;
 
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.joran.JoranConfigurator;
-import ch.qos.logback.core.joran.spi.JoranException;
 import com.beust.jcommander.JCommander;
-import com.elastic.support.diagnostics.DiagnosticService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.context.support.FileSystemXmlApplicationContext;
 
 class DiagnosticApp {
 
@@ -43,12 +36,17 @@ class DiagnosticApp {
         }
 
         try {
-            DiagnosticService diags = new DiagnosticService();
+            //DiagnosticService diags = new DiagnosticService();
+            DiagnosticChain dc = new DiagnosticChain();
+            DiagnosticContext ctx = new DiagnosticContext();
+            ctx.setInputParams(inputs);
+
             int reps = inputs.getReps();
             long interval = inputs.getInterval() * 1000;
 
             for (int i = 1; i <= reps; i++) {
-                diags.run(inputs);
+                //diags.run(inputs);
+                dc.execute(ctx);
                 System.out.println("Run " + i + " of " + reps + " completed.");
                 if (reps > 1) {
                     if (i < reps) {

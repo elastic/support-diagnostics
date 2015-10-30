@@ -1,6 +1,5 @@
 package com.elastic.support.diagnostics;
 
-import com.elastic.support.InputParams;
 import com.elastic.support.SystemProperties;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,12 +21,10 @@ import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.jar.Manifest;
 import java.util.zip.GZIPOutputStream;
 
 public class DiagnosticService {

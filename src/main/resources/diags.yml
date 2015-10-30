@@ -44,12 +44,13 @@ restQueries:
   mapping: "_mapping?pretty"
   nodes_hot_threads: "_nodes/hot_threads?threads=10000"
   nodes_stats: "_nodes/stats?pretty&human"
-  nodes: "_nodes?all&pretty&human"
   plugins: "_cat/plugins?v"
   recovery: "_cat/recovery?v"
   segments: "_segments?pretty&human"
   settings: "_settings?pretty"
   version: ""
+  nodes: "_nodes?all&pretty&human"
+
 
 linuxOS:
   top: "top -b -n1"
@@ -58,12 +59,13 @@ linuxOS:
   process-list: "ps -ef"
   top_threads: "top -b -n1 -H"
   uname: "uname -a"
-  ulimit: "ulimit -a"
+  proc-limit: "cat /proc/PID/limits"
 
 macOS:
   top: "top -l 1"
   netstat: "netstat -an"
   process-list: "ps -ef"
+  ulimit: "ulimit -a"
 
 winOS:
   process-list: "tasklist /v"
