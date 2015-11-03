@@ -8,6 +8,8 @@ Installation:
 
 	./bin/plugin --install elasticsearch/elasticsearch-support-diagnostics
 	
+Note for ES 2.0 users:  We are working on a java version of the support diagnostic tool that will replace the existing .sh and .bat scripts.  For now, if you are running ES 2.0, the above installation command will not work.  However, you can download the scripts [directly](https://github.com/elastic/elasticsearch-support-diagnostics/tree/master/bin) and run them.  
+
 
 ### Support Diagnostics Script
 
