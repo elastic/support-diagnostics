@@ -10,7 +10,7 @@ public class InputParams {
     @Parameter(names = {"--host", }, description = "Required field.  Hostname, IP Address, or localhost.  HTTP access must be enabled.", required = true)
     private String host;
 
-    @Parameter(names = { "--port" }, description = "HTTP or HTTPS listening port.")
+    @Parameter(names = { "--port" }, description = "HTTP or HTTPS listening port. Defaults to 9200")
     private int port = 9200;
 
     @Parameter(names = { "-u", "--user" }, description = "Username")

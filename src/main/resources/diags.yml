@@ -7,7 +7,6 @@ textFileExtensions:
   - cat_shards
   - nodes_hot_threads
   - plugins
-  - version
   - cat_master
   - cat_nodes
   - cat_indices
@@ -19,7 +18,7 @@ textFileExtensions:
   - cat_thread_pool
   - cat_fielddata
 
-restQueries:
+restQueries-1:
   alias: "_alias?pretty"
   allocation: "_cat/allocation?v"
   cat_master: "/_cat/master?v"
@@ -51,6 +50,37 @@ restQueries:
   version: ""
   nodes: "_nodes?all&pretty&human"
 
+restQueries-2:
+  alias: "_alias?pretty"
+  allocation: "_cat/allocation?v"
+  cat_master: "/_cat/master?v"
+  cat_nodes: "/_cat/nodes?v"
+  cat_indices: "/_cat/indices?v"
+  cat_count: "/_cat/count?v"
+  cat_segments: "/_cat/segments?v"
+  cat_health: "/_cat/health?v"
+  cat_pending_tasks: "/_cat/pending_tasks?v"
+  cat_aliases: "/_cat/aliases?v"
+  cat_thread_pool: "/_cat/thread_pool?v"
+  cat_fielddata: "/_cat/fielddata?v"
+  cat_shards: "_cat/shards"
+  cluster_health: "_cluster/health?pretty"
+  cluster_pending_tasks: "_cluster/pending_tasks?pretty&human"
+  cluster_settings: "_cluster/settings?pretty"
+  cluster_state: "_cluster/state?pretty"
+  cluster_stats: "_cluster/stats?pretty&human"
+  count: "_count?pretty"
+  indices_stats: "_stats?pretty&human"
+  licenses: "_license?pretty"
+  mapping: "_mapping?pretty"
+  nodes_hot_threads: "_nodes/hot_threads?threads=10000"
+  nodes_stats: "_nodes/stats?pretty&human"
+  plugins: "_cat/plugins?v"
+  recovery: "_cat/recovery?v"
+  segments: "_segments?pretty&human"
+  settings: "_settings?pretty"
+  version: ""
+  nodes: "_nodes?all&pretty&human"
 
 linuxOS:
   top: "top -b -n1"

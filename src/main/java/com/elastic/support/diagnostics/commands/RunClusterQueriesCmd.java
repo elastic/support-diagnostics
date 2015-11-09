@@ -21,9 +21,10 @@ public class RunClusterQueriesCmd extends AbstractDiagnosticCmd {
         String queryName = null;
         String fileName = null;
 
+        String majorVersion = context.getVersion().substring(0,1);
 
         List textFileExtensions = (List) config.get("textFileExtensions");
-        Map<String, String> statements = (Map<String, String>) config.get("restQueries");
+        Map<String, String> statements = (Map<String, String>) config.get("restQueries-" + majorVersion);
         Set<Map.Entry<String, String>> entries = statements.entrySet();
 
         logger.debug("Generating full diagnostic.");
