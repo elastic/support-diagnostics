@@ -14,6 +14,7 @@ public class DiagnosticChain implements DiagnosticCommand{
         List<DiagnosticCommand> commandChain = new ArrayList<DiagnosticCommand>();
         commandChain.add(new GetConfigCmd());
         commandChain.add(new HostIdentifierCmd());
+        commandChain.add(new InteractiveInputCmd());
         commandChain.add(new RestModuleSetupCmd());
         commandChain.add(new VersionAndClusterNameCheckCmd());
         commandChain.add(new DirectorySetupCmd());

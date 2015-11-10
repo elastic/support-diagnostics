@@ -7,8 +7,8 @@ public class InputParams {
     @Parameter(names = { "-h", "--?", "--help" }, help=true)
     private boolean help;
 
-    @Parameter(names = {"--host", }, description = "Required field.  Hostname, IP Address, or localhost.  HTTP access must be enabled.", required = true)
-    private String host;
+    @Parameter(names = {"--host", }, description = "Required field.  Hostname, IP Address, or localhost.  HTTP access must be enabled.")
+    private String host="";
 
     @Parameter(names = { "--port" }, description = "HTTP or HTTPS listening port. Defaults to 9200")
     private int port = 9200;
@@ -33,6 +33,17 @@ public class InputParams {
 
     @Parameter(names={ "--archivedLogs"}, description = "Get archived logs in addition to current ones if present - No value required, only the option.")
     private boolean archivedLogs;
+
+    @Parameter(names={ "--interactive"}, description = "Get archived logs in addition to current ones if present - No value required, only the option.")
+    private boolean interactive;
+
+    public boolean isInteractive() {
+        return interactive;
+    }
+
+    public void setInteractive(boolean interactive) {
+        this.interactive = interactive;
+    }
 
     private boolean secured = false;
 

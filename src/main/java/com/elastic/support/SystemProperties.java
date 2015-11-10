@@ -6,11 +6,14 @@ import java.util.Date;
 
 public class SystemProperties {
 
+
     public static final String osName = System.getProperty("os.name");
 
     public static final String pathSeparator = System.getProperty("path.separator");
 
     public static final String fileSeparator = System.getProperty("file.separator");
+
+    public static final String lineSeparator = System.getProperty("line.separator");
 
     public static final String userDir = System.getProperty("user.dir");
 

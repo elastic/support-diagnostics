@@ -31,7 +31,7 @@ public class VersionAndClusterNameCheckCmd extends AbstractDiagnosticCmd{
 
         } catch (Exception e) {
             context.addMessage("Could not retrieve Elasticsearch cluster version - unable to continue.");
-            logger.error("Error getting version.", e);
+            logger.error("Error retrieving Elasticsearch version.  Please make sure the proper connection parameters were specified", e);
             rc = false;
         }
 

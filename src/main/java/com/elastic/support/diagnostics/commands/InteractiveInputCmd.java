@@ -173,7 +173,7 @@ public class InteractiveInputCmd extends AbstractDiagnosticCmd{
             return true;
         }
         else {
-            return true;
+            return false;
         }
     }
 }
