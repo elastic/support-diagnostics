@@ -79,7 +79,7 @@ fi
 
 #Check if user wants auth support
 curlCmd=''
-if [ $authType ] 
+if [ $authType ]
 then
 
     #Ensure valid auth type
@@ -111,10 +111,10 @@ then
 
     else
 	#not using cookie, so setup basic auth
-	
+
 
 	#check if user provided password via flag, if not prompt. This also captures -p with no value
-	if [ -z $password ] 
+	if [ -z $password ]
 	then
 	    printf "Enter authentication password (not displayed): "
 	    read -s password
@@ -125,7 +125,7 @@ then
 
 	#test to make sure the auth is right, or exit as things will silently fail
 	authStatus=$($curlCmd -XGET "$eshost/")
-	authCheck=`echo $authStatus | grep '"status" : 200' > /dev/null; echo $?`
+  authCheck=`echo $authStatus | grep 'cluster_name' > /dev/null; echo $?`
 
 	if [ $authCheck -ne 0 ]
 	then
