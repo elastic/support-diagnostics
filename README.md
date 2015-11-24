@@ -3,6 +3,11 @@ The support diagnostic utility is a Java executable that will interrogate the no
 
 * No runtime requirements or dependencies other than a recent JRE
 * OS specific versions are not required.
+* The application can be run from any directory on the machine.  It does not require installation to a specific location, and the only requirement is that the user has read access to the Elasticsearch artifacts, write access to the chosen output directory, an## Support Diagnostics Utility
+The support diagnostic utility is a Java executable that will interrogate the node on the the host it is running on to obtain data and statistics on the running cluster.  There are a number of changes from the previous script based version:
+
+* No runtime requirements or dependencies other than a recent JRE
+* OS specific versions are not required.
 * The application can be run from any directory on the machine.  It does not require installation to a specific location, and the only requirement is that the user has read access to the Elasticsearch artifacts, write access to the chosen output directory, and sufficient disk space for the generated archive.
 * Detects multiple nodes and network interfaces per host.
 * Shield authentication, SSL and cookies are supported for REST calls to the cluster.
@@ -49,10 +54,10 @@ The support diagnostic utility is a Java executable that will interrogate the no
     --port, --listen
        HTTP or HTTPS listening port.
        Default: 9200
-    -o, --out,  --output, --outputDir
+    -o, --out, --output, --outputDir
        Fully qualified path to output directory or c for current working
        directory.
-       Default: cwd
+       Default: current working directory
     -p, --password, --pwd
        Prompt for a password?  No password value required, only the option.
        Hidden from the command line on entry.
