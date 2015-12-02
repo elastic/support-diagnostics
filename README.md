@@ -27,18 +27,17 @@ The support diagnostic utility is a Java executable that will interrogate the no
 * Supplied arguments are not required to be in any particular order.
 
 ## Simple Examples
-  * ./diagnostics.sh --host 192.168.137.1
-  * ./diagnostics.sh --host 192.168.137.1 -port 9201
+  * `./diagnostics.sh --host 192.168.137.1`
+  * `./diagnostics.sh --host 192.168.137.1 -port 9201`
 
 ## Using Shield Authentication
-  * ./diagnostics.sh --host 192.168.137.1 -u <your username> -p
-  * ./diagnostics.sh --host 192.168.137.1 --user <your username> -p
-  * ./diagnostics.sh --host 192.168.137.1 --user <your username> --password
-
-  * Do not specify a password on the command line, only the flag.  You will be prompted for the password and it will be hidden.
+  * `./diagnostics.sh --host 192.168.137.1 -u <your username> -p`
+  * `./diagnostics.sh --host 192.168.137.1 --user <your username> -p`
+  * `./diagnostics.sh --host 192.168.137.1 --user <your username> --password`
+  * Do **not** specify a password on the command line, only the flag.  You will be prompted for the password and it will be hidden.
 
  ## Using Shield Authentication And SSL
-  * ./diagnostics.sh --host 192.168.137.1 -u <your username> -p -s
+  * `./diagnostics.sh --host 192.168.137.1 -u <your username> -p -s`
 
 ### Help command content
 ``````
