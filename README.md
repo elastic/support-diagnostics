@@ -28,7 +28,7 @@ The support diagnostic utility is a Java executable that will interrogate the no
 
 ## Simple Examples
   * `./diagnostics.sh --host 192.168.137.1`
-  * `./diagnostics.sh --host 192.168.137.1 -port 9201`
+  * `./diagnostics.sh --host 192.168.137.1 --port 9201`
 
 ## Using Shield Authentication
   * `./diagnostics.sh --host 192.168.137.1 -u <your username> -p`
