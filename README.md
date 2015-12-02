@@ -14,16 +14,16 @@ The support diagnostic utility is a Java executable that will interrogate the no
 
 ## Run Requirements
 * JRE - Oracle or OpenJDK, 1.7 or 1.8
-* JAVA_HOME environment variable should point to the Java installation directory.  If JAVA_HOME is not found, the utility will attempt to locate a distribution but if errors occur it may be necessary to set this manually.
+* `JAVA_HOME` environment variable should point to the Java installation directory.  If `JAVA_HOME` is not found, the utility will attempt to locate a distribution but if errors occur it may be necessary to set this manually.
 * Account running the utility must have read access to the Elasticsearch files and write access to the output location.
 * Linux, Windows, and Mac OSX are supported.
 
 ## Installation And Usage Instructions
-* Unzip the support-diagnostics-<version>-dist.zip into the directory from which you intend to run the application.
+* Unzip the `support-diagnostics-<version>-dist.zip` into the directory from which you intend to run the application.
 * Switch to the diagnostics distribution directory.
-* Run the application via the diagnostics.sh or diagnostics.bat script. The host name or IP address used by the HTTP connector of the node is required.
-* If you omit the --host parameter you will be presented with a list of network interfaces to choose from.  You'll also be required to enter a port, even if you are running on the default.  If the selections do not specify a listening interface the utility will fail and you will need to run it again.
-* Executing the application with --? or --help will display the help command output.
+* Run the application via the `diagnostics.sh` or `diagnostics.bat` script. The host name or IP address used by the HTTP connector of the node is required.
+* If you omit the `--host` parameter you will be presented with a list of network interfaces to choose from.  You'll also be required to enter a port, even if you are running on the default.  If the selections do not specify a listening interface the utility will fail and you will need to run it again.
+* Executing the application with `--?` or `--help` will display the help command output.
 * Supplied arguments are not required to be in any particular order.
 
 ## Simple Examples
