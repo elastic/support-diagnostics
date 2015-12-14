@@ -6,7 +6,7 @@ to assist users with gathering diagnostic data about their cluster and nodes.
 
 Installation:
 
-	./bin/plugin --install elasticsearch/elasticsearch-support-diagnostics
+	./bin/plugin --install elastic/elasticsearch-support-diagnostics
 	
 Note for ES 2.0 users:  We are working on a java version of the support diagnostic tool that will replace the existing .sh and .bat scripts.  For now, if you are running ES 2.0, the above installation command will not work.  However, you can download the scripts [directly](https://github.com/elastic/elasticsearch-support-diagnostics/tree/master/bin) and run them.  
 
@@ -40,4 +40,4 @@ The script can be executed on Windows by calling either `support-diagnostics.bat
 
 ## Contributing
 
-If you would like to contribute to this plugin, please see [the contributing document](https://github.com/elasticsearch/elasticsearch-support-diagnostics/blob/master/CONTRIBUTING.md) 
+If you would like to contribute to this plugin, please see [the contributing document](https://github.com/elastic/elasticsearch-support-diagnostics/blob/master/CONTRIBUTING.md) 
