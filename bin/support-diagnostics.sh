@@ -393,6 +393,11 @@ while [ $i -le $repeat ]
         i=$[i+1]
 done
 
+echo "Running df"
+df -k >> $outputdir/fsinfo.txt
+
+echo "Running mount"
+mount >> $outputdir/mount.txt
 
 echo "Output complete.  Creating tarball."
 tarfile=$outputdir.tar

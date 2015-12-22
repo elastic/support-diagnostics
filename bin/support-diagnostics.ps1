@@ -346,6 +346,9 @@ while($n -le $repeat) {
 }
 
 
+Write-Host 'Running fsutil'
+fsutil fsinfo drives | Out-File $outputDir/fsinfo.txt
+
 Write-Host 'Output complete.  Creating zip.'
 Add-Type -Assembly System.IO.Compression.FileSystem
 $compressionLevel = [System.IO.Compression.CompressionLevel]::Optimal
