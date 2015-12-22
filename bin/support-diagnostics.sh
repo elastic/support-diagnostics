@@ -77,6 +77,12 @@ then
 	exit 1
 fi
 
+if [ $authCreds ] && ! [ $authType ]
+then
+    printf "You have defined credentials, but no authentication type... please define -a as well\n"
+    exit 1
+fi
+
 #Check if user wants auth support
 curlCmd=''
 if [ $authType ]
@@ -167,6 +173,13 @@ then
     echo "Error connecting to $eshost: $connectionTest"
 #   DON'T DELETE THE OUTPUT DIR!  IT MIGHT BE / or /opt!
 #   rmdir $outputdir
+    exit 1
+fi
+
+authenticationTest=$( $curlCmd -s -S -XGET $eshost | grep -q 'missing authentication'; echo $? )
+if [ $authenticationTest -eq 0 ]
+then
+    echo "Authentication failure connecting to $eshost"
     exit 1
 fi
 
