@@ -43,12 +43,14 @@ restQueries-1:
   mapping: "_mapping?pretty"
   nodes_hot_threads: "_nodes/hot_threads?threads=10000"
   nodes_stats: "_nodes/stats?pretty&human"
+  shards: "_cat/shards?format=json"
   plugins: "_cat/plugins?v"
   recovery: "_cat/recovery?v"
   segments: "_segments?pretty&human"
   settings: "_settings?pretty"
   version: ""
   nodes: "_nodes?all&pretty&human"
+  warmers: "GET /_all/_warmer"
 
 restQueries-2:
   alias: "_alias?pretty"
@@ -81,6 +83,7 @@ restQueries-2:
   settings: "_settings?pretty"
   version: ""
   nodes: "_nodes?all&pretty&human"
+  warmers: "GET /_all/_warmer"
 
 linuxOS:
   top: "top -b -n1"

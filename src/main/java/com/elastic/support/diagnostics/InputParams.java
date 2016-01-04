@@ -19,7 +19,7 @@ public class InputParams {
     @Parameter(names = { "-p", "--password", "--pwd" }, description = "Prompt for a password?  No password value required, only the option. Hidden from the command line on entry.", password = true)
     private String password;
 
-    @Parameter(names = { "-o", "--out"," --output", "--outputDir" }, description = "Fully qualified path to output directory or c for current working directory.")
+    @Parameter(names = { "-o", "--out", "--output", "--outputDir" }, description = "Fully qualified path to output directory or c for current working directory.")
     private String outputDir = "cwd";
 
     @Parameter(names = { "-s", "--ssl", "--https"}, description = "Use SSL?  No value required, only the option.")
