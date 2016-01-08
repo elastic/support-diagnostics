@@ -4,164 +4,179 @@ import com.beust.jcommander.*;
 
 public class InputParams {
 
-    @Parameter(names = { "-h", "--?", "--help" }, help=true)
-    private boolean help;
+   @Parameter(names = {"-h", "--?", "--help"}, help = true)
+   private boolean help;
 
-    @Parameter(names = {"--host", }, description = "Required field.  Hostname, IP Address, or localhost.  HTTP access must be enabled.")
-    private String host="";
+   @Parameter(names = {"--host",}, description = "Required field.  Hostname, IP Address, or localhost.  HTTP access must be enabled.")
+   private String host = "";
 
-    @Parameter(names = { "--port" }, description = "HTTP or HTTPS listening port. Defaults to 9200")
-    private int port = 9200;
+   @Parameter(names = {"--port"}, description = "HTTP or HTTPS listening port. Defaults to 9200")
+   private int port = 9200;
 
-    @Parameter(names = { "-u", "--user" }, description = "Username")
-    private String username;
+   @Parameter(names = {"-u", "--user"}, description = "Username")
+   private String username;
 
-    @Parameter(names = { "-p", "--password", "--pwd" }, description = "Prompt for a password?  No password value required, only the option. Hidden from the command line on entry.", password = true)
-    private String password;
+   @Parameter(names = {"-p", "--password", "--pwd"}, description = "Prompt for a password?  No password value required, only the option. Hidden from the command line on entry.", password = true)
+   private String password;
 
-    @Parameter(names = { "-o", "--out", "--output", "--outputDir" }, description = "Fully qualified path to output directory or c for current working directory.")
-    private String outputDir = "cwd";
+   @Parameter(names = {"-ptp"}, description = "Insecure plain text password - warning, may exposure access.")
+   private String plainTextPassword;
 
-    @Parameter(names = { "-s", "--ssl", "--https"}, description = "Use SSL?  No value required, only the option.")
-    private boolean isSsl = false;
+   @Parameter(names = {"-o", "--out", "--output", "--outputDir"}, description = "Fully qualified path to output directory or c for current working directory.")
+   private String outputDir = "cwd";
 
-    @Parameter(names={"-r", "--reps"}, description = "Number of times to execute the diagnostic. Use to create multiple runs at timed intervals.")
-    private  int reps = 1;
+   @Parameter(names = {"-s", "--ssl", "--https"}, description = "Use SSL?  No value required, only the option.")
+   private boolean isSsl = false;
 
-    @Parameter(names={"-i", "--interval"}, description = "Elapsed time in seconds between diangostic runs when in repeating mode.  Minimum value is 30.")
-    private long interval = 30;
+   @Parameter(names = {"-r", "--reps"}, description = "Number of times to execute the diagnostic. Use to create multiple runs at timed intervals.")
+   private int reps = 1;
 
-    @Parameter(names={ "--archivedLogs"}, description = "Get archived logs in addition to current ones if present - No value required, only the option.")
-    private boolean archivedLogs;
+   @Parameter(names = {"-i", "--interval"}, description = "Elapsed time in seconds between diangostic runs when in repeating mode.  Minimum value is 30.")
+   private long interval = 30;
 
-    @Parameter(names={ "--interactive"}, description = "Get archived logs in addition to current ones if present - No value required, only the option.")
-    private boolean interactive;
+   @Parameter(names = {"--archivedLogs"}, description = "Get archived logs in addition to current ones if present - No value required, only the option.")
+   private boolean archivedLogs;
 
-    public boolean isInteractive() {
-        return interactive;
-    }
+   @Parameter(names = {"--interactive"}, description = "Get archived logs in addition to current ones if present - No value required, only the option.")
+   private boolean interactive;
 
-    public void setInteractive(boolean interactive) {
-        this.interactive = interactive;
-    }
+   public boolean isInteractive() {
+      return interactive;
+   }
 
-    private boolean secured = false;
+   public void setInteractive(boolean interactive) {
+      this.interactive = interactive;
+   }
 
-    public String getHost() {
-        return host;
-    }
+   private boolean secured = false;
 
-    public void setHost(String host) {
-        this.host = host;
-    }
+   public String getHost() {
+      return host;
+   }
 
-    public int getPort() {
-        return port;
-    }
+   public void setHost(String host) {
+      this.host = host;
+   }
 
-    public void setPort(int port) {
-        this.port = port;
-    }
+   public int getPort() {
+      return port;
+   }
 
-    public String getUsername() {
-        return username;
-    }
+   public void setPort(int port) {
+      this.port = port;
+   }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
+   public String getUsername() {
+      return username;
+   }
 
-    public String getPassword() {
-        return password;
-    }
+   public void setUsername(String username) {
+      this.username = username;
+   }
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
+   public String getPassword() {
+      return password;
+   }
 
-    public String getOutputDir() {
-        return outputDir;
-    }
+   public void setPassword(String password) {
+      this.password = password;
+   }
 
-    public void setOutputDir(String outputDir) {
-        this.outputDir = outputDir;
-    }
+   public String getOutputDir() {
+      return outputDir;
+   }
 
-    public boolean isSecured() {
-        return (this.username != null && this.password != null);
-    }
+   public void setOutputDir(String outputDir) {
+      this.outputDir = outputDir;
+   }
 
-    public boolean isSsl() {
-        return isSsl;
-    }
+   public boolean isSecured() {
+      return (this.username != null && this.password != null);
+   }
 
-    public void setIsSsl(boolean isSsl) {
-        this.isSsl = isSsl;
-    }
+   public boolean isSsl() {
+      return isSsl;
+   }
 
-    public void setSecured(boolean secured) {
-        this.secured = secured;
-    }
+   public void setIsSsl(boolean isSsl) {
+      this.isSsl = isSsl;
+   }
 
-    public boolean isHelp() {
-        return help;
-    }
+   public void setSecured(boolean secured) {
+      this.secured = secured;
+   }
 
-    public void setHelp(boolean help) {
-        this.help = help;
-    }
+   public boolean isHelp() {
+      return help;
+   }
 
-    public int getReps() {
-        return reps;
-    }
+   public void setHelp(boolean help) {
+      this.help = help;
+   }
 
-    public void setReps(int reps) {
-        if (reps < 1) { throw new IllegalArgumentException("Number of repetitions must be at least 1.");}
-        this.reps = reps;
-    }
+   public int getReps() {
+      return reps;
+   }
 
-    public long getInterval() {
-        return interval;
-    }
+   public void setReps(int reps) {
+      if (reps < 1) {
+         throw new IllegalArgumentException("Number of repetitions must be at least 1.");
+      }
+      this.reps = reps;
+   }
 
-    public void setInterval(long interval) {
-        if (interval < 30) { throw new IllegalArgumentException("Delay interval must be at least 30.");}
+   public long getInterval() {
+      return interval;
+   }
 
-        this.interval = interval;
-    }
+   public void setInterval(long interval) {
+      if (interval < 30) {
+         throw new IllegalArgumentException("Delay interval must be at least 30.");
+      }
 
-    public boolean isArchivedLogs() {
-        return archivedLogs;
-    }
+      this.interval = interval;
+   }
 
-    public void setArchivedLogs(boolean archivedLogs) {
-        this.archivedLogs = archivedLogs;
-    }
+   public String getPlainTextPassword() {
+      return plainTextPassword;
+   }
 
-    public String getUrl(){
-        String protocol;
+   public void setPlainTextPassword(String plainTextPassword) {
+      this.plainTextPassword = plainTextPassword;
+      this.password = plainTextPassword;
+   }
 
-        if(this.isSsl) {
-            protocol = "https";
-        }
-        else{
-            protocol = "http";
-        }
+   public boolean isArchivedLogs() {
+      return archivedLogs;
+   }
 
-        return protocol + "://" + host + ":" + port;
-    }
+   public void setArchivedLogs(boolean archivedLogs) {
+      this.archivedLogs = archivedLogs;
+   }
 
-    @Override
-    public String toString() {
-        return "InputParams{" +
-                "help=" + help +
-                ", host='" + host + '\'' +
-                ", port=" + port +
-                ", username='" + username + '\'' +
-                ", password='" + password + '\'' +
-                ", outputDir='" + outputDir + '\'' +
-                ", isSsl=" + isSsl +
-                ", secured=" + secured +
-                '}';
-    }
+   public String getUrl() {
+      String protocol;
+
+      if (this.isSsl) {
+         protocol = "https";
+      } else {
+         protocol = "http";
+      }
+
+      return protocol + "://" + host + ":" + port;
+   }
+
+   @Override
+   public String toString() {
+      return "InputParams{" +
+         "help=" + help +
+         ", host='" + host + '\'' +
+         ", port=" + port +
+         ", username='" + username + '\'' +
+         ", password='" + password + '\'' +
+         ", outputDir='" + outputDir + '\'' +
+         ", isSsl=" + isSsl +
+         ", secured=" + secured +
+         '}';
+   }
 }
