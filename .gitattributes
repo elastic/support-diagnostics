@@ -1,0 +1,9 @@
+# Files default to Unix line endings (\n)
+* text eol=lf
+
+# Windows line endings (\r\n)
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+*.zip binary
