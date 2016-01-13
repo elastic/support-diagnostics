@@ -1,7 +1,6 @@
 package com.elastic.support.diagnostics;
 
 import com.beust.jcommander.JCommander;
-import com.sun.deploy.util.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
