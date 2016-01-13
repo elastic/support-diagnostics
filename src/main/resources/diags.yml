@@ -91,7 +91,7 @@ linuxOS:
   ss: "ss"
   process-list: "ps -ef"
   top_threads: "top -b -n1 -H"
-  uname: "uname -a"
+  uname: "uname -a -r"
   proc-limit: "cat /proc/PID/limits"
 
 macOS:
