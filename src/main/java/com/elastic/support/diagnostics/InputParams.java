@@ -20,7 +20,7 @@ public class InputParams {
    private String password;
 
    @Parameter(names = {"--ptp"}, description = "Insecure plain text password - warning, may exposure access.")
-   private String plainTextPassword;
+   private String plainTextPassword = "";
 
    @Parameter(names = {"-o", "--out", "--output", "--outputDir"}, description = "Fully qualified path to output directory or c for current working directory.")
    private String outputDir = "cwd";
@@ -143,7 +143,6 @@ public class InputParams {
 
    public void setPlainTextPassword(String plainTextPassword) {
       this.plainTextPassword = plainTextPassword;
-      this.password = plainTextPassword;
    }
 
    public boolean isArchivedLogs() {
