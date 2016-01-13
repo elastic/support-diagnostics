@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.File;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class GenerateManifestCmd extends AbstractDiagnosticCmd {
@@ -22,7 +24,7 @@ public class GenerateManifestCmd extends AbstractDiagnosticCmd {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode root = mapper.readTree(nodeString);
             JsonNode nodes = root.path("nodes");
-            String clusterName = root.path("cluster_name").textValue();
+            String clusterName = context.getClusterName();
 
             Iterator<JsonNode> it = nodes.iterator();
 
@@ -30,50 +32,6 @@ public class GenerateManifestCmd extends AbstractDiagnosticCmd {
             cluster.put("diagToolVersion", getToolVersion());
             cluster.put("clusterName", clusterName);
             cluster.put("collectionDate", SystemProperties.getUtcDateString());
-            List nodeList = new ArrayList();
-            cluster.put("nodes", nodeList);
-
-            while (it.hasNext()) {
-                JsonNode n = it.next();
-
-                String host = n.path("host").asText();
-                String transportSocket = n.path("transport_address").asText();
-                String[] transportAddress = transportSocket.split(":");
-                String httpSocket = n.path("http_address").asText();
-                String [] httpAddress = httpSocket.split(":");
-                String name = n.path("name").asText();
-
-                assert transportAddress.length == 2;
-                assert httpAddress.length == 2;
-
-                JsonNode settings = n.path("settings");
-                String configFile = settings.path("config").asText();
-
-                JsonNode nodePaths = settings.path("path");
-                String logs = nodePaths.path("logs").asText();
-                String conf = nodePaths.path("conf").asText();
-                String home = nodePaths.path("home").asText();
-
-                JsonNode jnode = n.path("process");
-                String pid = jnode.path("id").asText();
-
-                Map<String, String> tmp = new HashMap<>();
-                tmp.put("host", host);
-                tmp.put("transportAddress", transportAddress[0]);
-                tmp.put("transportPort", transportAddress[1]);
-                tmp.put("httpAddress", httpAddress[0]);
-                tmp.put("httpPort", httpAddress[1]);
-
-                tmp.put("name", name);
-                tmp.put("config", configFile);
-                tmp.put("conf", conf);
-                tmp.put("logs", logs);
-                tmp.put("home", home);
-                tmp.put("pid", pid);
-                nodeList.add(tmp);
-
-                logger.debug("processed node:\n" + tmp);
-            }
 
             File manifest = new File(context.getTempDir() + SystemProperties.fileSeparator + clusterName + "-manifest.json");
             mapper.writeValue(manifest, cluster);
@@ -92,4 +50,12 @@ public class GenerateManifestCmd extends AbstractDiagnosticCmd {
         String ver = GenerateManifestCmd.class.getPackage().getImplementationVersion() ;
         return (ver != null) ? ver : "Debug";
     }
+
+   public String getIsoDate(){
+      TimeZone tz = TimeZone.getTimeZone("UTC");
+      DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ");
+      df.setTimeZone(tz);
+      String nowAsISO = df.format(new Date());
+      return  nowAsISO;
+   }
 }
