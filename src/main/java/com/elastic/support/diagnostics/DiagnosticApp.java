@@ -35,7 +35,6 @@ class DiagnosticApp {
       }
 
       try {
-         //DiagnosticService diags = new DiagnosticService();
          DiagnosticChain dc = new DiagnosticChain();
          DiagnosticContext ctx = new DiagnosticContext();
          ctx.setInputParams(inputs);

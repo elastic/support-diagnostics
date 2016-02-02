@@ -12,12 +12,13 @@ public class DiagnosticChain implements DiagnosticCommand {
 
       //Set up initial generic chain
       List<DiagnosticCommand> commandChain = new ArrayList<DiagnosticCommand>();
+      commandChain.add(new DirectorySetupCmd());
+      commandChain.add(new BuildLoggerCmd());
       commandChain.add(new GetConfigCmd());
       commandChain.add(new HostIdentifierCmd());
       commandChain.add(new InteractiveInputCmd());
       commandChain.add(new RestModuleSetupCmd());
       commandChain.add(new VersionAndClusterNameCheckCmd());
-      commandChain.add(new DirectorySetupCmd());
       commandChain.add(new RunClusterQueriesCmd());
       commandChain.add(new ExtractNodeInfoCmd());
       commandChain.add(new GenerateManifestCmd());

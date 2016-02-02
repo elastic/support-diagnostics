@@ -19,7 +19,7 @@ public class SystemProperties {
 
     public static final String userHome = System.getProperty("user.home");
 
-    private static final String UTC_DATE_FORMAT = "MM/dd/yyyy KK:mm:ss a Z";
+    private static final String UTC_DATE_FORMAT = "MM-dd-yyyy KK:mm:ss a Z";
     
     private static final String FILE_DATE_FORMAT = "yyyyMMdd-KKmmssa";
 

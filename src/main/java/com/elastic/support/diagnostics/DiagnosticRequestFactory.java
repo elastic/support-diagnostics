@@ -1,6 +1,7 @@
 package com.elastic.support.diagnostics;
 
 import org.apache.http.client.HttpClient;
+import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLContexts;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;

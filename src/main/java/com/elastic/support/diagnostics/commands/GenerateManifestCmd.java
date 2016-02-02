@@ -4,6 +4,7 @@ import com.elastic.support.SystemProperties;
 import com.elastic.support.diagnostics.DiagnosticContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 import java.io.File;
 import java.text.DateFormat;
@@ -14,30 +15,20 @@ public class GenerateManifestCmd extends AbstractDiagnosticCmd {
 
     public boolean execute(DiagnosticContext context){
 
-        String nodeString = context.getNodeString();
-        if (nodeString == null || "".equals(nodeString)){
-            context.addMessage("Could not create manifest - no node string to generate with.");
-            return true;
-        }
-
         try {
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode root = mapper.readTree(nodeString);
-            JsonNode nodes = root.path("nodes");
+           ObjectMapper mapper = new ObjectMapper();
+           mapper.enable(SerializationFeature.INDENT_OUTPUT);
             String clusterName = context.getClusterName();
-
-            Iterator<JsonNode> it = nodes.iterator();
-
             Map<String, Object> cluster = new HashMap<>();
             cluster.put("diagToolVersion", getToolVersion());
             cluster.put("clusterName", clusterName);
             cluster.put("collectionDate", SystemProperties.getUtcDateString());
 
-            File manifest = new File(context.getTempDir() + SystemProperties.fileSeparator + clusterName + "-manifest.json");
+            File manifest = new File(context.getTempDir() + SystemProperties.fileSeparator + "manifest.json");
             mapper.writeValue(manifest, cluster);
             String manifestString = mapper.writeValueAsString(cluster);
-            context.setManifest(manifestString);
-            context.setNodeString("");
+            //context.setManifest(manifestString);
+            //context.setNodeString("");
         } catch (Exception e) {
             logger.error("Error creating the manifest file\n", e);
             context.addMessage("Could not generate the manifest. Some output will not be available.");

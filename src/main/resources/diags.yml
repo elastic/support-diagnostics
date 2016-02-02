@@ -1,6 +1,6 @@
 # REST timeout settings - note:values are in milliseconds
-requestTimeout: 30000
-connectTimeout: 30000
+requestTimeout: 60000
+connectTimeout: 60000
 
 textFileExtensions:
   - allocation
@@ -17,6 +17,7 @@ textFileExtensions:
   - cat_aliases
   - cat_thread_pool
   - cat_fielddata
+  - cat_recovery
 
 restQueries-1:
   alias: "_alias?pretty"
@@ -32,6 +33,7 @@ restQueries-1:
   cat_thread_pool: "/_cat/thread_pool?v"
   cat_fielddata: "/_cat/fielddata?v"
   cat_shards: "_cat/shards"
+  cat_recovery: "_cat/recovery?v"
   cluster_health: "_cluster/health?pretty"
   cluster_pending_tasks: "_cluster/pending_tasks?pretty&human"
   cluster_settings: "_cluster/settings?pretty"
@@ -45,12 +47,12 @@ restQueries-1:
   nodes_stats: "_nodes/stats?pretty&human"
   shards: "_cat/shards?format=json"
   plugins: "_cat/plugins?v"
-  recovery: "_cat/recovery?v"
+  recovery: "_recovery"
   segments: "_segments?pretty&human"
   settings: "_settings?pretty"
   version: ""
   nodes: "_nodes?all&pretty&human"
-  warmers: "GET /_all/_warmer"
+  warmers: "_all/_warmer"
 
 restQueries-2:
   alias: "_alias?pretty"
@@ -78,12 +80,14 @@ restQueries-2:
   nodes_hot_threads: "_nodes/hot_threads?threads=10000"
   nodes_stats: "_nodes/stats?pretty&human"
   plugins: "_cat/plugins?v"
-  recovery: "_cat/recovery?v"
+  cat_recovery: "_cat/recovery?v"
+  recovery: "/_recovery"
+  shards: "_cat/shards?format=json"
   segments: "_segments?pretty&human"
   settings: "_settings?pretty"
   version: ""
   nodes: "_nodes?all&pretty&human"
-  warmers: "GET /_all/_warmer"
+  warmers: "_all/_warmer"
 
 linuxOS:
   top: "top -b -n1"
