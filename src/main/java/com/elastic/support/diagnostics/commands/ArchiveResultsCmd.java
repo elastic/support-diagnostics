@@ -18,7 +18,7 @@ public class ArchiveResultsCmd extends AbstractDiagnosticCmd {
             String dir = context.getTempDir();
             File srcDir = new File(dir);
 
-            FileOutputStream fout = new FileOutputStream(dir  + "-" + SystemProperties.getUtcDateString() + ".tar.gz");
+            FileOutputStream fout = new FileOutputStream(dir  + "-" + SystemProperties.getFileDateString() + ".tar.gz");
             GZIPOutputStream gzout = new GZIPOutputStream(fout);
             TarArchiveOutputStream taos = new TarArchiveOutputStream(gzout);
 
@@ -43,7 +43,7 @@ public class ArchiveResultsCmd extends AbstractDiagnosticCmd {
 
         try {
             if(append) {
-                relPath = path + "/" + file.getName() + "-" + SystemProperties.getUtcDateString();
+                relPath = path + "/" + file.getName() + "-" + SystemProperties.getFileDateString();
             }
             else{
                 relPath = path + "/" + file.getName();
