@@ -1,0 +1,24 @@
+analyze:
+  - com.elastic.support.inspection.commands.CheckDiagnosticVersionCmd
+  - com.elastic.support.inspection.commands.InitialSetupCmd
+  - com.elastic.support.inspection.commands.ConfigureOutputDirCmd
+  - com.elastic.support.inspection.commands.ExtractNodeDataCmd
+  - com.elastic.support.inspection.commands.DumpNodeProfilesCmd
+  - com.elastic.support.inspection.commands.CheckJvmVersionsCmd
+  - com.elastic.support.inspection.commands.CheckElasticVersionsCmd
+  - com.elastic.support.inspection.commands.CheckPluginVersionsCmd
+  - com.elastic.support.inspection.commands.CheckMasterSettingsCmd
+  - com.elastic.support.inspection.commands.CheckClusterSettingsCmd
+  - com.elastic.support.inspection.commands.CheckNodeSettingsCmd
+  - com.elastic.support.inspection.commands.CheckNodeSettingsDefaultsCmd
+  - com.elastic.support.inspection.commands.CheckMemoryCmd
+  - com.elastic.support.inspection.commands.CheckDurationsCmd
+  - com.elastic.support.inspection.commands.CheckCacheCmd
+  - com.elastic.support.inspection.commands.CheckBreakersCmd
+  - com.elastic.support.inspection.commands.CheckThreadPoolsCmd
+  - com.elastic.support.inspection.commands.CheckForUnitsCmd
+  - com.elastic.support.inspection.commands.CheckFilesystemsCmd
+  - com.elastic.support.inspection.commands.CheckShardsCmd
+  - com.elastic.support.inspection.commands.CheckLogfileCmd
+  - com.elastic.support.inspection.commands.SortNodesByHealthCmd
+  - com.elastic.support.inspection.commands.PrintOutputCmd
