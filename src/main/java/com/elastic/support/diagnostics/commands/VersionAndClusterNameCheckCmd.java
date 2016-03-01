@@ -18,6 +18,8 @@ public class VersionAndClusterNameCheckCmd extends AbstractDiagnosticCmd{
         String url = context.getInputParams().getUrl();
         boolean rc = true;
 
+       logger.info("Trying REST Endpoint.");
+
         try {
             RestModule restModule = context.getRestModule();
             String result = restModule.submitRequest(url);
@@ -30,8 +32,7 @@ public class VersionAndClusterNameCheckCmd extends AbstractDiagnosticCmd{
             context.setVersion(versionNumber);
 
         } catch (Exception e) {
-            context.addMessage("Could not retrieve Elasticsearch cluster version - unable to continue.");
-            logger.error("Error retrieving Elasticsearch version.  Please make sure the proper connection parameters were specified", e);
+            logger.error("Error retrieving Elasticsearch version  - unable to continue..  Please make sure the proper connection parameters were specified", e);
             rc = false;
         }
 

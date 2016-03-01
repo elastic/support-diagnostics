@@ -35,7 +35,7 @@ class DiagnosticApp {
       }
 
       try {
-         DiagnosticChain dc = new DiagnosticChain();
+         DiagnosticChainExec dc = new DiagnosticChainExec();
          DiagnosticContext ctx = new DiagnosticContext();
          ctx.setInputParams(inputs);
 
@@ -44,7 +44,7 @@ class DiagnosticApp {
 
          for (int i = 1; i <= reps; i++) {
             //diags.run(inputs);
-            dc.execute(ctx);
+            dc.runDiagnostic(ctx);
             System.out.println("Run " + i + " of " + reps + " completed.");
             if (reps > 1) {
                if (i < reps) {
@@ -54,7 +54,7 @@ class DiagnosticApp {
             }
          }
       } catch (RuntimeException re) {
-         System.out.println("An error occurred while retrieving statistics. " + re.getMessage());
+         logger.error("Execution Error", re);
       }
    }
 

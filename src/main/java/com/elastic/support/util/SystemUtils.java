@@ -1,6 +1,6 @@
 package com.elastic.support.util;
 
-import com.elastic.support.inspection.Constants;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,6 +21,7 @@ public class SystemUtils {
    private static final String IPV4 = "(\\d+\\.\\d+\\.\\d+\\.\\d+\\:\\d+)";
    private static final String IPV6 = "^(:?[a-fA-F0-9]{0,4}:){1,7}[a-fA-F0-9]{1,4}%?[a-zA-Z0-9-_]{0,10}$";
    private static final DecimalFormat formatter = new DecimalFormat("###.##");
+   private static final String EMPTY = "";
 
 
    public static String getUtcDateString() {
@@ -71,7 +72,7 @@ public class SystemUtils {
 
       String res = SystemUtils.safeToString(input);
       if (res.equals("")){
-         return Constants.EMPTY;
+         return EMPTY;
       }
       else{
          return res;
@@ -141,21 +142,7 @@ public class SystemUtils {
 
    }
 
-   public static String bytesToUnits(long byteSize){
 
-      if(byteSize / Constants.GB > 1){
-         return byteSize / Constants.GB + "GB";
-      }
-      else if(byteSize / Constants.MB > 1){
-         return byteSize / Constants.MB + "MB";
-      }
-      else if(byteSize / Constants.KB  > 1){
-         return  byteSize / Constants.KB + "KB";
-      }
-
-      else return byteSize + "b";
-
-   }
 
 
 }

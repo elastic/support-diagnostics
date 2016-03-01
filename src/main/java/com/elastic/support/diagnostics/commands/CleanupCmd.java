@@ -8,18 +8,18 @@ import java.io.IOException;
 
 public class CleanupCmd extends AbstractDiagnosticCmd {
 
-    public boolean execute(DiagnosticContext context){
+   public boolean execute(DiagnosticContext context) {
 
-        String dir = context.getTempDir();
-        try {
-            FileUtils.deleteDirectory(new File(dir));
-        } catch (IOException e) {
-            String msg = "Error deleting temporary work directory";
-            logger.error(msg, e);
-            context.addMessage(msg);
-        }
-        logger.debug("Temp directory " + dir + " was deleted.");
+      logger.info("Deleting temporary directories.");
+      String dir = context.getTempDir();
+      try {
+         FileUtils.deleteDirectory(new File(dir));
+      } catch (IOException e) {
+         String msg = "Error deleting temporary work directory";
+         logger.error(msg, e);
+      }
+      logger.debug("Temp directory " + dir + " was deleted.");
 
-        return true;
-    }
+      return true;
+   }
 }

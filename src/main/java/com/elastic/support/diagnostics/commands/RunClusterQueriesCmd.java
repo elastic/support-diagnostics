@@ -36,6 +36,8 @@ public class RunClusterQueriesCmd extends AbstractDiagnosticCmd {
             String query = entry.getValue();
             logger.debug(": now processing " + queryName + ", " + query);
             String url = inputs.getUrl() + "/" + query;
+
+            logger.info("Currently running the following query:" + queryName);
             String result = restModule.submitRequest(url);
 
             String ext;
@@ -49,25 +51,17 @@ public class RunClusterQueriesCmd extends AbstractDiagnosticCmd {
 
             Files.write(Paths.get(fileName), result.getBytes());
 
-            logger.debug("Done writing:" + fileName);
-            System.out.println("Statistic " + queryName + " was retrieved and saved to disk.");
-
-            //If it's nodes then we stash it so we can create the manifest
-            if (queryName.equalsIgnoreCase("nodes")) {
-               context.setNodeString(result);
-            }
+            logger.info("Statistic " + queryName + " was retrieved and saved to disk.");
 
          } catch (IOException ioe) {
             // If something goes wrong write the detail stuff to the log and then rethrow a RuntimeException
             // that will be caught at the top level and will contain a more generic user message
-            logger.error("Diagnostic for:" + queryName + "couldn't be written", ioe);
+            logger.error("Diagnostic for:" + queryName + "couldn't be written. There may be issues with the file system or you need to check for permissions or space issues.", ioe);
             context.addMessage("Error writing file for statistic:" + queryName + ". There may be issues with the file system.  You may need to check for permissions or space issues.");
          } catch (Exception e) {
             // If they aren't Shield users this will generate an Exception so if it fails just continue and don't rethrow an Exception
             if (!"licenses".equalsIgnoreCase(queryName)) {
-               System.out.println("Statistic " + queryName + " had errors and was not written.");
                logger.error("Error retrieving the following diagnostic:  " + queryName + " - this stat will not be included.", e);
-               context.addMessage("Error retrieving the following diagnostic:  " + queryName + " - this stat will not be included.");
             }
          }
       }

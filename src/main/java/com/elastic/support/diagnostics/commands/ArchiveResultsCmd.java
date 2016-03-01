@@ -14,7 +14,9 @@ public class ArchiveResultsCmd extends AbstractDiagnosticCmd {
 
     public boolean execute(DiagnosticContext context){
 
-        try {
+       logger.info("Archiving diagnostic results.");
+
+       try {
             String dir = context.getTempDir();
             File srcDir = new File(dir);
 
@@ -27,11 +29,10 @@ public class ArchiveResultsCmd extends AbstractDiagnosticCmd {
             archiveResults(taos, srcDir, "", true);
             taos.close();
 
-            logger.debug("Archive " + dir + ".zip was created");
+            logger.info("Archive " + dir + ".zip was created");
 
         } catch (Exception ioe) {
             logger.error("Couldn't create archive.\n", ioe);
-            context.addMessage("Error creating compressed archive from statistics files.");
         }
         return true;
     }

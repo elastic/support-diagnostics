@@ -2,10 +2,12 @@ package com.elastic.support.diagnostics.commands;
 
 import com.elastic.support.SystemProperties;
 import com.elastic.support.diagnostics.DiagnosticContext;
+import com.elastic.support.util.JsonYamlUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
+
 import java.io.File;
 import java.io.FileFilter;
 import java.nio.file.Files;
@@ -13,102 +15,115 @@ import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.Set;
 
-public class LogAndConfigCmd extends AbstractDiagnosticCmd{
+public class LogAndConfigCmd extends AbstractDiagnosticCmd {
 
-    public boolean execute(DiagnosticContext context){
+   private static final String NODES = "nodes.json";
 
-        try {
-            Set hosts = context.getHostIpList();
-            String manifestString = context.getManifest();
-            boolean needPid = true;
+   public boolean execute(DiagnosticContext context) {
 
-            JsonNode rootNode = new ObjectMapper().readTree(manifestString);
-            JsonNode nodes = rootNode.path("nodes");
-            Iterator<JsonNode> it = nodes.iterator();
+      logger.info("Processing logs and configuration files.");
+      try {
+         Set hosts = context.getHostIpList();
 
-            while (it.hasNext()) {
-                JsonNode n = it.next();
-                String host = n.path("host").asText();
-                String httpPublish = n.path("httpPublish").asText();
-                String transportPublish = n.path("transportPublish").asText();
+         // Get the nodes info:
+         String temp = context.getTempDir();
+         JsonNode rootNode = JsonYamlUtils.createJsonNodeFromFileName(temp, NODES);
+         boolean needPid = true;
+         JsonNode nodes = rootNode.path("nodes");
+         Iterator<JsonNode> it = nodes.iterator();
 
-                // if the host we're on doesn't match up with the node entry
-                // then bypass it and move to the next node
-                if(hosts.contains(host) || hosts.contains(httpPublish) || hosts.contains(transportPublish)) {
-                    String name = n.path("name").asText();
-                    String config = n.path("config").asText();
-                    String conf = n.path("conf").asText();
-                    String logs = n.path("logs").asText();
-                    String home = n.path("home").asText();
+         while (it.hasNext()) {
+            JsonNode n = it.next();
 
-                    if(needPid){
-                        String pid = n.path("pid").asText();
-                        context.setPid(pid);
-                    }
+            String host = n.path("host").asText();
+            String httpPublish = n.path("httpPublish").asText();
+            String transportPublish = n.path("transportPublish").asText();
 
-                    // Create a directory for this node
-                    String nodeDir = context.getTempDir() + SystemProperties.fileSeparator + name + " node-log and config";
+            // if the host we're on doesn't match up with the node entry
+            // then bypass it and move to the next node
+            if (hosts.contains(host) || hosts.contains(httpPublish) || hosts.contains(transportPublish)) {
+               String name = n.path("name").asText();
 
-                    Files.createDirectories(Paths.get(nodeDir));
-                    FileFilter configFilter = new WildcardFileFilter("*.yml");
-                    String configFileLoc = determineConfigLocation(conf, config, home);
+               JsonNode settings = n.path("settings");
 
-                    // Copy the config directory
-                    String configDest = nodeDir + SystemProperties.fileSeparator + "config";
-                    FileUtils.copyDirectory(new File(configFileLoc), new File(configDest), configFilter, true);
+               String configFile = settings.path("config").asText();
+               JsonNode nodePaths = settings.path("path");
 
-                    File shield = new File(configFileLoc + SystemProperties.fileSeparator + "shield");
-                    if (shield.exists()){
-                        FileUtils.copyDirectory(shield, new File(configDest + SystemProperties.fileSeparator + "shield"), true);
-                    }
+               String config = nodePaths.path("config").asText();
+               String logs = nodePaths.path("logs").asText();
+               String conf = nodePaths.path("conf").asText();
+               String home = nodePaths.path("home").asText();
 
-                    File scripts = new File(configFileLoc + SystemProperties.fileSeparator + "scripts");
-                    if (scripts.exists()){
-                        FileUtils.copyDirectory(scripts, new File(configDest + SystemProperties.fileSeparator + "scripts"), true);
-                    }
+               if (needPid) {
+                  JsonNode jnode = n.path("process");
+                  String pid = jnode.path("id").asText();
+                  context.setPid(pid);
+               }
 
-                    if ("".equals(logs)) {
-                        logs = home + SystemProperties.fileSeparator + "logs";
-                    }
+               // Create a directory for this node
+               String nodeDir = context.getTempDir() + SystemProperties.fileSeparator + name + " node-log and config";
 
-                    String logPattern = "*.log";
-                    if(context.getInputParams().isArchivedLogs()) {
-                        logPattern = "*.*";
-                    }
+               Files.createDirectories(Paths.get(nodeDir));
+               FileFilter configFilter = new WildcardFileFilter("*.yml");
+               String configFileLoc = determineConfigLocation(conf, config, home);
 
-                    File logDir = new File(logs);
-                    File logDest = new File(nodeDir + SystemProperties.fileSeparator + "logs");
+               // Copy the config directory
+               String configDest = nodeDir + SystemProperties.fileSeparator + "config";
+               FileUtils.copyDirectory(new File(configFileLoc), new File(configDest), configFilter, true);
 
-                    FileFilter logFilter = new WildcardFileFilter(logPattern);
-                    FileUtils.copyDirectory(logDir, logDest, logFilter, true);
+               File shield = new File(configFileLoc + SystemProperties.fileSeparator + "shield");
+               if (shield.exists()) {
+                  FileUtils.copyDirectory(shield, new File(configDest + SystemProperties.fileSeparator + "shield"), true);
+               }
 
-                    logger.debug("processed node:\n" + name);
-                }
+               File scripts = new File(configFileLoc + SystemProperties.fileSeparator + "scripts");
+               if (scripts.exists()) {
+                  FileUtils.copyDirectory(scripts, new File(configDest + SystemProperties.fileSeparator + "scripts"), true);
+               }
 
+               if ("".equals(logs)) {
+                  logs = home + SystemProperties.fileSeparator + "logs";
+               }
+
+               String logPattern = "*.log";
+               if (context.getInputParams().isArchivedLogs()) {
+                  logPattern = "*.*";
+               }
+
+               File logDir = new File(logs);
+               File logDest = new File(nodeDir + SystemProperties.fileSeparator + "logs");
+
+               FileFilter logFilter = new WildcardFileFilter(logPattern);
+               FileUtils.copyDirectory(logDir, logDest, logFilter, true);
+
+               logger.info("Processed logs and configs for node: " + name);
             }
-        } catch (Exception e) {
-            logger.error("Error processing the nodes manifest:\n", e);
-            context.addMessage("An issue was encountered determining the location of the log and configuration files.");
-        }
 
-        return  true;
-    }
+         }
+      } catch (Exception e) {
+         logger.error("Error processing log and config files.", e);
+      }
 
-    public String determineConfigLocation(String conf, String config, String home) {
+      logger.info("Finished processing logs and configuration files.");
 
-        String configFileLoc;
+      return true;
+   }
 
-        //Check for the config location
-        if (!"".equals(config)) {
-            int idx = config.lastIndexOf(SystemProperties.fileSeparator);
-            configFileLoc = config.substring(0, idx);
+   public String determineConfigLocation(String conf, String config, String home) {
 
-        } else if (!"".equals(conf)) {
-            configFileLoc = conf ;
-        } else {
-            configFileLoc = home + SystemProperties.fileSeparator + "config";
-        }
+      String configFileLoc;
 
-        return configFileLoc;
-    }
+      //Check for the config location
+      if (!"".equals(config)) {
+         int idx = config.lastIndexOf(SystemProperties.fileSeparator);
+         configFileLoc = config.substring(0, idx);
+
+      } else if (!"".equals(conf)) {
+         configFileLoc = conf;
+      } else {
+         configFileLoc = home + SystemProperties.fileSeparator + "config";
+      }
+
+      return configFileLoc;
+   }
 }

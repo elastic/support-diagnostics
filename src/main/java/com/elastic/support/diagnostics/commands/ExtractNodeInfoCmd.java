@@ -14,15 +14,9 @@ public class ExtractNodeInfoCmd extends AbstractDiagnosticCmd {
 
     public boolean execute(DiagnosticContext context){
 
-        String nodeString = context.getNodeString();
-        if (nodeString == null || "".equals(nodeString)){
-            context.addMessage("Could not create manifest - no node string to generate with.");
-            return true;
-        }
-
         try {
             ObjectMapper mapper = new ObjectMapper();
-            JsonNode root = mapper.readTree(nodeString);
+            JsonNode root = mapper.readTree("");
             JsonNode nodes = root.path("nodes");
             Iterator<JsonNode> it = nodes.iterator();
 
@@ -43,7 +37,8 @@ public class ExtractNodeInfoCmd extends AbstractDiagnosticCmd {
                 assert transportAddress.length == 2;
                 assert httpAddress.length == 2;
 
-                JsonNode settings = n.path("settings");
+
+               JsonNode settings = n.path("settings");
                 String configFile = settings.path("config").asText();
 
                 JsonNode nodePaths = settings.path("path");

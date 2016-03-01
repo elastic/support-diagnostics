@@ -25,7 +25,7 @@ public class RestModule {
         try {;
             logger.debug("Submitting: " + url);
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
-            result = response.getBody();
+           result = response.getBody();
             logger.debug(result);
 
         } catch (RestClientException e) {

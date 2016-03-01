@@ -4,10 +4,13 @@ import com.beust.jcommander.*;
 
 public class InputParams {
 
-   @Parameter(names = {"-h", "--?", "--help"}, help = true)
+   @Parameter(names = {"-?", "--help"}, help = true)
    private boolean help;
 
-   @Parameter(names = {"--host",}, description = "Required field.  Hostname, IP Address, or localhost.  HTTP access must be enabled.")
+   @Parameter(names = {"-o", "--out", "--output", "--outputDir"}, description = "Fully qualified path to output directory or c for current working directory.")
+   private String outputDir = "cwd";
+
+   @Parameter(names = {"-h", "--host",}, description = "Required field.  Hostname, IP Address, or localhost.  HTTP access must be enabled.")
    private String host = "";
 
    @Parameter(names = {"--port"}, description = "HTTP or HTTPS listening port. Defaults to 9200")
@@ -19,36 +22,36 @@ public class InputParams {
    @Parameter(names = {"-p", "--password", "--pwd"}, description = "Prompt for a password?  No password value required, only the option. Hidden from the command line on entry.", password = true)
    private String password;
 
-   @Parameter(names = {"--ptp"}, description = "Insecure plain text password - warning, may exposure access.")
-   private String plainTextPassword = "";
-
-   @Parameter(names = {"-o", "--out", "--output", "--outputDir"}, description = "Fully qualified path to output directory or c for current working directory.")
-   private String outputDir = "cwd";
-
    @Parameter(names = {"-s", "--ssl", "--https"}, description = "Use SSL?  No value required, only the option.")
    private boolean isSsl = false;
 
-   @Parameter(names = {"-r", "--reps"}, description = "Number of times to execute the diagnostic. Use to create multiple runs at timed intervals.")
+   @Parameter(names = {"-d", "--diagType"}, description ="Diagnostic type to run. Enter standard, remote, or logstash. Default is standard.  Remote will suppress retrieval of logs, configuration and system command info.")
+   private String diagType = "standard";
+
+   @Parameter(names = {"--ptp"}, description = "Insecure plain text password - warning, may exposure access.")
+   private String plainTextPassword = "";
+
+   @Parameter(names = {"--reps"}, description = "Number of times to execute the diagnostic. Use to create multiple runs at timed intervals.")
    private int reps = 1;
 
-   @Parameter(names = {"-i", "--interval"}, description = "Elapsed time in seconds between diangostic runs when in repeating mode.  Minimum value is 30.")
+   @Parameter(names = {"--interval"}, description = "Elapsed time in seconds between diangostic runs when in repeating mode.  Minimum value is 30.")
    private long interval = 30;
 
    @Parameter(names = {"--archivedLogs"}, description = "Get archived logs in addition to current ones if present - No value required, only the option.")
    private boolean archivedLogs;
 
-   @Parameter(names = {"--interactive"}, description = "Get archived logs in addition to current ones if present - No value required, only the option.")
-   private boolean interactive;
-
-   public boolean isInteractive() {
-      return interactive;
-   }
-
-   public void setInteractive(boolean interactive) {
-      this.interactive = interactive;
-   }
+   @Parameter(names = {"--bypassVerification"}, description = "Set to true to bypass hostname verification for certificate. This is inherently unsafe and NOT recommended.")
+   private boolean skipVerification = false;
 
    private boolean secured = false;
+
+   public boolean getSkipVerification() {
+      return skipVerification;
+   }
+
+   public void setSkipVerification(boolean skipVerification) {
+      this.skipVerification = skipVerification;
+   }
 
    public String getHost() {
       return host;
@@ -56,6 +59,14 @@ public class InputParams {
 
    public void setHost(String host) {
       this.host = host;
+   }
+
+   public String getDiagType() {
+      return diagType;
+   }
+
+   public void setDiagType(String diagType) {
+      this.diagType = diagType;
    }
 
    public int getPort() {

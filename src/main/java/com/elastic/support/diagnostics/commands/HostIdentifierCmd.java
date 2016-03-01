@@ -12,64 +12,67 @@ import java.util.HashSet;
 
 public class HostIdentifierCmd extends AbstractDiagnosticCmd {
 
-    public boolean execute(DiagnosticContext context) {
+   public boolean execute(DiagnosticContext context) {
 
-        getNodesViaNic(context);
-        return true;
-    }
+      getNodesViaNic(context);
+      return true;
+   }
 
-    public void getNodesViaNic(DiagnosticContext context) {
+   public void getNodesViaNic(DiagnosticContext context) {
 
-        // Check system for NIC's to get ip's and hostnames
-        HashSet ipAndHosts = new HashSet();
+      // Check system for NIC's to get ip's and hostnames
+      HashSet ipAndHosts = new HashSet();
 
-        System.out.println("Getting Network Interface Information - this may take some time...");
-        try {
-            String hostName = getHostName();
-            ipAndHosts.add(hostName);
-            Enumeration<NetworkInterface> nics = NetworkInterface.getNetworkInterfaces();
+      // Add the node address they passed in.
+      ipAndHosts.add(context.getInputParams().getHost());
 
-            while (nics.hasMoreElements()) {
-                NetworkInterface nic = nics.nextElement();
-                ipAndHosts.add(nic.getDisplayName());
-                Enumeration<InetAddress> inets = nic.getInetAddresses();
+      logger.info("Retrieving network interface information.");
+      try {
+         // Get the system hostname and add it.
+         String hostName = getHostName();
+         ipAndHosts.add(hostName);
+         Enumeration<NetworkInterface> nics = NetworkInterface.getNetworkInterfaces();
 
-                while (inets.hasMoreElements()) {
-                    InetAddress inet = inets.nextElement();
-                    ipAndHosts.add(inet.getHostAddress());
-                    ipAndHosts.add(inet.getHostName());
-                    ipAndHosts.add(inet.getCanonicalHostName());
-                }
+         while (nics.hasMoreElements()) {
+            NetworkInterface nic = nics.nextElement();
+            ipAndHosts.add(nic.getDisplayName());
+            Enumeration<InetAddress> inets = nic.getInetAddresses();
+
+            while (inets.hasMoreElements()) {
+               InetAddress inet = inets.nextElement();
+               ipAndHosts.add(inet.getHostAddress());
+               ipAndHosts.add(inet.getHostName());
+               ipAndHosts.add(inet.getCanonicalHostName());
             }
-        } catch (Exception e) {
-            logger.error("Error occurred acquiring IP's and hostnames", e);
-            context.addMessage("Error occurred acquiring IP's and hostnames");
-        }
+         }
+      } catch (Exception e) {
+         logger.error("Error occurred acquiring IP's and hostnames", e);
+      }
 
-        context.setHostIpList(ipAndHosts);
-        logger.debug("IP and Hostname list:" + ipAndHosts);
-    }
+      context.setHostIpList(ipAndHosts);
+      logger.debug("IP and Hostname list:" + ipAndHosts);
+   }
 
 
-    public String getHostName() {
-        String s = null;
-        try {
+   public String getHostName() {
+      String s = null;
+      try {
 
-            Process p = Runtime.getRuntime().exec("hostname");
+         Process p = Runtime.getRuntime().exec("hostname");
 
-            BufferedReader stdInput = new BufferedReader(new
-                    InputStreamReader(p.getInputStream()));
+         BufferedReader stdInput = new BufferedReader(new
+            InputStreamReader(p.getInputStream()));
 
-            BufferedReader stdError = new BufferedReader(new
-                    InputStreamReader(p.getErrorStream()));
-            s = stdInput.readLine();
+         BufferedReader stdError = new BufferedReader(new
+            InputStreamReader(p.getErrorStream()));
+         s = stdInput.readLine();
 
-        } catch (IOException e) {
-            logger.error("Error retrieving hostname.", e);
-        }
+      } catch (IOException e) {
+         logger.error("Error retrieving hostname.", e);
+      }
 
-        return s;
-    }
+      return s;
+   }
 
 
 }

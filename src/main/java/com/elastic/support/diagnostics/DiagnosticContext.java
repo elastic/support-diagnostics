@@ -1,12 +1,14 @@
 package com.elastic.support.diagnostics;
 
+import com.elastic.support.chain.Context;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-public class DiagnosticContext{
+public class DiagnosticContext extends Context{
 
     InputParams inputParams;
     RestModule restModule;
@@ -74,14 +76,6 @@ public class DiagnosticContext{
 
     public void setOutputDir(String outputDir) {
         this.outputDir = outputDir;
-    }
-
-    public List<String> getMessages() {
-        return messages;
-    }
-
-    public void setMessages(List<String> messages) {
-        this.messages = messages;
     }
 
     public InputParams getInputParams() {

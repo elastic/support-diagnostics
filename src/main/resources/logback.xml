@@ -3,33 +3,26 @@
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d{ISO8601} [%thread] %-5level %logger{5} - %msg%n</pattern>
+            <pattern>%d{ISO8601} [%thread] %-5level %logger{0} - %msg%n</pattern>
         </encoder>
     </appender>
 
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${user.home}/elasticsearch-diagnostics/diagnostics.log</file>
+        <file>${logOutput:-./}diagnostics.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- daily rollover -->
             <fileNamePattern>logFile.%d{yyyy-MM-dd}.log</fileNamePattern>
-            <maxHistory>2</maxHistory>
+            <maxHistory>5</maxHistory>
         </rollingPolicy>
 
         <encoder>
-            <pattern>%d{ISO8601} [%thread] %-5level %logger{5} - %msg%n</pattern>
+            <pattern>%d{ISO8601} [%thread] %-5level %logger{0} - %msg%n</pattern>
         </encoder>
     </appender>
 
-    <logger name="org.springframework" level="WARN" additivity="false">
+    <root level="INFO">
         <appender-ref ref="FILE"/>
-    </logger>
-
-    <logger name="com.elastic" level="WARN" additivity="false">
-        <appender-ref ref="FILE"/>
-    </logger>
-
-    <root level="WARN">
-        <appender-ref ref="FILE"/>
+        <appender-ref ref="STDOUT"/>
     </root>
 
 </configuration>
