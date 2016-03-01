@@ -39,6 +39,7 @@ public class RunClusterQueriesCmd extends AbstractDiagnosticCmd {
 
             logger.info("Currently running the following query:" + queryName);
             String result = restModule.submitRequest(url);
+            if(result == null){result = "";}
 
             String ext;
             if (textFileExtensions.contains(queryName)) {
@@ -57,7 +58,6 @@ public class RunClusterQueriesCmd extends AbstractDiagnosticCmd {
             // If something goes wrong write the detail stuff to the log and then rethrow a RuntimeException
             // that will be caught at the top level and will contain a more generic user message
             logger.error("Diagnostic for:" + queryName + "couldn't be written. There may be issues with the file system or you need to check for permissions or space issues.", ioe);
-            context.addMessage("Error writing file for statistic:" + queryName + ". There may be issues with the file system.  You may need to check for permissions or space issues.");
          } catch (Exception e) {
             // If they aren't Shield users this will generate an Exception so if it fails just continue and don't rethrow an Exception
             if (!"licenses".equalsIgnoreCase(queryName)) {
