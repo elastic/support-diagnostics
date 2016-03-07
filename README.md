@@ -14,6 +14,7 @@ The support diagnostic utility is a Java executable that will interrogate the no
 * Linux, Windows, and Mac OSX are supported.
 
 ## Installation And Usage Instructions
+* Download the latest release from [here](https://github.com/elastic/elasticsearch-support-diagnostics/releases/latest).
 * Unzip the support-diagnostics-<version>-dist.zip into the directory from which you intend to run the application.
 * Switch to the diagnostics distribution directory.
 * Run the application via the diagnostics.sh or diagnostics.bat script. The host name or IP address used by the HTTP connector of the node is required.
