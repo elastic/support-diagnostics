@@ -15,7 +15,7 @@ import java.util.Set;
 public class ScrubConfigFileCmd extends AbstractDiagnosticCmd {
 
    private static final String logDirPattern = ".*-log and config";
-   private static final String logFilePattern = "*.log";
+   private static final String configFile = "elasticsearch.yml";
 
    public boolean execute(DiagnosticContext context) {
 
@@ -30,8 +30,9 @@ public class ScrubConfigFileCmd extends AbstractDiagnosticCmd {
          File[] files = dir.listFiles(fileFilter);
          for (int i = 0; i < files.length; i++) {
             if (files[i].isDirectory()) {
-               String configPath = files[i].getAbsolutePath() + SystemProperties.fileSeparator + "logs" + SystemProperties.fileSeparator + logFilePattern;
-               logger.info("Processed " + configPath);
+               String configPath = files[i].getAbsolutePath() + SystemProperties.fileSeparator + "config" + SystemProperties.fileSeparator + configFile;
+               redactConfig(configPath);
+               logger.info("Scrubbed passwords for " + configPath);
             }
 
             System.out.println(files[i]);
