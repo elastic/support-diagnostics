@@ -40,6 +40,9 @@ public class InputParams {
    @Parameter(names = {"--archivedLogs"}, description = "Get archived logs in addition to current ones if present - No value required, only the option.")
    private boolean archivedLogs;
 
+   @Parameter(names = {"--scrub"}, description = "Set to true to use the scrub.yml dictionary to scrub logs and config files.  See KB for more info.")
+   private boolean scrubFiles = false;
+
    @Parameter(names = {"--bypassVerification"}, description = "Set to true to bypass hostname verification for certificate. This is inherently unsafe and NOT recommended.")
    private boolean skipVerification = false;
 
@@ -51,6 +54,14 @@ public class InputParams {
 
    public void setSkipVerification(boolean skipVerification) {
       this.skipVerification = skipVerification;
+   }
+
+   public boolean isScrubFiles() {
+      return scrubFiles;
+   }
+
+   public void setScrubFiles(boolean scrubFiles){
+      this.scrubFiles = scrubFiles;
    }
 
    public String getHost() {

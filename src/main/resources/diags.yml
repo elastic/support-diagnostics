@@ -89,7 +89,10 @@ restQueries-2:
   warmers: "_all/_warmer"
 
 logstash:
-
+  alias: "_alias?pretty"
+  allocation: "_cat/allocation?v"
+  cat_master: "_cat/master?v"
+  cat_nodes: "_cat/nodes?v"
 
 linuxOS:
   top: "top -b -n1"

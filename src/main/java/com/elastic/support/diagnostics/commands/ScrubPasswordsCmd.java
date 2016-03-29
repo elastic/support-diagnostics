@@ -12,7 +12,7 @@ import java.io.FileFilter;
 import java.util.Map;
 import java.util.Set;
 
-public class ScrubConfigFileCmd extends AbstractDiagnosticCmd {
+public class ScrubPasswordsCmd extends AbstractDiagnosticCmd {
 
    private static final String logDirPattern = ".*-log and config";
    private static final String configFile = "elasticsearch.yml";
