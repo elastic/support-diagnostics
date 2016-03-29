@@ -1,14 +1,20 @@
 package com.elastic.support.diagnostics;
 
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.conn.ssl.SSLContexts;
+import org.apache.http.ssl.SSLContexts;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLSession;
 import java.security.cert.X509Certificate;
 
 public class DiagnosticRequestFactory {
@@ -17,40 +23,81 @@ public class DiagnosticRequestFactory {
 
    private Integer connectTimeout;
    private Integer requestTimeout;
-   private boolean skipVerification;
+   private boolean isSecured;
+   CredentialsProvider credentialsProvider  = new BasicCredentialsProvider();
 
-   public DiagnosticRequestFactory(int connectTimeout, int requestTimeout, boolean skipVerification) {
+   public DiagnosticRequestFactory(int connectTimeout, int requestTimeout, boolean isSecured, String user, String pass) {
       this.requestTimeout = requestTimeout;
       this.connectTimeout = requestTimeout;
-      this.skipVerification = skipVerification;
+      this.isSecured = isSecured;
+
+      if (isSecured){
+         credentialsProvider.setCredentials(
+            new AuthScope(AuthScope.ANY_HOST, AuthScope.ANY_PORT),
+            new UsernamePasswordCredentials(user, pass));
+      }
    }
 
    /**
     * provide SSLContext that allows self-signed or internal CA
     */
-   private HttpClient getSslClient() {
-      HttpClient httpClient;
+   public HttpClient getSslClient() {
+      CloseableHttpClient httpClient;
       logger.debug("Retrieving SSL HTTP client");
       try {
-         httpClient = HttpClients.custom()
-            .setSSLSocketFactory(new SSLConnectionSocketFactory(SSLContexts.custom()
-                  .loadTrustMaterial(null, new ShieldDiagnosticStrategy())
-                  .build()
-               )
-            ).build();
+
+         RequestConfig requestConfig = RequestConfig.custom()
+            .setConnectTimeout(connectTimeout)
+            .setSocketTimeout(requestTimeout).build();
+
+         if(isSecured){
+            httpClient = HttpClients.custom()
+               .setDefaultRequestConfig(requestConfig)
+               .setDefaultCredentialsProvider(credentialsProvider)
+               .setSSLSocketFactory(new SSLConnectionSocketFactory(SSLContexts.custom()
+                     .loadTrustMaterial(null, new ShieldDiagnosticStrategy())
+                     .build()
+                  )
+               ).build();
+         }
+         else {
+            httpClient = HttpClients.custom()
+               .setSSLSocketFactory(new SSLConnectionSocketFactory(SSLContexts.custom()
+                     .loadTrustMaterial(null, new ShieldDiagnosticStrategy())
+                     .build()
+                  )
+               ).build();
+         }
       } catch (Exception e) {
          logger.error("Error occurred creating SSL Client Request Factory", e);
          throw new RuntimeException("HttpComponentsClientHttpRequestFactory failed to create client instance");
       }
+
       return httpClient;
    }
 
-   private HttpClient getUnverifiedSslClient() {
+   public HttpClient getUnverifiedSslClient() {
       HttpClient httpClient;
       logger.info("Retrieving Unverified SSL HTTP client - this is NOT RECOMMENDED");
 
       try {
-         httpClient = HttpClients.custom().setSSLSocketFactory(new SSLConnectionSocketFactory(SSLContexts.custom().loadTrustMaterial(null, new ShieldDiagnosticStrategy()).build(), SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER)).build();
+         if(isSecured){
+            httpClient = HttpClients.custom()
+               .setDefaultCredentialsProvider(credentialsProvider)
+               .setSSLSocketFactory(new SSLConnectionSocketFactory(
+                  SSLContexts.custom().
+                     loadTrustMaterial(null, new ShieldDiagnosticStrategy())
+                     .build(), new BypassHostnameVerifier()))
+               .build();
+         }
+         else {
+            httpClient = HttpClients.custom()
+               .setSSLSocketFactory(new SSLConnectionSocketFactory(
+                  SSLContexts.custom().
+                     loadTrustMaterial(null, new ShieldDiagnosticStrategy())
+                     .build(), new BypassHostnameVerifier()))
+               .build();
+         }
       } catch (Exception e) {
          logger.error("Error occurred creating SSL Client Request Factory", e);
          throw new RuntimeException("HttpComponentsClientHttpRequestFactory failed to create client instance");
@@ -62,7 +109,7 @@ public class DiagnosticRequestFactory {
       return HttpClients.createDefault();
    }
 
-   public HttpComponentsClientHttpRequestFactory getReqFactory() {
+/*   public HttpComponentsClientHttpRequestFactory getReqFactory() {
       HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory(getClient());
       setThresholds(factory);
       return factory;
@@ -89,7 +136,7 @@ public class DiagnosticRequestFactory {
       // or the read, pull the plug.
       factory.setReadTimeout(requestTimeout);
       factory.setConnectTimeout(connectTimeout);
-   }
+   }*/
 
    private class ShieldDiagnosticStrategy extends TrustSelfSignedStrategy {
 
@@ -111,6 +158,17 @@ public class DiagnosticRequestFactory {
        */
       @Override
       public boolean isTrusted(X509Certificate[] chain, String authType) {
+         return true;
+      }
+
+   }
+
+   /**
+    * This overrides any hostname mismatch in the certificate
+    */
+   private class BypassHostnameVerifier implements HostnameVerifier{
+
+      public boolean verify(String hostname, SSLSession session){
          return true;
       }
 

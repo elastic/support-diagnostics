@@ -12,6 +12,7 @@ import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.InputStream;
 import java.util.*;
 
@@ -57,6 +58,13 @@ public class JsonYamlUtils {
 
     }
 
+   public static void writeYaml(String path, Map tree) throws Exception{
+
+      Yaml yaml = new Yaml();
+      FileWriter writer = new FileWriter(path);
+      yaml.dump(tree, writer);
+   }
+
 
     public static Map<String, Object> readYamlFromClasspath(String path, boolean isBlock) throws Exception {
 
@@ -88,10 +96,7 @@ public class JsonYamlUtils {
         Map<String, Object> map =  (Map<String, Object>)yaml.load(in);
 
         return map;
-
     }
-
-
 
     public static Map<String, Object> flattenYaml(Map<String, Object> map){
         Map<String, Object> result = new LinkedHashMap<>();

@@ -88,6 +88,9 @@ restQueries-2:
   nodes: "_nodes?all&pretty&human"
   warmers: "_all/_warmer"
 
+logstash:
+
+
 linuxOS:
   top: "top -b -n1"
   netstat: "netstat -an"

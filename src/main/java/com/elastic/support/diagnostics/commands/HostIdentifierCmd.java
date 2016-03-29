@@ -30,6 +30,7 @@ public class HostIdentifierCmd extends AbstractDiagnosticCmd {
       try {
          // Get the system hostname and add it.
          String hostName = getHostName();
+         context.setAttribute("hostName", hostName);
          ipAndHosts.add(hostName);
          Enumeration<NetworkInterface> nics = NetworkInterface.getNetworkInterfaces();
 

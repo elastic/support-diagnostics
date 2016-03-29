@@ -26,12 +26,12 @@ public class GenerateManifestCmd extends AbstractDiagnosticCmd {
          cluster.put("diagToolVersion", getToolVersion());
          cluster.put("clusterName", clusterName);
          cluster.put("collectionDate", SystemProperties.getUtcDateString());
+         cluster.put("host", context.getAttribute("hostName"));
+         cluster.put("diagNode", context.getHostNode());
 
          File manifest = new File(context.getTempDir() + SystemProperties.fileSeparator + "manifest.json");
          mapper.writeValue(manifest, cluster);
-         String manifestString = mapper.writeValueAsString(cluster);
-         //context.setManifest(manifestString);
-         //context.setNodeString("");
+
       } catch (Exception e) {
          logger.error("Error creating the manifest file\n", e);
       }

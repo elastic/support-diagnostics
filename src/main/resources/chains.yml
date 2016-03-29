@@ -5,6 +5,7 @@ standard:
   - com.elastic.support.diagnostics.commands.RunClusterQueriesCmd
   - com.elastic.support.diagnostics.commands.HostIdentifierCmd
   - com.elastic.support.diagnostics.commands.LogAndConfigCmd
+  - com.elastic.support.diagnostics.commands.ScrubConfigFileCmd
   - com.elastic.support.diagnostics.commands.SystemCallsCmd
   - com.elastic.support.diagnostics.commands.GenerateManifestCmd
   - com.elastic.support.diagnostics.commands.ArchiveResultsCmd

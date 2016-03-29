@@ -12,62 +12,62 @@ import java.util.zip.GZIPOutputStream;
 
 public class ArchiveResultsCmd extends AbstractDiagnosticCmd {
 
-    public boolean execute(DiagnosticContext context){
+   public boolean execute(DiagnosticContext context) {
 
-       logger.info("Archiving diagnostic results.");
+      logger.info("Archiving diagnostic results.");
 
-       try {
-            String dir = context.getTempDir();
-            File srcDir = new File(dir);
+      try {
+         String dir = context.getTempDir();
+         File srcDir = new File(dir);
+         String filename = dir + "-" + SystemProperties.getFileDateString() + ".tar.gz";
 
-            FileOutputStream fout = new FileOutputStream(dir  + "-" + SystemProperties.getFileDateString() + ".tar.gz");
-            GZIPOutputStream gzout = new GZIPOutputStream(fout);
-            TarArchiveOutputStream taos = new TarArchiveOutputStream(gzout);
+         FileOutputStream fout = new FileOutputStream(filename);
+         GZIPOutputStream gzout = new GZIPOutputStream(fout);
+         TarArchiveOutputStream taos = new TarArchiveOutputStream(gzout);
 
-            taos.setBigNumberMode(TarArchiveOutputStream.BIGNUMBER_STAR);
-            taos.setLongFileMode(TarArchiveOutputStream.LONGFILE_GNU);
-            archiveResults(taos, srcDir, "", true);
-            taos.close();
+         taos.setBigNumberMode(TarArchiveOutputStream.BIGNUMBER_STAR);
+         taos.setLongFileMode(TarArchiveOutputStream.LONGFILE_GNU);
+         archiveResults(taos, srcDir, "", true);
+         taos.close();
 
-            logger.info("Archive " + dir + ".zip was created");
+         logger.info("Archive: " + filename + " was created");
 
-        } catch (Exception ioe) {
-            logger.error("Couldn't create archive.\n", ioe);
-        }
-        return true;
-    }
+      } catch (Exception ioe) {
+         logger.error("Couldn't create archive.\n", ioe);
+      }
+      return true;
+   }
 
-    public void archiveResults(TarArchiveOutputStream taos, File file, String path, boolean append) {
+   public void archiveResults(TarArchiveOutputStream taos, File file, String path, boolean append) {
 
-        boolean pathSet = false;
-        String relPath = "";
+      boolean pathSet = false;
+      String relPath = "";
 
-        try {
-            if(append) {
-                relPath = path + "/" + file.getName() + "-" + SystemProperties.getFileDateString();
+      try {
+         if (append) {
+            relPath = path + "/" + file.getName() + "-" + SystemProperties.getFileDateString();
+         } else {
+            relPath = path + "/" + file.getName();
+         }
+         TarArchiveEntry tae = new TarArchiveEntry(file, relPath);
+         taos.putArchiveEntry(tae);
+
+         if (file.isFile()) {
+            BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file));
+            IOUtils.copy(bis, taos);
+            taos.closeArchiveEntry();
+            bis.close();
+
+         } else if (file.isDirectory()) {
+            taos.closeArchiveEntry();
+            for (File childFile : file.listFiles()) {
+               archiveResults(taos, childFile, relPath, false);
             }
-            else{
-                relPath = path + "/" + file.getName();
-            }
-            TarArchiveEntry tae = new TarArchiveEntry(file, relPath);
-            taos.putArchiveEntry(tae);
+         }
 
-            if (file.isFile()) {
-                BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file));
-                IOUtils.copy(bis, taos);
-                taos.closeArchiveEntry();
-                bis.close();
+      } catch (IOException e) {
+         logger.error("Archive Error", e);
+      }
 
-            } else if (file.isDirectory()) {
-                taos.closeArchiveEntry();
-                for (File childFile : file.listFiles()) {
-                    archiveResults(taos, childFile, relPath, false);
-                }
-            }
-
-        } catch (IOException e) {
-            logger.error("Archive Error", e);
-        }
-
-    }
+   }
 }

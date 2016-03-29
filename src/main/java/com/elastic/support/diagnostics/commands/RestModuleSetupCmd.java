@@ -2,12 +2,11 @@ package com.elastic.support.diagnostics.commands;
 
 import com.elastic.support.diagnostics.DiagnosticContext;
 import com.elastic.support.diagnostics.DiagnosticRequestFactory;
-import com.elastic.support.diagnostics.InputParams;
 import com.elastic.support.diagnostics.RestModule;
-import org.apache.commons.codec.binary.Base64;
-import org.springframework.http.HttpEntity;
+import org.apache.http.client.HttpClient;
+/*import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestTemplate;*/
 
 /**
  * Created by gnieman on 10/28/15.
@@ -23,12 +22,28 @@ public class RestModuleSetupCmd extends AbstractDiagnosticCmd {
          // Note that it will function like a browser where you tell it to go ahead and trust an unknown CA
          int connectTimeout = (Integer) context.getConfig().get("connectTimeout");
          int requestTimeout = (Integer) context.getConfig().get("requestTimeout");
-         boolean isVerified = context.getInputParams().getSkipVerification();
+         boolean bypassVerify = context.getInputParams().getSkipVerification();
 
-         DiagnosticRequestFactory diagnosticRequestFactory = new DiagnosticRequestFactory(connectTimeout, requestTimeout, isVerified);
-         RestTemplate restTemplate = new RestTemplate(diagnosticRequestFactory.getSslReqFactory());
-         HttpEntity<String> request = configureAuth(context.getInputParams());
-         RestModule restModule = new RestModule(restTemplate, request);
+         String user = null, pass = null;
+         boolean isSecured = context.getInputParams().isSecured();
+         if (isSecured) {
+            user = context.getInputParams().getUsername();
+            pass = context.getInputParams().getPassword();
+         }
+
+         DiagnosticRequestFactory diagnosticRequestFactory = new DiagnosticRequestFactory(connectTimeout, requestTimeout, isSecured, user, pass);
+         //RestTemplate restTemplate = new RestTemplate(diagnosticRequestFactory.getSslReqFactory());
+         //HttpEntity<String> request = configureAuth(context.getInputParams());
+         //RestModule restModule = new RestModule(restTemplate, request);
+         HttpClient client = null;
+         if (bypassVerify) {
+            client = diagnosticRequestFactory.getUnverifiedSslClient();
+         } else {
+            client = diagnosticRequestFactory.getSslClient();
+         }
+
+         RestModule restModule = new RestModule(client);
+
          context.setRestModule(restModule);
       } catch (Exception e) {
          String errorMsg = "Failed to create REST submission module";
@@ -39,7 +54,7 @@ public class RestModuleSetupCmd extends AbstractDiagnosticCmd {
       return true;
    }
 
-   public HttpEntity<String> configureAuth(InputParams inputs) {
+/*   public HttpEntity<String> configureAuth(InputParams inputs) {
 
       HttpHeaders headers = new HttpHeaders();
 
@@ -55,5 +70,5 @@ public class RestModuleSetupCmd extends AbstractDiagnosticCmd {
 
       return new HttpEntity<>(headers);
 
-   }
+   }*/
 }

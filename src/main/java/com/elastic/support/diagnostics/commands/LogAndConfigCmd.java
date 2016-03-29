@@ -61,7 +61,7 @@ public class LogAndConfigCmd extends AbstractDiagnosticCmd {
                }
 
                // Create a directory for this node
-               String nodeDir = context.getTempDir() + SystemProperties.fileSeparator + name + " node-log and config";
+               String nodeDir = context.getTempDir() + SystemProperties.fileSeparator + name + "-log and config";
 
                Files.createDirectories(Paths.get(nodeDir));
                FileFilter configFilter = new WildcardFileFilter("*.yml");
