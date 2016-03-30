@@ -8,9 +8,6 @@ import org.apache.http.client.HttpClient;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.client.RestTemplate;*/
 
-/**
- * Created by gnieman on 10/28/15.
- */
 public class RestModuleSetupCmd extends AbstractDiagnosticCmd {
 
    public boolean execute(DiagnosticContext context) {
@@ -22,7 +19,7 @@ public class RestModuleSetupCmd extends AbstractDiagnosticCmd {
          // Note that it will function like a browser where you tell it to go ahead and trust an unknown CA
          int connectTimeout = (Integer) context.getConfig().get("connectTimeout");
          int requestTimeout = (Integer) context.getConfig().get("requestTimeout");
-         boolean bypassVerify = context.getInputParams().getSkipVerification();
+         boolean bypassVerify = context.getInputParams().isSkipVerification();
 
          String user = null, pass = null;
          boolean isSecured = context.getInputParams().isSecured();

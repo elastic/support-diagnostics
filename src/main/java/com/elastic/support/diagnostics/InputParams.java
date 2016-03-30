@@ -22,10 +22,10 @@ public class InputParams {
    @Parameter(names = {"-p", "--password", "--pwd"}, description = "Prompt for a password?  No password value required, only the option. Hidden from the command line on entry.", password = true)
    private String password;
 
-   @Parameter(names = {"-s", "--ssl", "--https"}, description = "Use SSL?  No value required, only the option.")
+   @Parameter(names = {"--ssl", "--https"}, description = "Use SSL?  No value required, only the option.")
    private boolean isSsl = false;
 
-   @Parameter(names = {"-d", "--diagType"}, description ="Diagnostic type to run. Enter standard, remote, or logstash. Default is standard.  Remote will suppress retrieval of logs, configuration and system command info.")
+   @Parameter(names = {"--type"}, description ="Diagnostic type to run. Enter standard, remote, or logstash. Default is standard.  Remote will suppress retrieval of logs, configuration and system command info.")
    private String diagType = "standard";
 
    @Parameter(names = {"--ptp"}, description = "Insecure plain text password - warning, may exposure access.")
@@ -43,12 +43,12 @@ public class InputParams {
    @Parameter(names = {"--scrub"}, description = "Set to true to use the scrub.yml dictionary to scrub logs and config files.  See KB for more info.")
    private boolean scrubFiles = false;
 
-   @Parameter(names = {"--bypassVerification"}, description = "Set to true to bypass hostname verification for certificate. This is inherently unsafe and NOT recommended.")
+   @Parameter(names = {"--noVerify"}, description = "Use this option to bypass hostname verification for certificate. This is inherently unsafe and NOT recommended.")
    private boolean skipVerification = false;
 
    private boolean secured = false;
 
-   public boolean getSkipVerification() {
+   public boolean isSkipVerification() {
       return skipVerification;
    }
 
