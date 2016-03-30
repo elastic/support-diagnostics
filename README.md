@@ -24,6 +24,9 @@ The support diagnostic utility is a Java executable that will interrogate the no
 ## Simple Examples
   * ./diagnostics.sh --host 192.168.137.1
   * ./diagnostics.sh --host 192.168.137.1 --port 9201
+  
+## Running remotely - does not collect logs, configs or run system commands.  Can be executed from a desktop without ES installed.
+  * ./diagnostics.sh --host 192.168.137.1 --type remote
 
 ## Using Shield Authentication
   * ./diagnostics.sh --host 192.168.137.1 -u <your username> -p
@@ -31,8 +34,8 @@ The support diagnostic utility is a Java executable that will interrogate the no
   * ./diagnostics.sh --host 192.168.137.1 --user <your username> --password
 
   * Do not specify a password on the command line, only the flag.  You will be prompted for the password and it will be hidden.
-
- ## Using Shield Authentication And SSL
+  
+## Using Shield Authentication And SSL
   * ./diagnostics.sh --host 192.168.137.1 -u <your username> -p -s
 
 ### Help command content
@@ -43,7 +46,7 @@ The support diagnostic utility is a Java executable that will interrogate the no
    --host
        Hostname, IP Address, or localhost if a node is present on this host that
        is part of the cluster and that has HTTP access enabled. Required.
-    -s, --ssl, --https
+   --ssl, --https
        Use SSL?  No value required, only the option.
        Default: false
     --port, --listen
@@ -58,8 +61,26 @@ The support diagnostic utility is a Java executable that will interrogate the no
        Hidden from the command line on entry.
     -u, --user
        Username
-    -r, --reps
+     --type  
+       Diagnostic type to run. Enter standard or remote. 'remote' will suppress retrieval of logs, configuration and system command
+           info.
+           Default: standard   
+  Exotic Options: Experimental, Use at your own risk.
+    --scrub
+           Set to true to use the scrub.yml dictionary to scrub logs and config
+           files.  See KB for more info.   
+    --ptp Insecure plain text password - warning, may exposure access.
+           Default: <empty string> 
+    --noVerify
+       Use this option to bypass hostname verification for certificate. This is
+       inherently unsafe and NOT recommended.
+       Default: false    
+    --archivedLogs
+       Get archived logs in addition to current ones if present - No value
+       required, only the option.
+       Default: false    
+    --reps
        Number of times to execute the diagnostic. Use to create multiple runs at timed intervals.
-    -i --interval
+    --interval
        Elapsed time in seconds between diangostic runs when in repeating mode.  Minimum value is 30.
 
