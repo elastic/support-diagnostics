@@ -17,7 +17,6 @@ textFileExtensions:
   - cat_aliases
   - cat_thread_pool
   - cat_recovery
-  - fielddata_stats
 
 
 restQueries-1:
