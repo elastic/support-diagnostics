@@ -17,6 +17,8 @@ textFileExtensions:
   - cat_aliases
   - cat_thread_pool
   - cat_recovery
+  - fielddata_stats
+
 
 restQueries-1:
   alias: "_alias?pretty"
@@ -44,6 +46,7 @@ restQueries-1:
   mapping: "_mapping?pretty"
   nodes_hot_threads: "_nodes/hot_threads?threads=10000"
   nodes_stats: "_nodes/stats?pretty&human"
+  fielddata_stats: "/_nodes/stats/indices/fielddata?level=indices&fields=*"
   shards: "_cat/shards?format=json"
   plugins: "_cat/plugins?v"
   recovery: "_recovery"
@@ -78,6 +81,7 @@ restQueries-2:
   mapping: "_mapping?pretty"
   nodes_hot_threads: "_nodes/hot_threads?threads=10000"
   nodes_stats: "_nodes/stats?pretty&human"
+  fielddata_stats: "/_nodes/stats/indices/fielddata?level=indices&fields=*"
   plugins: "_cat/plugins?v"
   cat_recovery: "_cat/recovery?v"
   recovery: "_recovery"
@@ -89,10 +93,7 @@ restQueries-2:
   warmers: "_all/_warmer"
 
 logstash:
-  alias: "_alias?pretty"
-  allocation: "_cat/allocation?v"
-  cat_master: "_cat/master?v"
-  cat_nodes: "_cat/nodes?v"
+
 
 linuxOS:
   top: "top -b -n1"
