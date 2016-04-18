@@ -8,6 +8,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.HttpClientUtils;
+import org.apache.http.conn.HttpHostConnectException;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,6 +61,9 @@ public class RestModule {
             logger.error("Error handling response for " + url, e);
          } finally {
             HttpClientUtils.closeQuietly(response);         }
+      }
+      catch (HttpHostConnectException e){
+         throw new RuntimeException("Error connecting to host " + url, e);
       }
       catch (Exception e){
          if (e.getMessage().contains("401 Unauthorized")) {
