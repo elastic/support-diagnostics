@@ -29,7 +29,7 @@ public class ScrubLogsCmd extends AbstractDiagnosticCmd {
          }
 
          Map<String, Object> dictionary = JsonYamlUtils.readYamlFromClasspath("scrub.yml", false);
-         if (dictionary == null || dictionary.size() == 0){
+         if (dictionary.size() == 0){
             logger.warn("Scrubbing was enabled but no substitutions were defined. Bypassing log and configuration file processing.");
             return true;
          }
