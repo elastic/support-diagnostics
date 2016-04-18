@@ -52,6 +52,12 @@ public class ScrubPasswordsCmd extends AbstractDiagnosticCmd {
    public void redactConfig(String conf) throws Exception {
 
       Map<String, Object> cfg = JsonYamlUtils.readYamlFromPath(conf, true);
+
+      if(cfg == null || cfg.size() == 0){
+         logger.warn("No configured properties were present in: " + conf + ".  This is unusual for a production system and may indicate misconfiguration." );
+         return;
+      }
+
       Map<String, Object> flatCfg = JsonYamlUtils.flattenYaml(cfg);
 
       Set<String> keys = flatCfg.keySet();
