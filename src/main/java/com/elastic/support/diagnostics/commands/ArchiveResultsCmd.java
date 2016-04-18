@@ -4,6 +4,8 @@ import com.elastic.support.SystemProperties;
 import com.elastic.support.diagnostics.DiagnosticContext;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
+import org.apache.commons.compress.compressors.CompressorOutputStream;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.apache.commons.compress.utils.IOUtils;
 
 import java.io.*;
@@ -19,11 +21,12 @@ public class ArchiveResultsCmd extends AbstractDiagnosticCmd {
       try {
          String dir = context.getTempDir();
          File srcDir = new File(dir);
-         String filename = dir + "-" + SystemProperties.getFileDateString() + ".tar.gz";
+         String filename = dir + "-" + SystemProperties.getFileDateString() + ".tar.bz2";
 
          FileOutputStream fout = new FileOutputStream(filename);
-         GZIPOutputStream gzout = new GZIPOutputStream(fout);
-         TarArchiveOutputStream taos = new TarArchiveOutputStream(gzout);
+         //GZIPOutputStream gzout = new GZIPOutputStream(fout);
+         CompressorOutputStream cout = new GzipCompressorOutputStream(fout);
+         TarArchiveOutputStream taos = new TarArchiveOutputStream(cout);
 
          taos.setBigNumberMode(TarArchiveOutputStream.BIGNUMBER_STAR);
          taos.setLongFileMode(TarArchiveOutputStream.LONGFILE_GNU);
