@@ -17,6 +17,7 @@ textFileExtensions:
   - cat_aliases
   - cat_thread_pool
   - cat_recovery
+  - watcher
 
 
 restQueries-1:
@@ -45,7 +46,7 @@ restQueries-1:
   mapping: "_mapping?pretty"
   nodes_hot_threads: "_nodes/hot_threads?threads=10000"
   nodes_stats: "_nodes/stats?pretty&human"
-  fielddata_stats: "/_nodes/stats/indices/fielddata?level=indices&fields=*"
+  fielddata_stats: "/_nodes/stats/indices/fielddata?level=indices&pretty=true&fields=*"
   shards: "_cat/shards?format=json"
   plugins: "_cat/plugins?v"
   recovery: "_recovery"
@@ -54,6 +55,8 @@ restQueries-1:
   version: ""
   nodes: "_nodes?all&pretty&human"
   warmers: "_all/_warmer"
+  watcher: "/_watcher/stats?emit_stacktraces=true"
+  templates: "_template?pretty"
 
 restQueries-2:
   alias: "_alias?pretty"
@@ -80,7 +83,7 @@ restQueries-2:
   mapping: "_mapping?pretty"
   nodes_hot_threads: "_nodes/hot_threads?threads=10000"
   nodes_stats: "_nodes/stats?pretty&human"
-  fielddata_stats: "/_nodes/stats/indices/fielddata?level=indices&fields=*"
+  fielddata_stats: "/_nodes/stats/indices/fielddata?level=indices&pretty=true&fields=*"
   plugins: "_cat/plugins?v"
   cat_recovery: "_cat/recovery?v"
   recovery: "_recovery"
@@ -90,6 +93,11 @@ restQueries-2:
   version: ""
   nodes: "_nodes?all&pretty&human"
   warmers: "_all/_warmer"
+  watcher: "/_watcher/stats?emit_stacktraces=true"
+  templates: "_template?pretty"
+  nodeattrs: "/_cat/nodeattrs"
+  tasks: "_tasks"
+
 
 logstash:
 

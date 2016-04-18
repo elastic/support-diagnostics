@@ -2,23 +2,40 @@ package com.elastic.support.diagnostics;
 
 import com.elastic.support.chain.Chain;
 import com.elastic.support.util.JsonYamlUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
 
 public class DiagnosticChainExec {
 
-   public void runDiagnostic(DiagnosticContext context) throws Exception {
+   private static Logger logger = LoggerFactory.getLogger(DiagnosticChainExec.class);
 
-      Map<String, Object> diags = JsonYamlUtils.readYamlFromClasspath("diags.yml", true);
-      context.setConfig(diags);
+   public void runDiagnostic(DiagnosticContext context){
 
-      Map<String, Object> chains = JsonYamlUtils.readYamlFromClasspath("chains.yml", false);
-      List<String> chain = (List) chains.get(context.getInputParams().getDiagType());
-      Chain analyze = new Chain(chain);
-      boolean ret = analyze.execute(context);
-      if (!ret) {
-         throw new Exception("Error initializing diagnostic chain");
+      try {
+         Map<String, Object> diags = JsonYamlUtils.readYamlFromClasspath("diags.yml", true);
+         if (diags.size() == 0) {
+            logger.error("Required config file diags.yml was not found. Exiting application.");
+            throw new RuntimeException("Missing diags.yml");
+         }
+
+         context.setConfig(diags);
+
+         Map<String, Object> chains = JsonYamlUtils.readYamlFromClasspath("chains.yml", false);
+         if (diags.size() == 0) {
+            logger.error("Required config file chains.yml was not found. Exiting application.");
+            throw new RuntimeException("Missing diags.yml");
+         }
+
+         List<String> chain = (List) chains.get(context.getInputParams().getDiagType());
+
+         Chain diagnostic = new Chain(chain);
+         diagnostic.execute(context);
+      } catch (Exception e) {
+         logger.error("Error encountered running diagnostic. See logs for additional information.  Exiting application.", e);
+         throw new RuntimeException("Diagnostic runtime error", e);
       }
 
    }
