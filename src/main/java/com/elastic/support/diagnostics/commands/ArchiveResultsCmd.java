@@ -5,6 +5,7 @@ import com.elastic.support.diagnostics.DiagnosticContext;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.compress.compressors.CompressorOutputStream;
+import org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.apache.commons.compress.utils.IOUtils;
 
@@ -19,13 +20,27 @@ public class ArchiveResultsCmd extends AbstractDiagnosticCmd {
       logger.info("Archiving diagnostic results.");
 
       try {
+         boolean bzip = context.getInputParams().isBzip();
+         String ext = "";
+         if (bzip){
+            ext = ".bz2";
+         }
+         else{
+            ext = ".gz";
+         }
+
          String dir = context.getTempDir();
          File srcDir = new File(dir);
-         String filename = dir + "-" + SystemProperties.getFileDateString() + ".tar.bz2";
+         String filename = dir + "-" + SystemProperties.getFileDateString() + ".tar" + ext;
 
          FileOutputStream fout = new FileOutputStream(filename);
-         //GZIPOutputStream gzout = new GZIPOutputStream(fout);
-         CompressorOutputStream cout = new GzipCompressorOutputStream(fout);
+         CompressorOutputStream cout = null;
+         if(bzip){
+            cout = new GzipCompressorOutputStream(fout);
+         }
+         else {
+            cout = new BZip2CompressorOutputStream(fout);
+         }
          TarArchiveOutputStream taos = new TarArchiveOutputStream(cout);
 
          taos.setBigNumberMode(TarArchiveOutputStream.BIGNUMBER_STAR);

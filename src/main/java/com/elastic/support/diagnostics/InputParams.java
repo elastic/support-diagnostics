@@ -37,8 +37,11 @@ public class InputParams {
    @Parameter(names = {"--interval"}, description = "Elapsed time in seconds between diangostic runs when in repeating mode.  Minimum value is 30.")
    private long interval = 30;
 
+   @Parameter(names = {"--bzip"}, description = "Set this option true to use bzip istead of gzip.")
+   private boolean isBzip = false;
+
    @Parameter(names = {"--archivedLogs"}, description = "Get archived logs in addition to current ones if present - No value required, only the option.")
-   private boolean archivedLogs;
+   private boolean archivedLogs=false;
 
    @Parameter(names = {"--scrub"}, description = "Set to true to use the scrub.yml dictionary to scrub logs and config files.  See KB for more info.")
    private boolean scrubFiles = false;
@@ -173,6 +176,14 @@ public class InputParams {
 
    public void setArchivedLogs(boolean archivedLogs) {
       this.archivedLogs = archivedLogs;
+   }
+
+   public boolean isBzip() {
+      return isBzip;
+   }
+
+   public void setBzip(boolean bzip) {
+      isBzip = bzip;
    }
 
    public String getUrl() {
