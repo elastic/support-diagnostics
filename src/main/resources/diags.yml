@@ -55,7 +55,8 @@ restQueries-1:
   version: ""
   nodes: "_nodes?all&pretty&human"
   warmers: "_all/_warmer"
-  watcher: "/_watcher/stats?emit_stacktraces=true"
+  watcher_stats: "/_watcher/stats/_all"
+  watcher_stack: "/_watcher/stats?emit_stacktraces=true"
   templates: "_template?pretty"
 
 restQueries-2:
@@ -93,7 +94,8 @@ restQueries-2:
   version: ""
   nodes: "_nodes?all&pretty&human"
   warmers: "_all/_warmer"
-  watcher: "/_watcher/stats?emit_stacktraces=true"
+  watcher_stats: "/_watcher/stats/_all"
+  watcher_stack: "/_watcher/stats?emit_stacktraces=true"
   templates: "_template?pretty"
   nodeattrs: "/_cat/nodeattrs"
   tasks: "_tasks"
