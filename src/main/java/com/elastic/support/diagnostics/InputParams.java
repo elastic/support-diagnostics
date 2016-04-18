@@ -25,7 +25,7 @@ public class InputParams {
    @Parameter(names = {"--ssl", "--https"}, description = "Use SSL?  No value required, only the option.")
    private boolean isSsl = false;
 
-   @Parameter(names = {"--type"}, description ="Diagnostic type to run. Enter standard, remote, or logstash. Default is standard.  Remote will suppress retrieval of logs, configuration and system command info.")
+   @Parameter(names = {"--type"}, description ="Diagnostic type to run. Enter standard, remote, or logstash. Default is standard and remote will suppress retrieval of logs, configuration and system command info.")
    private String diagType = "standard";
 
    @Parameter(names = {"--ptp"}, description = "Insecure plain text password - warning, may exposure access.")
