@@ -36,10 +36,10 @@ public class ArchiveResultsCmd extends AbstractDiagnosticCmd {
          FileOutputStream fout = new FileOutputStream(filename);
          CompressorOutputStream cout = null;
          if(bzip){
-            cout = new GzipCompressorOutputStream(fout);
+            cout = new BZip2CompressorOutputStream(fout);
          }
          else {
-            cout = new BZip2CompressorOutputStream(fout);
+            cout = new GzipCompressorOutputStream(fout);
          }
          TarArchiveOutputStream taos = new TarArchiveOutputStream(cout);
 
