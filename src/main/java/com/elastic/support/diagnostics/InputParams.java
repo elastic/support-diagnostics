@@ -4,7 +4,7 @@ import com.beust.jcommander.*;
 
 public class InputParams {
 
-   @Parameter(names = {"-?", "--help"}, help = true)
+   @Parameter(names = {"-?", "--help"}, description = "Help contents.", help = true)
    private boolean help;
 
    @Parameter(names = {"-o", "--out", "--output", "--outputDir"}, description = "Fully qualified path to output directory or c for current working directory.")
@@ -13,10 +13,10 @@ public class InputParams {
    @Parameter(names = {"-h", "--host",}, description = "Required field.  Hostname, IP Address, or localhost.  HTTP access must be enabled.")
    private String host = "";
 
-   @Parameter(names = {"--port"}, description = "HTTP or HTTPS listening port. Defaults to 9200")
+   @Parameter(names = {"--port"}, description = "HTTP or HTTPS listening port. Defaults to 9200.")
    private int port = 9200;
 
-   @Parameter(names = {"-u", "--user"}, description = "Username")
+   @Parameter(names = {"-u", "--user"}, description = "Username.")
    private String username;
 
    @Parameter(names = {"-p", "--password", "--pwd"}, description = "Prompt for a password?  No password value required, only the option. Hidden from the command line on entry.", password = true)
@@ -50,6 +50,7 @@ public class InputParams {
    private boolean skipVerification = false;
 
    private boolean secured = false;
+   private boolean wasPortSet = false;
 
    public boolean isSkipVerification() {
       return skipVerification;
@@ -89,6 +90,7 @@ public class InputParams {
 
    public void setPort(int port) {
       this.port = port;
+      wasPortSet = true;
    }
 
    public String getUsername() {
@@ -188,6 +190,12 @@ public class InputParams {
 
    public String getUrl() {
       String protocol;
+
+      if(diagType.equalsIgnoreCase("logstash")){
+         if(! wasPortSet){
+            this.port = 9600;
+         }
+      }
 
       if (this.isSsl) {
          protocol = "https";

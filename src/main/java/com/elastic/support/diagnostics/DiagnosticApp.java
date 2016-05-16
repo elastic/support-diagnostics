@@ -43,7 +43,6 @@ class DiagnosticApp {
          long interval = inputs.getInterval() * 1000;
 
          for (int i = 1; i <= reps; i++) {
-            //diags.run(inputs);
             dc.runDiagnostic(ctx);
             System.out.println("Run " + i + " of " + reps + " completed.");
             if (reps > 1) {

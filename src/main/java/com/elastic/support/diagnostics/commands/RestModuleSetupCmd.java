@@ -29,9 +29,6 @@ public class RestModuleSetupCmd extends AbstractDiagnosticCmd {
          }
 
          DiagnosticRequestFactory diagnosticRequestFactory = new DiagnosticRequestFactory(connectTimeout, requestTimeout, isSecured, user, pass);
-         //RestTemplate restTemplate = new RestTemplate(diagnosticRequestFactory.getSslReqFactory());
-         //HttpEntity<String> request = configureAuth(context.getInputParams());
-         //RestModule restModule = new RestModule(restTemplate, request);
          HttpClient client = null;
          if (bypassVerify) {
             client = diagnosticRequestFactory.getUnverifiedSslClient();
@@ -51,21 +48,4 @@ public class RestModuleSetupCmd extends AbstractDiagnosticCmd {
       return true;
    }
 
-/*   public HttpEntity<String> configureAuth(InputParams inputs) {
-
-      HttpHeaders headers = new HttpHeaders();
-
-      // If we need authentication
-      if (inputs.isSecured()) {
-         String plainCreds = inputs.getUsername()
-            + ":" + inputs.getPassword();
-         byte[] plainCredsBytes = plainCreds.getBytes();
-         byte[] base64CredsBytes = Base64.encodeBase64(plainCredsBytes);
-         String base64Creds = new String(base64CredsBytes);
-         headers.add("Authorization", "Basic " + base64Creds);
-      }
-
-      return new HttpEntity<>(headers);
-
-   }*/
 }

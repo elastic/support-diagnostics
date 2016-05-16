@@ -10,6 +10,7 @@ textFileExtensions:
   - cat_master
   - cat_nodes
   - cat_indices
+  - cat_fielddata
   - cat_count
   - cat_segments
   - cat_health
@@ -19,9 +20,8 @@ textFileExtensions:
   - cat_recovery
   - watcher
 
-
 restQueries-1:
-  alias: "_alias?pretty"
+  alias: "_alias?pretty&human"
   allocation: "_cat/allocation?v"
   cat_master: "_cat/master?format=json"
   cat_nodes: "_cat/nodes?v"
@@ -32,18 +32,19 @@ restQueries-1:
   cat_pending_tasks: "_cat/pending_tasks?v"
   cat_aliases: "_cat/aliases?v"
   cat_thread_pool: "_cat/thread_pool?v"
-  cat_fielddata: "_cat/fielddata?fields=*&format=json&pretty"
+#  cat_fielddata: "_cat/fielddata?fields=*&format=json&pretty"
+  cat_fielddata: "_cat/fielddata?v"
   cat_shards: "_cat/shards"
   cat_recovery: "_cat/recovery?v"
-  cluster_health: "_cluster/health?pretty"
+  cluster_health: "_cluster/health?pretty&human"
   cluster_pending_tasks: "_cluster/pending_tasks?pretty&human"
-  cluster_settings: "_cluster/settings?pretty"
-  cluster_state: "_cluster/state?pretty"
-  cluster_stats: "_cluster/stats?&pretty=human&output_uuid=true"
-  count: "_count?pretty"
+  cluster_settings: "_cluster/settings?pretty&human"
+  cluster_state: "_cluster/state?pretty&human"
+  cluster_stats: "_cluster/stats?pretty&human&output_uuid=true"
+  count: "_count?pretty&human"
   indices_stats: "_stats?pretty&human"
-  licenses: "_licenses?pretty"
-  mapping: "_mapping?pretty"
+  licenses: "_licenses?pretty&human"
+  mapping: "_mapping?pretty&human"
   nodes_hot_threads: "_nodes/hot_threads?threads=10000"
   nodes_stats: "_nodes/stats?pretty&human"
   fielddata_stats: "/_nodes/stats/indices/fielddata?level=indices&pretty=true&fields=*"
@@ -51,13 +52,13 @@ restQueries-1:
   plugins: "_cat/plugins?v"
   recovery: "_recovery"
   segments: "_segments?pretty&human"
-  settings: "_settings?pretty"
+  settings: "_settings?pretty&human"
   version: ""
   nodes: "_nodes?all&pretty&human"
   warmers: "_all/_warmer"
   watcher_stats: "/_watcher/stats/_all"
   watcher_stack: "/_watcher/stats?emit_stacktraces=true"
-  templates: "_template?pretty"
+  templates: "_template?pretty&human"
 
 restQueries-2:
   alias: "_alias?pretty"
@@ -90,7 +91,7 @@ restQueries-2:
   recovery: "_recovery"
   shards: "_cat/shards?format=json"
   segments: "_segments?pretty&human"
-  settings: "_settings?pretty"
+  settings: "_settings?pretty&human"
   version: ""
   nodes: "_nodes?all&pretty&human"
   warmers: "_all/_warmer"
@@ -98,11 +99,16 @@ restQueries-2:
   watcher_stack: "/_watcher/stats?emit_stacktraces=true"
   templates: "_template?pretty"
   nodeattrs: "/_cat/nodeattrs"
-  tasks: "_tasks"
-
+  tasks: "_tasks?pretty&human"
 
 logstash:
-
+  version: "?pretty&human"
+  hot_threads: "_node/hot_threads?pretty&human"
+  node_stats: "_node/stats/?pretty&human"
+  event_stats: "_node/stats/events?pretty&human"
+  jvm_node_stats: "_node/stats/jvm?pretty&human"
+  jvm_stats: "_stats/jvm?pretty&human"
+  plugins: "_plugins?pretty&human"
 
 linuxOS:
   top: "top -b -n1"
