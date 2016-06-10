@@ -118,13 +118,16 @@ linuxOS:
   top_threads: "top -b -n1 -H"
   uname: "uname -a -r"
   proc-limit: "cat /proc/PID/limits"
+  jps: "jps -l -m -v"
 
 macOS:
   top: "top -l 1"
   netstat: "netstat -an"
   process-list: "ps -ef"
   ulimit: "ulimit -a"
+  jps: "jps -l -m -v"
 
 winOS:
   process-list: "tasklist /v"
   netstat: "netstat -ano"
+  jps: "jps -l -m -v"
