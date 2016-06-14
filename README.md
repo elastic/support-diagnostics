@@ -9,79 +9,61 @@ The support diagnostic utility is a Java executable that will interrogate the no
 
 ## Run Requirements
 * JRE - Oracle or OpenJDK, 1.7 or 1.8
-* JAVA_HOME environment variable should point to the Java installation directory.  If JAVA_HOME is not found, the utility will attempt to locate a distribution but if errors occur it may be necessary to set this manually.
-* Account running the utility must have read access to the Elasticsearch files and write access to the output location.
+* It is recommended that you set the JAVA_HOME environment variable.  It should point to the Java installation directory.  If JAVA_HOME is not found, the utility will attempt to locate a distribution but if errors occur it may be necessary to set this manually.
+* The system account running the utility must have read access to the Elasticsearch files and write access to the output location.
+* If you are using Shield the supplied user id must have permission to execute the diagnostic URL's.
 * Linux, Windows, and Mac OSX are supported.
+* Docker installations may have issues depending on the individual configuration.
 
 ## Installation And Usage Instructions
-* Download the latest release from [here](https://github.com/elastic/elasticsearch-support-diagnostics/releases/latest).
+* Download [support-diagnostics-current.zip](https://github.com/elastic/elasticsearch-support-diagnostics/releases/latest) from the Github release area.
 * Unzip the support-diagnostics-<version>-dist.zip into the directory from which you intend to run the application.
 * Switch to the diagnostics distribution directory.
 * Run the application via the diagnostics.sh or diagnostics.bat script. The host name or IP address used by the HTTP connector of the node is required.
-* If you omit the --host parameter you will be presented with a list of network interfaces to choose from.  You'll also be required to enter a port, even if you are running on the default.  If the selections do not specify a listening interface the utility will fail and you will need to run it again.
-* Executing the application with --? or --help will display the help command output.
-* Supplied arguments are not required to be in any particular order.
+* A hostname or IP address must now be specified via the --host parameter. This is due to the changes in default port binding what were introduced starting with version 2.
+* The utility will still attempt to use a default listening port of 9200 if you do not specify one.
+* If prompted, you will also need to enter the port, even if it is set for the default of 9200.
+* If the utility cannot find a running ES version for that host/port combination the utility will exit and you will need to run it again.
+* Input parameters may be specified in any order.
+* When using Shield authentication, do not specify a password.  Using the -p option will bring up a prompt for you to type one that will not be displayed on the command line.
+* To get help for input options run the diagnostic with the --help option
+* An archive with the format <cluster name>-cluster-diagnostic-<Date Time Stamp>.tar.gz will be created in the working or output directory.
+* You can specify additional java options such as a higher -Xmx value by setting the environment variable DIAG_JAVA_OPTS.
+* A diagnostic.log file will be generated in the installation directory of the diagnostic utility - the output of the console, which will include both progress and error messages, will be replicated in that file.  It will be appended for each run and rolled over daily if not removed.
+* Additional compression can be obtained by running with the --bzip option.
+* To include all logs, not just today's use the --archivedLogs option.
+* To script the utility when using Shield, use the --ptp option to allow the addition of a plain text password via the command line.  Note that this is inherently insecure so use at your own risk.
+* --noVerify will bypass hostname verification with SSL. Again, this is a security hole so use at your own risk.
 
-## Simple Examples
-  * ./diagnostics.sh --host 192.168.137.1
-  * ./diagnostics.sh --host 192.168.137.1 --port 9201
+## Examples
+ *NOTE:* Windows users use diagnostics instead of ./diagnostics.sh
+
+## Getting Command Line Help
+ * /diagnostics.sh --help
+
+## Basic Runs
+  * ./diagnostics.sh --host 192.168.137.10
+  * ./diagnostics.sh --host 192.168.137.10 --port 9201
   
 ## Running remotely - does not collect logs, configs or run system commands.  Can be executed from a desktop without ES installed.
-  * ./diagnostics.sh --host 192.168.137.1 --type remote
+  * ./diagnostics.sh --host 192.168.137.10 --type remote
+  
+## Specifying a custom output directory
+  *  ./diagnostics.sh --host 192.168.137.10 -o <full path to output directory>
 
 ## Using Shield Authentication
-  * ./diagnostics.sh --host 192.168.137.1 -u <your username> -p
-  * ./diagnostics.sh --host 192.168.137.1 --user <your username> -p
-  * ./diagnostics.sh --host 192.168.137.1 --user <your username> --password
+  * ./diagnostics.sh --host 192.168.137.10 -u <your username> -p
+  * ./diagnostics.sh --host 192.168.137.10 --user <your username> -p
+  * ./diagnostics.sh --host 192.168.137.10 --user <your username> --password
 
   * Do not specify a password on the command line, only the flag.  You will be prompted for the password and it will be hidden.
   
 ## Using Shield Authentication And SSL
-  * ./diagnostics.sh --host 192.168.137.1 -u <your username> -p -s
+  * ./diagnostics.sh --host 192.168.137.10 -u <your username> -p -s
 
-### Help command content
-``````
-  Options:
-    -h, -?, --help
-       Default: false
-   --host
-       Hostname, IP Address, or localhost if a node is present on this host that
-       is part of the cluster and that has HTTP access enabled. Required.
-   --ssl, --https
-       Use SSL?  No value required, only the option.
-       Default: false
-    --port, --listen
-       HTTP or HTTPS listening port.
-       Default: 9200
-    -o, --out,  --output, --outputDir
-       Fully qualified path to output directory or c for current working
-       directory.
-       Default: current working directory
-    -p, --password, --pwd
-       Prompt for a password?  No password value required, only the option.
-       Hidden from the command line on entry.
-    -u, --user
-       Username
-     --type  
-       Diagnostic type to run. Enter standard or remote. 'remote' will suppress retrieval of logs, configuration and system command
-           info.
-           Default: standard   
-  Exotic Options: Experimental, Use at your own risk.
-    --scrub
-           Set to true to use the scrub.yml dictionary to scrub logs and config
-           files.  See KB for more info.   
-    --ptp Insecure plain text password - warning, may exposure access.
-           Default: <empty string> 
-    --noVerify
-       Use this option to bypass hostname verification for certificate. This is
-       inherently unsafe and NOT recommended.
-       Default: false    
-    --archivedLogs
-       Get archived logs in addition to current ones if present - No value
-       required, only the option.
-       Default: false    
-    --reps
-       Number of times to execute the diagnostic. Use to create multiple runs at timed intervals.
-    --interval
-       Elapsed time in seconds between diangostic runs when in repeating mode.  Minimum value is 30.
-
+# Troubleshooting
+  * Make sure the account you are running from has read access to all the Elasticsearch log and config directories.  This account must have write access to any directory you are using for output.
+  * Make sure you have a valid Java installation that the JAVA_HOME environment variable is pointing to.
+  * If you are not in the installation directory CD in and run it from there.
+  * If you encounter OutOfMemoryExceptions, use the DIAG_JAVA_OPTS environment variable to set an -Xmx value greater than the standard 2g.  Start with -Xmx4g and move up from there if necessary.
+  * All errors are logged to diagnostics.log and will be written to the working directory.  If reporting an issue make sure to include that.
