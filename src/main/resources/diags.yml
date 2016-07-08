@@ -95,10 +95,12 @@ restQueries-2:
   version: ""
   nodes: "_nodes?all&pretty&human"
   warmers: "_all/_warmer"
-  watcher_stats: "/_watcher/stats/_all"
-  watcher_stack: "/_watcher/stats?emit_stacktraces=true"
+  watcher_stats: "_watcher/stats/_all"
+  watcher_stack: "_watcher/stats/emit_stacktraces=true"
+  shield_users: "_shield/user?pretty"
+  shield_roles: "_shield/role?pretty"
   templates: "_template?pretty"
-  nodeattrs: "/_cat/nodeattrs"
+  nodeattrs: "_cat/nodeattrs"
   tasks: "_tasks?pretty&human"
 
 logstash:
