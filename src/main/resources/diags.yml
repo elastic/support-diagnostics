@@ -1,5 +1,5 @@
 # REST timeout settings - note:values are in milliseconds
-requestTimeout: 60000
+requestTimeout: 300000
 connectTimeout: 60000
 
 textFileExtensions:
@@ -102,13 +102,10 @@ restQueries-2:
   tasks: "_tasks?pretty&human"
 
 logstash:
-  version: "?pretty&human"
-  hot_threads: "_node/hot_threads?pretty&human"
-  node_stats: "_node/stats/?pretty&human"
-  event_stats: "_node/stats/events?pretty&human"
-  jvm_node_stats: "_node/stats/jvm?pretty&human"
-  jvm_stats: "_stats/jvm?pretty&human"
-  plugins: "_plugins?pretty&human"
+  version: "?pretty"
+  node: "_node?pretty"
+  node_stats: "_node/stats?pretty"
+  nodes_hot_threads: "_node/hot_threads?human=true"
 
 linuxOS:
   top: "top -b -n1"

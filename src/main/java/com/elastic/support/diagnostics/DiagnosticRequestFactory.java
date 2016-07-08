@@ -15,6 +15,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSession;
+import java.io.FileInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
 public class DiagnosticRequestFactory {
@@ -24,12 +31,28 @@ public class DiagnosticRequestFactory {
    private Integer connectTimeout;
    private Integer requestTimeout;
    private boolean isSecured;
+   KeyStore keystore;
+   private String keystorePass;
+   private boolean userCert;
    CredentialsProvider credentialsProvider  = new BasicCredentialsProvider();
 
-   public DiagnosticRequestFactory(int connectTimeout, int requestTimeout, boolean isSecured, String user, String pass) {
+   public DiagnosticRequestFactory(int connectTimeout, int requestTimeout, boolean isSecured,
+                                   String user, String pass, String keystoreFile, String keystorePass) {
       this.requestTimeout = requestTimeout;
       this.connectTimeout = requestTimeout;
       this.isSecured = isSecured;
+      this.keystorePass = keystorePass;
+
+      if(keystoreFile != null && keystorePass != null){
+         try {
+            this.keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+            this.keystore.load(new FileInputStream(keystoreFile), keystorePass.toCharArray());
+            userCert = true;
+         } catch (Exception e) {
+            logger.error("Error loading input keystore", e);
+            throw new RuntimeException("Could not create request context");
+         }
+      }
 
       if (isSecured){
          credentialsProvider.setCredentials(
@@ -50,7 +73,7 @@ public class DiagnosticRequestFactory {
             .setConnectTimeout(connectTimeout)
             .setSocketTimeout(requestTimeout).build();
 
-         if(isSecured){
+         if(isSecured && !userCert){
             httpClient = HttpClients.custom()
                .setDefaultRequestConfig(requestConfig)
                .setDefaultCredentialsProvider(credentialsProvider)
@@ -60,11 +83,33 @@ public class DiagnosticRequestFactory {
                   )
                ).build();
          }
+         else if(isSecured && userCert){
+
+            httpClient = HttpClients.custom()
+               .setDefaultRequestConfig(requestConfig)
+               .setDefaultCredentialsProvider(credentialsProvider)
+               .setSSLSocketFactory(new SSLConnectionSocketFactory(
+                  SSLContexts.custom()
+                     .loadTrustMaterial(null, new ShieldDiagnosticStrategy())
+                     .loadKeyMaterial(keystore, keystorePass.toCharArray())
+                        .build()
+                  )
+               ).build();
+
+         }
+         else if (!isSecured && userCert){
+            httpClient = HttpClients.custom()
+               .setSSLSocketFactory(new SSLConnectionSocketFactory(SSLContexts.custom()
+                  .loadTrustMaterial(null, new ShieldDiagnosticStrategy())
+                  .loadKeyMaterial(keystore, keystorePass.toCharArray())
+                  .build()
+                  )
+               ).build();         }
          else {
             httpClient = HttpClients.custom()
                .setSSLSocketFactory(new SSLConnectionSocketFactory(SSLContexts.custom()
                      .loadTrustMaterial(null, new ShieldDiagnosticStrategy())
-                     .build()
+                  .build()
                   )
                ).build();
          }
@@ -81,12 +126,31 @@ public class DiagnosticRequestFactory {
       logger.info("Retrieving Unverified SSL HTTP client - this is NOT RECOMMENDED");
 
       try {
-         if(isSecured){
+         if(isSecured && !userCert){
             httpClient = HttpClients.custom()
                .setDefaultCredentialsProvider(credentialsProvider)
                .setSSLSocketFactory(new SSLConnectionSocketFactory(
                   SSLContexts.custom().
                      loadTrustMaterial(null, new ShieldDiagnosticStrategy())
+                     .build(), new BypassHostnameVerifier()))
+               .build();
+         }
+         else if (isSecured && userCert){
+            httpClient = HttpClients.custom()
+               .setDefaultCredentialsProvider(credentialsProvider)
+               .setSSLSocketFactory(new SSLConnectionSocketFactory(
+                  SSLContexts.custom()
+                     .loadTrustMaterial(null, new ShieldDiagnosticStrategy())
+                     .loadKeyMaterial(keystore, keystorePass.toCharArray())
+                     .build(), new BypassHostnameVerifier()))
+               .build();
+         }
+         else if (!isSecured && userCert){
+            httpClient = HttpClients.custom()
+               .setSSLSocketFactory(new SSLConnectionSocketFactory(
+                  SSLContexts.custom()
+                     .loadTrustMaterial(null, new ShieldDiagnosticStrategy())
+                     .loadKeyMaterial(keystore, keystorePass.toCharArray())
                      .build(), new BypassHostnameVerifier()))
                .build();
          }

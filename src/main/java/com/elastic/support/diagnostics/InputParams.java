@@ -1,6 +1,7 @@
 package com.elastic.support.diagnostics;
 
 import com.beust.jcommander.*;
+import com.elastic.support.SystemProperties;
 
 public class InputParams {
 
@@ -19,13 +20,13 @@ public class InputParams {
    @Parameter(names = {"-u", "--user"}, description = "Username.")
    private String username;
 
-   @Parameter(names = {"-p", "--password", "--pwd"}, description = "Prompt for a password?  No password value required, only the option. Hidden from the command line on entry.", password = true)
+   @Parameter(names = {"-p", "--password"}, description = "Prompt for a password?  No password value required, only the option. Hidden from the command line on entry.", password = true)
    private String password;
 
    @Parameter(names = {"--ssl", "--https"}, description = "Use SSL?  No value required, only the option.")
    private boolean isSsl = false;
 
-   @Parameter(names = {"--type"}, description ="Diagnostic type to run. Enter standard, remote, or logstash. Default is standard and remote will suppress retrieval of logs, configuration and system command info.")
+   @Parameter(names = {"--type"}, description ="Diagnostic type to run. Enter standard, remote, logstash, or logstash-remote. Default is standard and remote will suppress retrieval of logs, configuration and system command info.")
    private String diagType = "standard";
 
    @Parameter(names = {"--ptp"}, description = "Insecure plain text password - warning, may exposure access.")
@@ -49,8 +50,30 @@ public class InputParams {
    @Parameter(names = {"--noVerify"}, description = "Use this option to bypass hostname verification for certificate. This is inherently unsafe and NOT recommended.")
    private boolean skipVerification = false;
 
+   @Parameter(names= {"--keystore"}, description = "Keystore for client certificate.")
+   private String keystore;
+
+   @Parameter(names= {"--keystorePass"}, description = "Keystore password for client certificate.")
+   private String keystorePass;
+
    private boolean secured = false;
    private boolean wasPortSet = false;
+
+   public String getKeystore() {
+      return keystore;
+   }
+
+   public void setKeystore(String keystore) {
+      this.keystore = keystore;
+   }
+
+   public String getKeystorePass() {
+      return keystorePass;
+   }
+
+   public void setKeystorePass(String keystorePass) {
+      this.keystorePass = keystorePass;
+   }
 
    public boolean isSkipVerification() {
       return skipVerification;
@@ -193,7 +216,7 @@ public class InputParams {
 
       if(diagType.equalsIgnoreCase("logstash")){
          if(! wasPortSet){
-            this.port = 9600;
+            this.port = SystemProperties.LOGSTASH_PORT;
          }
       }
 

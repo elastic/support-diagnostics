@@ -1,5 +1,6 @@
 package com.elastic.support.diagnostics;
 
+import com.elastic.support.SystemProperties;
 import com.elastic.support.chain.Context;
 
 import java.util.ArrayList;
@@ -8,125 +9,134 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-public class DiagnosticContext extends Context{
+public class DiagnosticContext extends Context {
 
-    InputParams inputParams;
-    RestModule restModule;
-    Map config;
-    List<String> messages = new ArrayList<String>();
-    String version="";
-    String clusterName="";
-    String outputDir="";
-    String tempDir="";
-    String manifest="";
-    String nodeString="";
-    String hostNode="";
-    String pid;
-    Set<String> hostIpList;
+   InputParams inputParams;
+   RestModule restModule;
+   Map config;
+   List<String> messages = new ArrayList<String>();
+   String version = "";
+   String clusterName = "";
+   String outputDir = "";
+   String tempDir = "";
+   String manifest = "";
+   String nodeString = "";
+   String hostNode = "";
+   String diagName = SystemProperties.ES_DIAG;
+   String pid;
+   Set<String> hostIpList;
 
-    private static final String verTwo = "2(\\.\\d+)+";
+   public String getDiagName() {
+      return diagName;
+   }
 
-    public Set<String> getHostIpList() {
-        return hostIpList;
-    }
+   public void setDiagName(String diagName) {
+      this.diagName = diagName;
+   }
 
-    public void setHostIpList(Set<String> hostIpList) {
-        this.hostIpList = hostIpList;
-    }
+   private static final String verTwo = "2(\\.\\d+)+";
 
-    public String getPid() {
-        return pid;
-    }
+   public Set<String> getHostIpList() {
+      return hostIpList;
+   }
 
-    public void setPid(String pid) {
-        this.pid = pid;
-    }
+   public void setHostIpList(Set<String> hostIpList) {
+      this.hostIpList = hostIpList;
+   }
 
-    public String getHostNode() {
-        return hostNode;
-    }
+   public String getPid() {
+      return pid;
+   }
 
-    public void setHostNode(String hostNode) {
-        this.hostNode = hostNode;
-    }
+   public void setPid(String pid) {
+      this.pid = pid;
+   }
 
-    public String getNodeString() {
-        return nodeString;
-    }
+   public String getHostNode() {
+      return hostNode;
+   }
 
-    public void setNodeString(String nodeString) {
-        this.nodeString = nodeString;
-    }
+   public void setHostNode(String hostNode) {
+      this.hostNode = hostNode;
+   }
 
-    public String getTempDir() {
-        return tempDir;
-    }
+   public String getNodeString() {
+      return nodeString;
+   }
 
-    public void setTempDir(String tempDir) {
-        this.tempDir = tempDir;
-    }
+   public void setNodeString(String nodeString) {
+      this.nodeString = nodeString;
+   }
 
-    public void addMessage(String msg){
-        messages.add(msg);
-    }
+   public String getTempDir() {
+      return tempDir;
+   }
 
-    public String getOutputDir() {
-        return outputDir;
-    }
+   public void setTempDir(String tempDir) {
+      this.tempDir = tempDir;
+   }
 
-    public void setOutputDir(String outputDir) {
-        this.outputDir = outputDir;
-    }
+   public void addMessage(String msg) {
+      messages.add(msg);
+   }
 
-    public InputParams getInputParams() {
-        return inputParams;
-    }
+   public String getOutputDir() {
+      return outputDir;
+   }
 
-    public void setInputParams(InputParams inputParams) {
-        this.inputParams = inputParams;
-    }
+   public void setOutputDir(String outputDir) {
+      this.outputDir = outputDir;
+   }
 
-    public RestModule getRestModule() {
-        return restModule;
-    }
+   public InputParams getInputParams() {
+      return inputParams;
+   }
 
-    public void setRestModule(RestModule restModule) {
-        this.restModule = restModule;
-    }
+   public void setInputParams(InputParams inputParams) {
+      this.inputParams = inputParams;
+   }
 
-    public String getVersion() {
-        return version;
-    }
+   public RestModule getRestModule() {
+      return restModule;
+   }
 
-    public void setVersion(String version) {
-        this.version = version;
-    }
+   public void setRestModule(RestModule restModule) {
+      this.restModule = restModule;
+   }
 
-    public String getClusterName() {
-        return clusterName;
-    }
+   public String getVersion() {
+      return version;
+   }
 
-    public void setClusterName(String clusterName) {
-        this.clusterName = clusterName;
-    }
+   public void setVersion(String version) {
+      this.version = version;
+   }
 
-    public Map getConfig() {
-        return config;
-    }
+   public String getClusterName() {
+      return clusterName;
+   }
 
-    public void setConfig(Map config) {
-        this.config = config;
-    }
+   public void setClusterName(String clusterName) {
+      this.clusterName = clusterName;
+   }
 
-    public String getManifest() {
-        return manifest;
-    }
+   public Map getConfig() {
+      return config;
+   }
 
-    public void setManifest(String manifest) {
-        this.manifest = manifest;
-    }
+   public void setConfig(Map config) {
+      this.config = config;
+   }
 
-    public boolean isVersionTwoOrGreater(){
-        return Pattern.matches(verTwo, version);
-    }
+   public String getManifest() {
+      return manifest;
+   }
+
+   public void setManifest(String manifest) {
+      this.manifest = manifest;
+   }
+
+   public boolean isVersionTwoOrGreater() {
+      return Pattern.matches(verTwo, version);
+   }
 }

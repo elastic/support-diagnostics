@@ -19,12 +19,14 @@ import java.util.concurrent.TimeUnit;
 public class RestModule {
 
 
-   HttpClient client;
+   DiagnosticRequestFactory requestFactory;
+   boolean isBypassVerify;
 
    private final static Logger logger = LoggerFactory.getLogger(RestModule.class);
 
-   public RestModule(HttpClient client){
-      this.client = client;
+   public RestModule(DiagnosticRequestFactory requestFactory, boolean isBypassVerify){
+      this.requestFactory = requestFactory;
+      this.isBypassVerify = isBypassVerify;
    }
 
    public String submitRequest(String url){
@@ -32,6 +34,7 @@ public class RestModule {
       HttpResponse response = null;
       String result = "";
       try{
+         HttpClient client = getClient();
          HttpGet httpget = new HttpGet(url);
          response = client.execute(httpget);
          try {
@@ -70,6 +73,7 @@ public class RestModule {
       InputStream responseStream = null;
 
       try{
+         HttpClient client = getClient();
          FileOutputStream fos = new FileOutputStream(destination);
          HttpGet httpget = new HttpGet(url);
          response = client.execute(httpget);
@@ -88,7 +92,7 @@ public class RestModule {
             logger.error("Error writing response for " + queryName + " to disk.", e);
          } finally {
             HttpClientUtils.closeQuietly(response);
-            Thread.sleep(2000);
+            HttpClientUtils.closeQuietly(client);
          }
       }
       catch (Exception e){
@@ -118,6 +122,26 @@ public class RestModule {
             throw new RuntimeException("Authentication failure: invalid login credentials. " + code + "/" + msg);
          }
       }
+   }
+
+   private HttpClient getClient(){
+
+      HttpClient client = null;
+      try {
+
+         if (isBypassVerify) {
+            client = requestFactory.getUnverifiedSslClient();
+         } else {
+            client = requestFactory.getSslClient();
+         }
+      }
+      catch (Exception e){
+         logger.error("Could not create HTTP client.", e);
+         throw new RuntimeException(e);
+      }
+
+      return client;
+
    }
 
 }

@@ -1,5 +1,6 @@
 package com.elastic.support.diagnostics;
 
+import com.elastic.support.SystemProperties;
 import com.elastic.support.chain.Chain;
 import com.elastic.support.util.JsonYamlUtils;
 import org.slf4j.Logger;
@@ -12,7 +13,7 @@ public class DiagnosticChainExec {
 
    private static Logger logger = LoggerFactory.getLogger(DiagnosticChainExec.class);
 
-   public void runDiagnostic(DiagnosticContext context){
+   public void runDiagnostic(DiagnosticContext context) {
 
       try {
          Map<String, Object> diags = JsonYamlUtils.readYamlFromClasspath("diags.yml", true);
@@ -29,7 +30,13 @@ public class DiagnosticChainExec {
             throw new RuntimeException("Missing diags.yml");
          }
 
-         List<String> chain = (List) chains.get(context.getInputParams().getDiagType());
+         String diagType = context.getInputParams().getDiagType();
+
+         List<String> chain = (List) chains.get(diagType);
+
+         if (diagType.equals(SystemProperties.LOGSTASH_DIAG)) {
+            context.setDiagName(SystemProperties.LOGSTASH_DIAG + "-" + SystemProperties.ES_DIAG);
+         }
 
          Chain diagnostic = new Chain(chain);
          diagnostic.execute(context);

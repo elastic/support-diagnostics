@@ -28,15 +28,11 @@ public class RestModuleSetupCmd extends AbstractDiagnosticCmd {
             pass = context.getInputParams().getPassword();
          }
 
-         DiagnosticRequestFactory diagnosticRequestFactory = new DiagnosticRequestFactory(connectTimeout, requestTimeout, isSecured, user, pass);
-         HttpClient client = null;
-         if (bypassVerify) {
-            client = diagnosticRequestFactory.getUnverifiedSslClient();
-         } else {
-            client = diagnosticRequestFactory.getSslClient();
-         }
+         String keystore = context.getInputParams().getKeystore();
+         String keystorePass = context.getInputParams().getKeystorePass();
 
-         RestModule restModule = new RestModule(client);
+         DiagnosticRequestFactory diagnosticRequestFactory = new DiagnosticRequestFactory(connectTimeout, requestTimeout, isSecured, user, pass, keystore, keystorePass);
+         RestModule restModule = new RestModule(diagnosticRequestFactory, bypassVerify);
 
          context.setRestModule(restModule);
       } catch (Exception e) {

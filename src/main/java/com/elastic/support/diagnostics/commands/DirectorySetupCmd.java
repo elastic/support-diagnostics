@@ -18,7 +18,7 @@ public class DirectorySetupCmd extends AbstractDiagnosticCmd {
       String outputDir = setOutputDir(context.getInputParams());
       context.setOutputDir(outputDir);
       logger.info("Results will be written to: " + outputDir);
-      String tempDir = outputDir + SystemProperties.fileSeparator + "diagnostics";
+      String tempDir = outputDir + SystemProperties.fileSeparator + context.getDiagName();
       context.setTempDir(tempDir);
 
       // Create the temp directory - delete if first if it exists from a previous run

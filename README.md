@@ -34,7 +34,7 @@ The support diagnostic utility is a Java executable that will interrogate the no
 * To include all logs, not just today's use the --archivedLogs option.
 * To script the utility when using Shield, use the --ptp option to allow the addition of a plain text password via the command line.  Note that this is inherently insecure so use at your own risk.
 * --noVerify will bypass hostname verification with SSL. Again, this is a security hole so use at your own risk.
-
+* --keystore and --keystorePass allow you to specify client side certificates for authentication.
 ## Examples
  *NOTE:* Windows users use diagnostics instead of ./diagnostics.sh
 
@@ -44,10 +44,10 @@ The support diagnostic utility is a Java executable that will interrogate the no
 ## Basic Runs
   * ./diagnostics.sh --host 192.168.137.10
   * ./diagnostics.sh --host 192.168.137.10 --port 9201
-  
+
 ## Running remotely - does not collect logs, configs or run system commands.  Can be executed from a desktop without ES installed.
   * ./diagnostics.sh --host 192.168.137.10 --type remote
-  
+
 ## Specifying a custom output directory
   *  ./diagnostics.sh --host 192.168.137.10 -o <full path to output directory>
 
@@ -57,7 +57,7 @@ The support diagnostic utility is a Java executable that will interrogate the no
   * ./diagnostics.sh --host 192.168.137.10 --user <your username> --password
 
   * Do not specify a password on the command line, only the flag.  You will be prompted for the password and it will be hidden.
-  
+
 ## Using Shield Authentication And SSL
   * ./diagnostics.sh --host 192.168.137.10 -u <your username> -p -s
 

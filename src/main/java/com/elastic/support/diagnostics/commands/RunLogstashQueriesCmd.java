@@ -5,6 +5,7 @@ import com.elastic.support.diagnostics.DiagnosticContext;
 import com.elastic.support.diagnostics.InputParams;
 import com.elastic.support.diagnostics.RestModule;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -20,6 +21,7 @@ public class RunLogstashQueriesCmd extends AbstractDiagnosticCmd {
 
       Map<String, String> statements = (Map<String, String>) config.get("logstash");
       Set<Map.Entry<String, String>> entries = statements.entrySet();
+      List textFileExtensions = (List) config.get("textFileExtensions");
 
       logger.debug("Generating full diagnostic.");
 
@@ -30,7 +32,12 @@ public class RunLogstashQueriesCmd extends AbstractDiagnosticCmd {
          String url = inputs.getUrl() + "/" + query;
          logger.info("Currently running the following query:" + queryName);
 
-         String ext = ".json";
+         String ext;
+         if (textFileExtensions.contains(queryName)) {
+            ext = ".txt";
+         } else {
+            ext = ".json";
+         }
 
          fileName = context.getTempDir() + SystemProperties.fileSeparator + queryName + ext;
          restModule.submitRequest(url, queryName, fileName);
