@@ -25,7 +25,7 @@ public class DiagnosticChainExec {
          context.setConfig(diags);
 
          Map<String, Object> chains = JsonYamlUtils.readYamlFromClasspath("chains.yml", false);
-         if (diags.size() == 0) {
+         if (chains.size() == 0) {
             logger.error("Required config file chains.yml was not found. Exiting application.");
             throw new RuntimeException("Missing diags.yml");
          }
