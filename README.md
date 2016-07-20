@@ -35,6 +35,7 @@ The support diagnostic utility is a Java executable that will interrogate the no
 * To script the utility when using Shield, use the --ptp option to allow the addition of a plain text password via the command line.  Note that this is inherently insecure so use at your own risk.
 * --noVerify will bypass hostname verification with SSL. Again, this is a security hole so use at your own risk.
 * --keystore and --keystorePass allow you to specify client side certificates for authentication.
+
 ## Examples
  *NOTE:* Windows users use diagnostics instead of ./diagnostics.sh
 
