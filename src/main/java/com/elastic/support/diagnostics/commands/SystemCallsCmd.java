@@ -2,8 +2,11 @@ package com.elastic.support.diagnostics.commands;
 
 import com.elastic.support.SystemProperties;
 import com.elastic.support.diagnostics.DiagnosticContext;
+import org.apache.commons.io.FileUtils;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 import java.util.*;
 
 public class SystemCallsCmd extends AbstractDiagnosticCmd {
@@ -20,12 +23,10 @@ public class SystemCallsCmd extends AbstractDiagnosticCmd {
       List cmds = new ArrayList();
 
       while (iter.hasNext()) {
-
+         Map.Entry<String, String> entry =  iter.next();
+         String cmdLabel = entry.getKey();
+         String cmdText = entry.getValue();
          try {
-            Map.Entry<String, String> entry =  iter.next();
-            String cmdLabel = entry.getKey();
-            String cmdText = entry.getValue();
-
             // One off hack for process limits
             if (cmdLabel.equals("proc-limit")) {
                cmdText = "cat /proc/" + context.getPid() + "/limits";
@@ -41,7 +42,15 @@ public class SystemCallsCmd extends AbstractDiagnosticCmd {
             Process pr = pb.start();
             pr.waitFor();
          } catch (Exception e) {
-            logger.error("Error processing system command", e);
+            logger.error("Error processing system command:" + cmdLabel);
+            try{
+               FileOutputStream fos = new FileOutputStream(new File(context.getTempDir() + SystemProperties.fileSeparator + cmdLabel + ".txt"), true);
+               PrintStream ps = new PrintStream(fos);
+               e.printStackTrace(ps);
+            }
+            catch (Exception ie){
+               logger.error("Error processing system command", ie);
+            }
          } finally {
             cmds.clear();
          }
