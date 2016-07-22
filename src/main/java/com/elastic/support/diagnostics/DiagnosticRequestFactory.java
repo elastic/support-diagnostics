@@ -16,12 +16,7 @@ import org.slf4j.LoggerFactory;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSession;
 import java.io.FileInputStream;
-import java.io.File;
-import java.io.IOException;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
 public class DiagnosticRequestFactory {
@@ -173,34 +168,6 @@ public class DiagnosticRequestFactory {
       return HttpClients.createDefault();
    }
 
-/*   public HttpComponentsClientHttpRequestFactory getReqFactory() {
-      HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory(getClient());
-      setThresholds(factory);
-      return factory;
-   }
-
-   public HttpComponentsClientHttpRequestFactory getSslReqFactory() {
-
-      HttpClient client;
-
-      if(skipVerification){
-         client = getUnverifiedSslClient();
-      }
-      else{
-         client = getSslClient();
-      }
-
-      HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory(getSslClient());
-      setThresholds(factory);
-      return factory;
-   }
-
-   private void setThresholds(HttpComponentsClientHttpRequestFactory factory) {
-      // Anything over 30 seconds for either the initial connect
-      // or the read, pull the plug.
-      factory.setReadTimeout(requestTimeout);
-      factory.setConnectTimeout(connectTimeout);
-   }*/
 
    private class ShieldDiagnosticStrategy extends TrustSelfSignedStrategy {
 
@@ -224,7 +191,6 @@ public class DiagnosticRequestFactory {
       public boolean isTrusted(X509Certificate[] chain, String authType) {
          return true;
       }
-
    }
 
    /**

@@ -4,10 +4,6 @@ import com.elastic.support.diagnostics.DiagnosticContext;
 import com.elastic.support.diagnostics.DiagnosticRequestFactory;
 import com.elastic.support.diagnostics.RestModule;
 import org.apache.http.client.HttpClient;
-/*import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.web.client.RestTemplate;*/
-
 public class RestModuleSetupCmd extends AbstractDiagnosticCmd {
 
    public boolean execute(DiagnosticContext context) {
