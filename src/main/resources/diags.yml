@@ -166,6 +166,7 @@ linuxOS:
   jps: "jps -l -m -v"
   iostat: "iostat -c -d -x -t -m"
   sar: "sar -A"
+  dmesg: "dmesg"
 
 macOS:
   top: "top -l 1"
