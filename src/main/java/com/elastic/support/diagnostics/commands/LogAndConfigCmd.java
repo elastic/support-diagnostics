@@ -21,6 +21,10 @@ public class LogAndConfigCmd extends AbstractDiagnosticCmd {
 
    public boolean execute(DiagnosticContext context) {
 
+      if (context.getInputParams().isSkipLogs()){
+         return true;
+      }
+
       logger.info("Processing logs and configuration files.");
       try {
          Set hosts = context.getHostIpList();

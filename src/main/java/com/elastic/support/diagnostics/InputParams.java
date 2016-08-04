@@ -35,7 +35,7 @@ public class InputParams {
    @Parameter(names = {"--reps"}, description = "Number of times to execute the diagnostic. Use to create multiple runs at timed intervals.")
    private int reps = 1;
 
-   @Parameter(names = {"--interval"}, description = "Elapsed time in seconds between diangostic runs when in repeating mode.  Minimum value is 30.")
+   @Parameter(names = {"--interval"}, description = "Elapsed time in seconds between diagnostic runs when in repeating mode.  Minimum value is 30.")
    private long interval = 30;
 
    @Parameter(names = {"--bzip"}, description = "Set this option true to use bzip istead of gzip.")
@@ -56,8 +56,19 @@ public class InputParams {
    @Parameter(names= {"--keystorePass"}, description = "Keystore password for client certificate.")
    private String keystorePass;
 
+   @Parameter(names = {"--noLogs"}, description = "Use this option to suppress log collection.")
+   private boolean skipLogs = false;
+
    private boolean secured = false;
    private boolean wasPortSet = false;
+
+   public boolean isSkipLogs() {
+      return skipLogs;
+   }
+
+   public void setSkipLogs(boolean skipLogs) {
+      this.skipLogs = skipLogs;
+   }
 
    public String getKeystore() {
       return keystore;
