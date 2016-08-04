@@ -164,6 +164,8 @@ linuxOS:
   proc-limit: "cat /proc/PID/limits"
   cpu: "cat /proc/cpuinfo"
   jps: "jps -l -m -v"
+  iostat: "iostat -c -d -x -t -m"
+  sar: "sar -A"
 
 macOS:
   top: "top -l 1"
