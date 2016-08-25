@@ -31,7 +31,7 @@ public abstract class AbstractQueryCmd extends AbstractDiagnosticCmd {
       }
 
       String fileName = context.getTempDir() + SystemProperties.fileSeparator + queryName + ext;
-      restModule.submitRequest(url, queryName, fileName);
+      restModule.submitRequest(inputs.getProtocol(), inputs.getHost(), inputs.getPort(), query, queryName, fileName);
    }
 
 }

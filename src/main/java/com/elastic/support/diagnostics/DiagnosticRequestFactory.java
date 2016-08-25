@@ -164,11 +164,6 @@ public class DiagnosticRequestFactory {
       return httpClient;
    }
 
-   private HttpClient getClient() {
-      return HttpClients.createDefault();
-   }
-
-
    private class ShieldDiagnosticStrategy extends TrustSelfSignedStrategy {
 
       public ShieldDiagnosticStrategy() {

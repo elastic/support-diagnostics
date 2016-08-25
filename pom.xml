@@ -4,7 +4,7 @@
 
     <groupId>com.elasticsearch</groupId>
     <artifactId>support-diagnostics</artifactId>
-    <version>2.1.1</version>
+    <version>2.1.2-beta</version>
     <packaging>jar</packaging>
     <name>Support Diagnostics Utilities</name>
 
@@ -80,7 +80,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-compress</artifactId>
-            <version>1.10</version>
+            <version>1.12</version>
         </dependency>
 
     </dependencies>

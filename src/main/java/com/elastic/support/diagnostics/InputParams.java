@@ -119,6 +119,11 @@ public class InputParams {
    }
 
    public int getPort() {
+      if(diagType.equalsIgnoreCase("logstash")){
+         if(! wasPortSet){
+            return SystemProperties.LOGSTASH_PORT;
+         }
+      }
       return port;
    }
 
@@ -223,21 +228,15 @@ public class InputParams {
    }
 
    public String getUrl() {
-      String protocol;
+      return getProtocol() + "://" + getHost() + ":" + getPort();
+   }
 
-      if(diagType.equalsIgnoreCase("logstash")){
-         if(! wasPortSet){
-            this.port = SystemProperties.LOGSTASH_PORT;
-         }
-      }
-
+   public String getProtocol(){
       if (this.isSsl) {
-         protocol = "https";
+         return  "https";
       } else {
-         protocol = "http";
+         return "http";
       }
-
-      return protocol + "://" + host + ":" + port;
    }
 
    @Override

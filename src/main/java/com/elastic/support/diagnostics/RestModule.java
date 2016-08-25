@@ -1,11 +1,16 @@
 package com.elastic.support.diagnostics;
 
 import org.apache.commons.compress.utils.IOUtils;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.AuthCache;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.client.utils.HttpClientUtils;
 import org.apache.http.conn.HttpHostConnectException;
+import org.apache.http.impl.auth.BasicScheme;
+import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +19,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.concurrent.TimeUnit;
+
 
 public class RestModule {
 
@@ -29,14 +34,16 @@ public class RestModule {
       this.isBypassVerify = isBypassVerify;
    }
 
-   public String submitRequest(String url){
+   public String submitRequest(String protocol, String host, int port, String request){
 
       HttpResponse response = null;
       String result = "";
+      HttpHost httpHost = new HttpHost(host, port, protocol);
+      String url = protocol + "://" + host + ":" + port + "/" + request;
       try{
          HttpClient client = getClient();
          HttpGet httpget = new HttpGet(url);
-         response = client.execute(httpget);
+         response = client.execute(httpHost, httpget, getLocalContext(httpHost));
          try {
             org.apache.http.HttpEntity entity = response.getEntity();
             if (entity != null ){
@@ -67,16 +74,18 @@ public class RestModule {
 
    }
 
-   public void submitRequest(String url, String queryName, String destination){
+   public void submitRequest(String protocol, String host, int port, String request, String queryName, String destination){
 
       HttpResponse response = null;
       InputStream responseStream = null;
 
       try{
+         HttpHost httpHost = new HttpHost(host, port, protocol);
+
          HttpClient client = getClient();
          FileOutputStream fos = new FileOutputStream(destination);
-         HttpGet httpget = new HttpGet(url);
-         response = client.execute(httpget);
+         HttpGet httpget = new HttpGet(protocol + "://" + host + ":" + port + "/" + request);
+         response = client.execute(httpHost, httpget, getLocalContext(httpHost));
          try {
             org.apache.http.HttpEntity entity = response.getEntity();
             if (entity != null ){
@@ -96,7 +105,7 @@ public class RestModule {
          }
       }
       catch (Exception e){
-         if (url.contains("_license")) {
+         if (request.contains("_license")) {
             logger.info("There were no licenses installed");
          }
          else if (e.getMessage().contains("401 Unauthorized")) {
@@ -122,6 +131,19 @@ public class RestModule {
             throw new RuntimeException("Authentication failure: invalid login credentials. " + code + "/" + msg);
          }
       }
+   }
+
+   private HttpClientContext getLocalContext(HttpHost httpHost) throws Exception{
+      AuthCache authCache = new BasicAuthCache();
+      // Generate BASIC scheme object and add it to the local
+      // auth cache
+      BasicScheme basicAuth = new BasicScheme();
+      authCache.put(httpHost, basicAuth);
+
+      HttpClientContext localContext = HttpClientContext.create();
+      localContext.setAuthCache(authCache);
+
+      return localContext;
    }
 
    private HttpClient getClient(){
