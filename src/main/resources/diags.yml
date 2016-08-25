@@ -148,6 +148,7 @@ restQueries-5:
   tasks: "_tasks?pretty&human"
   pipelines: "_ingest/pipeline/*?pretty&human"
   allocation_explain: "_cluster/allocation/explain?include_yes_decisions&pretty"
+  shard_stores: "_shard_stores"
 
 logstash:
   version: "?pretty"
