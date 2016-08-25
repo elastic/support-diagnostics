@@ -7,6 +7,7 @@ standard:
   - com.elastic.support.diagnostics.commands.LogAndConfigCmd
   - com.elastic.support.diagnostics.commands.ScrubPasswordsCmd
   - com.elastic.support.diagnostics.commands.SystemCallsCmd
+  - com.elastic.support.diagnostics.commands.CompressedPointersCmd
   - com.elastic.support.diagnostics.commands.ScrubLogsCmd
   - com.elastic.support.diagnostics.commands.GenerateManifestCmd
   - com.elastic.support.diagnostics.commands.ArchiveResultsCmd

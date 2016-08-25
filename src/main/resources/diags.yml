@@ -7,18 +7,17 @@ textFileExtensions:
   - cat_shards
   - nodes_hot_threads
   - plugins
-  - cat_master
   - cat_nodes
   - cat_indices
   - cat_fielddata
   - cat_count
+  - cat_master
   - cat_segments
   - cat_health
   - cat_pending_tasks
   - cat_aliases
   - cat_thread_pool
   - cat_recovery
-  - watcher
   - nodeattrs
 
 restQueries-1:
@@ -83,6 +82,7 @@ restQueries-2:
   indices_stats: "_stats?pretty&human"
   licenses: "_license?pretty"
   mapping: "_mapping?pretty"
+  master: "_cat/master?format=json"
   nodes_hot_threads: "_nodes/hot_threads?threads=10000"
   nodes_stats: "_nodes/stats?pretty&human"
   fielddata_stats: "/_nodes/stats/indices/fielddata?level=indices&pretty=true&fields=*"
@@ -126,6 +126,7 @@ restQueries-5:
   indices_stats: "_stats?pretty&human"
   licenses: "_license?pretty"
   mapping: "_mapping?pretty"
+  master: "_cat/master?format=json"
   nodes_hot_threads: "_nodes/hot_threads?threads=10000"
   nodes_stats: "_nodes/stats?pretty&human"
   fielddata_stats: "/_nodes/stats/indices/fielddata?level=indices&pretty=true&fields=*"
