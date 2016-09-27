@@ -168,6 +168,7 @@ linuxOS:
   jps: "jps -l -m -v"
   iostat: "iostat -c -d -x -t -m"
   sar: "sar -A"
+  sysctl: "sysctl -a"
   dmesg: "dmesg"
 
 macOS:
