@@ -1,6 +1,6 @@
 package com.elastic.support.diagnostics.commands;
 
-import com.elastic.support.diagnostics.DiagnosticContext;
+import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;

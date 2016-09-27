@@ -1,7 +1,6 @@
-package com.elastic.support.diagnostics;
+package com.elastic.support.diagnostics.chain;
 
-import com.elastic.support.SystemProperties;
-import com.elastic.support.chain.Chain;
+import com.elastic.support.diagnostics.commands.Constants;
 import com.elastic.support.util.JsonYamlUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,8 +33,8 @@ public class DiagnosticChainExec {
 
          List<String> chain = (List) chains.get(diagType);
 
-         if (diagType.equals(SystemProperties.LOGSTASH_DIAG)) {
-            context.setDiagName(SystemProperties.LOGSTASH_DIAG + "-" + SystemProperties.ES_DIAG);
+         if (diagType.equals(Constants.LOGSTASH_DIAG)) {
+            context.setDiagName(Constants.LOGSTASH_DIAG + "-" + Constants.ES_DIAG);
          }
 
          Chain diagnostic = new Chain(chain);

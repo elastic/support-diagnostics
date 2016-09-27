@@ -1,7 +1,9 @@
-package com.elastic.support.diagnostics;
+package com.elastic.support.diagnostics.chain;
 
-import com.elastic.support.SystemProperties;
-import com.elastic.support.chain.Context;
+import com.elastic.support.diagnostics.InputParams;
+import com.elastic.support.diagnostics.chain.Context;
+import com.elastic.support.diagnostics.commands.Constants;
+import com.elastic.support.util.RestModule;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +24,7 @@ public class DiagnosticContext extends Context {
    String manifest = "";
    String nodeString = "";
    String hostNode = "";
-   String diagName = SystemProperties.ES_DIAG;
+   String diagName = Constants.ES_DIAG;
    String pid;
    Set<String> hostIpList;
 

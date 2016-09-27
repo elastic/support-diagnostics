@@ -1,4 +1,4 @@
-package com.elastic.support;
+package com.elastic.support.util;
 
 
 import java.text.SimpleDateFormat;
@@ -22,12 +22,6 @@ public class SystemProperties {
    public static final String UTC_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
 
    public static final String FILE_DATE_FORMAT = "yyyyMMdd-HHmmss";
-
-   public static final String ES_DIAG = "diagnostics";
-
-   public static final String LOGSTASH_DIAG = "logstash";
-
-   public static final int LOGSTASH_PORT = 9600;
 
    public static String getUtcDateString() {
       Date curDate = new Date();

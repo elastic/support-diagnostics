@@ -1,9 +1,9 @@
 package com.elastic.support.diagnostics.commands;
 
-import com.elastic.support.diagnostics.DiagnosticContext;
-import com.elastic.support.diagnostics.DiagnosticRequestFactory;
-import com.elastic.support.diagnostics.RestModule;
-import org.apache.http.client.HttpClient;
+import com.elastic.support.diagnostics.chain.DiagnosticContext;
+import com.elastic.support.util.DiagnosticRequestFactory;
+import com.elastic.support.util.RestModule;
+
 public class RestModuleSetupCmd extends AbstractDiagnosticCmd {
 
    public boolean execute(DiagnosticContext context) {

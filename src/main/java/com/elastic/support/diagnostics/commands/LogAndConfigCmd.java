@@ -1,10 +1,9 @@
 package com.elastic.support.diagnostics.commands;
 
-import com.elastic.support.SystemProperties;
-import com.elastic.support.diagnostics.DiagnosticContext;
+import com.elastic.support.util.SystemProperties;
+import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.util.JsonYamlUtils;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 

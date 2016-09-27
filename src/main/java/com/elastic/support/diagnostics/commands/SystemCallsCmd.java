@@ -1,8 +1,7 @@
 package com.elastic.support.diagnostics.commands;
 
-import com.elastic.support.SystemProperties;
-import com.elastic.support.diagnostics.DiagnosticContext;
-import org.apache.commons.io.FileUtils;
+import com.elastic.support.util.SystemProperties;
+import com.elastic.support.diagnostics.chain.DiagnosticContext;
 
 import java.io.File;
 import java.io.FileOutputStream;

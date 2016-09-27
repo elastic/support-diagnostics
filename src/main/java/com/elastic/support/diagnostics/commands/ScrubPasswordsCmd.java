@@ -1,11 +1,10 @@
 package com.elastic.support.diagnostics.commands;
 
-import com.elastic.support.SystemProperties;
-import com.elastic.support.diagnostics.DiagnosticContext;
+import com.elastic.support.util.SystemProperties;
+import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.util.JsonYamlUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.RegexFileFilter;
-import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
 import java.io.FileFilter;

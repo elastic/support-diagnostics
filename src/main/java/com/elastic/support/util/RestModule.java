@@ -1,4 +1,4 @@
-package com.elastic.support.diagnostics;
+package com.elastic.support.util;
 
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.http.HttpHost;

@@ -1,8 +1,8 @@
 package com.elastic.support.diagnostics.commands;
 
-import com.elastic.support.diagnostics.DiagnosticContext;
+import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.diagnostics.InputParams;
-import com.elastic.support.diagnostics.RestModule;
+import com.elastic.support.util.RestModule;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.LinkedHashMap;

@@ -1,17 +1,13 @@
 package com.elastic.support.test;
 
-import com.elastic.support.diagnostics.DiagnosticContext;
-import com.elastic.support.diagnostics.commands.HostIdentifierCmd;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Set;
 
+public class GenericTest {
 
-public class HostIPCheckTest {
-
-    private final Logger logger = LoggerFactory.getLogger(HostIPCheckTest.class);
+    private final Logger logger = LoggerFactory.getLogger(GenericTest.class);
 
     @Test
     public void testHostIpCheck(){

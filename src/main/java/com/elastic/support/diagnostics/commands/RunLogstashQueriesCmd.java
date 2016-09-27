@@ -1,11 +1,7 @@
 package com.elastic.support.diagnostics.commands;
 
-import com.elastic.support.SystemProperties;
-import com.elastic.support.diagnostics.DiagnosticContext;
-import com.elastic.support.diagnostics.InputParams;
-import com.elastic.support.diagnostics.RestModule;
+import com.elastic.support.diagnostics.chain.DiagnosticContext;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 

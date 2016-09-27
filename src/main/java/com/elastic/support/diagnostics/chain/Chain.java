@@ -1,4 +1,4 @@
-package com.elastic.support.chain;
+package com.elastic.support.diagnostics.chain;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

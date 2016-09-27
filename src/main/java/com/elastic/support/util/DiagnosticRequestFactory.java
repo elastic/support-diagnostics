@@ -1,4 +1,4 @@
-package com.elastic.support.diagnostics;
+package com.elastic.support.util;
 
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;

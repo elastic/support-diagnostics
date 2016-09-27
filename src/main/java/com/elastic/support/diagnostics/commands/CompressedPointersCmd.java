@@ -1,12 +1,11 @@
 package com.elastic.support.diagnostics.commands;
 
-import com.elastic.support.SystemProperties;
-import com.elastic.support.diagnostics.DiagnosticContext;
+import com.elastic.support.util.SystemProperties;
+import com.elastic.support.diagnostics.chain.DiagnosticContext;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.StringTokenizer;
 
 public class CompressedPointersCmd extends AbstractDiagnosticCmd {

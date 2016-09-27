@@ -1,11 +1,9 @@
 package com.elastic.support.diagnostics.commands;
 
-import com.elastic.support.SystemProperties;
-import com.elastic.support.diagnostics.DiagnosticContext;
+import com.elastic.support.util.SystemProperties;
+import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.diagnostics.InputParams;
-import com.elastic.support.diagnostics.RestModule;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.elastic.support.util.RestModule;
 
 import java.util.List;
 import java.util.Map;

@@ -1,4 +1,4 @@
-package com.elastic.support.chain;
+package com.elastic.support.diagnostics.chain;
 
 import com.elastic.support.util.SystemUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
