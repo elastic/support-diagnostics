@@ -1,8 +1,8 @@
 package com.elastic.support.test;
 
 import com.elastic.support.diagnostics.InputParams;
-import com.elastic.support.SystemProperties;
-import com.elastic.support.diagnostics.DiagnosticContext;
+import com.elastic.support.util.SystemProperties;
+import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.diagnostics.commands.DirectorySetupCmd;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;

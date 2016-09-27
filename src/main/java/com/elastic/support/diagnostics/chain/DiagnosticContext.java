@@ -1,8 +1,7 @@
 package com.elastic.support.diagnostics.chain;
 
 import com.elastic.support.diagnostics.InputParams;
-import com.elastic.support.diagnostics.chain.Context;
-import com.elastic.support.diagnostics.commands.Constants;
+import com.elastic.support.diagnostics.Constants;
 import com.elastic.support.util.RestModule;
 
 import java.util.ArrayList;

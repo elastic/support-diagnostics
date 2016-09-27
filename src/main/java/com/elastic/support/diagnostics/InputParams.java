@@ -1,7 +1,6 @@
 package com.elastic.support.diagnostics;
 
 import com.beust.jcommander.*;
-import com.elastic.support.SystemProperties;
 
 public class InputParams {
 
@@ -121,7 +120,7 @@ public class InputParams {
    public int getPort() {
       if(diagType.equalsIgnoreCase("logstash")){
          if(! wasPortSet){
-            return SystemProperties.LOGSTASH_PORT;
+            return Constants.LOGSTASH_PORT;
          }
       }
       return port;

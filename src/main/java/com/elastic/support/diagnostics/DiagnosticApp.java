@@ -1,6 +1,8 @@
 package com.elastic.support.diagnostics;
 
 import com.beust.jcommander.JCommander;
+import com.elastic.support.diagnostics.chain.DiagnosticChainExec;
+import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

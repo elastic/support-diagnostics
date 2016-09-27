@@ -32,10 +32,8 @@ public class JsonYamlUtils {
    }
 
    public static JsonNode createJsonNodeFromFile(File jsonFile) throws Exception {
-
       String fileString = FileUtils.readFileToString(jsonFile);
       return JsonYamlUtils.createJsonNodeFromString(fileString);
-
    }
 
    public static JsonNode createJsonNodeFromString(String nodeString) throws Exception {
@@ -96,6 +94,10 @@ public class JsonYamlUtils {
       Map<String, Object> result = new LinkedHashMap<>();
       buildFlattenedMap(result, map, null);
       return result;
+   }
+
+   public static Map<String, Object> flattenMap(Map<String, Object> map){
+      return flattenYaml(map);
    }
 
    public static Map<String, Object> flattenNode(JsonNode node) throws RuntimeException {

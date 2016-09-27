@@ -1,6 +1,6 @@
 package com.elastic.support.diagnostics.chain;
 
-import com.elastic.support.diagnostics.commands.Constants;
+import com.elastic.support.diagnostics.Constants;
 import com.elastic.support.util.JsonYamlUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,8 +1,9 @@
 package com.elastic.support.util;
 
 
-import com.elastic.support.SystemProperties;
-import org.apache.commons.io.FileUtils;
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,9 +11,6 @@ import java.io.*;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,6 +26,10 @@ public class SystemUtils {
    private static final String IPV6 = "^(:?[a-fA-F0-9]{0,4}:){1,7}[a-fA-F0-9]{1,4}%?[a-zA-Z0-9-_]{0,10}$";
    private static final DecimalFormat formatter = new DecimalFormat("###.##");
    private static final String EMPTY = "";
+   public static final long GB = 1024*1024*1024;
+   public static final long MB = 1024* 1024;
+   public static final long KB = 1024;
+   public static final long sixtyFour= 65535;
 
 
    public static String getUtcDateString() {
@@ -148,5 +150,71 @@ public class SystemUtils {
 
    }
 
+   public static String bytesToUnits(long byteSize){
 
+      if(byteSize / GB > 1){
+         return byteSize / GB + "GB";
+      }
+      else if(byteSize / MB > 1){
+         return byteSize / MB + "MB";
+      }
+      else if(byteSize / KB  > 1){
+         return  byteSize / KB + "KB";
+      }
+
+      else return byteSize + "b";
+
+   }
+
+   public static String extract(String filename, String dir){
+
+      String diagOutput = "";
+
+      try {
+         final  int BUFFER = 2048;
+         FileInputStream fin = new FileInputStream(filename);
+         BufferedInputStream in = new BufferedInputStream(fin);
+         GzipCompressorInputStream gzIn = new GzipCompressorInputStream(in);
+         TarArchiveInputStream tarIn = new TarArchiveInputStream(gzIn);
+         TarArchiveEntry entry = null;
+
+         boolean initial = true;
+         while ((entry = (TarArchiveEntry) tarIn.getNextEntry()) != null) {
+            System.out.println("Extracting: " + entry.getName());
+
+            if (entry.isDirectory()) {
+               String fl = dir + SystemProperties.fileSeparator + entry.getName();
+               File f = new File(fl);
+               f.mkdirs();
+               if (initial){
+                  diagOutput = fl.substring(0, fl.length()-1);
+                  initial = false;
+               }
+            }
+            else {
+               int count;
+               byte data[] = new byte[BUFFER];
+               FileOutputStream fos = new FileOutputStream(dir
+                  + SystemProperties.fileSeparator + entry.getName());
+
+               BufferedOutputStream dest = new BufferedOutputStream(fos,
+                  BUFFER);
+
+               while ((count = tarIn.read(data, 0, BUFFER)) != -1) {
+                  dest.write(data, 0, count);
+               }
+               dest.close();
+            }
+         }
+
+         tarIn.close();
+
+      } catch (IOException e) {
+         logger.error("Error extracting diagnostic archive: " + e);
+      }
+
+      System.out.println("untar completed successfully!!");
+      return diagOutput;
+
+   }
 }
