@@ -146,7 +146,7 @@ restQueries-5:
   pipelines: "_ingest/pipeline/*?pretty&human"
   allocation_explain: "_cluster/allocation/explain?include_yes_decisions&pretty"
   shard_stores: "_shard_stores"
-  xpack: "_xpack/usage"
+  xpack: "_xpack/usage?pretty&human"
 
 logstash:
   version: "?pretty"
