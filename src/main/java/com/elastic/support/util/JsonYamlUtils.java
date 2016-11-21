@@ -131,8 +131,8 @@ public class JsonYamlUtils {
             @SuppressWarnings("unchecked")
             Map<String, Object> map = (Map<String, Object>) value;
             buildFlattenedMap(result, map, key);
-         } else if (value instanceof List) {
-            result.put(key, value);
+         //} else if (value instanceof List) {
+         //   result.put(key, value);
          } else if (value instanceof Collection) {
             // Need a compound key
             @SuppressWarnings("unchecked")
@@ -153,5 +153,16 @@ public class JsonYamlUtils {
          doc = new HashMap<String, Object>();
       }
       return doc;
+   }
+
+   private static Map<String, Object> listToMap(List input){
+      int sz = input.size();
+      Map<String, Object> output = new LinkedHashMap<>();
+      for(int i=0; i < sz; i++){
+         output.put("idx_" + i, input.get(i));
+      }
+
+      return output;
+
    }
 }
