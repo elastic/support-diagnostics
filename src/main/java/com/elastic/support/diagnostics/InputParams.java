@@ -241,14 +241,24 @@ public class InputParams {
    @Override
    public String toString() {
       return "InputParams{" +
-         "help=" + help +
+         "outputDir='" + outputDir + '\'' +
          ", host='" + host + '\'' +
          ", port=" + port +
          ", username='" + username + '\'' +
          ", password='" + password + '\'' +
-         ", outputDir='" + outputDir + '\'' +
          ", isSsl=" + isSsl +
+         ", diagType='" + diagType + '\'' +
+         ", plainTextPassword='" + plainTextPassword + '\'' +
+         ", reps=" + reps +
+         ", interval=" + interval +
+         ", isBzip=" + isBzip +
+         ", archivedLogs=" + archivedLogs +
+         ", scrubFiles=" + scrubFiles +
+         ", skipVerification=" + skipVerification +
+         ", keystore='" + keystore + '\'' +
+         ", skipLogs=" + skipLogs +
          ", secured=" + secured +
+         ", wasPortSet=" + wasPortSet +
          '}';
    }
 }
