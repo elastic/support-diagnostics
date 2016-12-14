@@ -50,7 +50,9 @@ public class JsonYamlUtils {
    }
 
    public static void writeYaml(String path, Map tree) throws Exception {
-      Yaml yaml = new Yaml();
+      DumperOptions options = new DumperOptions();
+      options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+      Yaml yaml = new Yaml(options);
       FileWriter writer = new FileWriter(path);
       yaml.dump(tree, writer);
    }
