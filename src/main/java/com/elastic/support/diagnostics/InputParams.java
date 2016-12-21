@@ -58,6 +58,9 @@ public class InputParams {
    @Parameter(names = {"--noLogs"}, description = "Use this option to suppress log collection.")
    private boolean skipLogs = false;
 
+   @Parameter(names = {"--accessLogs"}, description = "Use this option to collect access logs as well.")
+   private boolean accessLogs = false;
+
    private boolean secured = false;
    private boolean wasPortSet = false;
 
@@ -218,6 +221,14 @@ public class InputParams {
       this.archivedLogs = archivedLogs;
    }
 
+   public boolean isAccessLogs() {
+      return accessLogs;
+   }
+
+   public void setAccessLogs(boolean accessLogs) {
+      this.accessLogs = accessLogs;
+   }
+
    public boolean isBzip() {
       return isBzip;
    }
@@ -241,7 +252,8 @@ public class InputParams {
    @Override
    public String toString() {
       return "InputParams{" +
-         "outputDir='" + outputDir + '\'' +
+         "help=" + help +
+         ", outputDir='" + outputDir + '\'' +
          ", host='" + host + '\'' +
          ", port=" + port +
          ", username='" + username + '\'' +
@@ -256,7 +268,9 @@ public class InputParams {
          ", scrubFiles=" + scrubFiles +
          ", skipVerification=" + skipVerification +
          ", keystore='" + keystore + '\'' +
+         ", keystorePass='" + keystorePass + '\'' +
          ", skipLogs=" + skipLogs +
+         ", skipAccessLogs=" + accessLogs +
          ", secured=" + secured +
          ", wasPortSet=" + wasPortSet +
          '}';

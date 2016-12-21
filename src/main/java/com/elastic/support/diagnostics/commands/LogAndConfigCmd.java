@@ -17,12 +17,15 @@ import java.util.Set;
 public class LogAndConfigCmd extends AbstractDiagnosticCmd {
 
    private static final String NODES = "nodes.json";
+   private static final String ACCESS = "access";
 
    public boolean execute(DiagnosticContext context) {
 
       if (context.getInputParams().isSkipLogs()){
          return true;
       }
+
+      boolean getAccess = context.getInputParams().isAccessLogs();
 
       logger.info("Processing logs and configuration files.");
       try {
@@ -97,7 +100,19 @@ public class LogAndConfigCmd extends AbstractDiagnosticCmd {
                File logDest = new File(nodeDir + SystemProperties.fileSeparator + "logs");
 
                FileFilter logFilter = new WildcardFileFilter(logPattern);
-               FileUtils.copyDirectory(logDir, logDest, logFilter, true);
+               File[] logDirList = logDir.listFiles(logFilter);
+
+               for(File logListing: logDirList){
+                  if (logListing.getName().contains(ACCESS)){
+                     if(! getAccess){
+                        continue;
+                     }
+                  }
+                  FileUtils.copyFileToDirectory(logListing, logDest);
+               }
+
+
+               //ßFileUtils.copyDirectory(logDir, logDest, logFilter, true);
 
                logger.info("Processed logs and configs for node: " + name);
             }
