@@ -256,11 +256,8 @@ public class InputParams {
          ", outputDir='" + outputDir + '\'' +
          ", host='" + host + '\'' +
          ", port=" + port +
-         ", username='" + username + '\'' +
-         ", password='" + password + '\'' +
          ", isSsl=" + isSsl +
          ", diagType='" + diagType + '\'' +
-         ", plainTextPassword='" + plainTextPassword + '\'' +
          ", reps=" + reps +
          ", interval=" + interval +
          ", isBzip=" + isBzip +
