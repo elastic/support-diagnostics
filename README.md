@@ -17,7 +17,7 @@ The support diagnostic utility is a Java executable that will interrogate the no
 * Docker installations may have issues depending on the individual configuration.
 
 ## Installation And Usage Instructions
-* Download [support-diagnostics-current.zip](https://github.com/elastic/elasticsearch-support-diagnostics/releases/latest) from the Github release area.
+* Download [support-diagnostics-X.XX-dist.zip](https://github.com/elastic/elasticsearch-support-diagnostics/releases/latest) from the Github release area.
 * Unzip the support-diagnostics-<version>-dist.zip into the directory from which you intend to run the application.
 * Switch to the diagnostics distribution directory.
 * Run the application via the diagnostics.sh or diagnostics.bat script. The host name or IP address used by the HTTP connector of the node is required.
