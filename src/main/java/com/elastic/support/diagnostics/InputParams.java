@@ -265,7 +265,6 @@ public class InputParams {
          ", scrubFiles=" + scrubFiles +
          ", skipVerification=" + skipVerification +
          ", keystore='" + keystore + '\'' +
-         ", keystorePass='" + keystorePass + '\'' +
          ", skipLogs=" + skipLogs +
          ", skipAccessLogs=" + accessLogs +
          ", secured=" + secured +

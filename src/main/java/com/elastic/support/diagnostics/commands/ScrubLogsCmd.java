@@ -1,5 +1,6 @@
 package com.elastic.support.diagnostics.commands;
 
+import com.elastic.support.diagnostics.Constants;
 import com.elastic.support.util.SystemProperties;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.util.JsonYamlUtils;
@@ -14,9 +15,7 @@ import java.util.Set;
 
 public class ScrubLogsCmd extends AbstractDiagnosticCmd {
 
-   private static final String logDirPattern = ".*-log and config";
-   private static final String logFilePattern = "*.log";
-   private static final String configFile = "elasticsearch.yml";
+
 
    public boolean execute(DiagnosticContext context) {
 
@@ -34,12 +33,12 @@ public class ScrubLogsCmd extends AbstractDiagnosticCmd {
             return true;
          }
 
-         WildcardFileFilter wcfFilter = new WildcardFileFilter(logFilePattern);
+         WildcardFileFilter wcfFilter = new WildcardFileFilter(Constants.logFilePattern);
          // Get the nodes info:
          String temp = context.getTempDir();
 
          File dir = new File(temp);
-         FileFilter fileFilter = new RegexFileFilter(logDirPattern);
+         FileFilter fileFilter = new RegexFileFilter(Constants.logDirPattern);
          File[] files = dir.listFiles(fileFilter);
          for (int i = 0; i < files.length; i++) {
             if (files[i].isDirectory()) {

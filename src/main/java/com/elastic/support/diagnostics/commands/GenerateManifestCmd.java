@@ -1,5 +1,6 @@
 package com.elastic.support.diagnostics.commands;
 
+import com.elastic.support.diagnostics.InputParams;
 import com.elastic.support.util.SystemProperties;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,7 +29,8 @@ public class GenerateManifestCmd extends AbstractDiagnosticCmd {
          cluster.put("collectionDate", SystemProperties.getUtcDateString());
          cluster.put("host", context.getAttribute("hostName"));
          cluster.put("diagNode", context.getHostNode());
-         cluster.put("inputs", context.getInputParams());
+         InputParams params = context.getInputParams();
+         cluster.put("inputs", params.toString());
 
          File manifest = new File(context.getTempDir() + SystemProperties.fileSeparator + "manifest.json");
          mapper.writeValue(manifest, cluster);
