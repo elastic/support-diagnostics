@@ -61,8 +61,8 @@ The support diagnostic utility is a Java executable that will interrogate the no
 
   * Do not specify a password on the command line, only the flag.  You will be prompted for the password and it will be hidden.
 
-## Using Shield Authentication And SSL
-  * ./diagnostics.sh --host 192.168.137.10 -u <your username> -p -s
+## Using Security Authentication And SSL
+  * ./diagnostics.sh --host 192.168.137.10 -u <your username> -p --ssl
 
 # Troubleshooting
   * Make sure the account you are running from has read access to all the Elasticsearch log and config directories.  This account must have write access to any directory you are using for output.
