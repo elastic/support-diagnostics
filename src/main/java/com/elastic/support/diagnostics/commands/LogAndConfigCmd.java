@@ -6,6 +6,7 @@ import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.util.JsonYamlUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.RegexFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 
 import java.io.File;
@@ -14,6 +15,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class LogAndConfigCmd extends AbstractDiagnosticCmd {
 
@@ -103,7 +106,17 @@ public class LogAndConfigCmd extends AbstractDiagnosticCmd {
                FileFilter logFilter = new WildcardFileFilter(logPattern);
                File[] logDirList = logDir.listFiles(logFilter);
 
+               String patternString = ".*\\d{4}-\\d{2}-\\d{2}.log";
+               Pattern pattern = Pattern.compile(patternString);
+
                for(File logListing: logDirList){
+                  String filename = logListing.getName();
+                  Matcher matcher = pattern.matcher(filename);
+                  boolean matches = matcher.matches();
+                  if(matches){
+                     continue;
+                  }
+
                   if (logListing.getName().contains(ACCESS)){
                      if(! getAccess){
                         continue;
