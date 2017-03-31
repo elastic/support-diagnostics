@@ -22,7 +22,7 @@ public class InputParams {
    @Parameter(names = {"-p", "--password"}, description = "Prompt for a password?  No password value required, only the option. Hidden from the command line on entry.", password = true)
    private String password;
 
-   @Parameter(names = {"--ssl", "--https"}, description = "Use SSL?  No value required, only the option.")
+   @Parameter(names = {"-s", "--ssl", "--https"}, description = "Use SSL?  No value required, only the option.")
    private boolean isSsl = false;
 
    @Parameter(names = {"--type"}, description ="Diagnostic type to run. Enter standard, remote, logstash, or logstash-remote. Default is standard and remote will suppress retrieval of logs, configuration and system command info.")
