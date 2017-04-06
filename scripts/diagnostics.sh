@@ -17,5 +17,6 @@ fi
 
 [[ ${DIAG_JAVA_OPTS} == "" ]] && export DIAG_JAVA_OPTS="-Xms256m -Xmx2000m"
 
+diag_path="$(dirname $0)"
 echo "Using ${DIAG_JAVA_OPTS} ${DIAG_DEBUG_OPTS} for options."
-exec "$JAVA" $DIAG_JAVA_OPTS ${DIAG_DEBUG_OPTS} -cp .:./lib/*  com.elastic.support.diagnostics.DiagnosticApp "$@"
+exec "$JAVA" $DIAG_JAVA_OPTS ${DIAG_DEBUG_OPTS} -cp "$diag_path:$diag_path/lib/"*  com.elastic.support.diagnostics.DiagnosticApp "$@"
