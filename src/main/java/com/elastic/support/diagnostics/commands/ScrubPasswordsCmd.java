@@ -1,5 +1,6 @@
 package com.elastic.support.diagnostics.commands;
 
+import com.elastic.support.diagnostics.Constants;
 import com.elastic.support.util.SystemProperties;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.util.JsonYamlUtils;
@@ -8,35 +9,36 @@ import org.apache.commons.io.filefilter.RegexFileFilter;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 public class ScrubPasswordsCmd extends AbstractDiagnosticCmd {
 
-   private static final String logDirPattern = ".*-log and config";
    private static final String configFile = "elasticsearch.yml";
 
    public boolean execute(DiagnosticContext context) {
 
       logger.info("Scrubbing elasticsearch config.");
+      List<String> tempFileDirs = (List<String>)context.getAttribute("tempFileDirs");
+
       try {
 
-         // Get the nodes info:
-         String temp = context.getTempDir();
+         for(String temp: tempFileDirs) {
+            // Get the nodes info:
 
-         File dir = new File(temp);
-         FileFilter fileFilter = new RegexFileFilter(logDirPattern);
-         File[] files = dir.listFiles(fileFilter);
-         for (int i = 0; i < files.length; i++) {
-            if (files[i].isDirectory()) {
-               String configPath = files[i].getAbsolutePath() + SystemProperties.fileSeparator + "config" + SystemProperties.fileSeparator + configFile;
-               redactConfig(configPath);
-               logger.info("Scrubbed passwords for " + configPath);
+            File dir = new File(temp + SystemProperties.fileSeparator + "config" );
+            //FileFilter fileFilter = new RegexFileFilter("\\*.yml");
+            File[] files = dir.listFiles();
+            for (int i = 0; i < files.length; i++) {
+              if (!files[i].isDirectory() && files[i].getName().contains(".yml")) {
+                 redactConfig(files[i].getAbsolutePath());
+                 logger.info("Scrubbed passwords for " + files[i].getAbsolutePath());
+               }
+
+               System.out.println(files[i]);
             }
-
-            System.out.println(files[i]);
          }
-
 
       } catch (Exception e) {
          logger.error("Error redacting config passwords.", e);

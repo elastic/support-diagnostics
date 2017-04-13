@@ -13,7 +13,9 @@ import java.io.File;
 import java.io.FileFilter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -41,6 +43,8 @@ public class LogAndConfigCmd extends AbstractDiagnosticCmd {
          boolean needPid = true;
          JsonNode nodes = rootNode.path("nodes");
          Iterator<JsonNode> it = nodes.iterator();
+         List<String> fileDirs = new ArrayList<>();
+         context.setAttribute("tempFileDirs", fileDirs);
 
          while (it.hasNext()) {
             JsonNode n = it.next();
@@ -55,8 +59,6 @@ public class LogAndConfigCmd extends AbstractDiagnosticCmd {
                String name = n.path("name").asText();
 
                JsonNode settings = n.path("settings");
-
-               String configFile = settings.path("config").asText();
                JsonNode nodePaths = settings.path("path");
 
                String config = nodePaths.path("config").asText();
@@ -72,6 +74,7 @@ public class LogAndConfigCmd extends AbstractDiagnosticCmd {
 
                // Create a directory for this node
                String nodeDir = context.getTempDir() + SystemProperties.fileSeparator + name + Constants.logDir;
+               fileDirs.add(nodeDir);
 
                Files.createDirectories(Paths.get(nodeDir));
                FileFilter configFilter = new WildcardFileFilter("*.yml");
@@ -124,9 +127,6 @@ public class LogAndConfigCmd extends AbstractDiagnosticCmd {
                   }
                   FileUtils.copyFileToDirectory(logListing, logDest);
                }
-
-
-               //ßFileUtils.copyDirectory(logDir, logDest, logFilter, true);
 
                logger.info("Processed logs and configs for node: " + name);
             }

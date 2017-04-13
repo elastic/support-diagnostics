@@ -10,6 +10,7 @@ import org.apache.commons.io.filefilter.WildcardFileFilter;
 
 import java.io.*;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -18,6 +19,8 @@ public class ScrubLogsCmd extends AbstractDiagnosticCmd {
 
 
    public boolean execute(DiagnosticContext context) {
+
+      List<String> tempFileDirs = (List<String>)context.getAttribute("tempFileDirs");
 
       logger.info("Scrubbing elasticsearch logs and configuration using scrub.yml.");
       try {
@@ -33,32 +36,12 @@ public class ScrubLogsCmd extends AbstractDiagnosticCmd {
             return true;
          }
 
-         WildcardFileFilter wcfFilter = new WildcardFileFilter(Constants.logFilePattern);
-         // Get the nodes info:
-         String temp = context.getTempDir();
-
-         File dir = new File(temp);
-         FileFilter fileFilter = new RegexFileFilter(Constants.logDirPattern);
-         File[] files = dir.listFiles(fileFilter);
-         for (int i = 0; i < files.length; i++) {
-            if (files[i].isDirectory()) {
-               String configPath = files[i].getAbsolutePath() + SystemProperties.fileSeparator + "config" +SystemProperties.fileSeparator + "elasticsearch.yml";
-               File cfgFile = new File(configPath);
-               scrubFile(cfgFile, dictionary);
-
-               String logPath = files[i].getAbsolutePath() + SystemProperties.fileSeparator + "logs";
-               File logDir = new File(logPath);
-               Collection<File> logs = FileUtils.listFiles(logDir, wcfFilter, null);
-               for(File logfile: logs){
-                  scrubFile(logfile, dictionary);
-               }
-
-               logger.info("Processed scrubbed contents of " + logPath);
+         for(String logdir: tempFileDirs) {
+            Collection<File> files = FileUtils.listFiles(new File(logdir), new String[]{"log", "yml"}, true);
+            for (File fl : files) {
+               scrubFile(fl, dictionary);
             }
-
-            System.out.println(files[i]);
          }
-
 
       } catch (Exception e) {
          logger.error("Error scrubbing log and config files.", e);

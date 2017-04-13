@@ -93,7 +93,7 @@ restQueries-2:
   segments: "_segments?pretty&human"
   settings: "_settings?pretty&human"
   version: ""
-  nodes: "_nodes?all&pretty&human"
+  nodes: "_nodes?pretty&human"
   warmers: "_all/_warmer?pretty"
   watcher_stats: "_watcher/stats/_all?pretty"
   shield_users: "_shield/user?pretty"
