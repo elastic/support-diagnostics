@@ -119,6 +119,7 @@ restQueries-5:
   cluster_health: "_cluster/health?pretty"
   cluster_pending_tasks: "_cluster/pending_tasks?pretty&human"
   cluster_settings: "_cluster/settings?pretty"
+  cluster_settings_defaults: "_cluster/settings?include_defaults&pretty"
   cluster_state: "_cluster/state?pretty&human"
   cluster_stats: "_cluster/stats?pretty&human"
   count: "_count?pretty"
