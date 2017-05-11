@@ -60,11 +60,12 @@ public class LogAndConfigCmd extends AbstractDiagnosticCmd {
 
                JsonNode settings = n.path("settings");
                JsonNode nodePaths = settings.path("path");
+               JsonNode nodePathsDefault = settings.path("default").path("path");
 
-               String config = nodePaths.path("config").asText();
-               String logs = nodePaths.path("logs").asText();
-               String conf = nodePaths.path("conf").asText();
-               String home = nodePaths.path("home").asText();
+               String config = pathValueWithDefault("config", nodePaths, nodePathsDefault);
+               String logs = pathValueWithDefault("logs", nodePaths, nodePathsDefault);
+               String conf = pathValueWithDefault("conf", nodePaths, nodePathsDefault);
+               String home = pathValueWithDefault("home", nodePaths, nodePathsDefault);
 
                if (needPid) {
                   JsonNode jnode = n.path("process");
@@ -139,6 +140,10 @@ public class LogAndConfigCmd extends AbstractDiagnosticCmd {
       logger.info("Finished processing logs and configuration files.");
 
       return true;
+   }
+
+   public String pathValueWithDefault(String fieldName, JsonNode paths, JsonNode defaults) {
+      return paths.path(fieldName).asText(defaults.path(fieldName).asText());
    }
 
    public String determineConfigLocation(String conf, String config, String home) {
