@@ -4,7 +4,7 @@
 
     <groupId>com.elasticsearch</groupId>
     <artifactId>support-diagnostics</artifactId>
-    <version>5.12-snapshot</version>
+    <version>5.12</version>
     <packaging>jar</packaging>
     <name>Support Diagnostics Utilities</name>
 
