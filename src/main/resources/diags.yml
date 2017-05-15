@@ -130,6 +130,7 @@ restQueries-5:
   nodes_hot_threads: "_nodes/hot_threads?threads=10000"
   nodes_stats: "_nodes/stats?pretty&human"
   fielddata_stats: "/_nodes/stats/indices/fielddata?pretty=true&fields=*"
+  fielddata: "_cat/fielddata?format=json&bytes&pretty"
   plugins: "_cat/plugins?v"
   cat_recovery: "_cat/recovery?v"
   recovery: "_recovery"

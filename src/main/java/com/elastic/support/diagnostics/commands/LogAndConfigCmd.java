@@ -1,12 +1,11 @@
 package com.elastic.support.diagnostics.commands;
 
 import com.elastic.support.diagnostics.Constants;
-import com.elastic.support.util.SystemProperties;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.util.JsonYamlUtils;
+import com.elastic.support.util.SystemProperties;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.filefilter.RegexFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 
 import java.io.File;
@@ -27,7 +26,7 @@ public class LogAndConfigCmd extends AbstractDiagnosticCmd {
 
    public boolean execute(DiagnosticContext context) {
 
-      if (context.getInputParams().isSkipLogs()){
+      if (context.getInputParams().isSkipLogs()) {
          return true;
       }
 
@@ -60,11 +59,14 @@ public class LogAndConfigCmd extends AbstractDiagnosticCmd {
 
                JsonNode settings = n.path("settings");
                JsonNode nodePaths = settings.path("path");
+               JsonNode defaultPaths = settings.path("default").path("path");
 
                String config = nodePaths.path("config").asText();
                String logs = nodePaths.path("logs").asText();
                String conf = nodePaths.path("conf").asText();
                String home = nodePaths.path("home").asText();
+               String defaultLogs = defaultPaths.path("logs").asText();
+               String defaultConf = defaultPaths.path("conf").asText();;
 
                if (needPid) {
                   JsonNode jnode = n.path("process");
@@ -78,7 +80,8 @@ public class LogAndConfigCmd extends AbstractDiagnosticCmd {
 
                Files.createDirectories(Paths.get(nodeDir));
                FileFilter configFilter = new WildcardFileFilter("*.yml");
-               String configFileLoc = determineConfigLocation(conf, config, home);
+               String configFileLoc = determineConfigLocation(conf, config, home, defaultConf);
+               logs = determineLogLocation(home, logs, defaultLogs);
 
                // Copy the config directory
                String configDest = nodeDir + SystemProperties.fileSeparator + "config";
@@ -92,10 +95,6 @@ public class LogAndConfigCmd extends AbstractDiagnosticCmd {
                File scripts = new File(configFileLoc + SystemProperties.fileSeparator + "scripts");
                if (scripts.exists()) {
                   FileUtils.copyDirectory(scripts, new File(configDest + SystemProperties.fileSeparator + "scripts"), true);
-               }
-
-               if ("".equals(logs)) {
-                  logs = home + SystemProperties.fileSeparator + "logs";
                }
 
                String logPattern = "*.log";
@@ -112,16 +111,16 @@ public class LogAndConfigCmd extends AbstractDiagnosticCmd {
                String patternString = ".*\\d{4}-\\d{2}-\\d{2}.log";
                Pattern pattern = Pattern.compile(patternString);
 
-               for(File logListing: logDirList){
+               for (File logListing : logDirList) {
                   String filename = logListing.getName();
                   Matcher matcher = pattern.matcher(filename);
                   boolean matches = matcher.matches();
-                  if(matches){
+                  if (matches) {
                      continue;
                   }
 
-                  if (logListing.getName().contains(ACCESS)){
-                     if(! getAccess){
+                  if (logListing.getName().contains(ACCESS)) {
+                     if (!getAccess) {
                         continue;
                      }
                   }
@@ -141,7 +140,7 @@ public class LogAndConfigCmd extends AbstractDiagnosticCmd {
       return true;
    }
 
-   public String determineConfigLocation(String conf, String config, String home) {
+   public String determineConfigLocation(String conf, String config, String home, String defaultConf) {
 
       String configFileLoc;
 
@@ -149,13 +148,30 @@ public class LogAndConfigCmd extends AbstractDiagnosticCmd {
       if (!"".equals(config)) {
          int idx = config.lastIndexOf(SystemProperties.fileSeparator);
          configFileLoc = config.substring(0, idx);
-
-      } else if (!"".equals(conf)) {
+      } else if (! "".equals(conf)) {
          configFileLoc = conf;
+      } else if ("".equals(conf) && ! "".equals(defaultConf)) {
+         configFileLoc = defaultConf;
       } else {
          configFileLoc = home + SystemProperties.fileSeparator + "config";
       }
 
       return configFileLoc;
+   }
+
+   String determineLogLocation(String home, String log, String defaultLog) {
+
+      String logLoc;
+
+      if (!"".equals(log)) {
+         logLoc = log;
+      } else if ("".equals(log) && !"".equals(defaultLog)) {
+         logLoc = home + SystemProperties.fileSeparator + "logs";
+      } else {
+         logLoc = defaultLog;
+      }
+
+      return logLoc;
+
    }
 }

@@ -10,6 +10,7 @@ The support diagnostic utility is a Java executable that will interrogate the no
 
 ## Run Requirements
 * JRE - Oracle or OpenJDK, 1.7 or 1.8
+* If you are running a package installation under Linux you MUST run the command with elevated sudo privileges. Otherwise the utility will not be able to read the configuration folders or run the system queries.
 * It is recommended that you set the JAVA_HOME environment variable.  It should point to the Java installation directory.  If JAVA_HOME is not found, the utility will attempt to locate a distribution but if errors occur it may be necessary to set this manually.
 * The system account running the utility must have read access to the Elasticsearch files and write access to the output location.
 * If you are using Shield the supplied user id must have permission to execute the diagnostic URL's.
