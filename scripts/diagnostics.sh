@@ -13,6 +13,17 @@ if [ ! -x "$JAVA" ]; then
     exit 1
 fi
 
+if [ ! -r "/etc/elasticsearch" ]; then
+    echo "Could not read config dir (/etc/elasticsearch).  Please verify permissions and rerun"
+    exit 1
+fi
+
+if [ ! -r "/var/log/elasticsearch" ]; then
+    echo "Could not read log dir (/var/log/elasticsearch).  Please verify permissions and rerun"
+    exit 1
+fi
+
+
 [[ ${DIAG_DEBUG} != "" ]] && export DIAG_DEBUG_OPTS=" -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=y"
 
 [[ ${DIAG_JAVA_OPTS} == "" ]] && export DIAG_JAVA_OPTS="-Xms256m -Xmx2000m"
