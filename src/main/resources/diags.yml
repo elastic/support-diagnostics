@@ -146,7 +146,7 @@ restQueries-5:
   nodeattrs: "_cat/nodeattrs"
   tasks: "_tasks?pretty&human"
   pipelines: "_ingest/pipeline/*?pretty&human"
-  allocation_explain: "_cluster/allocation/explain?include_yes_decisions&pretty"
+  allocation_explain: "_cluster/allocation/explain?pretty"
   allocation_explain_disk: "_cluster/allocation/explain?include_disk_info=true&pretty"
   shard_stores: "_shard_stores"
   xpack: "_xpack/usage?pretty&human"

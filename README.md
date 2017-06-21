@@ -45,6 +45,7 @@ The support diagnostic utility is a Java executable that will interrogate the no
 * --keystore and --keystorePass allow you to specify client side certificates for authentication.
 * Because of the potential size access logs are no longer collected by default. If you need these use the --accessLogs option to have them copied.
 * --scrub will allow you to remove sensitive information from the logs. Use the scrub.yml to specify each string literal you want removed and the desired replacement value. Currently operates only on exact matches.
+* Use the --type logstash argument to get diagnostic information from a running Logstash process.
 
 ## Examples
  *NOTE:* Windows users use diagnostics instead of ./diagnostics.sh
@@ -58,6 +59,12 @@ The support diagnostic utility is a Java executable that will interrogate the no
 
 ## Running remotely - does not collect logs, configs or run system commands.  Can be executed from a desktop without ES installed.
   * ./diagnostics.sh --host 192.168.137.10 --type remote
+
+## Running a diagnostic on a running Logstash instance using the default 9600 port
+  * ./diagnostics.sh --host 192.168.137.10 --type logstash
+  
+## Running a diagnostic on a running Logstash instance using a custom port
+  * ./diagnostics.sh --host 192.168.137.10 --type logstash - port 9600
 
 ## Specifying a custom output directory
   *  ./diagnostics.sh --host 192.168.137.10 -o <full path to output directory>
