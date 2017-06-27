@@ -47,6 +47,19 @@ The support diagnostic utility is a Java executable that will interrogate the no
 * --scrub will allow you to remove sensitive information from the logs. Use the scrub.yml to specify each string literal you want removed and the desired replacement value. Currently operates only on exact matches.
 * Use the --type logstash argument to get diagnostic information from a running Logstash process.
 
+## Docker Instructions
+
+To collect data using docker from a remote host:
+
+```
+docker run -it --rm \
+  -v $PWD/data:/data elasticsearch-support-diagnostics \
+  --host your.elastic.domain \
+  -u your_username -p \
+  -o /data \
+  --type remote
+```
+
 ## Examples
  *NOTE:* Windows users use diagnostics instead of ./diagnostics.sh
 
