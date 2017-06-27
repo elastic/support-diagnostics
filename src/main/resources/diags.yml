@@ -154,6 +154,7 @@ restQueries-5:
 logstash:
   version: "?pretty"
   node: "_node?pretty"
+  plugins: "_node/plugins?pretty"
   node_stats: "_node/stats?pretty"
   nodes_hot_threads: "_node/hot_threads?human=true"
 
