@@ -11,8 +11,8 @@ The support diagnostic utility is a Java executable that will interrogate the no
 ## Building From Source
 * Clone the github repo.
 * Make sure a recent version of Maven is installed on the build machine. 
-* Create a MAVEN_HOME directory pointing to the location you've unzipped it to.
-* CD to the top level repo directory and type mvn package.
+* Create a `MAVEN_HOME` directory pointing to the location you've unzipped it to.
+* `cd` to the top level repo directory and type `mvn package`.
 
 ## Run Requirements
 * JRE - Oracle or OpenJDK, 1.7 or 1.8
