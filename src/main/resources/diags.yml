@@ -150,6 +150,8 @@ restQueries-5:
   allocation_explain_disk: "_cluster/allocation/explain?include_disk_info=true&pretty"
   shard_stores: "_shard_stores"
   xpack: "_xpack/usage?pretty&human"
+  ml_datafeeds: "_xpack/ml/datafeeds?pretty"
+  ml_anomaly_detectors: "_xpack/ml/anomaly_detectors?pretty"
 
 logstash:
   version: "?pretty"
