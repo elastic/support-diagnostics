@@ -19,18 +19,18 @@ public class SystemCallsCmd extends AbstractDiagnosticCmd {
       pb.redirectErrorStream(true);
 
       Iterator<Map.Entry<String, String>> iter = osCmds.entrySet().iterator();
-      List cmds = new ArrayList();
+      final List<String> cmds = new ArrayList<>();
 
       while (iter.hasNext()) {
          Map.Entry<String, String> entry =  iter.next();
          String cmdLabel = entry.getKey();
-         String cmdText = entry.getValue();
+         final String cmdText;
+         if (entry.getValue().contains("PID")) {
+            cmdText = entry.getValue().replace("PID", context.getPid());
+         } else {
+            cmdText = entry.getValue();
+         }
          try {
-            // One off hack for process limits
-            if (cmdLabel.equals("proc-limit")) {
-               cmdText = "cat /proc/" + context.getPid() + "/limits";
-            }
-
             StringTokenizer st = new StringTokenizer(cmdText, " ");
             while (st.hasMoreTokens()) {
                cmds.add(st.nextToken());

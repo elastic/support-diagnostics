@@ -170,6 +170,7 @@ linuxOS:
   proc-limit: "cat /proc/PID/limits"
   cpu: "cat /proc/cpuinfo"
   jps: "jps -l -m -v"
+  jstack: "jstack PID"
   iostat: "iostat -c -d -x -t -m"
   sar: "sar -A"
   sysctl: "sysctl -a"
@@ -181,9 +182,11 @@ macOS:
   process-list: "ps -ef"
   ulimit: "ulimit -a"
   jps: "jps -l -m -v"
+  jstack: "jstack PID"
 
 winOS:
   process-list: "tasklist /v"
   netstat: "netstat -ano"
   jps: "jps -l -m -v"
+  jstack: "jstack PID"
   cpu: "wmic CPU"
