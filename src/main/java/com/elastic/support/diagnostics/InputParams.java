@@ -41,7 +41,7 @@ public class InputParams {
    private boolean isBzip = false;
 
    @Parameter(names = {"--archivedLogs"}, description = "Get archived logs in addition to current ones if present - No value required, only the option.")
-   private boolean archivedLogs=false;
+   private boolean archivedLogs=true;
 
    @Parameter(names = {"--scrub"}, description = "Set to true to use the scrub.yml dictionary to scrub logs and config files.  See README for more info.")
    private boolean scrubFiles = false;
