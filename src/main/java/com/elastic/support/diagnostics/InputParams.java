@@ -19,7 +19,7 @@ public class InputParams {
    @Parameter(names = {"-u", "--user"}, description = "Username.")
    private String username;
 
-   @Parameter(names = {"-p", "--password"}, description = "Prompt for a password?  No password value required, only the option. Hidden from the command line on entry.", password = true)
+   @Parameter(names = {"-p", "--password"}, description = "Password", password = true)
    private String password;
 
    @Parameter(names = {"-s", "--ssl", "--https"}, description = "Use SSL?  No value required, only the option.")
