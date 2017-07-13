@@ -122,7 +122,7 @@ public class InputParams {
 
    public int getPort() {
       if(diagType.equalsIgnoreCase("logstash")){
-         if(! wasPortSet){
+         if( this.port == 9200 ){
             return Constants.LOGSTASH_PORT;
          }
       }
@@ -131,7 +131,6 @@ public class InputParams {
 
    public void setPort(int port) {
       this.port = port;
-      wasPortSet = true;
    }
 
    public String getUsername() {

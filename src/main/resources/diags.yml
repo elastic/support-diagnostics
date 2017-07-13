@@ -19,6 +19,7 @@ textFileExtensions:
   - cat_thread_pool
   - cat_recovery
   - nodeattrs
+  - logstash_nodes_hot_threads
 
 restQueries-1:
   alias: "_alias?pretty&human"
@@ -154,11 +155,11 @@ restQueries-5:
   ml_anomaly_detectors: "_xpack/ml/anomaly_detectors?pretty"
 
 logstash:
-  version: "?pretty"
-  node: "_node?pretty"
-  plugins: "_node/plugins?pretty"
-  node_stats: "_node/stats?pretty"
-  nodes_hot_threads: "_node/hot_threads?human=true"
+  logstash_version: "?pretty"
+  logstash_node: "_node?pretty"
+  logstash_node_stats: "_node/stats?pretty"
+  logstash_nodes_hot_threads: "_node/hot_threads?human=true"
+  logstash_plugins: "_node/plugins?pretty"
 
 linuxOS:
   top: "top -b -n1"
