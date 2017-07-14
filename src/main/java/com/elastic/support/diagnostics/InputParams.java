@@ -197,10 +197,6 @@ public class InputParams {
    }
 
    public void setInterval(long interval) {
-      if (interval < 30) {
-         throw new IllegalArgumentException("Delay interval must be at least 30.");
-      }
-
       this.interval = interval;
    }
 
