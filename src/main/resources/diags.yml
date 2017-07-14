@@ -142,7 +142,7 @@ restQueries-5:
   shield_roles: "_xpack/security/role?pretty"
   templates: "_template?pretty"
   nodeattrs: "_cat/nodeattrs"
-  tasks: "_tasks?pretty&human"
+  tasks: "_tasks?pretty&human&detailed"
   pipelines: "_ingest/pipeline/*?pretty&human"
   allocation_explain: "_cluster/allocation/explain?pretty"
   allocation_explain_disk: "_cluster/allocation/explain?include_disk_info=true&pretty"
