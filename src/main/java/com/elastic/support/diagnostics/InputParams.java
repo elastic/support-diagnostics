@@ -25,7 +25,7 @@ public class InputParams {
    @Parameter(names = {"-s", "--ssl", "--https"}, description = "Use SSL?  No value required, only the option.")
    private boolean isSsl = false;
 
-   @Parameter(names = {"--type"}, description ="Diagnostic type to run. Enter standard, remote, logstash, or logstash-remote. Default is standard and remote will suppress retrieval of logs, configuration and system command info.")
+   @Parameter(names = {"--type"}, description ="Diagnostic type to run. Enter standard, remote, logstash. Default is standard. Using remote will suppress retrieval of logs, configuration and system command info.")
    private String diagType = "standard";
 
    @Parameter(names = {"--ptp"}, description = "Insecure plain text password - warning, may exposure access.")
@@ -34,7 +34,7 @@ public class InputParams {
    @Parameter(names = {"--reps"}, description = "Number of times to execute the diagnostic. Use to create multiple runs at timed intervals.")
    private int reps = 1;
 
-   @Parameter(names = {"--interval"}, description = "Elapsed time in seconds between diagnostic runs when in repeating mode.  Minimum value is 30.")
+   @Parameter(names = {"--interval"}, description = "Elapsed time in seconds between diagnostic runs when in repeating mode.")
    private long interval = 30;
 
    @Parameter(names = {"--bzip"}, description = "Set this option true to use bzip istead of gzip.")
@@ -61,8 +61,19 @@ public class InputParams {
    @Parameter(names = {"--accessLogs"}, description = "Use this option to collect access logs as well.")
    private boolean accessLogs = false;
 
+   @Parameter(names = {"--threads"}, description = "Collect only hot threads.")
+   private boolean hotThreads = false;
+
    private boolean secured = false;
    private boolean wasPortSet = false;
+
+   public boolean isHotThreads() {
+      return hotThreads;
+   }
+
+   public void setHotThreads(boolean hotThreads) {
+      this.hotThreads = hotThreads;
+   }
 
    public boolean isSkipLogs() {
       return skipLogs;

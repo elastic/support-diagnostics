@@ -8,54 +8,13 @@ import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.util.*;
 
-public class SystemCallsCmd extends AbstractDiagnosticCmd {
+public class SystemCallsCmd extends BaseSystemCallsCmd {
 
    public boolean execute(DiagnosticContext context) {
 
       String os = checkOS();
       Map<String, String> osCmds = (Map<String, String>) context.getConfig().get(os);
-
-      ProcessBuilder pb = new ProcessBuilder();
-      pb.redirectErrorStream(true);
-
-      Iterator<Map.Entry<String, String>> iter = osCmds.entrySet().iterator();
-      final List<String> cmds = new ArrayList<>();
-
-      while (iter.hasNext()) {
-         Map.Entry<String, String> entry =  iter.next();
-         String cmdLabel = entry.getKey();
-         final String cmdText;
-         if (entry.getValue().contains("PID")) {
-            cmdText = entry.getValue().replace("PID", context.getPid());
-         } else {
-            cmdText = entry.getValue();
-         }
-         try {
-            StringTokenizer st = new StringTokenizer(cmdText, " ");
-            while (st.hasMoreTokens()) {
-               cmds.add(st.nextToken());
-            }
-
-            pb.redirectOutput(new File(context.getTempDir() + SystemProperties.fileSeparator + cmdLabel + ".txt"));
-            pb.command(cmds);
-            Process pr = pb.start();
-            pr.waitFor();
-         } catch (Exception e) {
-            logger.error("Error processing system command:" + cmdLabel);
-            try{
-               FileOutputStream fos = new FileOutputStream(new File(context.getTempDir() + SystemProperties.fileSeparator + cmdLabel + ".txt"), true);
-               PrintStream ps = new PrintStream(fos);
-               e.printStackTrace(ps);
-            }
-            catch (Exception ie){
-               logger.error("Error processing system command", ie);
-            }
-         } finally {
-            cmds.clear();
-         }
-      }
-
-
+      executeCalls(osCmds, context);
       return true;
    }
 

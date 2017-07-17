@@ -8,9 +8,17 @@ import java.util.Set;
 public class RunClusterQueriesCmd extends AbstractQueryCmd {
 
    public boolean execute(DiagnosticContext context) {
+      Map<String, String> statements = null;
+      String majorVersion = "";
 
-      String majorVersion = context.getVersion().split("\\.")[0];
-      Map<String, String> statements = (Map<String, String>) context.getConfig().get("restQueries-" + majorVersion);
+      if(context.getInputParams().isHotThreads()){
+         statements = (Map<String, String>) context.getConfig().get("hotThreads");
+      }
+      else{
+         majorVersion = context.getVersion().split("\\.")[0];
+         statements = (Map<String, String>) context.getConfig().get("restQueries-" + majorVersion);
+      }
+
       if (statements == null) {
          throw new IllegalArgumentException("major version [" + majorVersion + "] is not supported by this diagnostics tool");
       }

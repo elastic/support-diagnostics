@@ -20,6 +20,10 @@ public class ScrubPasswordsCmd extends AbstractDiagnosticCmd {
    public boolean execute(DiagnosticContext context) {
 
       logger.info("Scrubbing elasticsearch config.");
+      if (context.getInputParams().isSkipLogs()) {
+         return true;
+      }
+
       List<String> tempFileDirs = (List<String>)context.getAttribute("tempFileDirs");
 
       try {

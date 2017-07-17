@@ -44,22 +44,20 @@ class DiagnosticApp {
          int reps = inputs.getReps();
          long interval = inputs.getInterval() * 1000;
 
+         if (reps > 1){
+            if(inputs.getDiagType().equalsIgnoreCase(Constants.STANDARD_DIAG)) {
+               inputs.setDiagType(Constants.REMOTE_DIAG);
+            }
+
+         }
+
          for (int i = 1; i <= reps; i++) {
-            if(reps > 1  && i < reps){
-               inputs.setSkipLogs(true);
-            }
-            else{
-               inputs.setSkipLogs(false);
-            }
             dc.runDiagnostic(ctx);
             System.out.println("Run " + i + " of " + reps + " completed.");
             if (reps > 1) {
                if (i < reps) {
                   System.out.println("Next run will occur in " + inputs.getInterval() + " seconds.\n");
                   Thread.sleep(interval);
-               }
-               if(i == (reps - 1)){
-                  inputs.setSkipLogs(false);
                }
             }
          }

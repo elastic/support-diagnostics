@@ -46,6 +46,8 @@ The support diagnostic utility is a Java executable that will interrogate the no
 * Because of the potential size access logs are no longer collected by default. If you need these use the --accessLogs option to have them copied.
 * --scrub will allow you to remove sensitive information from the logs. Use the scrub.yml to specify each string literal you want removed and the desired replacement value. Currently operates only on exact matches.
 * Use the --type logstash argument to get diagnostic information from a running Logstash process.
+* Use the interval x (in seconds) and reps (times to repeat)to take a diagnostic, sleep for the interval duration, and then take another diagnostic. Each run will get it's own archive, and each run will use the --remote type so no logs or system calls will be collected.
+* Use the --threads option along with the interval/reps combination to take timed thread dumps.
 
 ## Examples
  *NOTE:* Windows users use diagnostics instead of ./diagnostics.sh
@@ -79,6 +81,11 @@ The support diagnostic utility is a Java executable that will interrogate the no
 ## Using Shield Authentication And SSL
   * ./diagnostics.sh --host 192.168.137.10 -u <your username> -p -s
   * ./diagnostics.sh --host 192.168.137.10 -u <your username> -p --ssl
+  
+## Running for Logstash
+  * ./diagnostics.sh --host localhost --type logstash
+  * ./diagnostics.sh --host localhost --type logstash --port 9610
+  
 
 # Troubleshooting
   * Make sure the account you are running from has read access to all the Elasticsearch log and config directories.  This account must have write access to any directory you are using for output.

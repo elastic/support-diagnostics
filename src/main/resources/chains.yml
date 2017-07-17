@@ -7,6 +7,7 @@ standard:
   - com.elastic.support.diagnostics.commands.LogAndConfigCmd
   - com.elastic.support.diagnostics.commands.ScrubPasswordsCmd
   - com.elastic.support.diagnostics.commands.SystemCallsCmd
+  - com.elastic.support.diagnostics.commands.ThreadDumpCmd
   - com.elastic.support.diagnostics.commands.CompressedPointersCmd
   - com.elastic.support.diagnostics.commands.ScrubLogsCmd
   - com.elastic.support.diagnostics.commands.GenerateManifestCmd
@@ -18,6 +19,17 @@ remote:
   - com.elastic.support.diagnostics.commands.RestModuleSetupCmd
   - com.elastic.support.diagnostics.commands.VersionAndClusterNameCheckCmd
   - com.elastic.support.diagnostics.commands.RunClusterQueriesCmd
+  - com.elastic.support.diagnostics.commands.GenerateManifestCmd
+  - com.elastic.support.diagnostics.commands.ArchiveResultsCmd
+  - com.elastic.support.diagnostics.commands.CleanupCmd
+
+intervals:
+  - com.elastic.support.diagnostics.commands.DirectorySetupCmd
+  - com.elastic.support.diagnostics.commands.RestModuleSetupCmd
+  - com.elastic.support.diagnostics.commands.VersionAndClusterNameCheckCmd
+  - com.elastic.support.diagnostics.commands.RunClusterQueriesCmd
+  - com.elastic.support.diagnostics.commands.SystemCallsCmd
+  - com.elastic.support.diagnostics.commands.ThreadDumpCmd
   - com.elastic.support.diagnostics.commands.GenerateManifestCmd
   - com.elastic.support.diagnostics.commands.ArchiveResultsCmd
   - com.elastic.support.diagnostics.commands.CleanupCmd
