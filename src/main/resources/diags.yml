@@ -140,6 +140,7 @@ restQueries-5:
   watcher_stats: "_watcher/stats/_all"
   shield_users: "_xpack/security/user?pretty"
   shield_roles: "_xpack/security/role?pretty"
+  shield_roles_mapping: "_xpack/security/role_mapping?pretty"
   templates: "_template?pretty"
   nodeattrs: "_cat/nodeattrs"
   tasks: "_tasks?pretty&human&detailed"
