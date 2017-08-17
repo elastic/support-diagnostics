@@ -44,23 +44,23 @@ class DiagnosticApp {
          int reps = inputs.getReps();
          long interval = inputs.getInterval() * 1000;
 
-         if (reps > 1){
-            if(inputs.getDiagType().equalsIgnoreCase(Constants.STANDARD_DIAG)) {
-               inputs.setDiagType(Constants.REMOTE_DIAG);
-            }
-
-         }
-
-         for (int i = 1; i <= reps; i++) {
-            dc.runDiagnostic(ctx);
-            System.out.println("Run " + i + " of " + reps + " completed.");
-            if (reps > 1) {
+         if (reps > 1) {
+            for (int i = 1; i <= reps; i++) {
+               if (inputs.getDiagType().equalsIgnoreCase(Constants.STANDARD_DIAG) && i < (reps-1)) {
+                  inputs.setDiagType(Constants.REMOTE_DIAG);
+               }
+               dc.runDiagnostic(ctx);
+               System.out.println("Run " + i + " of " + reps + " completed.");
                if (i < reps) {
                   System.out.println("Next run will occur in " + inputs.getInterval() + " seconds.\n");
                   Thread.sleep(interval);
                }
             }
          }
+         else {
+            dc.runDiagnostic(ctx);
+         }
+
       } catch (RuntimeException re) {
          logger.error("Execution Error", re);
       }
@@ -71,7 +71,7 @@ class DiagnosticApp {
       String ptPassword = inputs.getPlainTextPassword();
       String userName = inputs.getUsername();
       String password = inputs.getPassword();
-      if(! "".equals(ptPassword)){
+      if (!"".equals(ptPassword)) {
          password = ptPassword;
          inputs.setPassword(ptPassword);
       }

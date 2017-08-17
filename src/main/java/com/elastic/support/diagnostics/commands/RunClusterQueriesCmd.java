@@ -16,7 +16,7 @@ public class RunClusterQueriesCmd extends AbstractQueryCmd {
       }
       else{
          majorVersion = context.getVersion().split("\\.")[0];
-         statements = (Map<String, String>) context.getConfig().get("restQueries-" + majorVersion);
+         statements = (Map<String, String>) context.getConfig().get("standard-" + majorVersion);
       }
 
       if (statements == null) {

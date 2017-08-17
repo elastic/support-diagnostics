@@ -6,7 +6,6 @@ textFileExtensions:
   - allocation
   - cat_shards
   - nodes_hot_threads
-  - plugins
   - cat_nodes
   - cat_indices
   - cat_fielddata
@@ -21,7 +20,7 @@ textFileExtensions:
   - nodeattrs
   - logstash_nodes_hot_threads
 
-restQueries-1:
+standard-1:
   alias: "_alias?pretty&human"
   allocation: "_cat/allocation?v"
   cat_master: "_cat/master?format=json"
@@ -48,7 +47,7 @@ restQueries-1:
   nodes_stats: "_nodes/stats?pretty&human"
   fielddata_stats: "/_nodes/stats/indices/fielddata?level=indices&pretty=true&fields=*"
   shards: "_cat/shards?format=json&bytes=b&pretty=true"
-  plugins: "_cat/plugins?v"
+  plugins: "_cat/plugins?format=json"
   recovery: "_recovery"
   segments: "_segments?pretty&human"
   settings: "_settings?pretty&human"
@@ -59,7 +58,7 @@ restQueries-1:
   watcher_stack: "/_watcher/stats?emit_stacktraces=true"
   templates: "_template?pretty&human"
 
-restQueries-2:
+standard-2:
   alias: "_alias?pretty"
   allocation: "_cat/allocation?v"
   cat_master: "_cat/master?v"
@@ -85,7 +84,7 @@ restQueries-2:
   nodes_hot_threads: "_nodes/hot_threads?threads=10000"
   nodes_stats: "_nodes/stats?pretty&human"
   fielddata_stats: "/_nodes/stats/indices/fielddata?level=indices&pretty=true&fields=*"
-  plugins: "_cat/plugins?v"
+  plugins: "_cat/plugins?format=json"
   cat_recovery: "_cat/recovery?v"
   recovery: "_recovery?pretty"
   shards: "_cat/shards?format=json&bytes=b&pretty"
@@ -94,14 +93,16 @@ restQueries-2:
   version: ""
   nodes: "_nodes?pretty&human"
   warmers: "_all/_warmer?pretty"
-  watcher_stats: "_watcher/stats/_all?pretty"
-  shield_users: "_shield/user?pretty"
-  shield_roles: "_shield/role?pretty"
   templates: "_template?pretty"
   nodeattrs: "_cat/nodeattrs"
   tasks: "_tasks?pretty&human"
 
-restQueries-5:
+commercial-2:
+  watcher_stats: "_watcher/stats/_all?pretty"
+  security_users: "_shield/user?pretty"
+  security_roles: "_shield/role?pretty"
+
+standard-5:
   alias: "_alias?pretty"
   allocation: "_cat/allocation?v"
   cat_master: "_cat/master?v"
@@ -129,29 +130,86 @@ restQueries-5:
   nodes_stats: "_nodes/stats?pretty&human"
   fielddata_stats: "/_nodes/stats/indices/fielddata?pretty=true&fields=*"
   fielddata: "_cat/fielddata?format=json&bytes&pretty"
-  plugins: "_cat/plugins?v"
+  plugins: "_cat/plugins?format=json"
   cat_recovery: "_cat/recovery?v"
-  recovery: "_recovery"
+  recovery: "_recovery?pretty"
   shards: "_cat/shards?format=json&bytes=b&pretty"
   segments: "_segments?pretty&human"
   settings: "_settings?pretty&human"
   version: ""
   nodes: "_nodes?pretty&human"
-  watcher_stats: "_watcher/stats/_all"
-  shield_users: "_xpack/security/user?pretty"
-  shield_roles: "_xpack/security/role?pretty"
   templates: "_template?pretty"
   nodeattrs: "_cat/nodeattrs"
   tasks: "_tasks?pretty&human&detailed"
   pipelines: "_ingest/pipeline/*?pretty&human"
   allocation_explain: "_cluster/allocation/explain?pretty"
   allocation_explain_disk: "_cluster/allocation/explain?include_disk_info=true&pretty"
-  shard_stores: "_shard_stores"
+  shard_stores: "_shard_stores?pretty"
+
+commercial-5:
   xpack: "_xpack/usage?pretty&human"
   ml_datafeeds: "_xpack/ml/datafeeds?pretty"
   ml_anomaly_detectors: "_xpack/ml/anomaly_detectors?pretty"
+  watcher_stats: "_watcher/stats/_all"
+  security_users: "_xpack/security/user?pretty"
+  security_roles: "_xpack/security/role?pretty"
+  security_role_mappings: "/_xpack/security/role_mapping?pretty"
 
-hotThreads:
+
+standard-6:
+  alias: "_alias?pretty"
+  allocation: "_cat/allocation?v"
+  cat_master: "_cat/master?v"
+  cat_nodes: "_cat/nodes?v&h=ip,heap.percent,ram.percent,cpu,load_1m,load_5m,load_15m,node.role,master,name,nodeId,diskAvail"
+  cat_indices: "_cat/indices?v"
+  cat_segments: "_cat/segments?v"
+  cat_health: "_cat/health?v"
+  cat_pending_tasks: "_cat/pending_tasks?v"
+  cat_aliases: "_cat/aliases?v"
+  cat_thread_pool: "_cat/thread_pool?v"
+  cat_fielddata: "_cat/fielddata?v"
+  cat_shards: "_cat/shards"
+  cluster_health: "_cluster/health?pretty"
+  cluster_pending_tasks: "_cluster/pending_tasks?pretty&human"
+  cluster_settings: "_cluster/settings?pretty&flat_settings"
+  cluster_settings_defaults: "_cluster/settings?include_defaults&pretty&flat_settings"
+  cluster_state: "_cluster/state?pretty&human"
+  cluster_stats: "_cluster/stats?pretty&human"
+  count: "_count?pretty"
+  indices_stats: "_stats?pretty&human"
+  licenses: "_license?pretty"
+  mapping: "_mapping?pretty"
+  master: "_cat/master?format=json"
+  nodes_hot_threads: "_nodes/hot_threads?threads=10000"
+  nodes_stats: "_nodes/stats?pretty&human"
+  fielddata_stats: "/_nodes/stats/indices/fielddata?pretty=true&fields=*"
+  fielddata: "_cat/fielddata?format=json&bytes&pretty"
+  plugins: "_cat/plugins?format=json"
+  cat_recovery: "_cat/recovery?v"
+  recovery: "_recovery?pretty"
+  shards: "_cat/shards?format=json&bytes=b&pretty"
+  segments: "_segments?pretty&human"
+  settings: "_settings?pretty&human"
+  version: ""
+  nodes: "_nodes?pretty&human"
+  templates: "_template?pretty"
+  nodeattrs: "_cat/nodeattrs"
+  tasks: "_tasks?pretty&human&detailed"
+  pipelines: "_ingest/pipeline/*?pretty&human"
+  allocation_explain: "_cluster/allocation/explain?pretty"
+  allocation_explain_disk: "_cluster/allocation/explain?include_disk_info=true&pretty"
+  shard_stores: "_shard_stores?pretty"
+
+commercial-6:
+  xpack: "_xpack/usage?pretty&human"
+  ml_datafeeds: "_xpack/ml/datafeeds?pretty"
+  ml_anomaly_detectors: "_xpack/ml/anomaly_detectors?pretty"
+  watcher_stats: "_watcher/stats/_all"
+  security_users: "_xpack/security/user?pretty"
+  security_roles: "_xpack/security/role?pretty"
+  security_role_mappings: "/_xpack/security/role_mapping?pretty"
+
+elasticThreads:
   nodes: "_nodes?pretty&human"
   nodes_hot_threads: "_nodes/hot_threads?threads=10000"
 

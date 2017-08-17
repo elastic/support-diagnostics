@@ -12,7 +12,7 @@ public abstract class BaseSystemCallsCmd extends AbstractDiagnosticCmd {
 
    public void executeCalls(Map<String, String> calls, DiagnosticContext context) {
 
-       ProcessBuilder pb = new ProcessBuilder();
+      ProcessBuilder pb = new ProcessBuilder();
       pb.redirectErrorStream(true);
 
       Iterator<Map.Entry<String, String>> iter = calls.entrySet().iterator();
@@ -51,7 +51,6 @@ public abstract class BaseSystemCallsCmd extends AbstractDiagnosticCmd {
             cmds.clear();
          }
       }
-
    }
 
 }

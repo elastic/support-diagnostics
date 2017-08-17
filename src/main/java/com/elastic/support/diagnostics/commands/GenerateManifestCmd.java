@@ -28,7 +28,7 @@ public class GenerateManifestCmd extends AbstractDiagnosticCmd {
          cluster.put("clusterName", clusterName);
          cluster.put("collectionDate", SystemProperties.getUtcDateString());
          cluster.put("host", context.getAttribute("hostName"));
-         cluster.put("diagNode", context.getHostNode());
+         cluster.put("diagNode", context.getStringAttribute("diagNodeName"));
          InputParams params = context.getInputParams();
          cluster.put("inputs", params.toString());
 
