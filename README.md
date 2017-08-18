@@ -39,7 +39,7 @@ It will execute a series of REST API calls to the running cluster, run a number 
 * An archive with the format diagnostics-`<DateTimeStamp>`.tar.gz will be created in the utility directory. If you wish to specify a specific output folder you may do so by using the -o `<Full path to custom output folder>` option.
 
 
-####Basic Usage Examples
+#### Basic Usage Examples
     * NOTE: Windows users use `diagnostics` instead of `./diagnostics.sh`
     * sudo ./diagnostics.sh --host localhost
     * sudo ./diagnostics.sh --host 10.0.0.20
@@ -47,7 +47,7 @@ It will execute a series of REST API calls to the running cluster, run a number 
     * sudo ./diagnostics.sh --host 10.0.0.20 --port 9201
     * sudo ./diagnostics.sh --host localhost -o /home/myusername/diag-out
 
-####Getting Command Line Help
+#### Getting Command Line Help
     * /diagnostics.sh --help
 
 ## Using With Shield/Security
@@ -57,44 +57,44 @@ It will execute a series of REST API calls to the running cluster, run a number 
 * --keystore and --keystorePass allow you to specify client side certificates for authentication.
 * To script the utility when using Shield/Security, you may use the --ptp option to allow you to pass a plain text password to the command line rather than use -p and get a prompt.  Note that this is inherently insecure - use at your own risk.
 
-####Examples - Without SSL
+#### Examples - Without SSL
     * sudo ./diagnostics.sh --host localhost -u elastic -p
     * sudo ./diagnostics.sh --host 10.0.0.20 -u elastic -p
-####Example - With SSL
+#### Example - With SSL
     * sudo ./diagnostics.sh --host 10.0.0.20 -u <your username> -p --ssl
 
-##Additional Options
+## Additional Options
 * You can specify additional java options such as a higher -Xmx value by setting the environment variable DIAG_JAVA_OPTS.
 * To include all logs, not just today's use the --archivedLogs option.
 * To suppress all log file collection use the --skipLogs option.
 * Because of the potential size access logs are no longer collected by default. If you need these use the --accessLogs option to have them copied.
 
-##Alternate Usages
-###Remote
+## Alternate Usages
+### Remote
 * If you cannot run the utility on the host the node to be queried resides on, such as a workstation, you may use the --type remote option.
 * This will execute only the REST API calls and will not attempt to execute local system calls or collect log/config files. 
-####Remote Example
+#### Remote Example
     * ./diagnostics.sh --host 10.0.0.20 --type remote
 
-###Logstash Diagnostics
+### Logstash Diagnostics
 * Use the --type logstash argument to get diagnostic information from a running Logstash process. It will query the process in a manner similar to the Elasticsearch REST API calls.
 * The default port will be 9600. This can be modified at startup, or will be automatically incremented if you start multiple Logstash processes on the same host. You can connect to these other Logstash processes with the --port option.
 #### Logstash Examples
     * sudo ./diagnostics.sh --host localhost --type logstash
     * sudo ./diagnostics.sh --host localhost --type logstash --port 9610
 
-###Multiple Runs At Timed Intervals
+### Multiple Runs At Timed Intervals
 * If the cluster is not running X-Pack Monitoring you may find it beneficial to see how some statistics change over time. You can accomplish this by using the --interval x (in seconds) and --reps (times to repeat)to take a diagnostic.
 * You run the diagnostic once and it will execute a run, sleep for the interval duration, and then take another diagnostic. 
 * Each run will get it's own archive with the same DateTime stamp and with run-`<run number>` appended.
 * Logs and configs will only be collected in the archive of the final run. If you are running in standard rather than remote mode, however, all the system level calls will be executed.
 * This can be used for either Elasticsearch or Logstash
-####Examples - 6 runs with 20 seconds separating each run
+#### Examples - 6 runs with 20 seconds separating each run
     * sudo ./diagnostics.sh --host localhost -u elastic -p --interval 20 --reps 6
     * sudo ./diagnostics.sh --host localhost -u elastic -p --interval 20 --reps 6 --type remote
     * sudo ./diagnostics.sh --host localhost -u elastic -p --interval 20 --reps 6 --type logstash 
 
-###Timed Thread Dumps
+### Timed Thread Dumps
 * If you wish to take thread dumps at timed intervals without running the full gamut of API calls use the --type elastic-threads option. 
 * For each run it will collect output from the Hot Threads API call, as well as running a full thread dump against the process using jstack.
 * This **must** be run on the physical host of the node you will to check.
