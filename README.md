@@ -1,5 +1,6 @@
 ## Support Diagnostics Utility
-The support diagnostic utility is a Java executable that will interrogate the node on the the host it is running on to obtain data and statistics on the running cluster.  There are a number of changes from the previous script based version:
+The support diagnostic utility is a Java executable that will interrogate the node on the the host it is running on to obtain data and statistics on the running cluster. 
+It will execute a series of REST API calls to the running cluster, run a number of OS related commands(such as top, netstat, etc.), and collect logs and configuration, then bundle them into one or more archives.
 
 * Compatible with versions 5.x, 2.x, 1.x
 * No runtime requirements or dependencies other than a recent JRE
@@ -19,75 +20,91 @@ The support diagnostic utility is a Java executable that will interrogate the no
 * If you are running a package installation under Linux you MUST run the command with elevated sudo privileges. Otherwise the utility will not be able to read the configuration folders or run the system queries.
 * It is recommended that you set the JAVA_HOME environment variable.  It should point to the Java installation directory.  If JAVA_HOME is not found, the utility will attempt to locate a distribution but if errors occur it may be necessary to set this manually.
 * The system account running the utility must have read access to the Elasticsearch files and write access to the output location.
-* If you are using Shield the supplied user id must have permission to execute the diagnostic URL's.
+* If you are using Shield/Security the supplied user id must have permission to execute the diagnostic URL's.
 * Linux, Windows, and Mac OSX are supported.
-* Docker installations may have issues depending on the individual configuration.
+* Docker installations should use the --type remote option. See below for examples. 
 
-## Installation And Usage Instructions
+## Installation
 * Download [support-diagnostics-X.XX-dist.zip](https://github.com/elastic/elasticsearch-support-diagnostics/releases/latest) from the Github release area.
 * Unzip the support-diagnostics-<version>-dist.zip into the directory from which you intend to run the application.
 * Switch to the diagnostics distribution directory.
+
+## Usage - Simplest Case
 * Run the application via the diagnostics.sh or diagnostics.bat script. The host name or IP address used by the HTTP connector of the node is required.
-* A hostname or IP address must now be specified via the --host parameter. This is due to the changes in default port binding what were introduced starting with version 2.
-* The utility will still attempt to use a default listening port of 9200 if you do not specify one.
-* If prompted, you will also need to enter the port, even if it is set for the default of 9200.
+* In order to assure that all artifacts are collected it is recommended that you run the tool with elevated privileges. This means sudo on Linux type platforms and via an Administor Prompt in Windows.
+* A hostname or IP address must now be specified via the --host parameter. This is due to the changes in default port binding what were introduced starting with version 2. You must supply this even if you are running as localhost.
+* The utility will use default listening port of 9200 if you do not specify one.
 * If the utility cannot find a running ES version for that host/port combination the utility will exit and you will need to run it again.
 * Input parameters may be specified in any order.
-* When using Shield authentication, do not specify a password.  Using the -p option will bring up a prompt for you to type one that will not be displayed on the command line.
-* To get help for input options run the diagnostic with the --help option
-* An archive with the format <cluster name>-cluster-diagnostic-<Date Time Stamp>.tar.gz will be created in the working or output directory.
-* You can specify additional java options such as a higher -Xmx value by setting the environment variable DIAG_JAVA_OPTS.
-* A diagnostic.log file will be generated in the installation directory of the diagnostic utility - the output of the console, which will include both progress and error messages, will be replicated in that file.  It will be appended for each run and rolled over daily if not removed.
-* Additional compression can be obtained by running with the --bzip option.
-* To include all logs, not just today's use the --archivedLogs option.
-* To script the utility when using Shield, use the --ptp option to allow the addition of a plain text password via the command line.  Note that this is inherently insecure so use at your own risk.
-* --noVerify will bypass hostname verification with SSL. Again, this is a security hole so use at your own risk.
+* An archive with the format diagnostics-`<DateTimeStamp>`.tar.gz will be created in the utility directory. If you wish to specify a specific output folder you may do so by using the -o `<Full path to custom output folder>` option.
+
+
+####Basic Usage Examples
+    * NOTE: Windows users use `diagnostics` instead of `./diagnostics.sh`
+    * sudo ./diagnostics.sh --host localhost
+    * sudo ./diagnostics.sh --host 10.0.0.20
+    * sudo ./diagnostics.sh --host myhost.mycompany.com
+    * sudo ./diagnostics.sh --host 10.0.0.20 --port 9201
+    * sudo ./diagnostics.sh --host localhost -o /home/myusername/diag-out
+
+####Getting Command Line Help
+    * /diagnostics.sh --help
+
+## Using With Shield/Security
+* a truststore does not need to be specified - it's assumed you are running this against a node that you set up and if you didn't trust it you wouldn't be running this.
+* When using Shield authentication, do not specify a password and the -p option.  Using the -p option will bring up a prompt for you to type an obfuscated value that will not be displayed on the command history.
+* --noVerify will bypass hostname verification with SSL.
 * --keystore and --keystorePass allow you to specify client side certificates for authentication.
+* To script the utility when using Shield/Security, you may use the --ptp option to allow you to pass a plain text password to the command line rather than use -p and get a prompt.  Note that this is inherently insecure - use at your own risk.
+
+####Examples - Without SSL
+    * sudo ./diagnostics.sh --host localhost -u elastic -p
+    * sudo ./diagnostics.sh --host 10.0.0.20 -u elastic -p
+####Example - With SSL
+    * sudo ./diagnostics.sh --host 10.0.0.20 -u <your username> -p --ssl
+
+##Additional Options
+* You can specify additional java options such as a higher -Xmx value by setting the environment variable DIAG_JAVA_OPTS.
+* To include all logs, not just today's use the --archivedLogs option.
+* To suppress all log file collection use the --skipLogs option.
 * Because of the potential size access logs are no longer collected by default. If you need these use the --accessLogs option to have them copied.
-* --scrub will allow you to remove sensitive information from the logs. Use the scrub.yml to specify each string literal you want removed and the desired replacement value. Currently operates only on exact matches.
-* Use the --type logstash argument to get diagnostic information from a running Logstash process.
-* Use the interval x (in seconds) and reps (times to repeat)to take a diagnostic, sleep for the interval duration, and then take another diagnostic. Each run will get it's own archive, and each run will use the --remote type so no logs or system calls will be collected.
-* Use the --threads option along with the interval/reps combination to take timed thread dumps.
 
-## Examples
- *NOTE:* Windows users use diagnostics instead of ./diagnostics.sh
+##Alternate Usages
+###Remote
+* If you cannot run the utility on the host the node to be queried resides on, such as a workstation, you may use the --type remote option.
+* This will execute only the REST API calls and will not attempt to execute local system calls or collect log/config files. 
+####Remote Example
+    * ./diagnostics.sh --host 10.0.0.20 --type remote
 
-## Getting Command Line Help
- * /diagnostics.sh --help
+###Logstash Diagnostics
+* Use the --type logstash argument to get diagnostic information from a running Logstash process. It will query the process in a manner similar to the Elasticsearch REST API calls.
+* The default port will be 9600. This can be modified at startup, or will be automatically incremented if you start multiple Logstash processes on the same host. You can connect to these other Logstash processes with the --port option.
+#### Logstash Examples
+    * sudo ./diagnostics.sh --host localhost --type logstash
+    * sudo ./diagnostics.sh --host localhost --type logstash --port 9610
 
-## Basic Runs
-  * ./diagnostics.sh --host 192.168.137.10
-  * ./diagnostics.sh --host 192.168.137.10 --port 9201
+###Multiple Runs At Timed Intervals
+* If the cluster is not running X-Pack Monitoring you may find it beneficial to see how some statistics change over time. You can accomplish this by using the --interval x (in seconds) and --reps (times to repeat)to take a diagnostic.
+* You run the diagnostic once and it will execute a run, sleep for the interval duration, and then take another diagnostic. 
+* Each run will get it's own archive with the same DateTime stamp and with run-`<run number>` appended.
+* Logs and configs will only be collected in the archive of the final run. If you are running in standard rather than remote mode, however, all the system level calls will be executed.
+* This can be used for either Elasticsearch or Logstash
+####Examples - 6 runs with 20 seconds separating each run
+    * sudo ./diagnostics.sh --host localhost -u elastic -p --interval 20 --reps 6
+    * sudo ./diagnostics.sh --host localhost -u elastic -p --interval 20 --reps 6 --type remote
+    * sudo ./diagnostics.sh --host localhost -u elastic -p --interval 20 --reps 6 --type logstash 
 
-## Running remotely - does not collect logs, configs or run system commands.  Can be executed from a desktop without ES installed.
-  * ./diagnostics.sh --host 192.168.137.10 --type remote
-
-## Running a diagnostic on a running Logstash instance using the default 9600 port
-  * ./diagnostics.sh --host 192.168.137.10 --type logstash
-  
-## Running a diagnostic on a running Logstash instance using a custom port
-  * ./diagnostics.sh --host 192.168.137.10 --type logstash - port 9600
-
-## Specifying a custom output directory
-  *  ./diagnostics.sh --host 192.168.137.10 -o <full path to output directory>
-
-## Using Shield Authentication
-  * ./diagnostics.sh --host 192.168.137.10 -u <your username> -p
-  * ./diagnostics.sh --host 192.168.137.10 --user <your username> -p
-  * ./diagnostics.sh --host 192.168.137.10 --user <your username> --password
-
-  * Do not specify a password on the command line, only the flag.  You will be prompted for the password and it will be hidden.
-
-## Using Shield Authentication And SSL
-  * ./diagnostics.sh --host 192.168.137.10 -u <your username> -p -s
-  * ./diagnostics.sh --host 192.168.137.10 -u <your username> -p --ssl
-  
-## Running for Logstash
-  * ./diagnostics.sh --host localhost --type logstash
-  * ./diagnostics.sh --host localhost --type logstash --port 9610
-  
+###Timed Thread Dumps
+* If you wish to take thread dumps at timed intervals without running the full gamut of API calls use the --type elastic-threads option. 
+* For each run it will collect output from the Hot Threads API call, as well as running a full thread dump against the process using jstack.
+* This **must** be run on the physical host of the node you will to check.
+* You do not need to supply a process id, only the host/port. It will query the node for the information on the one running on that host and use it in the call.
+* Since there are fewer calls for Logstash it does not have a separate type. Use the standard repitition options and both hot threads and jstack will be included.
+#### Elasticseach Timed Thread Dumps Example
+    * sudo ./diagnostics.sh --host localhost -u elastic -p --interval 20 --reps 6 --type elastic-threads    
 
 # Troubleshooting
+  * The file: diagnostic.log file will be generated in the installation directory of the diagnostic utility - the output of the console, which will include both progress and error messages, will be replicated in that file.  It will be appended for each run and rolled over daily if not removed.
   * Make sure the account you are running from has read access to all the Elasticsearch log and config directories.  This account must have write access to any directory you are using for output.
   * Make sure you have a valid Java installation that the JAVA_HOME environment variable is pointing to.
   * If you are not in the installation directory CD in and run it from there.

@@ -19,6 +19,16 @@ public class ArchiveResultsCmd extends AbstractDiagnosticCmd {
       logger.info("Archiving diagnostic results.");
 
       try {
+         String archiveFilename = SystemProperties.getFileDateString();
+         if(context.getInputParams().getReps() > 1){
+            int currentRep = context.getCurrentRep();
+            if(currentRep == 1){
+               context.setAttribute("archiveFileName", archiveFilename);
+            }
+
+            archiveFilename = context.getStringAttribute("archiveFileName") + "-run-" + currentRep;
+         }
+
          boolean bzip = context.getInputParams().isBzip();
          String ext = "";
          if (bzip){
@@ -30,7 +40,7 @@ public class ArchiveResultsCmd extends AbstractDiagnosticCmd {
 
          String dir = context.getTempDir();
          File srcDir = new File(dir);
-         String filename = dir + "-" + SystemProperties.getFileDateString() + ".tar" + ext;
+         String filename = dir + "-" + archiveFilename + ".tar" + ext;
 
          FileOutputStream fout = new FileOutputStream(filename);
          CompressorOutputStream cout = null;

@@ -11,8 +11,8 @@ public class RunClusterQueriesCmd extends AbstractQueryCmd {
       Map<String, String> statements = null;
       String majorVersion = "";
 
-      if(context.getInputParams().isHotThreads()){
-         statements = (Map<String, String>) context.getConfig().get("hotThreads");
+      if(context.getInputParams().getDiagType().equalsIgnoreCase("elastic-threads")){
+         statements = (Map<String, String>) context.getConfig().get("elastic-threads");
       }
       else{
          majorVersion = context.getVersion().split("\\.")[0];

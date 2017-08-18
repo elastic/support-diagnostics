@@ -46,8 +46,12 @@ class DiagnosticApp {
 
          if (reps > 1) {
             for (int i = 1; i <= reps; i++) {
-               if (inputs.getDiagType().equalsIgnoreCase(Constants.STANDARD_DIAG) && i < (reps-1)) {
-                  inputs.setDiagType(Constants.REMOTE_DIAG);
+               ctx.setCurrentRep(i);
+               if (inputs.getDiagType().equalsIgnoreCase(Constants.STANDARD_DIAG) && i < (reps)) {
+                  inputs.setSkipLogs(true);
+               }
+               else{
+                  inputs.setSkipLogs(false);
                }
                dc.runDiagnostic(ctx);
                System.out.println("Run " + i + " of " + reps + " completed.");
@@ -55,6 +59,7 @@ class DiagnosticApp {
                   System.out.println("Next run will occur in " + inputs.getInterval() + " seconds.\n");
                   Thread.sleep(interval);
                }
+
             }
          }
          else {

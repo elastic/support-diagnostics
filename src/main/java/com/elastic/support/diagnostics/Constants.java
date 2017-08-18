@@ -7,6 +7,7 @@ public class Constants {
    public static final String REMOTE_DIAG = "remote";
    public static final String STANDARD_DIAG = "standard";
    public static final String NODES = "nodes.json";
+   public static final String PLUGINS = "plugins.json";
 
 
    public static final int LOGSTASH_PORT = 9600;

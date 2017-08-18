@@ -28,7 +28,7 @@ public class LogAndConfigCmd extends AbstractDiagnosticCmd {
 
       JsonNode diagNode = context.getTypedAttribute("diagNode", JsonNode.class);
       boolean getAccess = context.getInputParams().isAccessLogs();
-      String commercialDir = SystemUtils.safeToString(context.getStringAttribute("commercialDir"));
+      String commercialDir = SystemUtils.safeToString(context.getAttribute("commercialDir"));
       logger.info("Processing logs and configuration files.");
       JsonNode settings = diagNode.path("settings");
       String name = diagNode.path("name").asText();

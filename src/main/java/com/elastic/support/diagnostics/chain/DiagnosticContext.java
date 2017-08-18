@@ -25,6 +25,7 @@ public class DiagnosticContext extends Context {
    String hostNode = "";
    String diagName = Constants.ES_DIAG;
    String pid;
+   int currentRep;
    Set<String> hostIpList;
 
    public String getDiagName() {
@@ -139,5 +140,13 @@ public class DiagnosticContext extends Context {
 
    public boolean isVersionTwoOrGreater() {
       return Pattern.matches(verTwo, version);
+   }
+
+   public int getCurrentRep() {
+      return currentRep;
+   }
+
+   public void setCurrentRep(int currentRep) {
+      this.currentRep = currentRep;
    }
 }

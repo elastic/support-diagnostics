@@ -1,5 +1,6 @@
 package com.elastic.support.diagnostics.commands;
 
+import com.elastic.support.diagnostics.Constants;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.util.JsonYamlUtils;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -10,17 +11,20 @@ import java.util.Set;
 
 public class RunCommercialQueriesCmd extends AbstractQueryCmd {
 
-   private static final String PLUGINS = "plugins.json";
-
 
    public boolean execute(DiagnosticContext context) {
+
+      if(context.getInputParams().isHotThreads()){
+         return true;
+      }
+
       String runStatements = "";
       boolean runCommercial = false;
       Map<String, String> statements = null;
       String temp = context.getTempDir();
 
       try {
-         JsonNode node = JsonYamlUtils.createJsonNodeFromFileName(temp, PLUGINS);
+         JsonNode node = JsonYamlUtils.createJsonNodeFromFileName(temp, Constants.PLUGINS);
          List<String> vals = node.findValuesAsText("component");
          int majorVersion = Integer.parseInt(context.getVersion().split("\\.")[0]);
          if(majorVersion > 2){

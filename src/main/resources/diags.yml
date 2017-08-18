@@ -155,7 +155,6 @@ commercial-5:
   security_roles: "_xpack/security/role?pretty"
   security_role_mappings: "/_xpack/security/role_mapping?pretty"
 
-
 standard-6:
   alias: "_alias?pretty"
   allocation: "_cat/allocation?v"
@@ -209,11 +208,11 @@ commercial-6:
   security_roles: "_xpack/security/role?pretty"
   security_role_mappings: "/_xpack/security/role_mapping?pretty"
 
-elasticThreads:
+elastic-threads:
   nodes: "_nodes?pretty&human"
   nodes_hot_threads: "_nodes/hot_threads?threads=10000"
 
-jstack:
+thread-dump:
   jstack: "jstack PID"
 
 logstash:

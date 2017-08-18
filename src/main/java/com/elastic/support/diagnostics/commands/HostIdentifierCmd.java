@@ -20,6 +20,12 @@ public class HostIdentifierCmd extends AbstractDiagnosticCmd {
    public boolean execute(DiagnosticContext context) {
 
       try {
+
+         // If we're doing multiple runs we don't need to do this again.
+         if(context.getCurrentRep() > 1){
+            return true;
+         }
+
          String temp = context.getTempDir();
          int port = context.getInputParams().getPort();
          JsonNode rootNode = JsonYamlUtils.createJsonNodeFromFileName(temp, Constants.NODES);

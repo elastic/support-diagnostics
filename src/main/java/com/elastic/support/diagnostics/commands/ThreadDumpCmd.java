@@ -12,7 +12,7 @@ public class ThreadDumpCmd extends BaseSystemCallsCmd {
 
    public boolean execute( DiagnosticContext context) {
 
-      Map<String, String> cmds = (Map<String, String>) context.getConfig().get("jstack");
+      Map<String, String> cmds = (Map<String, String>) context.getConfig().get("thread-dump");
       executeCalls(cmds, context);
 
       return true;
