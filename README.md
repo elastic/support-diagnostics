@@ -16,7 +16,8 @@ It will execute a series of REST API calls to the running cluster, run a number 
 * `cd` to the top level repo directory and type `mvn package`.
 
 ## Run Requirements
-* JRE - Oracle or OpenJDK, 1.7 or 1.8
+* JDK **strongly recommended** - Oracle or OpenJDK, 1.7 or 1.8
+* A JRE may be used, however certain functionality such as jstack generated thread dumps will not be available.
 * If you are running a package installation under Linux you MUST run the command with elevated sudo privileges. Otherwise the utility will not be able to read the configuration folders or run the system queries.
 * It is recommended that you set the JAVA_HOME environment variable.  It should point to the Java installation directory.  If JAVA_HOME is not found, the utility will attempt to locate a distribution but if errors occur it may be necessary to set this manually.
 * The system account running the utility must have read access to the Elasticsearch files and write access to the output location.
