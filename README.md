@@ -72,7 +72,7 @@ It will execute a series of REST API calls to the running cluster, run a number 
 
 ## Alternate Usages
 ### Remote
-* If you cannot run the utility on the host the node to be queried resides on, such as a workstation, you may use the --type remote option.
+* If you do not wish to run the utility on the host the node to be queried resides on, and wish to run it from a different host such as your workstation, you may use the --type remote option.
 * This will execute only the REST API calls and will not attempt to execute local system calls or collect log/config files. 
 #### Remote Example
     * ./diagnostics.sh --host 10.0.0.20 --type remote
