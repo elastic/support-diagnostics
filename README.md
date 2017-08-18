@@ -25,8 +25,8 @@ It will execute a series of REST API calls to the running cluster, run a number 
 * Docker installations should use the --type remote option. See below for examples. 
 
 ## Installation
-* Download [support-diagnostics-X.XX-dist.zip](https://github.com/elastic/elasticsearch-support-diagnostics/releases/latest) from the Github release area.
-* Unzip the support-diagnostics-<version>-dist.zip into the directory from which you intend to run the application.
+* Download [support-diagnostics-latest-dist.zip](https://github.com/elastic/elasticsearch-support-diagnostics/releases/latest) from the Github release area.
+* Unzip the support-diagnostics-`<version>`-dist.zip into the directory from which you intend to run the application.
 * Switch to the diagnostics distribution directory.
 
 ## Usage - Simplest Case
