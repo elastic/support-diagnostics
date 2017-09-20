@@ -244,10 +244,12 @@ macOS:
   netstat: "netstat -an"
   process-list: "ps -ef"
   ulimit: "ulimit -a"
+  jstack: "jstack PID"
   jps: "jps -l -m -v"
 
 winOS:
   process-list: "tasklist /v"
   netstat: "netstat -ano"
   jps: "jps -l -m -v"
+  jstack: "jstack PID"
   cpu: "wmic CPU"

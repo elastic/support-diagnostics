@@ -27,12 +27,13 @@ public abstract class BaseSystemCallsCmd extends AbstractDiagnosticCmd {
          } else {
             cmdText = entry.getValue();
          }
+
          try {
             StringTokenizer st = new StringTokenizer(cmdText, " ");
             while (st.hasMoreTokens()) {
                cmds.add(st.nextToken());
             }
-
+            logger.info("Running: " + cmdText);
             pb.redirectOutput(new File(context.getTempDir() + SystemProperties.fileSeparator + cmdLabel + ".txt"));
             pb.command(cmds);
             Process pr = pb.start();
