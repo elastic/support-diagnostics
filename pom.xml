@@ -4,7 +4,7 @@
 
     <groupId>com.elasticsearch</groupId>
     <artifactId>support-diagnostics</artifactId>
-    <version>6.0-beta1</version>
+    <version>6.1</version>
     <packaging>jar</packaging>
     <name>Support Diagnostics Utilities</name>
 
@@ -56,7 +56,7 @@
         <dependency>
             <groupId>com.beust</groupId>
             <artifactId>jcommander</artifactId>
-            <version>1.35</version>
+            <version>1.48</version>
         </dependency>
 
         <dependency>

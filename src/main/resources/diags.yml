@@ -236,6 +236,8 @@ linuxOS:
   sar: "sar -A"
   sysctl: "sysctl -a"
   dmesg: "dmesg"
+  jstack: "jstack PID"
+  huge_pages: "cat /sys/kernel/mm/transparent_hugepage/enabled"
 
 macOS:
   top: "top -l 1"

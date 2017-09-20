@@ -1,6 +1,7 @@
 package com.elastic.support.diagnostics;
 
 import com.beust.jcommander.*;
+import com.elastic.support.util.SystemProperties;
 
 public class InputParams {
 
@@ -28,7 +29,7 @@ public class InputParams {
    @Parameter(names = {"--type"}, description ="Diagnostic type to run. Enter standard, remote, logstash. Default is standard. Using remote will suppress retrieval of logs, configuration and system command info.")
    private String diagType = "standard";
 
-   @Parameter(names = {"--ptp"}, description = "Insecure plain text password - warning, may exposure access.")
+   @Parameter(names = {"--ptp"}, description = "Insecure plain text password - allows you to input the password as a plain text argument for scripts. WARNING: Exposes passwords in clear text. Inherently insecure.")
    private String plainTextPassword = "";
 
    @Parameter(names = {"--reps"}, description = "Number of times to execute the diagnostic. Use to create multiple runs at timed intervals.")
