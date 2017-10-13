@@ -54,6 +54,7 @@ public class LogAndConfigCmd extends AbstractDiagnosticCmd {
       String home = nodePaths.path("home").asText();
       String defaultLogs = defaultPaths.path("logs").asText();
       String defaultConf = defaultPaths.path("conf").asText();
+      String configFileLoc = "";
 
       try {
          List<String> fileDirs = new ArrayList<>();
@@ -65,12 +66,12 @@ public class LogAndConfigCmd extends AbstractDiagnosticCmd {
 
          Files.createDirectories(Paths.get(nodeDir));
          FileFilter configFilter = new WildcardFileFilter("*.yml");
-         String configFileLoc = determineConfigLocation(conf, config, home, defaultConf, inputArgsConfig);
+         configFileLoc = determineConfigLocation(conf, config, home, defaultConf, inputArgsConfig);
 
          // Process the config directory
          String configDest = nodeDir + SystemProperties.fileSeparator + "config";
          File configDir = new File(configFileLoc);
-         if(configDir.exists() && configDir.listFiles().length > 0){
+         if(configDir.exists() ){
 
            FileUtils.copyDirectory(configDir, new File(configDest), configFilter, true);
 
@@ -90,7 +91,7 @@ public class LogAndConfigCmd extends AbstractDiagnosticCmd {
          File logDest = new File(nodeDir + SystemProperties.fileSeparator + "logs");
          logs = determineLogLocation(home, logs, defaultLogs);
          File logDir = new File(logs);
-         if (logDir.exists() && logDir.listFiles().length > 0) {
+         if (logDir.exists()) {
             if (context.getInputParams().isArchivedLogs()) {
                FileUtils.copyDirectory(logDir, logDest, true);
             } else {
@@ -128,13 +129,16 @@ public class LogAndConfigCmd extends AbstractDiagnosticCmd {
          }
          else {
             logger.error("Configured log directory is not readable or does not exist: " + logDir.getAbsolutePath());
+            context.setProcessLocal(false);
          }
 
       } catch (Exception e) {
-         logger.error("Error processing log and config files.", e);
+         logger.error("Error processing log and config files: Error encountered reading directory. Does the account you are running under have sufficient permisssions to read the config and log directories?");
+         logger.error("Log directory: " + logs + ",  config file location: " + configFileLoc);
       }
 
       logger.info("Finished processing logs and configuration files.");
+
 
       return true;
    }

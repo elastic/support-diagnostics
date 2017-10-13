@@ -19,10 +19,12 @@ public class ScrubPasswordsCmd extends AbstractDiagnosticCmd {
 
    public boolean execute(DiagnosticContext context) {
 
-      logger.info("Scrubbing elasticsearch config.");
-      if (! context.isProcessLocal() || context.getInputParams().isScrubFiles()) {
+      if (! context.isProcessLocal() || ! context.getInputParams().isScrubFiles()) {
+         logger.info("Password redaction not configured.");
          return true;
       }
+
+      logger.info("Password redaction: elasticsearch config.");
 
       List<String> tempFileDirs = (List<String>)context.getAttribute("tempFileDirs");
 
@@ -39,7 +41,6 @@ public class ScrubPasswordsCmd extends AbstractDiagnosticCmd {
                  redactConfig(files[i].getAbsolutePath());
                  logger.info("Scrubbed passwords for " + files[i].getAbsolutePath());
                }
-
                System.out.println(files[i]);
             }
          }

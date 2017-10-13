@@ -16,11 +16,10 @@ import java.util.Set;
 
 public class ScrubLogsCmd extends AbstractDiagnosticCmd {
 
-
-
    public boolean execute(DiagnosticContext context) {
 
-      if (! context.isProcessLocal() || context.getInputParams().isScrubFiles()) {
+      if (! context.isProcessLocal() || ! context.getInputParams().isScrubFiles()) {
+         logger.info("Log and config scrubbing not configured.");
          return true;
       }
 

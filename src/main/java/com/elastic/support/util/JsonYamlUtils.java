@@ -117,7 +117,7 @@ public class JsonYamlUtils {
 
    public static void buildFlattenedMap(Map<String, Object> result, Map<String, Object> source, String path) {
       for (Map.Entry<String, Object> entry : source.entrySet()) {
-         String key = entry.getKey();
+         String key = entry.getKey().toString();
          if (StringUtils.hasText(path)) {
             if (key.startsWith("[")) {
                key = path + key;

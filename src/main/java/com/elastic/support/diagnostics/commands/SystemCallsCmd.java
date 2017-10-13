@@ -12,6 +12,10 @@ public class SystemCallsCmd extends BaseSystemCallsCmd {
 
    public boolean execute(DiagnosticContext context) {
 
+      if(! context.isProcessLocal()){
+         return true;
+      }
+
       String os = checkOS();
       Map<String, String> osCmds = (Map<String, String>) context.getConfig().get(os);
       executeCalls(osCmds, context);
