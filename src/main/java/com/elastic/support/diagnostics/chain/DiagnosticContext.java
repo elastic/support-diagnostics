@@ -26,6 +26,16 @@ public class DiagnosticContext extends Context {
    String diagName = Constants.ES_DIAG;
    String pid;
    int currentRep;
+   boolean processLocal = true;
+
+   public boolean isProcessLocal() {
+      return processLocal;
+   }
+
+   public void setProcessLocal(boolean processLocal) {
+      this.processLocal = processLocal;
+   }
+
    Set<String> hostIpList;
 
    public String getDiagName() {

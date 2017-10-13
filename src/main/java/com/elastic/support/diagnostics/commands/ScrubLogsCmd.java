@@ -20,16 +20,15 @@ public class ScrubLogsCmd extends AbstractDiagnosticCmd {
 
    public boolean execute(DiagnosticContext context) {
 
+      if (! context.isProcessLocal() || context.getInputParams().isScrubFiles()) {
+         return true;
+      }
+
       List<String> tempFileDirs = (List<String>)context.getAttribute("tempFileDirs");
 
       logger.info("Scrubbing elasticsearch logs and configuration using scrub.yml.");
+
       try {
-
-         boolean scrubFiles = context.getInputParams().isScrubFiles();
-         if(! scrubFiles){
-            return true;
-         }
-
          Map<String, Object> dictionary = JsonYamlUtils.readYamlFromClasspath("scrub.yml", false);
          if (dictionary.size() == 0){
             logger.warn("Scrubbing was enabled but no substitutions were defined. Bypassing log and configuration file processing.");
@@ -45,7 +44,8 @@ public class ScrubLogsCmd extends AbstractDiagnosticCmd {
 
       } catch (Exception e) {
          logger.error("Error scrubbing log and config files.", e);
-         throw (new RuntimeException(e));
+         logger.error("Password removal failed - please examine archive to ensure sensitive information is removed.");
+
       }
 
       logger.info("Finished scrubbing logs and configs.");

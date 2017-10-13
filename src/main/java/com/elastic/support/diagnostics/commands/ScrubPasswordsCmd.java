@@ -20,7 +20,7 @@ public class ScrubPasswordsCmd extends AbstractDiagnosticCmd {
    public boolean execute(DiagnosticContext context) {
 
       logger.info("Scrubbing elasticsearch config.");
-      if (context.getInputParams().isSkipLogs()) {
+      if (! context.isProcessLocal() || context.getInputParams().isScrubFiles()) {
          return true;
       }
 
@@ -46,8 +46,7 @@ public class ScrubPasswordsCmd extends AbstractDiagnosticCmd {
 
       } catch (Exception e) {
          logger.error("Error redacting config passwords.", e);
-         throw (new RuntimeException(e));
-      }
+         logger.error("Password removal failed - please examine archive to ensure sensitive information is removed.");      }
 
       logger.info("Finished processing logs and configuration files.");
 

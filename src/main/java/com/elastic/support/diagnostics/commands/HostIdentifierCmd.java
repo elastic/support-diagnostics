@@ -27,12 +27,23 @@ public class HostIdentifierCmd extends AbstractDiagnosticCmd {
          }
 
          String temp = context.getTempDir();
+         String targetHost = context.getInputParams().getHost();
          int port = context.getInputParams().getPort();
+         HashSet hosts = getNodesViaNic(context);
+         context.setHostIpList(hosts);
+
+         if(! "localhost".equalsIgnoreCase(targetHost) && ! hosts.contains(targetHost)){
+            logger.warn("Input hostname could not be verified against a list of the local interfaces");
+            logger.warn("Input hostname: " +  targetHost + ",  Detected Interfaces: " + hosts);
+            context.setProcessLocal(false);
+            return true;
+         }
+
          JsonNode rootNode = JsonYamlUtils.createJsonNodeFromFileName(temp, Constants.NODES);
          JsonNode nodes = rootNode.path("nodes");
          Iterator<JsonNode> it = nodes.iterator();
-         HashSet hosts = getNodesViaNic(context);
-         context.setHostIpList(hosts);
+
+         boolean diagNodeFound = false;
 
          while (it.hasNext()) {
             JsonNode n = it.next();
@@ -54,14 +65,23 @@ public class HostIdentifierCmd extends AbstractDiagnosticCmd {
                }
                context.setAttribute("diagNode", n);
                JsonNode jnode = n.path("process");
+               String nodeName = n.path("name").asText();
+               context.setAttribute("diagNodeName", nodeName);
                String pid = jnode.path("id").asText();
                context.setPid(pid);
+               diagNodeFound = true;
                break;
             }
          }
+
+         if(! diagNodeFound){
+            throw new Exception("Current host name or address not found in node listings. Are you running the diagnostic on a host containing a running node.");
+         }
+
       } catch (Exception e) {
          logger.error("Error identifying host of diag node.", e);
       }
+
 
       return true;
    }

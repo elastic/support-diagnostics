@@ -16,21 +16,30 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 public class LogAndConfigCmd extends AbstractDiagnosticCmd {
 
    public boolean execute(DiagnosticContext context) {
 
-      if (context.getInputParams().isSkipLogs()) {
+      if (context.getInputParams().isSkipLogs() || ! context.isProcessLocal()) {
          return true;
       }
 
       JsonNode diagNode = context.getTypedAttribute("diagNode", JsonNode.class);
+      if(diagNode == null){
+         logger.error("Could not locate node running on current host.");
+            return true;
+      }
+
       boolean getAccess = context.getInputParams().isAccessLogs();
       String commercialDir = SystemUtils.safeToString(context.getAttribute("commercialDir"));
       logger.info("Processing logs and configuration files.");
+
       JsonNode settings = diagNode.path("settings");
+      Iterator<JsonNode> inputArgs = diagNode.path("jvm").path("input_arguments").iterator();
+
       String name = diagNode.path("name").asText();
       context.setAttribute("diagNodeName", name);
 
@@ -38,6 +47,7 @@ public class LogAndConfigCmd extends AbstractDiagnosticCmd {
       JsonNode nodePaths = settings.path("path");
       JsonNode defaultPaths = settings.path("default").path("path");
 
+      String inputArgsConfig = findConfigArg(inputArgs);
       String config = nodePaths.path("config").asText();
       String logs = nodePaths.path("logs").asText();
       String conf = nodePaths.path("conf").asText();
@@ -55,64 +65,70 @@ public class LogAndConfigCmd extends AbstractDiagnosticCmd {
 
          Files.createDirectories(Paths.get(nodeDir));
          FileFilter configFilter = new WildcardFileFilter("*.yml");
-         String configFileLoc = determineConfigLocation(conf, config, home, defaultConf);
-         logs = determineLogLocation(home, logs, defaultLogs);
+         String configFileLoc = determineConfigLocation(conf, config, home, defaultConf, inputArgsConfig);
 
-         // Copy the config directory
+         // Process the config directory
          String configDest = nodeDir + SystemProperties.fileSeparator + "config";
-         FileUtils.copyDirectory(new File(configFileLoc), new File(configDest), configFilter, true);
+         File configDir = new File(configFileLoc);
+         if(configDir.exists() && configDir.listFiles().length > 0){
 
-         if (commercialDir != "") {
-            File comm = new File(configFileLoc + SystemProperties.fileSeparator + commercialDir);
-            if (comm.exists()) {
-               FileUtils.copyDirectory(comm, new File(configDest + SystemProperties.fileSeparator + commercialDir), true);
+           FileUtils.copyDirectory(configDir, new File(configDest), configFilter, true);
+
+            if (commercialDir != "") {
+               File comm = new File(configFileLoc + SystemProperties.fileSeparator + commercialDir);
+               if (comm.exists()) {
+                  FileUtils.copyDirectory(comm, new File(configDest + SystemProperties.fileSeparator + commercialDir), true);
+               }
+            }
+
+            File scripts = new File(configFileLoc + SystemProperties.fileSeparator + "scripts");
+            if (scripts.exists()) {
+               FileUtils.copyDirectory(scripts, new File(configDest + SystemProperties.fileSeparator + "scripts"), true);
             }
          }
 
-         File scripts = new File(configFileLoc + SystemProperties.fileSeparator + "scripts");
-         if (scripts.exists()) {
-            FileUtils.copyDirectory(scripts, new File(configDest + SystemProperties.fileSeparator + "scripts"), true);
-         }
-
-         // Creat the temp directory for the logs
-         File logDir = new File(logs);
          File logDest = new File(nodeDir + SystemProperties.fileSeparator + "logs");
-
-         if (context.getInputParams().isArchivedLogs()) {
-            FileUtils.copyDirectory(logDir, logDest, true);
-         } else {
-            //Get the top level log, slow search, and slow index logs
-            FileUtils.copyFileToDirectory(new File(logs + SystemProperties.fileSeparator + clusterName + ".log"), logDest);
-            FileUtils.copyFileToDirectory(new File(logs + SystemProperties.fileSeparator + clusterName + "_index_indexing_slowlog.log"), logDest);
-            FileUtils.copyFileToDirectory(new File(logs + SystemProperties.fileSeparator + clusterName + "_index_search_slowlog.log"), logDest);
-
-            if (getAccess) {
-               FileUtils.copyFileToDirectory(new File(logs + SystemProperties.fileSeparator + clusterName + "_access.log"), logDest);
-            }
-            int majorVersion = Integer.parseInt(context.getVersion().split("\\.")[0]);
-            String patternString = null;
-            if (majorVersion > 2) {
-               patternString = clusterName + "-\\d{4}-\\d{2}-\\d{2}.log*";
+         logs = determineLogLocation(home, logs, defaultLogs);
+         File logDir = new File(logs);
+         if (logDir.exists() && logDir.listFiles().length > 0) {
+            if (context.getInputParams().isArchivedLogs()) {
+               FileUtils.copyDirectory(logDir, logDest, true);
             } else {
-               patternString = clusterName + ".log.\\d{4}-\\d{2}-\\d{2}";
-            }
-            // Get the two most recent server log rollovers
-            //Pattern pattern = Pattern.compile(patternString);
-            FileFilter logFilter = new RegexFileFilter(patternString);
-            File[] logDirList = logDir.listFiles(logFilter);
-            Arrays.sort(logDirList, LastModifiedFileComparator.LASTMODIFIED_REVERSE);
+               //Get the top level log, slow search, and slow index logs
+               FileUtils.copyFileToDirectory(new File(logs + SystemProperties.fileSeparator + clusterName + ".log"), logDest);
+               FileUtils.copyFileToDirectory(new File(logs + SystemProperties.fileSeparator + clusterName + "_index_indexing_slowlog.log"), logDest);
+               FileUtils.copyFileToDirectory(new File(logs + SystemProperties.fileSeparator + clusterName + "_index_search_slowlog.log"), logDest);
 
-            int limit = 2, count = 0;
-            for (File logListing : logDirList) {
-               if (count < limit) {
-                  FileUtils.copyFileToDirectory(logListing, logDest);
-                  count++;
+               if (getAccess) {
+                  FileUtils.copyFileToDirectory(new File(logs + SystemProperties.fileSeparator + clusterName + "_access.log"), logDest);
+               }
+               int majorVersion = Integer.parseInt(context.getVersion().split("\\.")[0]);
+               String patternString = null;
+               if (majorVersion > 2) {
+                  patternString = clusterName + "-\\d{4}-\\d{2}-\\d{2}.log*";
                } else {
-                  break;
+                  patternString = clusterName + ".log.\\d{4}-\\d{2}-\\d{2}";
+               }
+               // Get the two most recent server log rollovers
+               //Pattern pattern = Pattern.compile(patternString);
+               FileFilter logFilter = new RegexFileFilter(patternString);
+               File[] logDirList = logDir.listFiles(logFilter);
+               Arrays.sort(logDirList, LastModifiedFileComparator.LASTMODIFIED_REVERSE);
+
+               int limit = 2, count = 0;
+               for (File logListing : logDirList) {
+                  if (count < limit) {
+                     FileUtils.copyFileToDirectory(logListing, logDest);
+                     count++;
+                  } else {
+                     break;
+                  }
                }
             }
          }
-
+         else {
+            logger.error("Configured log directory is not readable or does not exist: " + logDir.getAbsolutePath());
+         }
 
       } catch (Exception e) {
          logger.error("Error processing log and config files.", e);
@@ -123,7 +139,7 @@ public class LogAndConfigCmd extends AbstractDiagnosticCmd {
       return true;
    }
 
-   public String determineConfigLocation(String conf, String config, String home, String defaultConf) {
+   public String determineConfigLocation(String conf, String config, String home, String defaultConf, String inputArgsConfig) {
 
       String configFileLoc;
 
@@ -135,6 +151,8 @@ public class LogAndConfigCmd extends AbstractDiagnosticCmd {
          configFileLoc = conf;
       } else if ("".equals(conf) && !"".equals(defaultConf)) {
          configFileLoc = defaultConf;
+      } else if (! "".equals(inputArgsConfig)){
+         configFileLoc = inputArgsConfig;
       } else {
          configFileLoc = home + SystemProperties.fileSeparator + "config";
       }
@@ -155,6 +173,24 @@ public class LogAndConfigCmd extends AbstractDiagnosticCmd {
       }
 
       return logLoc;
+
+   }
+
+   String findConfigArg(Iterator<JsonNode> args){
+
+      try{
+         while(args.hasNext()){
+            String arg = args.next().asText();
+            if(arg.contains("-Des.path.conf=")){
+               return arg.replace("-Des.path.conf=", "");
+            }
+         }
+      }
+      catch (Exception e){
+         logger.error("Error parsing input arguments for config directory:" + args);
+      }
+
+      return "";
 
    }
 }
