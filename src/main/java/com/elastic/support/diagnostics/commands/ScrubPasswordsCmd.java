@@ -67,7 +67,7 @@ public class ScrubPasswordsCmd extends AbstractDiagnosticCmd {
 
       Set<String> keys = flatCfg.keySet();
       for (String key: keys){
-         if (key.contains("access") || key.contains("password") || key.contains("secret")){
+         if (key.contains("access") || key.contains("password") || key.contains("secret") || key.contains("key")){
             flatCfg.put(key, "*********");
          }
       }
