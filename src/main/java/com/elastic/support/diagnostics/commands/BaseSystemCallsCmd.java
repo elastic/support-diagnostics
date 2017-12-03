@@ -21,11 +21,19 @@ public abstract class BaseSystemCallsCmd extends AbstractDiagnosticCmd {
       while (iter.hasNext()) {
          Map.Entry<String, String> entry =  iter.next();
          String cmdLabel = entry.getKey();
-         final String cmdText;
-         if (entry.getValue().contains("PID")) {
-            cmdText = entry.getValue().replace("PID", context.getPid());
-         } else {
-            cmdText = entry.getValue();
+         String cmdText = entry.getValue();
+         if (cmdText.contains("PID")) {
+            String pid = context.getPid();
+            if (pid.equals("0")) {
+               logger.error("Process id for node local to diagnostic not found. Bypassing:" + entry.getKey() + ", " + cmdText);
+            } else {
+               cmdText = entry.getValue().replace("PID", pid);
+            }
+         }
+
+         if (cmdText.contains("JAVA_HOME")) {
+            String javaHome = SystemProperties.javaHome;
+               cmdText = entry.getValue().replace("JAVA_HOME", javaHome);
          }
 
          try {

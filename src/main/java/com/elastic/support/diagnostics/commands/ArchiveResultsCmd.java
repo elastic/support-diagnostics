@@ -16,7 +16,7 @@ public class ArchiveResultsCmd extends AbstractDiagnosticCmd {
 
    public boolean execute(DiagnosticContext context) {
 
-      logger.info("Archiving diagnostic results.");
+/*      logger.info("Archiving diagnostic results.");
 
       try {
          String archiveFilename = SystemProperties.getFileDateString();
@@ -61,11 +61,11 @@ public class ArchiveResultsCmd extends AbstractDiagnosticCmd {
 
       } catch (Exception ioe) {
          logger.error("Couldn't create archive.\n", ioe);
-      }
+      }*/
       return true;
    }
 
-   public void archiveResults(TarArchiveOutputStream taos, File file, String path, boolean append) {
+/*   public void archiveResults(TarArchiveOutputStream taos, File file, String path, boolean append) {
 
       boolean pathSet = false;
       String relPath = "";
@@ -96,5 +96,5 @@ public class ArchiveResultsCmd extends AbstractDiagnosticCmd {
          logger.error("Archive Error", e);
       }
 
-   }
+   }*/
 }

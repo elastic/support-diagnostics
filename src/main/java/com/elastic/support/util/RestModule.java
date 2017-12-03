@@ -17,8 +17,9 @@ import org.apache.http.conn.HttpHostConnectException;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.util.EntityUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -31,7 +32,7 @@ public class RestModule {
    boolean isBypassVerify;
    HttpClient client;
 
-   private final static Logger logger = LoggerFactory.getLogger(RestModule.class);
+   private final static Logger logger = LogManager.getLogger(RestModule.class);
 
    public RestModule(DiagnosticRequestFactory requestFactory, boolean isBypassVerify) {
       this.requestFactory = requestFactory;
@@ -62,7 +63,6 @@ public class RestModule {
                if(queryName == null || queryName.equals("")){
                   checkResponseCode(url, response);
                   result = EntityUtils.toString(entity);
-                  logger.info(request + " was submitted");
                }
                else{
                   checkResponseCode(queryName, response);

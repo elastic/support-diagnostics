@@ -46,7 +46,7 @@ public class RunCommercialQueriesCmd extends AbstractQueryCmd {
          }
 
          if(! runCommercial){
-            System.out.println("No commercial plugins found - bypassing those REST calls.");
+            logger.info("No commercial plugins found - bypassing those REST calls.");
             return true;
          }
 

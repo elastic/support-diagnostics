@@ -26,14 +26,20 @@ public class DiagnosticContext extends Context {
    String diagName = Constants.ES_DIAG;
    String pid;
    int currentRep;
-   boolean processLocal = true;
+   boolean localAddressLocated = true;
+   boolean diagNodeFound = false;
 
-   public boolean isProcessLocal() {
-      return processLocal;
+   public DiagnosticContext(InputParams inputs){
+      super();
+      this.inputParams = inputs;
    }
 
-   public void setProcessLocal(boolean processLocal) {
-      this.processLocal = processLocal;
+   public boolean isLocalAddressLocated() {
+      return localAddressLocated;
+   }
+
+   public void setLocalAddressLocated(boolean localAddressLocated) {
+      this.localAddressLocated = localAddressLocated;
    }
 
    Set<String> hostIpList;
@@ -158,5 +164,13 @@ public class DiagnosticContext extends Context {
 
    public void setCurrentRep(int currentRep) {
       this.currentRep = currentRep;
+   }
+
+   public boolean isDiagNodeFound() {
+      return diagNodeFound;
+   }
+
+   public void setDiagNodeFound(boolean diagNodeFound) {
+      this.diagNodeFound = diagNodeFound;
    }
 }

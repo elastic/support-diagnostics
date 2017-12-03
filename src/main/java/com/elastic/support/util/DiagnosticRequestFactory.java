@@ -11,8 +11,8 @@ import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSession;
 import java.io.FileInputStream;
@@ -21,7 +21,7 @@ import java.security.cert.X509Certificate;
 
 public class DiagnosticRequestFactory {
 
-   private final Logger logger = LoggerFactory.getLogger(DiagnosticRequestFactory.class);
+   private final Logger logger = LogManager.getLogger(DiagnosticRequestFactory.class);
 
    private Integer connectTimeout;
    private Integer requestTimeout;

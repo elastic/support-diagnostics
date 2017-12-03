@@ -2,6 +2,10 @@
 requestTimeout: 300000
 connectTimeout: 60000
 
+security-settings:
+  ttl:
+  ttl-cache:
+
 textFileExtensions:
   - allocation
   - cat_shards
@@ -150,6 +154,7 @@ commercial-5:
   xpack: "_xpack/usage?pretty&human"
   ml_datafeeds: "_xpack/ml/datafeeds?pretty"
   ml_anomaly_detectors: "_xpack/ml/anomaly_detectors?pretty"
+  ml_stats: "_xpack/ml/anomaly_detectors/_stats?pretty"
   watcher_stats: "_watcher/stats/_all"
   security_users: "_xpack/security/user?pretty"
   security_roles: "_xpack/security/role?pretty"
@@ -203,6 +208,7 @@ commercial-6:
   xpack: "_xpack/usage?pretty&human"
   ml_datafeeds: "_xpack/ml/datafeeds?pretty"
   ml_anomaly_detectors: "_xpack/ml/anomaly_detectors?pretty"
+  ml_stats: "_xpack/ml/anomaly_detectors/_stats?pretty"
   watcher_stats: "_watcher/stats/_all"
   security_users: "_xpack/security/user?pretty"
   security_roles: "_xpack/security/role?pretty"
@@ -231,15 +237,16 @@ linuxOS:
   uname: "uname -a -r"
   proc-limit: "cat /proc/PID/limits"
   cpu: "cat /proc/cpuinfo"
-  jps: "jps -l -m -v"
+  jps: "JAVA_HOME/bin/jps -l -m -v"
   iostat: "iostat -c -d -x -t -m 1 5"
   sar: "sar -A"
   sysctl: "sysctl -a"
   dmesg: "dmesg"
-  jstack: "jstack PID"
+  jstack: "JAVA_HOME/bin/jstack PID"
   huge_pages: "cat /sys/kernel/mm/transparent_hugepage/enabled"
 
 macOS:
+  ss: "ss"
   top: "top -l 1"
   netstat: "netstat -an"
   process-list: "ps -ef"
@@ -250,6 +257,6 @@ macOS:
 winOS:
   process-list: "tasklist /v"
   netstat: "netstat -ano"
-  jps: "jps -l -m -v"
-  jstack: "jstack PID"
+  jps: "JAVA_HOME\\bin\\jps -l -m -v"
+  jstack: "JAVA_HOME\\bin\\jstack PID"
   cpu: "wmic CPU"

@@ -1,7 +1,8 @@
 package com.elastic.support.diagnostics.chain;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -10,7 +11,7 @@ import java.util.Map;
 
 public class Context {
 
-    Logger logger = LoggerFactory.getLogger(Context.class);
+    Logger logger = LogManager.getLogger(Context.class);
 
     public static final String CONTEXT_MSGS = "context";
 

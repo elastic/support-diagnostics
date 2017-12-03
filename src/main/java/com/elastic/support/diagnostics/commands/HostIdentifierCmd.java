@@ -3,6 +3,7 @@ package com.elastic.support.diagnostics.commands;
 import com.elastic.support.diagnostics.Constants;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.util.JsonYamlUtils;
+import com.elastic.support.util.SystemUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import java.io.BufferedReader;
@@ -10,7 +11,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
-import java.util.ConcurrentModificationException;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -35,7 +35,7 @@ public class HostIdentifierCmd extends AbstractDiagnosticCmd {
          if(! "localhost".equalsIgnoreCase(targetHost) && ! hosts.contains(targetHost)){
             logger.warn("Input hostname could not be verified against a list of the local interfaces");
             logger.warn("Input hostname: " +  targetHost + ",  Detected Interfaces: " + hosts);
-            context.setProcessLocal(false);
+            context.setLocalAddressLocated(false);
             return true;
          }
 
@@ -67,9 +67,10 @@ public class HostIdentifierCmd extends AbstractDiagnosticCmd {
                JsonNode jnode = n.path("process");
                String nodeName = n.path("name").asText();
                context.setAttribute("diagNodeName", nodeName);
-               String pid = jnode.path("id").asText();
+               String pid = SystemUtils.safeToString(jnode.path("id").asText(), "0");
                context.setPid(pid);
                diagNodeFound = true;
+               context.setDiagNodeFound(true);
                break;
             }
          }

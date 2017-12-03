@@ -3,12 +3,13 @@ package com.elastic.support.diagnostics.commands;
 import com.elastic.support.diagnostics.chain.Command;
 import com.elastic.support.diagnostics.chain.Context;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 
 public abstract class AbstractDiagnosticCmd implements Command {
 
-   protected static final Logger logger = LoggerFactory.getLogger(AbstractDiagnosticCmd.class);
+   protected final Logger logger = LogManager.getLogger();
 
    public boolean execute(Context context) {
       DiagnosticContext ctx = (DiagnosticContext) context;

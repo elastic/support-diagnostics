@@ -3,16 +3,15 @@ package com.elastic.support.diagnostics.commands;
 import com.elastic.support.util.SystemProperties;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.PrintStream;
 import java.util.*;
 
 public class SystemCallsCmd extends BaseSystemCallsCmd {
 
    public boolean execute(DiagnosticContext context) {
 
-      if(! context.isProcessLocal()){
+      if(! context.isLocalAddressLocated() || ! context.isDiagNodeFound()){
+         logger.warn("The diagnostic does not appear to be running on a host that contains a running node or that node could not be located in the retrieved list from the cluster.");
+         logger.warn("No system calls will be run. Utility should probably be run with --type remote.");
          return true;
       }
 

@@ -76,6 +76,11 @@ public class SystemUtils {
       return input == null ? "" : input.toString();
    }
 
+   public static String safeToString(Object input, String defaultValue) {
+      return input == null ? defaultValue : input.toString();
+   }
+
+
    public static String emptyDisplayString(Object input){
 
       String res = SystemUtils.safeToString(input);

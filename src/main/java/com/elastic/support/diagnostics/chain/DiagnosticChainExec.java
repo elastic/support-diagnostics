@@ -2,15 +2,15 @@ package com.elastic.support.diagnostics.chain;
 
 import com.elastic.support.diagnostics.Constants;
 import com.elastic.support.util.JsonYamlUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 import java.util.Map;
 
 public class DiagnosticChainExec {
 
-   private static Logger logger = LoggerFactory.getLogger(DiagnosticChainExec.class);
+   private static Logger logger = LogManager.getLogger(DiagnosticChainExec.class);
 
    public void runDiagnostic(DiagnosticContext context) {
 

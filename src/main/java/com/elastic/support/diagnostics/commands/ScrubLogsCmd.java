@@ -1,12 +1,8 @@
 package com.elastic.support.diagnostics.commands;
 
-import com.elastic.support.diagnostics.Constants;
-import com.elastic.support.util.SystemProperties;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.util.JsonYamlUtils;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.filefilter.RegexFileFilter;
-import org.apache.commons.io.filefilter.WildcardFileFilter;
 
 import java.io.*;
 import java.util.Collection;
@@ -18,7 +14,7 @@ public class ScrubLogsCmd extends AbstractDiagnosticCmd {
 
    public boolean execute(DiagnosticContext context) {
 
-      if (! context.isProcessLocal() || ! context.getInputParams().isScrubFiles()) {
+      if (! context.isLocalAddressLocated() || ! context.getInputParams().isScrubFiles()) {
          logger.info("Log and config scrubbing not configured.");
          return true;
       }

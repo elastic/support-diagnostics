@@ -23,7 +23,7 @@ public class LogAndConfigCmd extends AbstractDiagnosticCmd {
 
    public boolean execute(DiagnosticContext context) {
 
-      if (context.getInputParams().isSkipLogs() || ! context.isProcessLocal()) {
+      if (context.getInputParams().isSkipLogs() || ! context.isLocalAddressLocated()) {
          return true;
       }
 
@@ -129,7 +129,7 @@ public class LogAndConfigCmd extends AbstractDiagnosticCmd {
          }
          else {
             logger.error("Configured log directory is not readable or does not exist: " + logDir.getAbsolutePath());
-            context.setProcessLocal(false);
+            context.setLocalAddressLocated(false);
          }
 
       } catch (Exception e) {
