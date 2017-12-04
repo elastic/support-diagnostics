@@ -1,0 +1,2 @@
+networkaddress.cache.ttl
+networkaddress.cache.negative.ttl
