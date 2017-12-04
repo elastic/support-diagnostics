@@ -27,8 +27,8 @@ public final class SecurityPropertiesCmd extends AbstractDiagnosticCmd {
          OutputStream outpuStream = new FileOutputStream(path.toFile());
          BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outpuStream));
          securityProperties.store(writer, "");
-      } catch (final Exception e) {
-         logger.error("failed opening " + path.toString(), e);
+      } catch (final IOException e) {
+         logger.error("Failed saving security.properties file.", e);
          return false;
       }
       return true;

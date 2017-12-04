@@ -6,6 +6,13 @@ security-settings:
   networkaddress.cache.ttl:
   networkaddress.cache.negative.ttl:
 
+password-keys:
+  - password
+  - secret
+  - access
+  - key
+
+
 textFileExtensions:
   - allocation
   - cat_shards

@@ -21,6 +21,9 @@ public class ScrubPasswordsCmd extends AbstractDiagnosticCmd {
          return true;
       }
 
+      Map diagConfig = context.getConfig();
+      List<String> passwordKeys = (List<String>)diagConfig.get("password-keys");
+
       logger.info("Password redaction: elasticsearch config.");
 
       List<String> tempFileDirs = (List<String>)context.getAttribute("tempFileDirs");
@@ -35,7 +38,7 @@ public class ScrubPasswordsCmd extends AbstractDiagnosticCmd {
             File[] files = dir.listFiles();
             for (int i = 0; i < files.length; i++) {
               if (!files[i].isDirectory() && files[i].getName().contains(".yml")) {
-                 redactConfig(files[i].getAbsolutePath());
+                 redactConfig(files[i].getAbsolutePath(), passwordKeys);
                  logger.info("Scrubbed passwords for " + files[i].getAbsolutePath());
                }
                System.out.println(files[i]);
@@ -51,7 +54,7 @@ public class ScrubPasswordsCmd extends AbstractDiagnosticCmd {
       return true;
    }
 
-   public void redactConfig(String conf) throws Exception {
+   public void redactConfig(String conf, List<String> passwordKeys) throws Exception {
 
       Map<String, Object> cfg = JsonYamlUtils.readYamlFromPath(conf, true);
 
@@ -64,8 +67,10 @@ public class ScrubPasswordsCmd extends AbstractDiagnosticCmd {
 
       Set<String> keys = flatCfg.keySet();
       for (String key: keys){
-         if (key.contains("access") || key.contains("password") || key.contains("secret")){
-            flatCfg.put(key, "*********");
+         for(String passwordKey: passwordKeys){
+            if (key.contains(passwordKey)){
+               flatCfg.put(key, "*********");
+            }
          }
       }
 
