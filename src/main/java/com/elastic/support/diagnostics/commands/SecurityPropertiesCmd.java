@@ -16,18 +16,17 @@ public final class SecurityPropertiesCmd extends AbstractDiagnosticCmd {
 
       Properties securityProperties = new Properties();
       Map diagProps = (Map)context.getConfig().get("security-settings");
-      securityProperties.putAll(diagProps);
       Set<String> keys = diagProps.keySet();
       for (String key: keys){
          String value = SystemUtils.safeToString(Security.getProperty(key), "");
          securityProperties.put(key, value);
       }
 
-      final Path path = Paths.get(context.getTempDir());
+      final Path path = Paths.get(context.getTempDir(), "security.properties");
       try {
          OutputStream outpuStream = new FileOutputStream(path.toFile());
          BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outpuStream));
-         securityProperties.store(writer, null);
+         securityProperties.store(writer, "");
       } catch (final Exception e) {
          logger.error("failed opening " + path.toString(), e);
          return false;
