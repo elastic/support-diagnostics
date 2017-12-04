@@ -53,7 +53,7 @@ public class InputParams {
    @Parameter(names= {"--keystore"}, description = "Keystore for client certificate.")
    private String keystore;
 
-   @Parameter(names= {"--keystorePass"}, description = "Keystore password for client certificate.")
+   @Parameter(names= {"--keystorePass"}, description = "Keystore password for client certificate.", password = true)
    private String keystorePass;
 
    @Parameter(names = {"--noLogs"}, description = "Use this option to suppress log collection.")
