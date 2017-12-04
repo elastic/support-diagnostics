@@ -1,40 +1,33 @@
 standard:
-#  - com.elastic.support.diagnostics.commands.DirectorySetupCmd
   - com.elastic.support.diagnostics.commands.GenerateManifestCmd
   - com.elastic.support.diagnostics.commands.RestModuleSetupCmd
   - com.elastic.support.diagnostics.commands.VersionAndClusterNameCheckCmd
   - com.elastic.support.diagnostics.commands.RunClusterQueriesCmd
   - com.elastic.support.diagnostics.commands.RunCommercialQueriesCmd
   - com.elastic.support.diagnostics.commands.HostIdentifierCmd
-#  - com.elastic.support.diagnostics.commands.LogAndConfigCmd
+  - com.elastic.support.diagnostics.commands.LogAndConfigCmd
   - com.elastic.support.diagnostics.commands.SystemCallsCmd
+  - com.elastic.support.diagnostics.commands.SecurityPropertiesCmd
 #  - com.elastic.support.diagnostics.commands.ThreadDumpCmd
   - com.elastic.support.diagnostics.commands.ScrubPasswordsCmd
   - com.elastic.support.diagnostics.commands.ScrubLogsCmd
-#  - com.elastic.support.diagnostics.commands.ArchiveResultsCmd
-#  - com.elastic.support.diagnostics.commands.CleanupCmd
+
 
 remote:
-#  - com.elastic.support.diagnostics.commands.DirectorySetupCmd
   - com.elastic.support.diagnostics.commands.GenerateManifestCmd
   - com.elastic.support.diagnostics.commands.RestModuleSetupCmd
   - com.elastic.support.diagnostics.commands.VersionAndClusterNameCheckCmd
   - com.elastic.support.diagnostics.commands.RunClusterQueriesCmd
   - com.elastic.support.diagnostics.commands.RunCommercialQueriesCmd
-#  - com.elastic.support.diagnostics.commands.ArchiveResultsCmd
-#  - com.elastic.support.diagnostics.commands.CleanupCmd
 
 logstash:
-  - com.elastic.support.diagnostics.commands.DirectorySetupCmd
   - com.elastic.support.diagnostics.commands.GenerateManifestCmd
   - com.elastic.support.diagnostics.commands.RestModuleSetupCmd
   - com.elastic.support.diagnostics.commands.RunLogstashQueriesCmd
   - com.elastic.support.diagnostics.commands.ThreadDumpCmd
-  - com.elastic.support.diagnostics.commands.ArchiveResultsCmd
-  - com.elastic.support.diagnostics.commands.CleanupCmd
+
 
 elastic-threads:
-  - com.elastic.support.diagnostics.commands.DirectorySetupCmd
   - com.elastic.support.diagnostics.commands.GenerateManifestCmd
   - com.elastic.support.diagnostics.commands.RestModuleSetupCmd
   - com.elastic.support.diagnostics.commands.VersionAndClusterNameCheckCmd
@@ -42,6 +35,5 @@ elastic-threads:
   - com.elastic.support.diagnostics.commands.HostIdentifierCmd
   - com.elastic.support.diagnostics.commands.ThreadDumpCmd
   - com.elastic.support.diagnostics.commands.ScrubLogsCmd
-  - com.elastic.support.diagnostics.commands.ArchiveResultsCmd
-  - com.elastic.support.diagnostics.commands.CleanupCmd
+
 

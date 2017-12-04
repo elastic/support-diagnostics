@@ -3,8 +3,8 @@ requestTimeout: 300000
 connectTimeout: 60000
 
 security-settings:
-  ttl:
-  ttl-cache:
+  networkaddress.cache.ttl:
+  networkaddress.cache.negative.ttl:
 
 textFileExtensions:
   - allocation

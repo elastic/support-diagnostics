@@ -26,7 +26,7 @@ public class DiagnosticChainExec {
          Map<String, Object> chains = JsonYamlUtils.readYamlFromClasspath("chains.yml", false);
          if (chains.size() == 0) {
             logger.error("Required config file chains.yml was not found. Exiting application.");
-            throw new RuntimeException("Missing diags.yml");
+            throw new RuntimeException("Missing chain.yml");
          }
 
          String diagType = context.getInputParams().getDiagType();
