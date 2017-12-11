@@ -2,7 +2,6 @@ package com.elastic.support.diagnostics.chain;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,7 +25,7 @@ public class Chain implements Command {
         }
     }
 
-    public boolean execute(Context context){
+    public boolean execute(DiagnosticContext context){
 
         //Set up initial generic chain
         for(Command dc : commandChain){

@@ -1,5 +1,5 @@
 package com.elastic.support.diagnostics.chain;
 
 public interface Command {
-    public boolean execute(Context context);
+    public boolean execute(DiagnosticContext context);
 }

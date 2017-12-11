@@ -30,15 +30,11 @@ public class DiagnosticChainExec {
          }
 
          String diagType = context.getInputParams().getDiagType();
-
          List<String> chain = (List) chains.get(diagType);
-
-         if (diagType.equals(Constants.LOGSTASH_DIAG)) {
-            context.setDiagName(Constants.LOGSTASH_DIAG + "-" + Constants.ES_DIAG);
-         }
 
          Chain diagnostic = new Chain(chain);
          diagnostic.execute(context);
+
       } catch (Exception e) {
          logger.error("Error encountered running diagnostic. See logs for additional information.  Exiting application.", e);
          throw new RuntimeException("Diagnostic runtime error", e);

@@ -24,6 +24,7 @@ import org.apache.logging.log4j.core.layout.PatternLayout;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.List;
 
 public class Diagnostic {
 
@@ -124,6 +125,12 @@ public class Diagnostic {
       String outputDir = formatOutputDir(context.getInputParams());
       context.setOutputDir(outputDir);
       logger.info("Results will be written to: " + outputDir);
+      String diagType = context.getInputParams().getDiagType();
+
+      if (! diagType.equals(Constants.ES_DIAG)) {
+         context.setDiagName(diagType + "-" + Constants.ES_DIAG);
+      }
+
       String tempDir = outputDir + SystemProperties.fileSeparator + context.getDiagName();
       context.setTempDir(tempDir);
 
@@ -210,7 +217,7 @@ public class Diagnostic {
 
          taos.setBigNumberMode(TarArchiveOutputStream.BIGNUMBER_STAR);
          taos.setLongFileMode(TarArchiveOutputStream.LONGFILE_GNU);
-         archiveResults(taos, srcDir, "", true);
+         archiveResults(archiveFilename, taos, srcDir, "", true);
          taos.close();
 
          logger.info("Archive: " + filename + " was created");
@@ -221,14 +228,14 @@ public class Diagnostic {
 
    }
 
-   private void archiveResults(TarArchiveOutputStream taos, File file, String path, boolean append) {
+   private void archiveResults(String archiveFilename, TarArchiveOutputStream taos, File file, String path, boolean append) {
 
       boolean pathSet = false;
       String relPath = "";
 
       try {
          if (append) {
-            relPath = path + "/" + file.getName() + "-" + SystemProperties.getFileDateString();
+            relPath = path + "/" + file.getName() + "-" + archiveFilename;
          } else {
             relPath = path + "/" + file.getName();
          }
@@ -244,7 +251,7 @@ public class Diagnostic {
          } else if (file.isDirectory()) {
             taos.closeArchiveEntry();
             for (File childFile : file.listFiles()) {
-               archiveResults(taos, childFile, relPath, false);
+               archiveResults(archiveFilename, taos, childFile, relPath, false);
             }
          }
       } catch (IOException e) {
