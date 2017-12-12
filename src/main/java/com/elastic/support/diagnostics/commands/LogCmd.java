@@ -17,7 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 
-public class LogAndConfigCmd extends AbstractDiagnosticCmd {
+public class LogCmd extends AbstractDiagnosticCmd {
 
    public boolean execute(DiagnosticContext context) {
 
@@ -32,11 +32,9 @@ public class LogAndConfigCmd extends AbstractDiagnosticCmd {
       }
 
       boolean getAccess = context.getInputParams().isAccessLogs();
-      String commercialDir = SystemUtils.safeToString(context.getAttribute("commercialDir"));
-      logger.info("Processing logs and configuration files.");
+      logger.info("Processing log files.");
 
       JsonNode settings = diagNode.path("settings");
-      Iterator<JsonNode> inputArgs = diagNode.path("jvm").path("input_arguments").iterator();
 
       String name = diagNode.path("name").asText();
       context.setAttribute("diagNodeName", name);
@@ -45,14 +43,9 @@ public class LogAndConfigCmd extends AbstractDiagnosticCmd {
       JsonNode nodePaths = settings.path("path");
       JsonNode defaultPaths = settings.path("default").path("path");
 
-      String inputArgsConfig = findConfigArg(inputArgs);
-      String config = nodePaths.path("config").asText();
       String logs = nodePaths.path("logs").asText();
-      String conf = nodePaths.path("conf").asText();
       String home = nodePaths.path("home").asText();
       String defaultLogs = defaultPaths.path("logs").asText();
-      String defaultConf = defaultPaths.path("conf").asText();
-      String configFileLoc = "";
 
       try {
          List<String> fileDirs = new ArrayList<>();
@@ -63,28 +56,6 @@ public class LogAndConfigCmd extends AbstractDiagnosticCmd {
          fileDirs.add(nodeDir);
 
          Files.createDirectories(Paths.get(nodeDir));
-         FileFilter configFilter = new WildcardFileFilter("*.*");
-         configFileLoc = determineConfigLocation(conf, config, home, defaultConf, inputArgsConfig);
-
-         // Process the config directory
-         String configDest = nodeDir + SystemProperties.fileSeparator + "config";
-         File configDir = new File(configFileLoc);
-         if (configDir.exists()) {
-
-            FileUtils.copyDirectory(configDir, new File(configDest), configFilter, true);
-
-            if (commercialDir != "") {
-               File comm = new File(configFileLoc + SystemProperties.fileSeparator + commercialDir);
-               if (comm.exists()) {
-                  FileUtils.copyDirectory(comm, new File(configDest + SystemProperties.fileSeparator + commercialDir), true);
-               }
-            }
-
-            File scripts = new File(configFileLoc + SystemProperties.fileSeparator + "scripts");
-            if (scripts.exists()) {
-               FileUtils.copyDirectory(scripts, new File(configDest + SystemProperties.fileSeparator + "scripts"), true);
-            }
-         }
 
          File logDest = new File(nodeDir + SystemProperties.fileSeparator + "logs");
          logs = determineLogLocation(home, logs, defaultLogs);
@@ -135,34 +106,13 @@ public class LogAndConfigCmd extends AbstractDiagnosticCmd {
 
       } catch (Exception e) {
          logger.error("Error processing log and config files: Error encountered reading directory. Does the account you are running under have sufficient permisssions to read the config and log directories?");
-         logger.error("Log directory: " + logs + ",  config file location: " + configFileLoc);
+         logger.error("Log directory: " + logs);
       }
 
       logger.info("Finished processing logs and configuration files.");
 
 
       return true;
-   }
-
-   public String determineConfigLocation(String conf, String config, String home, String defaultConf, String inputArgsConfig) {
-
-      String configFileLoc;
-
-      //Check for the config location
-      if (!"".equals(config)) {
-         int idx = config.lastIndexOf(SystemProperties.fileSeparator);
-         configFileLoc = config.substring(0, idx);
-      } else if (!"".equals(conf)) {
-         configFileLoc = conf;
-      } else if ("".equals(conf) && !"".equals(defaultConf)) {
-         configFileLoc = defaultConf;
-      } else if (!"".equals(inputArgsConfig)) {
-         configFileLoc = inputArgsConfig;
-      } else {
-         configFileLoc = home + SystemProperties.fileSeparator + "config";
-      }
-
-      return configFileLoc;
    }
 
    String determineLogLocation(String home, String log, String defaultLog) {
@@ -181,20 +131,4 @@ public class LogAndConfigCmd extends AbstractDiagnosticCmd {
 
    }
 
-   String findConfigArg(Iterator<JsonNode> args) {
-
-      try {
-         while (args.hasNext()) {
-            String arg = args.next().asText();
-            if (arg.contains("-Des.path.conf=")) {
-               return arg.replace("-Des.path.conf=", "");
-            }
-         }
-      } catch (Exception e) {
-         logger.error("Error parsing input arguments for config directory:" + args);
-      }
-
-      return "";
-
-   }
 }
