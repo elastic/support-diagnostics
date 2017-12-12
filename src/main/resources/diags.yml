@@ -1,4 +1,5 @@
 # REST timeout settings - note:values are in milliseconds
+
 requestTimeout: 300000
 connectTimeout: 60000
 
@@ -117,7 +118,7 @@ standard-5:
   alias: "_alias?pretty"
   allocation: "_cat/allocation?v"
   cat_master: "_cat/master?v"
-  cat_nodes: "_cat/nodes?v&h=ip,heap.percent,ram.percent,cpu,load_1m,load_5m,load_15m,node.role,master,name,nodeId"
+  cat_nodes: "_cat/nodes?v&h=ip,heap.percent,ram.percent,cpu,load_1m,load_5m,load_15m,node.role,master,name,nodeId,diskAvail"
   cat_indices: "_cat/indices?v"
   cat_segments: "_cat/segments?v"
   cat_health: "_cat/health?v"
@@ -242,15 +243,18 @@ linuxOS:
   process-list: "ps -ef"
   top_threads: "top -b -n1 -H"
   uname: "uname -a -r"
-  proc-limit: "cat /proc/PID/limits"
   cpu: "cat /proc/cpuinfo"
-  jps: "JAVA_HOME/bin/jps -l -m -v"
   iostat: "iostat -c -d -x -t -m 1 5"
   sar: "sar -A"
   sysctl: "sysctl -a"
   dmesg: "dmesg"
-  jstack: "JAVA_HOME/bin/jstack PID"
   huge_pages: "cat /sys/kernel/mm/transparent_hugepage/enabled"
+  cpu_governor: "cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"
+
+linuxOS-dep:
+   proc-limit: "cat /proc/PID/limits"
+   jps: "JAVA_HOME/bin/jps -l -m -v"
+   jstack: "JAVA_HOME/bin/jstack PID"
 
 macOS:
   ss: "ss"
@@ -258,12 +262,18 @@ macOS:
   netstat: "netstat -an"
   process-list: "ps -ef"
   ulimit: "ulimit -a"
+  jps: "jps -l -m -v"
+
+macOS-dep:
   jstack: "jstack PID"
   jps: "jps -l -m -v"
 
 winOS:
   process-list: "tasklist /v"
   netstat: "netstat -ano"
+  cpu: "wmic CPU"
+
+winOS-dep:
   jps: "JAVA_HOME\\bin\\jps -l -m -v"
   jstack: "JAVA_HOME\\bin\\jstack PID"
-  cpu: "wmic CPU"
+

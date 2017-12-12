@@ -37,6 +37,7 @@ It will execute a series of REST API calls to the running cluster, run a number 
 * The utility will use default listening port of 9200 if you do not specify one.
 * If the utility cannot find a running ES version for that host/port combination the utility will exit and you will need to run it again.
 * Input parameters may be specified in any order.
+* If config file settings with names containing the strings in the diags.yml password-keys are detected, the text in those settings will be redacted.
 * An archive with the format diagnostics-`<DateTimeStamp>`.tar.gz will be created in the utility directory. If you wish to specify a specific output folder you may do so by using the -o `<Full path to custom output folder>` option.
 
 
@@ -69,6 +70,7 @@ It will execute a series of REST API calls to the running cluster, run a number 
 * To include all logs, not just today's use the --archivedLogs option.
 * To suppress all log file collection use the --skipLogs option.
 * Because of the potential size access logs are no longer collected by default. If you need these use the --accessLogs option to have them copied.
+* If you have sensitive information in your logs and wish to scrub them, you will need to make sure your last three logs are unzipped before running the utility. Configure the scrub.yml to designate the sensitive character data you wish to modify and the value you wish to substitute. You can the trigger the rep;acement process with the --scrub option.
 
 ## Alternate Usages
 ### Remote
@@ -80,6 +82,7 @@ It will execute a series of REST API calls to the running cluster, run a number 
 ### Logstash Diagnostics
 * Use the --type logstash argument to get diagnostic information from a running Logstash process. It will query the process in a manner similar to the Elasticsearch REST API calls.
 * The default port will be 9600. This can be modified at startup, or will be automatically incremented if you start multiple Logstash processes on the same host. You can connect to these other Logstash processes with the --port option.
+* Available for 5.0 or greater.
 #### Logstash Examples
     * sudo ./diagnostics.sh --host localhost --type logstash
     * sudo ./diagnostics.sh --host localhost --type logstash --port 9610
@@ -103,6 +106,9 @@ It will execute a series of REST API calls to the running cluster, run a number 
 * Since there are fewer calls for Logstash it does not have a separate type. Use the standard repitition options and both hot threads and jstack will be included.
 #### Elasticseach Timed Thread Dumps Example
     * sudo ./diagnostics.sh --host localhost -u elastic -p --interval 20 --reps 6 --type elastic-threads    
+
+### Heap Dumps
+* If you wish to take a heap dump of a running process use the --heapdump --nodename processoption
 
 # Troubleshooting
   * The file: diagnostic.log file will be generated in the installation directory of the diagnostic utility - the output of the console, which will include both progress and error messages, will be replicated in that file.  It will be appended for each run and rolled over daily if not removed.

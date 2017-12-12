@@ -22,17 +22,14 @@ public class GenerateManifestCmd extends AbstractDiagnosticCmd {
       try {
          ObjectMapper mapper = new ObjectMapper();
          mapper.enable(SerializationFeature.INDENT_OUTPUT);
-         String clusterName = context.getClusterName();
-         Map<String, Object> cluster = new HashMap<>();
-         cluster.put("diagToolVersion", getToolVersion());
-         cluster.put("clusterName", clusterName);
-         cluster.put("collectionDate", SystemProperties.getUtcDateString());
-         cluster.put("host", context.getAttribute("hostName"));
+         Map<String, Object> manifest = new HashMap<>();
+         manifest.put("diagToolVersion", getToolVersion());
+         manifest.put("collectionDate", SystemProperties.getUtcDateString());
          InputParams params = context.getInputParams();
-         cluster.put("inputs", params.toString());
+         manifest.put("inputs", params.toString());
 
-         File manifest = new File(context.getTempDir() + SystemProperties.fileSeparator + "manifest.json");
-         mapper.writeValue(manifest, cluster);
+         File manifestFile = new File(context.getTempDir() + SystemProperties.fileSeparator + "manifest.json");
+         mapper.writeValue(manifestFile, manifest);
 
       } catch (Exception e) {
          logger.error("Error creating the manifest file\n", e);

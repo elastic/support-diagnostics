@@ -8,7 +8,7 @@ import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.util.*;
 
-public class ProcessBasedSystemCallsCmd extends BaseSystemCallsCmd {
+public class SystemCallsWithDependenciesCmd extends BaseSystemCallsCmd {
 
    public boolean execute(DiagnosticContext context) {
 
@@ -38,6 +38,6 @@ public class ProcessBasedSystemCallsCmd extends BaseSystemCallsCmd {
       return true;
 
    }
-   
+
 }
 

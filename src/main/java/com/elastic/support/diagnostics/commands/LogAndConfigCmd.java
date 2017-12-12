@@ -15,24 +15,20 @@ import java.io.File;
 import java.io.FileFilter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 public class LogAndConfigCmd extends AbstractDiagnosticCmd {
 
    public boolean execute(DiagnosticContext context) {
 
-      if (context.getInputParams().isSkipLogs() || ! context.isLocalAddressLocated()) {
+      if (context.getInputParams().isSkipLogs() || !context.isLocalAddressLocated()) {
          return true;
       }
 
       JsonNode diagNode = context.getTypedAttribute("diagNode", JsonNode.class);
-      if(diagNode == null){
+      if (diagNode == null) {
          logger.error("Could not locate node running on current host.");
-            return true;
+         return true;
       }
 
       boolean getAccess = context.getInputParams().isAccessLogs();
@@ -67,15 +63,15 @@ public class LogAndConfigCmd extends AbstractDiagnosticCmd {
          fileDirs.add(nodeDir);
 
          Files.createDirectories(Paths.get(nodeDir));
-         FileFilter configFilter = new WildcardFileFilter("*.yml");
+         FileFilter configFilter = new WildcardFileFilter("*.*");
          configFileLoc = determineConfigLocation(conf, config, home, defaultConf, inputArgsConfig);
 
          // Process the config directory
          String configDest = nodeDir + SystemProperties.fileSeparator + "config";
          File configDir = new File(configFileLoc);
-         if(configDir.exists() ){
+         if (configDir.exists()) {
 
-           FileUtils.copyDirectory(configDir, new File(configDest), configFilter, true);
+            FileUtils.copyDirectory(configDir, new File(configDest), configFilter, true);
 
             if (commercialDir != "") {
                File comm = new File(configFileLoc + SystemProperties.fileSeparator + commercialDir);
@@ -132,8 +128,7 @@ public class LogAndConfigCmd extends AbstractDiagnosticCmd {
                   }
                }
             }
-         }
-         else {
+         } else {
             logger.error("Configured log directory is not readable or does not exist: " + logDir.getAbsolutePath());
             context.setLocalAddressLocated(false);
          }
@@ -161,7 +156,7 @@ public class LogAndConfigCmd extends AbstractDiagnosticCmd {
          configFileLoc = conf;
       } else if ("".equals(conf) && !"".equals(defaultConf)) {
          configFileLoc = defaultConf;
-      } else if (! "".equals(inputArgsConfig)){
+      } else if (!"".equals(inputArgsConfig)) {
          configFileLoc = inputArgsConfig;
       } else {
          configFileLoc = home + SystemProperties.fileSeparator + "config";
@@ -186,17 +181,16 @@ public class LogAndConfigCmd extends AbstractDiagnosticCmd {
 
    }
 
-   String findConfigArg(Iterator<JsonNode> args){
+   String findConfigArg(Iterator<JsonNode> args) {
 
-      try{
-         while(args.hasNext()){
+      try {
+         while (args.hasNext()) {
             String arg = args.next().asText();
-            if(arg.contains("-Des.path.conf=")){
+            if (arg.contains("-Des.path.conf=")) {
                return arg.replace("-Des.path.conf=", "");
             }
          }
-      }
-      catch (Exception e){
+      } catch (Exception e) {
          logger.error("Error parsing input arguments for config directory:" + args);
       }
 
