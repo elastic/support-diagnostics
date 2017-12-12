@@ -5,11 +5,10 @@ diagnostics:
   - com.elastic.support.diagnostics.commands.RunClusterQueriesCmd
   - com.elastic.support.diagnostics.commands.RunCommercialQueriesCmd
   - com.elastic.support.diagnostics.commands.HostIdentifierCmd
-  - com.elastic.support.diagnostics.commands.LogAndConfigCmd
+  - com.elastic.support.diagnostics.commands.LogCmd
   - com.elastic.support.diagnostics.commands.SystemCallsCmd
   - com.elastic.support.diagnostics.commands.SystemCallsWithDependenciesCmd
   - com.elastic.support.diagnostics.commands.SecurityPropertiesCmd
-  - com.elastic.support.diagnostics.commands.ScrubPasswordsCmd
   - com.elastic.support.diagnostics.commands.ScrubLogsCmd
 
 remote:
