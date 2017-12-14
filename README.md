@@ -1,6 +1,6 @@
 ## Support Diagnostics Utility
 The support diagnostic utility is a Java executable that will interrogate the node on the the host it is running on to obtain data and statistics on the running cluster. 
-It will execute a series of REST API calls to the running cluster, run a number of OS related commands(such as top, netstat, etc.), and collect logs and configuration, then bundle them into one or more archives.
+It will execute a series of REST API calls to the running cluster, run a number of OS related commands(such as top, netstat, etc.), and collect logs, then bundle them into one or more archives.
 
 * Compatible with versions 6.x, 5.x, 2.x, 1.x
 * No runtime requirements or dependencies other than a recent JRE
@@ -18,7 +18,7 @@ It will execute a series of REST API calls to the running cluster, run a number 
 ## Run Requirements
 * JDK **strongly recommended** - Oracle or OpenJDK, 1.7 or 1.8
 * A JRE may be used, however certain functionality such as jstack generated thread dumps will not be available.
-* If you are running a package installation under Linux you MUST run the command with elevated sudo privileges. Otherwise the utility will not be able to read the configuration folders or run the system queries.
+* If you are running a package installation under Linux you MUST run the command with elevated sudo privileges. Otherwise the utility will not be able to run the system queries.
 * It is recommended that you set the JAVA_HOME environment variable.  It should point to the Java installation directory.  If JAVA_HOME is not found, the utility will attempt to locate a distribution but if errors occur it may be necessary to set this manually.
 * The system account running the utility must have read access to the Elasticsearch files and write access to the output location.
 * If you are using Shield/Security the supplied user id must have permission to execute the diagnostic URL's.
@@ -37,7 +37,6 @@ It will execute a series of REST API calls to the running cluster, run a number 
 * The utility will use default listening port of 9200 if you do not specify one.
 * If the utility cannot find a running ES version for that host/port combination the utility will exit and you will need to run it again.
 * Input parameters may be specified in any order.
-* If config file settings with names containing the strings in the diags.yml password-keys are detected, the text in those settings will be redacted.
 * An archive with the format diagnostics-`<DateTimeStamp>`.tar.gz will be created in the utility directory. If you wish to specify a specific output folder you may do so by using the -o `<Full path to custom output folder>` option.
 
 
@@ -70,12 +69,12 @@ It will execute a series of REST API calls to the running cluster, run a number 
 * To include all logs, not just today's use the --archivedLogs option.
 * To suppress all log file collection use the --skipLogs option.
 * Because of the potential size access logs are no longer collected by default. If you need these use the --accessLogs option to have them copied.
-* If you have sensitive information in your logs and wish to scrub them, you will need to make sure your last three logs are unzipped before running the utility. Configure the scrub.yml to designate the sensitive character data you wish to modify and the value you wish to substitute. You can the trigger the rep;acement process with the --scrub option.
+* If you have sensitive information in your logs and wish to scrub them, you will need to make sure your last three logs are unzipped before running the utility. Configure the scrub.yml to designate the sensitive character data you wish to modify and the value you wish to substitute. You can the trigger the replacement process with the --scrub option.
 
 ## Alternate Usages
 ### Remote
 * If you do not wish to run the utility on the host the node to be queried resides on, and wish to run it from a different host such as your workstation, you may use the --type remote option.
-* This will execute only the REST API calls and will not attempt to execute local system calls or collect log/config files. 
+* This will execute only the REST API calls and will not attempt to execute local system calls or collect log files. 
 #### Remote Example
     * ./diagnostics.sh --host 10.0.0.20 --type remote
 
@@ -91,7 +90,7 @@ It will execute a series of REST API calls to the running cluster, run a number 
 * If the cluster is not running X-Pack Monitoring you may find it beneficial to see how some statistics change over time. You can accomplish this by using the --interval x (in seconds) and --reps (times to repeat)to take a diagnostic.
 * You run the diagnostic once and it will execute a run, sleep for the interval duration, and then take another diagnostic. 
 * Each run will get it's own archive with the same DateTime stamp and with run-`<run number>` appended.
-* Logs and configs will only be collected in the archive of the final run. If you are running in standard rather than remote mode, however, all the system level calls will be executed.
+* Logs will only be collected in the archive of the final run. If you are running in standard rather than remote mode, however, all the system level calls will be executed.
 * This can be used for either Elasticsearch or Logstash
 #### Examples - 6 runs with 20 seconds separating each run
     * sudo ./diagnostics.sh --host localhost -u elastic -p --interval 20 --reps 6
@@ -112,7 +111,7 @@ It will execute a series of REST API calls to the running cluster, run a number 
 
 # Troubleshooting
   * The file: diagnostic.log file will be generated in the installation directory of the diagnostic utility - the output of the console, which will include both progress and error messages, will be replicated in that file.  It will be appended for each run and rolled over daily if not removed.
-  * Make sure the account you are running from has read access to all the Elasticsearch log and config directories.  This account must have write access to any directory you are using for output.
+  * Make sure the account you are running from has read access to all the Elasticsearch log directories.  This account must have write access to any directory you are using for output.
   * Make sure you have a valid Java installation that the JAVA_HOME environment variable is pointing to.
   * If you are not in the installation directory CD in and run it from there.
   * If you encounter OutOfMemoryExceptions, use the DIAG_JAVA_OPTS environment variable to set an -Xmx value greater than the standard 2g.  Start with -Xmx4g and move up from there if necessary.
