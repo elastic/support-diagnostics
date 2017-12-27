@@ -16,9 +16,8 @@ public class Constants {
    public static final int HTTP_PUT = 3;
    public static final int HTTP_DELETE = 4;
 
-   public static final String logDir = "_log_config";
-   public static final String logDirPattern = "*_log_config";
+   public static final String logDir = "_log";
+   public static final String logDirPattern = "*_log";
    public static final String logFilePattern = "[a-zA-Z0-9]+$(?!-\\d\\d\\d\\d-\\d\\d-\\d\\d$)*.log";
-   public static final String configFile = "elasticsearch.yml";
 
 }
