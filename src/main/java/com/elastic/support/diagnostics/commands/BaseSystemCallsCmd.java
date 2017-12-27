@@ -7,6 +7,7 @@ import com.elastic.support.util.SystemProperties;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
+import java.nio.file.Paths;
 import java.util.*;
 
 public abstract class BaseSystemCallsCmd extends AbstractDiagnosticCmd {
@@ -106,7 +107,7 @@ public abstract class BaseSystemCallsCmd extends AbstractDiagnosticCmd {
 
    protected boolean isJdkPresent() {
       try {
-         File jdk = new File(SystemProperties.javaHome + SystemProperties.fileSeparator + "javac");
+         File jdk = Paths.get(SystemProperties.javaHome, "bin", "javac").toFile();
          if (jdk.exists()) {
             return true;
          }
