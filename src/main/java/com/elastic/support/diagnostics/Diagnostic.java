@@ -24,7 +24,6 @@ import org.apache.logging.log4j.core.layout.PatternLayout;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.List;
 
 public class Diagnostic {
 
@@ -70,10 +69,10 @@ public class Diagnostic {
 
    }
 
-   public void exec(){
+   public void exec() {
 
       try {
-        int reps = inputs.getReps();
+         int reps = inputs.getReps();
          long interval = inputs.getInterval() * 1000;
 
          if (reps > 1) {
@@ -81,8 +80,7 @@ public class Diagnostic {
                ctx.setCurrentRep(i);
                if (inputs.getDiagType().equalsIgnoreCase(Constants.STANDARD_DIAG) && i < (reps)) {
                   inputs.setSkipLogs(true);
-               }
-               else{
+               } else {
                   inputs.setSkipLogs(false);
                }
                dc.runDiagnostic(ctx);
@@ -92,21 +90,19 @@ public class Diagnostic {
                   Thread.sleep(interval);
                }
             }
-         }
-         else {
+         } else {
             dc.runDiagnostic(ctx);
          }
 
       } catch (Exception re) {
          logger.error("Execution Error", re);
-      }
-      finally{
+      } finally {
          createArchive(ctx);
          cleanup(ctx);
       }
    }
 
-   private  boolean validateAuth(InputParams inputs) {
+   private boolean validateAuth(InputParams inputs) {
 
       String ptPassword = inputs.getPlainTextPassword();
       String userName = inputs.getUsername();
@@ -127,7 +123,7 @@ public class Diagnostic {
       logger.info("Results will be written to: " + outputDir);
       String diagType = context.getInputParams().getDiagType();
 
-      if (! diagType.equals(Constants.ES_DIAG)) {
+      if (!diagType.equals(Constants.ES_DIAG)) {
          context.setDiagName(diagType + "-" + Constants.ES_DIAG);
       }
 
@@ -162,19 +158,31 @@ public class Diagnostic {
 
       final LoggerContext context = (LoggerContext) LogManager.getContext(false);
       final Configuration config = context.getConfiguration();
-      Layout layout = PatternLayout.createLayout("%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n", null, config, null,
-         null,true, true, null, null );
-      Appender appender = FileAppender.createAppender(logDir, "false", "false", "File", "true",
-         "false", "false", "0", layout, null, "false", null, config);
+      /*Layout layout = PatternLayout.createLayout("%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n", null, config, null,
+         null,true, true, null, null );*/
+      Layout layout = PatternLayout.newBuilder()
+         .withConfiguration(config)
+         .withPattern("%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n")
+         .build();
+
+      Appender appender = FileAppender.newBuilder().setConfiguration(config)
+         .withFileName(logDir)
+         .withAppend(false)
+         .withLocking(false)
+         .withName("File")
+         .withImmediateFlush(true)
+         .withIgnoreExceptions(false)
+         .withBufferedIo(false)
+         .withBufferSize(0)
+         .withLayout(layout)
+         .withAdvertise(false).build();
+
       appender.start();
       config.addAppender(appender);
       AppenderRef ref = AppenderRef.createAppenderRef("File", null, null);
-      AppenderRef[] refs = new AppenderRef[] {ref};
-
       config.getRootLogger().addAppender(appender, null, null);
       context.updateLoggers();
-      Logger testLog = LogManager.getLogger();
-      testLog.error("Testing");
+
    }
 
    private void createArchive(DiagnosticContext context) {
@@ -183,9 +191,9 @@ public class Diagnostic {
 
       try {
          String archiveFilename = SystemProperties.getFileDateString();
-         if(context.getInputParams().getReps() > 1){
+         if (context.getInputParams().getReps() > 1) {
             int currentRep = context.getCurrentRep();
-            if(currentRep == 1){
+            if (currentRep == 1) {
                context.setAttribute("archiveFileName", archiveFilename);
             }
 
@@ -194,10 +202,9 @@ public class Diagnostic {
 
          boolean bzip = context.getInputParams().isBzip();
          String ext = "";
-         if (bzip){
+         if (bzip) {
             ext = ".bz2";
-         }
-         else{
+         } else {
             ext = ".gz";
          }
 
@@ -207,10 +214,9 @@ public class Diagnostic {
 
          FileOutputStream fout = new FileOutputStream(filename);
          CompressorOutputStream cout = null;
-         if(bzip){
+         if (bzip) {
             cout = new BZip2CompressorOutputStream(fout);
-         }
-         else {
+         } else {
             cout = new GzipCompressorOutputStream(fout);
          }
          TarArchiveOutputStream taos = new TarArchiveOutputStream(cout);
@@ -230,7 +236,6 @@ public class Diagnostic {
 
    private void archiveResults(String archiveFilename, TarArchiveOutputStream taos, File file, String path, boolean append) {
 
-      boolean pathSet = false;
       String relPath = "";
 
       try {
@@ -263,7 +268,14 @@ public class Diagnostic {
 
       String dir = context.getTempDir();
       try {
-         FileUtils.deleteDirectory(new File(dir));
+         LoggerContext lc = (LoggerContext) LogManager.getContext(false);
+         final Configuration config = lc.getConfiguration();
+         Appender appndr = config.getAppender("File");
+         appndr.stop();
+         config.getRootLogger().removeAppender("File");
+         File tempdir = new File(dir);
+         tempdir.setWritable(true, false);
+         FileUtils.deleteDirectory(tempdir);
       } catch (IOException e) {
          String msg = "Error deleting temporary work directory";
          logger.error(msg, e);
