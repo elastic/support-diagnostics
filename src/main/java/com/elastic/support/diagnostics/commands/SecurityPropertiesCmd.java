@@ -15,20 +15,21 @@ public final class SecurityPropertiesCmd extends AbstractDiagnosticCmd {
    public boolean execute(final DiagnosticContext context) {
 
       Properties securityProperties = new Properties();
-      Map diagProps = (Map)context.getConfig().get("security-settings");
+      Map diagProps = (Map)context.getConfig().get("network-cache-settings");
       Set<String> keys = diagProps.keySet();
       for (String key: keys){
-         String value = SystemUtils.safeToString(Security.getProperty(key), "");
+         String value = SystemUtils.toString(Security.getProperty(key), "");
          securityProperties.put(key, value);
       }
 
-      final Path path = Paths.get(context.getTempDir(), "security.properties");
+      final Path path = Paths.get(context.getTempDir(), "network-cache-settings.properties");
       try {
          OutputStream outpuStream = new FileOutputStream(path.toFile());
          BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outpuStream));
          securityProperties.store(writer, "");
+         outpuStream.close();
       } catch (final IOException e) {
-         logger.error("Failed saving security.properties file.", e);
+         logger.error("Failed saving network-cache-settings.properties file.", e);
          return false;
       }
       return true;
