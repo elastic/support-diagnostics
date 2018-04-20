@@ -32,7 +32,7 @@ public class JsonYamlUtils {
    }
 
    public static JsonNode createJsonNodeFromFile(File jsonFile) throws Exception {
-      String fileString = FileUtils.readFileToString(jsonFile);
+      String fileString = FileUtils.readFileToString(jsonFile, "UTF8");
       return JsonYamlUtils.createJsonNodeFromString(fileString);
    }
 
@@ -60,7 +60,7 @@ public class JsonYamlUtils {
    public static Map<String, Object> readYamlFromClasspath(String path, boolean isBlock) throws Exception {
       InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(path);
       Map<String, Object> doc = JsonYamlUtils.readYaml(inputStream, isBlock);
-      IOUtils.closeQuietly(inputStream);
+      SystemUtils.streamClose(path, inputStream);
       return doc;
    }
 
@@ -68,7 +68,7 @@ public class JsonYamlUtils {
       File fl = FileUtils.getFile(path);
       InputStream inputStream = new FileInputStream(fl);
       Map<String, Object> doc = JsonYamlUtils.readYaml(inputStream, isBlock);
-      IOUtils.closeQuietly(inputStream);
+      SystemUtils.streamClose(path, inputStream);
       return doc;
    }
 

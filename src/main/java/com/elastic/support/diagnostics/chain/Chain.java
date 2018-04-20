@@ -15,7 +15,7 @@ public class Chain implements Command {
         try {
             for (String commandClass : commandList){
                 Class clazz = Class.forName(commandClass);
-                Command cmd = (Command)clazz.newInstance();
+                Command cmd = (Command)clazz.getConstructor().newInstance();
                 commandChain.add(cmd);
             }
         } catch(Exception e) {

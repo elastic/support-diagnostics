@@ -67,7 +67,7 @@ public class HostIdentifierCmd extends AbstractDiagnosticCmd {
                JsonNode jnode = n.path("process");
                String nodeName = n.path("name").asText();
                context.setAttribute("diagNodeName", nodeName);
-               String pid = SystemUtils.safeToString(jnode.path("id").asText(), "0");
+               String pid = SystemUtils.toString(jnode.path("id").asText(), "0");
                context.setPid(pid);
                diagNodeFound = true;
                context.setDiagNodeFound(true);

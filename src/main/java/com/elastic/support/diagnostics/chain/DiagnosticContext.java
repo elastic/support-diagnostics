@@ -194,12 +194,12 @@ public class DiagnosticContext {
 
    public Long getLongAttribute(String key){
        Long ret = getTypedAttribute(key, Long.class);
-       return ret == null ? new Long("0") : ret;
+       return ret == null ? 0L: ret;
    }
 
    public Integer getIntegerAttribute(String key){
        Integer ret = getTypedAttribute(key, Integer.class);
-       return ret == null ? new Integer("0") : ret;
+       return ret == null ? 0 : ret;
    }
 
    public Map<String, Object> getMappedAttribute(String key){

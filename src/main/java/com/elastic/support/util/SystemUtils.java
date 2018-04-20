@@ -1,6 +1,11 @@
 package com.elastic.support.util;
 
 
+import org.apache.commons.beanutils.converters.BooleanConverter;
+import org.apache.commons.beanutils.ConvertUtils;
+import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
@@ -8,15 +13,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class SystemUtils {
 
    private static final Logger logger = LoggerFactory.getLogger(SystemUtils.class);
+
+   public static StringUtils CommonsStringUtils;
+   public static NumberUtils CommonsNumberUtils;
+   public static org.springframework.util.StringUtils SpringStringUtils;
+   public static PropertyUtils CommonsPropertyUtils;
+   public static java.util.Objects JavaObjects;
 
    public static final String UTC_DATE_FORMAT = "MM/dd/yyyy KK:mm:ss a Z";
    public static final String FILE_DATE_FORMAT = "yyyyMMdd-KKmmssa";
@@ -26,10 +38,10 @@ public class SystemUtils {
    private static final String IPV6 = "^(:?[a-fA-F0-9]{0,4}:){1,7}[a-fA-F0-9]{1,4}%?[a-zA-Z0-9-_]{0,10}$";
    private static final DecimalFormat formatter = new DecimalFormat("###.##");
    private static final String EMPTY = "";
-   public static final long GB = 1024*1024*1024;
-   public static final long MB = 1024* 1024;
+   public static final long GB = 1024 * 1024 * 1024;
+   public static final long MB = 1024 * 1024;
    public static final long KB = 1024;
-   public static final long sixtyFour= 65535;
+   public static final long sixtyFour = 65535;
 
 
    public static String getUtcDateString() {
@@ -60,7 +72,7 @@ public class SystemUtils {
       return uptimeHours + "hours " + uptimeMinutes + " minutes";
    }
 
-   public static String formatDouble(double input){
+   public static String formatDouble(double input) {
       return formatter.format(input);
    }
 
@@ -72,68 +84,138 @@ public class SystemUtils {
       return (millis / 1000) / 60;
    }
 
-   public static String safeToString(Object input) {
-      return input == null ? "" : input.toString();
+   public static Object getProperty(Object target, String name){
+
+      Object result = null;
+      try {
+         result =  PropertyUtils.getProperty(target, name);
+      } catch (Exception e) {
+         logger.error("Could not access property {} from target object", name, e);
+      }
+
+      return result;
+
    }
 
-   public static String safeToString(Object input, String defaultValue) {
-      return input == null ? defaultValue : input.toString();
-   }
-
-
-   public static String emptyDisplayString(Object input){
-
-      String res = SystemUtils.safeToString(input);
-      if (res.equals("")){
-         return EMPTY;
+   public static Map getMapProperty(Object target, String name){
+      Object result = getProperty(target, name);
+      if ( result == null || ! (result instanceof Map) ) {
+         return new LinkedHashMap();
       }
       else{
-         return res;
+         return (Map) result;
       }
    }
 
-   public static long safeToLong(Object input) {
+   public static List getListProperty(Object target, String name){
+      Object result = getProperty(target, name);
+      if ( result == null || ! (result instanceof List) ) {
+         return new ArrayList();
+      }
+      else{
+         return (List) result;
+      }
+   }
 
-      String ret = input == null ? "0" : input.toString();
+
+   public static String getStringProperty(Object target, String name){
+      Object result = getProperty(target, name);
+      return toString(result);
+   }
+
+   public static String getStringProperty(Object target, String name, String defaultValue){
+      Object result = getProperty(target, name);
+      return toString(result, defaultValue);
+   }
+
+   public static Long getLongProperty(Object target, String name, Long defaultValue){
+      Object result = getProperty(target, name);
+      return toLong(result, defaultValue);
+   }
+
+   public static Integer getIntProperty(Object target, String name, Integer defaultValue){
+      Object result = getProperty(target, name);
+      return toInt(result, defaultValue);
+   }
+
+   public static Double getDoubleProperty(Object target, String name, Double defaultValue){
+      Object result = getProperty(target, name);
+      return toDouble(result, defaultValue);
+   }
+
+   public static Boolean getBooleanProperty(Object target, String name, Boolean defaultValue){
+      Object result = getProperty(target, name);
+      return toBoolean(result, defaultValue);
+   }
+
+   public static String toString(Object input) {
+      return JavaObjects.toString(input, "");
+   }
+
+   public static String toString(Object input, String defaultValue) {
+      if (defaultValue == null) {
+         defaultValue = "";
+      }
+      return JavaObjects.toString(input, defaultValue);
+   }
+
+   public static Long toLong(Object input, long defaultValue) {
+      if (input == null) return defaultValue;
+      if(input instanceof Long) return (Long)input;
+      return NumberUtils.toLong(toString(input), defaultValue);
+   }
+
+   public static Long toLong(Object input){
+      return toLong(input, -1);
+   }
+
+   public static Integer toInt(Object input, int defaultValue) {
+      if (input == null) return defaultValue;
+      if(input instanceof Integer) return (Integer)input;
+      return NumberUtils.toInt(toString(input), defaultValue);
+   }
+
+   public static Integer toInt(Object input){
+      return toInt(input, -1);
+   }
+
+   public static Double toDouble(Object input, double defaultValue) {
+      if (input == null) return defaultValue;
+      if(input instanceof Double) return (Double)input;
+      return NumberUtils.toDouble(toString(input), defaultValue);
+   }
+
+   public static Double toDouble(Object input){
+      return toDouble(input, -1.00);
+   }
+
+   public static Boolean toBoolean(Object input, boolean defaultValue) {
+      if (input == null) return defaultValue;
+      if(input instanceof Boolean) return (Boolean)input;
+      BooleanConverter booleanConverter = new BooleanConverter(defaultValue);
+      return booleanConverter.convert(null, input);
+   }
+
+   public static Boolean toBoolean(Object input){
+      return toBoolean(input, false);
+   }
+
+   protected static <T> T convert(Object val, Class<T> clazz) {
+
+      if(val == null) return null;
+      T castValue = null;
+      String conversionError = "Value {} was converted to {}.";
 
       try {
-         long res = new Long(input.toString());
-         return res;
+         ConvertUtils.convert(val, clazz);
+         castValue = clazz.cast(val);
       } catch (Exception e) {
-         logger.error("Could not convert: " + input + " to long value.");
+         logger.error(conversionError, val, clazz.getName());
       }
 
-      return -1;
+      return castValue;
+
    }
-
-   public static int safeToInt(Object input) {
-
-      String ret = input == null ? "0" : input.toString();
-
-      try {
-         int res = new Integer(input.toString());
-         return res;
-      } catch (Exception e) {
-         logger.error("Could not convert: " + input + " to long value.");
-      }
-
-      return -1;
-   }
-
-   public static double safeToDouble(Object input) {
-
-      String ret = input == null ? "0" : input.toString();
-
-      try {
-         double res = new Double(input.toString());
-         return res;
-      } catch (Exception e) {
-         logger.error("Could not convert: " + input + " to long value.");
-      }
-
-      return -1;
-   }
-
 
    public static String extractIpPort(String address) {
 
@@ -155,28 +237,57 @@ public class SystemUtils {
 
    }
 
-   public static String bytesToUnits(long byteSize){
+   public static String bytesToUnits(long size) {
+      String hrSize = null;
 
-      if(byteSize / GB > 1){
-         return byteSize / GB + "GB";
-      }
-      else if(byteSize / MB > 1){
-         return byteSize / MB + "MB";
-      }
-      else if(byteSize / KB  > 1){
-         return  byteSize / KB + "KB";
+      double b = size;
+      double k = size / 1024.0;
+      double m = ((size / 1024.0) / 1024.0);
+      double g = (((size / 1024.0) / 1024.0) / 1024.0);
+      double t = ((((size / 1024.0) / 1024.0) / 1024.0) / 1024.0);
+
+      DecimalFormat dec = new DecimalFormat("0.00");
+
+      if (t > 1) {
+         hrSize = dec.format(t).concat(" TB");
+      } else if (g > 1) {
+         hrSize = dec.format(g).concat(" GB");
+      } else if (m > 1) {
+         hrSize = dec.format(m).concat(" MB");
+      } else if (k > 1) {
+         hrSize = dec.format(k).concat(" KB");
+      } else {
+         hrSize = dec.format(b).concat(" Bytes");
       }
 
-      else return byteSize + "b";
+      return hrSize;
+   }
+
+   public static boolean streamClose(String path, InputStream instream){
+
+      if (instream != null){
+         try{
+            instream.close();
+         }
+         catch (Throwable t){
+            logger.error("Error encountered when attempting to close file {}", path);
+            return false;
+         }
+      }
+      else {
+         logger.error("Error encountered when attempting to close file: null InputStream {}", path);
+      }
+
+      return true;
 
    }
 
-   public static String extract(String filename, String dir){
+   public static String extract(String filename, String dir) {
 
       String diagOutput = "";
 
       try {
-         final  int BUFFER = 2048;
+         final int BUFFER = 2048;
          FileInputStream fin = new FileInputStream(filename);
          BufferedInputStream in = new BufferedInputStream(fin);
          GzipCompressorInputStream gzIn = new GzipCompressorInputStream(in);
@@ -191,12 +302,11 @@ public class SystemUtils {
                String fl = dir + SystemProperties.fileSeparator + entry.getName();
                File f = new File(fl);
                f.mkdirs();
-               if (initial){
-                  diagOutput = fl.substring(0, fl.length()-1);
+               if (initial) {
+                  diagOutput = fl.substring(0, fl.length() - 1);
                   initial = false;
                }
-            }
-            else {
+            } else {
                int count;
                byte data[] = new byte[BUFFER];
                FileOutputStream fos = new FileOutputStream(dir
