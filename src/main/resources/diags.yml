@@ -3,7 +3,10 @@
 requestTimeout: 300000
 connectTimeout: 60000
 
-security-settings:
+maxLogs: 2
+maxGcLogs: 3
+
+network-cache-settings:
   networkaddress.cache.ttl:
   networkaddress.cache.negative.ttl:
 
@@ -12,7 +15,6 @@ password-keys:
   - secret
   - access
   - key
-
 
 textFileExtensions:
   - allocation

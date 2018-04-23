@@ -48,16 +48,19 @@ public class LogCmd extends AbstractDiagnosticCmd {
       String defaultLogs = defaultPaths.path("logs").asText();
 
       try {
+         int maxLogs =  SystemUtils.toInt(context.getConfig().get("maxLogs"), 3 );
+         int maxGcLogs =  SystemUtils.toInt(context.getConfig().get("maxGcLogs"), 3 );
+
          List<String> fileDirs = new ArrayList<>();
          context.setAttribute("tempFileDirs", fileDirs);
 
          // Create a directory for this node
-         String nodeDir = context.getTempDir() + SystemProperties.fileSeparator + name + Constants.logDir;
+         String nodeDir = context.getTempDir() + SystemProperties.fileSeparator + "logs";
+
          fileDirs.add(nodeDir);
 
          Files.createDirectories(Paths.get(nodeDir));
-
-         File logDest = new File(nodeDir + SystemProperties.fileSeparator + "logs");
+         File logDest = new File(nodeDir);
          logs = determineLogLocation(home, logs, defaultLogs);
          File logDir = new File(logs);
          if (logDir.exists()) {
@@ -68,36 +71,21 @@ public class LogCmd extends AbstractDiagnosticCmd {
                FileUtils.copyFileToDirectory(new File(logs + SystemProperties.fileSeparator + clusterName + ".log"), logDest);
                FileUtils.copyFileToDirectory(new File(logs + SystemProperties.fileSeparator + clusterName + "_index_indexing_slowlog.log"), logDest);
                FileUtils.copyFileToDirectory(new File(logs + SystemProperties.fileSeparator + clusterName + "_index_search_slowlog.log"), logDest);
-               final Collection<File> gcLogs = FileUtils.listFiles(new File(logs), new WildcardFileFilter("gc*.log*"), TrueFileFilter.INSTANCE);
-               for (final File gcLog : gcLogs) {
-                  FileUtils.copyFileToDirectory(gcLog, logDest);
-               }
-
                if (getAccess) {
                   FileUtils.copyFileToDirectory(new File(logs + SystemProperties.fileSeparator + clusterName + "_access.log"), logDest);
                }
+
                int majorVersion = Integer.parseInt(context.getVersion().split("\\.")[0]);
                String patternString = null;
                if (majorVersion > 2) {
-                  patternString = clusterName + "-\\d{4}-\\d{2}-\\d{2}.log*";
+                  patternString = clusterName + ".*\\.log\\.gz";
                } else {
                   patternString = clusterName + ".log.\\d{4}-\\d{2}-\\d{2}";
                }
-               // Get the two most recent server log rollovers
-               //Pattern pattern = Pattern.compile(patternString);
-               FileFilter logFilter = new RegexFileFilter(patternString);
-               File[] logDirList = logDir.listFiles(logFilter);
-               Arrays.sort(logDirList, LastModifiedFileComparator.LASTMODIFIED_REVERSE);
 
-               int limit = 2, count = 0;
-               for (File logListing : logDirList) {
-                  if (count < limit) {
-                     FileUtils.copyFileToDirectory(logListing, logDest);
-                     count++;
-                  } else {
-                     break;
-                  }
-               }
+               processLogVersions(patternString, maxLogs, logDir,logDest);
+               processLogVersions("gc*.log.*", maxGcLogs, logDir,logDest);
+
             }
          } else {
             logger.error("Configured log directory is not readable or does not exist: " + logDir.getAbsolutePath());
@@ -115,7 +103,7 @@ public class LogCmd extends AbstractDiagnosticCmd {
       return true;
    }
 
-   String determineLogLocation(String home, String log, String defaultLog) {
+   private String determineLogLocation(String home, String log, String defaultLog) {
 
       String logLoc;
 
@@ -130,5 +118,22 @@ public class LogCmd extends AbstractDiagnosticCmd {
       return logLoc;
 
    }
+
+   private void processLogVersions(String pattern, int maxToGet, File logDir, File logDest) throws Exception{
+
+      FileFilter gcLogFilter = new RegexFileFilter(pattern);
+      File[] gcLogList = logDir.listFiles(gcLogFilter);
+      Arrays.sort(gcLogList, LastModifiedFileComparator.LASTMODIFIED_REVERSE);
+      int limit = maxToGet, count = 0;
+      for (File gcLog : gcLogList) {
+         if (count < limit) {
+            FileUtils.copyFileToDirectory(gcLog, logDest);
+            count++;
+         } else {
+            break;
+         }
+      }
+   }
+
 
 }

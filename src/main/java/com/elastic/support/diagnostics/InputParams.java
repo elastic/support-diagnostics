@@ -38,9 +38,6 @@ public class InputParams {
    @Parameter(names = {"--interval"}, description = "Elapsed time in seconds between diagnostic runs when in repeating mode.")
    private long interval = 30;
 
-   @Parameter(names = {"--bzip"}, description = "Set this option true to use bzip istead of gzip.")
-   private boolean isBzip = false;
-
    @Parameter(names = {"--archivedLogs"}, description = "Get archived logs in addition to current ones if present - No value required, only the option.")
    private boolean archivedLogs=false;
 
@@ -236,14 +233,6 @@ public class InputParams {
       this.accessLogs = accessLogs;
    }
 
-   public boolean isBzip() {
-      return isBzip;
-   }
-
-   public void setBzip(boolean bzip) {
-      isBzip = bzip;
-   }
-
    public String getUrl() {
       return getProtocol() + "://" + getHost() + ":" + getPort();
    }
@@ -267,7 +256,6 @@ public class InputParams {
          ", diagType='" + diagType + '\'' +
          ", reps=" + reps +
          ", interval=" + interval +
-         ", isBzip=" + isBzip +
          ", archivedLogs=" + archivedLogs +
          ", scrubFiles=" + scrubFiles +
          ", skipVerification=" + skipVerification +

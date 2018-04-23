@@ -200,25 +200,12 @@ public class Diagnostic {
             archiveFilename = context.getStringAttribute("archiveFileName") + "-run-" + currentRep;
          }
 
-         boolean bzip = context.getInputParams().isBzip();
-         String ext = "";
-         if (bzip) {
-            ext = ".bz2";
-         } else {
-            ext = ".gz";
-         }
-
          String dir = context.getTempDir();
          File srcDir = new File(dir);
-         String filename = dir + "-" + archiveFilename + ".tar" + ext;
+         String filename = dir + "-" + archiveFilename + ".tar.gz";
 
          FileOutputStream fout = new FileOutputStream(filename);
-         CompressorOutputStream cout = null;
-         if (bzip) {
-            cout = new BZip2CompressorOutputStream(fout);
-         } else {
-            cout = new GzipCompressorOutputStream(fout);
-         }
+         CompressorOutputStream cout = new GzipCompressorOutputStream(fout);
          TarArchiveOutputStream taos = new TarArchiveOutputStream(cout);
 
          taos.setBigNumberMode(TarArchiveOutputStream.BIGNUMBER_STAR);
