@@ -11,10 +11,11 @@ public class ScrubApp {
 
       try {
          Scrubber scrub = new Scrubber(args);
-         scrub.exec();
+         if(scrub.isProceedToRun()) {
+            scrub.exec();
+         }
       } catch (Exception e) {
          logger.error(e.getMessage());
       }
    }
-
 }

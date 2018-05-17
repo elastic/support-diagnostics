@@ -12,6 +12,8 @@ import java.util.Set;
 
 public class ScrubLogsCmd extends AbstractDiagnosticCmd {
 
+   // To do , Hash and IP placeholders for specialized sub.
+
    public boolean execute(DiagnosticContext context) {
 
       if (! context.isLocalAddressLocated() || ! context.getInputParams().isScrubFiles()) {
@@ -40,7 +42,6 @@ public class ScrubLogsCmd extends AbstractDiagnosticCmd {
       } catch (Exception e) {
          logger.error("Error scrubbing log files.", e);
          logger.error("Password removal failed - please examine archive to ensure sensitive information is removed.");
-
       }
 
       logger.info("Finished scrubbing logs.");

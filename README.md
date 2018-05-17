@@ -17,7 +17,7 @@ It will execute a series of REST API calls to the running cluster, run a number 
 * `cd` to the top level repo directory and type `mvn package`.
 
 ## Run Requirements
-* JDK **strongly recommended** - Oracle or OpenJDK, 1.7 or 1.8
+* JDK **strongly recommended** - Oracle or OpenJDK, 8-10
 * A JRE may be used, however certain functionality such as jstack generated thread dumps will not be available.
 * If you are running a package installation under Linux you MUST run the command with elevated sudo privileges. Otherwise the utility will not be able to run the system queries.
 * It is recommended that you set the JAVA_HOME environment variable.  It should point to the Java installation directory.  If JAVA_HOME is not found, the utility will attempt to locate a distribution but if errors occur it may be necessary to set this manually.
@@ -67,10 +67,8 @@ It will execute a series of REST API calls to the running cluster, run a number 
 
 ## Additional Options
 * You can specify additional java options such as a higher -Xmx value by setting the environment variable DIAG_JAVA_OPTS.
-* To include all logs, not just today's use the --archivedLogs option.
 * To suppress all log file collection use the --skipLogs option.
 * Because of the potential size access logs are no longer collected by default. If you need these use the --accessLogs option to have them copied.
-* If you have sensitive information in your logs and wish to scrub them, you will need to make sure your last three logs are unzipped before running the utility. Configure the scrub.yml to designate the sensitive character data you wish to modify and the value you wish to substitute. You can the trigger the replacement process with the --scrub option.
 
 ## Alternate Usages
 ### Remote

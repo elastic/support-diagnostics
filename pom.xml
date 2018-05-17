@@ -4,7 +4,7 @@
 
     <groupId>com.elasticsearch</groupId>
     <artifactId>support-diagnostics</artifactId>
-    <version>6.3</version>
+    <version>6.4</version>
     <packaging>jar</packaging>
     <name>Support Diagnostics Utilities</name>
 
@@ -44,7 +44,7 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.11</version>
-            <scope>test</scope>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -167,8 +167,8 @@
                     <showDeprecation>true</showDeprecation>
                     <verbose>true</verbose>
                     <fork>true</fork>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>1.7</source>
+                    <target>1.7</target>
                     <compilerVersion>9</compilerVersion>
                 </configuration>
             </plugin>

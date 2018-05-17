@@ -1,5 +1,4 @@
 # REST timeout settings - note:values are in milliseconds
-
 requestTimeout: 300000
 connectTimeout: 60000
 
@@ -54,7 +53,7 @@ standard-1:
   cluster_state: "_cluster/state?pretty&human"
   cluster_stats: "_cluster/stats?pretty&human&output_uuid=true"
   count: "_count?pretty&human"
-  indices_stats: "_stats?pretty&human"
+  indices_stats: "_stats?level=shards&pretty&human"
   licenses: "_licenses?pretty&human"
   mapping: "_mapping?pretty&human"
   nodes_hot_threads: "_nodes/hot_threads?threads=10000"

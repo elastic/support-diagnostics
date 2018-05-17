@@ -1,7 +1,4 @@
-# add terms that require replacemet
-# one term to a line, no nested relationships
-
-# 192.168.20: 10.1.1
-# MyHostName: mylaptop
-# node1: mynode
-
+tokens:
+# Examples:
+#  - WGCIWzf
+#  - Apple

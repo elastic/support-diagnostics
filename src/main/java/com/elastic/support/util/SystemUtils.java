@@ -1,19 +1,27 @@
 package com.elastic.support.util;
 
 
-import org.apache.commons.beanutils.converters.BooleanConverter;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.beanutils.PropertyUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.commons.beanutils.converters.BooleanConverter;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Appender;
+import org.apache.logging.log4j.core.Layout;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.appender.FileAppender;
+import org.apache.logging.log4j.core.config.AppenderRef;
+import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.lang.reflect.InvocationTargetException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -84,11 +92,11 @@ public class SystemUtils {
       return (millis / 1000) / 60;
    }
 
-   public static Object getProperty(Object target, String name){
+   public static Object getProperty(Object target, String name) {
 
       Object result = null;
       try {
-         result =  PropertyUtils.getProperty(target, name);
+         result = PropertyUtils.getProperty(target, name);
       } catch (Exception e) {
          logger.error("Could not access property {} from target object", name, e);
       }
@@ -97,53 +105,51 @@ public class SystemUtils {
 
    }
 
-   public static Map getMapProperty(Object target, String name){
+   public static Map getMapProperty(Object target, String name) {
       Object result = getProperty(target, name);
-      if ( result == null || ! (result instanceof Map) ) {
+      if (result == null || !(result instanceof Map)) {
          return new LinkedHashMap();
-      }
-      else{
+      } else {
          return (Map) result;
       }
    }
 
-   public static List getListProperty(Object target, String name){
+   public static List getListProperty(Object target, String name) {
       Object result = getProperty(target, name);
-      if ( result == null || ! (result instanceof List) ) {
+      if (result == null || !(result instanceof List)) {
          return new ArrayList();
-      }
-      else{
+      } else {
          return (List) result;
       }
    }
 
 
-   public static String getStringProperty(Object target, String name){
+   public static String getStringProperty(Object target, String name) {
       Object result = getProperty(target, name);
       return toString(result);
    }
 
-   public static String getStringProperty(Object target, String name, String defaultValue){
+   public static String getStringProperty(Object target, String name, String defaultValue) {
       Object result = getProperty(target, name);
       return toString(result, defaultValue);
    }
 
-   public static Long getLongProperty(Object target, String name, Long defaultValue){
+   public static Long getLongProperty(Object target, String name, Long defaultValue) {
       Object result = getProperty(target, name);
       return toLong(result, defaultValue);
    }
 
-   public static Integer getIntProperty(Object target, String name, Integer defaultValue){
+   public static Integer getIntProperty(Object target, String name, Integer defaultValue) {
       Object result = getProperty(target, name);
       return toInt(result, defaultValue);
    }
 
-   public static Double getDoubleProperty(Object target, String name, Double defaultValue){
+   public static Double getDoubleProperty(Object target, String name, Double defaultValue) {
       Object result = getProperty(target, name);
       return toDouble(result, defaultValue);
    }
 
-   public static Boolean getBooleanProperty(Object target, String name, Boolean defaultValue){
+   public static Boolean getBooleanProperty(Object target, String name, Boolean defaultValue) {
       Object result = getProperty(target, name);
       return toBoolean(result, defaultValue);
    }
@@ -161,48 +167,48 @@ public class SystemUtils {
 
    public static Long toLong(Object input, long defaultValue) {
       if (input == null) return defaultValue;
-      if(input instanceof Long) return (Long)input;
+      if (input instanceof Long) return (Long) input;
       return NumberUtils.toLong(toString(input), defaultValue);
    }
 
-   public static Long toLong(Object input){
+   public static Long toLong(Object input) {
       return toLong(input, -1);
    }
 
    public static Integer toInt(Object input, int defaultValue) {
       if (input == null) return defaultValue;
-      if(input instanceof Integer) return (Integer)input;
+      if (input instanceof Integer) return (Integer) input;
       return NumberUtils.toInt(toString(input), defaultValue);
    }
 
-   public static Integer toInt(Object input){
+   public static Integer toInt(Object input) {
       return toInt(input, -1);
    }
 
    public static Double toDouble(Object input, double defaultValue) {
       if (input == null) return defaultValue;
-      if(input instanceof Double) return (Double)input;
+      if (input instanceof Double) return (Double) input;
       return NumberUtils.toDouble(toString(input), defaultValue);
    }
 
-   public static Double toDouble(Object input){
+   public static Double toDouble(Object input) {
       return toDouble(input, -1.00);
    }
 
    public static Boolean toBoolean(Object input, boolean defaultValue) {
       if (input == null) return defaultValue;
-      if(input instanceof Boolean) return (Boolean)input;
+      if (input instanceof Boolean) return (Boolean) input;
       BooleanConverter booleanConverter = new BooleanConverter(defaultValue);
       return booleanConverter.convert(null, input);
    }
 
-   public static Boolean toBoolean(Object input){
+   public static Boolean toBoolean(Object input) {
       return toBoolean(input, false);
    }
 
    protected static <T> T convert(Object val, Class<T> clazz) {
 
-      if(val == null) return null;
+      if (val == null) return null;
       T castValue = null;
       String conversionError = "Value {} was converted to {}.";
 
@@ -263,18 +269,16 @@ public class SystemUtils {
       return hrSize;
    }
 
-   public static boolean streamClose(String path, InputStream instream){
+   public static boolean streamClose(String path, InputStream instream) {
 
-      if (instream != null){
-         try{
+      if (instream != null) {
+         try {
             instream.close();
-         }
-         catch (Throwable t){
+         } catch (Throwable t) {
             logger.error("Error encountered when attempting to close file {}", path);
             return false;
          }
-      }
-      else {
+      } else {
          logger.error("Error encountered when attempting to close file: null InputStream {}", path);
       }
 
@@ -332,4 +336,58 @@ public class SystemUtils {
       return diagOutput;
 
    }
+
+   public static void createFileAppender(String logDir, String logFile) {
+
+      logDir = logDir + SystemProperties.fileSeparator + logFile;
+
+      final LoggerContext context = (LoggerContext) LogManager.getContext(false);
+      final Configuration config = context.getConfiguration();
+      /*Layout layout = PatternLayout.createLayout("%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n", null, config, null,
+         null,true, true, null, null );*/
+      Layout layout = PatternLayout.newBuilder()
+         .withConfiguration(config)
+         .withPattern("%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n")
+         .build();
+
+      Appender appender = FileAppender.newBuilder().setConfiguration(config)
+         .withFileName(logDir)
+         .withAppend(false)
+         .withLocking(false)
+         .withName("File")
+         .withImmediateFlush(true)
+         .withIgnoreExceptions(false)
+         .withBufferedIo(false)
+         .withBufferSize(0)
+         .withLayout(layout)
+         .withAdvertise(false).build();
+
+      appender.start();
+      config.addAppender(appender);
+      AppenderRef.createAppenderRef("File", null, null);
+      config.getRootLogger().addAppender(appender, null, null);
+      context.updateLoggers();
+
+   }
+
+   public static void cleanup(String dir) {
+
+      try {
+         LoggerContext lc = (LoggerContext) LogManager.getContext(false);
+         final Configuration config = lc.getConfiguration();
+         Appender appndr = config.getAppender("File");
+         appndr.stop();
+         config.getRootLogger().removeAppender("File");
+         File tempdir = new File(dir);
+         tempdir.setWritable(true, false);
+         FileUtils.deleteDirectory(tempdir);
+      } catch (IOException e) {
+         String msg = "Error deleting temporary work directory";
+         logger.error(msg, e);
+      }
+
+      logger.info("Temp directory {} was deleted.", dir);
+
+   }
+
 }

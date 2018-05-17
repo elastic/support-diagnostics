@@ -12,7 +12,9 @@ class DiagnosticApp {
 
       try {
          Diagnostic diag = new Diagnostic(args);
-         diag.exec();
+         if (diag.isProceedToRun()) {
+            diag.exec();
+         }
       } catch (Exception e) {
          logger.error(e.getMessage());
       }
