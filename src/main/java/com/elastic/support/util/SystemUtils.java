@@ -350,17 +350,19 @@ public class SystemUtils {
          .withPattern("%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n")
          .build();
 
-      Appender appender = FileAppender.newBuilder().setConfiguration(config)
-         .withFileName(logDir)
-         .withAppend(false)
-         .withLocking(false)
-         .withName("File")
-         .withImmediateFlush(true)
-         .withIgnoreExceptions(false)
-         .withBufferedIo(false)
-         .withBufferSize(0)
-         .withLayout(layout)
-         .withAdvertise(false).build();
+      FileAppender.Builder builder = FileAppender.newBuilder();
+      builder.setConfiguration(config);
+      builder.withFileName(logDir);
+      builder.withAppend(false);
+      builder.withLocking(false);
+      builder.withName("File");
+      builder.withIgnoreExceptions(false);
+      builder.withImmediateFlush(true);
+      builder.withBufferedIo(false);
+      builder.withBufferSize(0);
+      builder.withLayout(layout);
+      builder.withAdvertise(false);
+      Appender appender = builder.build();
 
       appender.start();
       config.addAppender(appender);
@@ -381,12 +383,13 @@ public class SystemUtils {
          File tempdir = new File(dir);
          tempdir.setWritable(true, false);
          FileUtils.deleteDirectory(tempdir);
+         logger.info("Temp directory {} was deleted.", dir);
+
       } catch (IOException e) {
          String msg = "Error deleting temporary work directory";
          logger.error(msg, e);
       }
-
-      logger.info("Temp directory {} was deleted.", dir);
+      logger.info("Cleanup complete.");
 
    }
 
