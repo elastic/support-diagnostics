@@ -95,7 +95,7 @@ public class LogCmd extends AbstractDiagnosticCmd {
          }
 
       } catch (Exception e) {
-         logger.error("Error processing logs: Error encountered reading directory. Does the account you are running under have sufficient permisssions to read the log directories?");
+         logger.error("Error processing logs: Error encountered reading directory. Does the account you are running under have sufficient permissions to read the log directories?");
          logger.error("Log directory: " + logs);
       }
 
