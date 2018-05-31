@@ -51,7 +51,13 @@ public class RestModule {
       HttpResponse response = null;
       InputStream responseStream = null;
       String result = null;
-      String url = protocol + "://" + host + ":" + port + "/" + request;
+      String url = null;
+      if(port == 80 || port == 0){
+         url = protocol + "://" + host + "/" + request;
+      }
+      else{
+         url = protocol + "://" + host + ":" + port + "/" + request;
+      }
 
       try {
          HttpHost httpHost = new HttpHost(host, port, protocol);

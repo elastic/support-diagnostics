@@ -173,8 +173,8 @@
                     <showDeprecation>true</showDeprecation>
                     <verbose>true</verbose>
                     <fork>true</fork>
-                    <source>1.7</source>
-                    <target>1.7</target>
+                    <source>1.8</source>
+                    <target>1.8</target>
                     <compilerVersion>9</compilerVersion>
                 </configuration>
             </plugin>

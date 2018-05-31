@@ -62,6 +62,18 @@ public class InputParams {
    @Parameter(names = {"--threads"}, description = "Collect only hot threads.")
    private boolean hotThreads = false;
 
+   @Parameter(names = {"--bypassDiagVerify"}, description = "Don't check the diagnostic version by querying Github.")
+   private boolean bypassDiagVerify = false;
+
+   @Parameter(names= {"--proxyHost"}, description = "HTTP Proxy host.")
+   private String proxyHost;
+
+   @Parameter(names= {"--proxyPort"}, description = "HTTP Proxy port.")
+   private int proxyPort;
+
+   @Parameter(names= {"--proxyPass"}, description = "HTTP Proxy password.", password = true)
+   private String proxyPass;
+
    private boolean secured = false;
    private boolean wasPortSet = false;
 

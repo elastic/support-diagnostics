@@ -19,7 +19,7 @@ public abstract class AbstractQueryCmd extends AbstractDiagnosticCmd {
       String query = entry.getValue();
       logger.debug(": now processing " + queryName + ", " + query);
       String url = inputs.getUrl() + "/" + query;
-      logger.info("Currently running the following query:" + queryName);
+      logger.info("Currently running query:" + queryName);
 
       String ext;
       if (textFileExtensions.contains(queryName)) {

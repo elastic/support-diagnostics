@@ -2,6 +2,7 @@ diagnostics:
   - com.elastic.support.diagnostics.commands.GenerateManifestCmd
   - com.elastic.support.diagnostics.commands.RestModuleSetupCmd
   - com.elastic.support.diagnostics.commands.VersionAndClusterNameCheckCmd
+  - com.elastic.support.diagnostics.commands.DiagVersionCheckCmd
   - com.elastic.support.diagnostics.commands.RunClusterQueriesCmd
   - com.elastic.support.diagnostics.commands.RunCommercialQueriesCmd
   - com.elastic.support.diagnostics.commands.HostIdentifierCmd
@@ -15,6 +16,7 @@ diagnostics:
 remote:
   - com.elastic.support.diagnostics.commands.GenerateManifestCmd
   - com.elastic.support.diagnostics.commands.RestModuleSetupCmd
+  - com.elastic.support.diagnostics.commands.DiagVersionCheckCmd
   - com.elastic.support.diagnostics.commands.VersionAndClusterNameCheckCmd
   - com.elastic.support.diagnostics.commands.RunClusterQueriesCmd
   - com.elastic.support.diagnostics.commands.RunCommercialQueriesCmd
@@ -22,6 +24,7 @@ remote:
 logstash:
   - com.elastic.support.diagnostics.commands.GenerateManifestCmd
   - com.elastic.support.diagnostics.commands.RestModuleSetupCmd
+  - com.elastic.support.diagnostics.commands.DiagVersionCheckCmd
   - com.elastic.support.diagnostics.commands.RunLogstashQueriesCmd
   - com.elastic.support.diagnostics.commands.SystemCallsCmd
   - com.elastic.support.diagnostics.commands.SystemDigestCmd
@@ -29,6 +32,7 @@ logstash:
 elastic-threads:
   - com.elastic.support.diagnostics.commands.GenerateManifestCmd
   - com.elastic.support.diagnostics.commands.RestModuleSetupCmd
+  - com.elastic.support.diagnostics.commands.DiagVersionCheckCmd
   - com.elastic.support.diagnostics.commands.VersionAndClusterNameCheckCmd
   - com.elastic.support.diagnostics.commands.RunClusterQueriesCmd
   - com.elastic.support.diagnostics.commands.HostIdentifierCmd
@@ -38,5 +42,7 @@ elastic-threads:
 
 syscalls:
   - com.elastic.support.diagnostics.commands.GenerateManifestCmd
+  - com.elastic.support.diagnostics.commands.RestModuleSetupCmd
+  - com.elastic.support.diagnostics.commands.DiagVersionCheckCmd
   - com.elastic.support.diagnostics.commands.SystemCallsCmd
 

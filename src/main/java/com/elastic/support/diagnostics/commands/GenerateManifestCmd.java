@@ -1,5 +1,6 @@
 package com.elastic.support.diagnostics.commands;
 
+import com.elastic.support.diagnostics.Constants;
 import com.elastic.support.diagnostics.InputParams;
 import com.elastic.support.util.SystemProperties;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
@@ -23,7 +24,9 @@ public class GenerateManifestCmd extends AbstractDiagnosticCmd {
          ObjectMapper mapper = new ObjectMapper();
          mapper.enable(SerializationFeature.INDENT_OUTPUT);
          Map<String, Object> manifest = new HashMap<>();
-         manifest.put("diagToolVersion", getToolVersion());
+         String diagVersion = getToolVersion();
+         manifest.put(Constants.DIAG_VERSION, diagVersion);
+         context.setAttribute(Constants.DIAG_VERSION, diagVersion);
          manifest.put("collectionDate", SystemProperties.getUtcDateString());
          InputParams params = context.getInputParams();
          manifest.put("inputs", params.toString());
@@ -40,7 +43,8 @@ public class GenerateManifestCmd extends AbstractDiagnosticCmd {
 
    public String getToolVersion() {
       String ver = GenerateManifestCmd.class.getPackage().getImplementationVersion();
-      return (ver != null) ? ver : "Debug";
+      return "6.1";
+      //return (ver != null) ? ver : "Debug";
    }
 
    public String getIsoDate() {
