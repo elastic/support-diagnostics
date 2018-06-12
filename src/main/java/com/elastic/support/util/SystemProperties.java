@@ -1,11 +1,14 @@
 package com.elastic.support.util;
 
 
+import org.apache.logging.log4j.Level;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class SystemProperties {
 
+   public static Level DIAG = Level.forName("DIAG", 250);
 
    public static final String osName = System.getProperty("os.name");
 

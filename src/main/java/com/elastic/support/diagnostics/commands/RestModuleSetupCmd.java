@@ -1,8 +1,9 @@
 package com.elastic.support.diagnostics.commands;
 
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
-import com.elastic.support.util.DiagnosticRequestFactory;
-import com.elastic.support.util.RestModule;
+import com.elastic.support.util.ClientBuilder;
+import com.elastic.support.util.RestExec;
+import org.apache.http.client.HttpClient;
 
 public class RestModuleSetupCmd extends AbstractDiagnosticCmd {
 
@@ -27,10 +28,24 @@ public class RestModuleSetupCmd extends AbstractDiagnosticCmd {
          String keystore = context.getInputParams().getKeystore();
          String keystorePass = context.getInputParams().getKeystorePass();
 
-         DiagnosticRequestFactory diagnosticRequestFactory = new DiagnosticRequestFactory(connectTimeout, requestTimeout, isSecured, user, pass, keystore, keystorePass);
-         RestModule restModule = new RestModule(diagnosticRequestFactory, bypassVerify);
+         ClientBuilder cb = new ClientBuilder();
+         cb.setBypassHostnameVerify(bypassVerify);
+         cb.setUser(user);
+         cb.setPassword(pass);
+         cb.setConnectTimeout(connectTimeout);
+         cb.setRequestTimeout(requestTimeout);
+         cb.setClientCred(keystore);
+         cb.setClientCreedPassword(keystorePass);
+         cb.setHost(context.getInputParams().getHost());
+         cb.setPort(context.getInputParams().getPort());
+         cb.setScheme(context.getInputParams().getProtocol());
+         HttpClient client = cb.build();
 
-         context.setRestModule(restModule);
+         RestExec restExec = new RestExec()
+            .setClient(client)
+            .setHttpHost(cb.getHttpHost())
+            .setSecured(context.getInputParams().isSecured());
+         context.setRestExec(restExec);
       } catch (Exception e) {
          String errorMsg = "Failed to create REST submission module";
          logger.error(errorMsg, e);

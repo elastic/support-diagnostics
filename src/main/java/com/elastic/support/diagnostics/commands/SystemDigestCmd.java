@@ -34,12 +34,14 @@ public class SystemDigestCmd extends AbstractDiagnosticCmd {
          SystemInfo si = new SystemInfo();
          HardwareAbstractionLayer hal = si.getHardware();
          OperatingSystem os = si.getOperatingSystem();
-         Properties props = PropertiesUtil.loadProperties("oshi.json.properties");
+         //Properties props = PropertiesUtil.loadProperties("oshi.json.properties");
 
          File sysFileJson = new File(context.getTempDir() + SystemProperties.fileSeparator + "system-info.json");
          OutputStream outputStreamJson = new FileOutputStream(sysFileJson);
          BufferedWriter jsonWriter = new BufferedWriter(new OutputStreamWriter(outputStreamJson));
-         jsonWriter.write((si.toPrettyJSON(props)));
+         String jsonInfo = si.toPrettyJSON();
+         context.setAttribute("systemDigest", jsonInfo);
+         jsonWriter.write(jsonInfo);
          jsonWriter.close();
 
          File sysFile = new File(context.getTempDir() + SystemProperties.fileSeparator + "system-info.txt");

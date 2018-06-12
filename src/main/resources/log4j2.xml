@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="warn">
+    <CustomLevels>
+        <CustomLevel name="DIAG" intLevel="250" />
+    </CustomLevels>
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
             <PatternLayout pattern="%d{HH:mm:ss} %-5level %msg%n"/>
+            <Filters>
+                <ThresholdFilter level="info" />
+                <ThresholdFilter level="diag" onMatch="DENY" onMismatch="NEUTRAL" />
+            </Filters>
         </Console>
     </Appenders>
     <Loggers>

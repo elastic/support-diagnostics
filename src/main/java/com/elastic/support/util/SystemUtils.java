@@ -10,6 +10,7 @@ import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Appender;
 import org.apache.logging.log4j.core.Layout;
@@ -367,7 +368,7 @@ public class SystemUtils {
       appender.start();
       config.addAppender(appender);
       AppenderRef.createAppenderRef("File", null, null);
-      config.getRootLogger().addAppender(appender, null, null);
+      config.getRootLogger().addAppender(appender, Level.DEBUG, null);
       context.updateLoggers();
 
    }

@@ -21,31 +21,17 @@ public class LogCmd extends AbstractDiagnosticCmd {
 
    public boolean execute(DiagnosticContext context) {
 
-      if (context.getInputParams().isSkipLogs() || !context.isLocalAddressLocated()) {
-         return true;
-      }
+      String logs = context.getLogDir();
 
-      JsonNode diagNode = context.getTypedAttribute("diagNode", JsonNode.class);
-      if (diagNode == null) {
-         logger.error("Could not locate node running on current host.");
+      if (context.getInputParams().isSkipLogs() || logs.equalsIgnoreCase("not found") ) {
+         logger.warn("Could not locate log directory bypassing log collection.");
          return true;
       }
 
       boolean getAccess = context.getInputParams().isAccessLogs();
       logger.info("Processing log files.");
-
-      JsonNode settings = diagNode.path("settings");
-
-      String name = diagNode.path("name").asText();
-      context.setAttribute("diagNodeName", name);
-
       String clusterName = context.getClusterName();
-      JsonNode nodePaths = settings.path("path");
-      JsonNode defaultPaths = settings.path("default").path("path");
-
-      String logs = nodePaths.path("logs").asText();
-      String home = nodePaths.path("home").asText();
-      String defaultLogs = defaultPaths.path("logs").asText();
+      String home = context.getEsHome();
 
       try {
          int maxLogs =  SystemUtils.toInt(context.getConfig().get("maxLogs"), 3 );
@@ -61,7 +47,6 @@ public class LogCmd extends AbstractDiagnosticCmd {
 
          Files.createDirectories(Paths.get(nodeDir));
          File logDest = new File(nodeDir);
-         logs = determineLogLocation(home, logs, defaultLogs);
          File logDir = new File(logs);
          if (logDir.exists()) {
             if (context.getInputParams().isArchivedLogs()) {
@@ -91,34 +76,18 @@ public class LogCmd extends AbstractDiagnosticCmd {
             }
          } else {
             logger.error("Configured log directory is not readable or does not exist: " + logDir.getAbsolutePath());
-            context.setLocalAddressLocated(false);
          }
 
       } catch (Exception e) {
          logger.error("Error processing logs: Error encountered reading directory. Does the account you are running under have sufficient permissions to read the log directories?");
          logger.error("Log directory: " + logs);
+         logger.log(SystemProperties.DIAG, "Error reading log dir", e);
       }
 
       logger.info("Finished processing logs.");
 
 
       return true;
-   }
-
-   private String determineLogLocation(String home, String log, String defaultLog) {
-
-      String logLoc;
-
-      if (!"".equals(log)) {
-         logLoc = log;
-      } else if ("".equals(log) && !"".equals(defaultLog)) {
-         logLoc = home + SystemProperties.fileSeparator + "logs";
-      } else {
-         logLoc = defaultLog;
-      }
-
-      return logLoc;
-
    }
 
    private void processLogVersions(String pattern, int maxToGet, File logDir, File logDest) throws Exception{
@@ -136,6 +105,4 @@ public class LogCmd extends AbstractDiagnosticCmd {
          }
       }
    }
-
-
 }

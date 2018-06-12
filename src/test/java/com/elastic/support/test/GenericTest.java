@@ -1,21 +1,8 @@
 package com.elastic.support.test;
 
-import com.elastic.support.util.DiagnosticRequestFactory;
-import com.elastic.support.util.RestModule;
-import org.apache.http.HttpHost;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.utils.HttpClientUtils;
-import org.apache.http.conn.HttpHostConnectException;
-import org.apache.http.util.EntityUtils;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 
 public class GenericTest {
@@ -24,8 +11,8 @@ public class GenericTest {
 
     @Test
     public void testLogstashSubmit(){
-/*       DiagnosticRequestFactory diagnosticRequestFactory = new DiagnosticRequestFactory(30, 30, false, null, null, null, null);
-       RestModule restModule = new RestModule(diagnosticRequestFactory, false);
+/*       ClientBuilder diagnosticRequestFactory = new ClientBuilder(30, 30, false, null, null, null, null);
+       RestExec restModule = new RestExec(diagnosticRequestFactory, false);
 
        String cmds[] = {
           "?pretty",

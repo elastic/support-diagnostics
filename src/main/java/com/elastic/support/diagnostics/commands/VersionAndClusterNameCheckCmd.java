@@ -2,7 +2,7 @@ package com.elastic.support.diagnostics.commands;
 
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.diagnostics.InputParams;
-import com.elastic.support.util.RestModule;
+import com.elastic.support.util.RestExec;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.LinkedHashMap;
@@ -22,8 +22,8 @@ public class VersionAndClusterNameCheckCmd extends AbstractDiagnosticCmd {
       logger.info("Trying REST Endpoint.");
 
       try {
-         RestModule restModule = context.getRestModule();
-         String result = restModule.submitRequest(inputs.getProtocol(), inputs.getHost(), inputs.getPort(), "");
+         RestExec restExec = context.getRestExec();
+         String result = restExec.execBasic(inputs.getProtocol() + "://" + inputs.getHost() + ":" + inputs.getPort());
          ObjectMapper mapper = new ObjectMapper();
          resultMap = mapper.readValue(result, LinkedHashMap.class);
          String clusterName = (String) resultMap.get("cluster_name");

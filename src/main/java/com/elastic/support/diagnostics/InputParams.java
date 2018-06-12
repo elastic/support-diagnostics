@@ -71,9 +71,6 @@ public class InputParams {
    @Parameter(names= {"--proxyPort"}, description = "HTTP Proxy port.")
    private int proxyPort;
 
-   @Parameter(names= {"--proxyPass"}, description = "HTTP Proxy password.", password = true)
-   private String proxyPass;
-
    private boolean secured = false;
    private boolean wasPortSet = false;
 

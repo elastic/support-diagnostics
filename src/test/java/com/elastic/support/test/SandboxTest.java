@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.util.HashMap;
 
 public class SandboxTest {
 
@@ -19,8 +20,9 @@ public class SandboxTest {
     public void testGenericCode() throws Exception{
 
 
-       String tst = "".replace("PID", "");
-       logger.info("\n" +
-          "        test");
+       HashMap hm = new HashMap<>();
+       hm.put("test", new String[] {"val1", "val2"} );
+       Object ret = hm.get("test");
+       logger.error("test");
     }
 }

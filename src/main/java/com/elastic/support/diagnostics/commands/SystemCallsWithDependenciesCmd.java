@@ -12,13 +12,13 @@ public class SystemCallsWithDependenciesCmd extends BaseSystemCallsCmd {
 
    public boolean execute(DiagnosticContext context) {
 
-      if(! context.isLocalAddressLocated() || ! context.isDiagNodeFound()){
+      String pid = context.getPid();
+      if(pid.equalsIgnoreCase("not found")){
          logger.warn("The diagnostic does not appear to be running on a host that contains a running node or that node could not be located in the retrieved list from the cluster.");
          logger.warn("No system calls will be run. Utility should probably be run with --type remote.");
          return true;
       }
 
-      String pid = context.getPid();
       String javaHome = SystemProperties.javaHome;
 
       if( !isJdkPresent() || !isProcessPresent(pid)) {

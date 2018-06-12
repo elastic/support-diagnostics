@@ -43,8 +43,7 @@ public class GenerateManifestCmd extends AbstractDiagnosticCmd {
 
    public String getToolVersion() {
       String ver = GenerateManifestCmd.class.getPackage().getImplementationVersion();
-      return "6.1";
-      //return (ver != null) ? ver : "Debug";
+      return (ver != null) ? ver : "Debug";
    }
 
    public String getIsoDate() {
