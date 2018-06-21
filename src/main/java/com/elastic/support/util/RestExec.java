@@ -20,6 +20,7 @@ import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
 import java.io.FileOutputStream;
 import java.io.InputStream;
 
@@ -101,51 +102,6 @@ public class RestExec {
 
    }
 
-/*
-   public boolean submitDiagQuery(String queryUrl, String destination) {
-
-      try {
-         HttpGet httpget = new HttpGet(queryUrl);
-         HttpResponse response = client.execute(httpHost, httpget, getLocalContext(httpHost));
-         try {
-            org.apache.http.HttpEntity entity = response.getEntity();
-            if (entity != null) {
-               if(queryName == null || queryName.equals("")){
-                  checkResponseCode(response);
-                  result = EntityUtils.toString(entity);
-               }
-               else{
-                  checkResponseCode(response);
-                  responseStream = entity.getContent();
-                  FileOutputStream fos = new FileOutputStream(destination);
-                  IOUtils.copy(responseStream, fos);
-                  logger.info("Diagnostic query: " + queryName + " was retrieved and saved to disk.");
-               }
-            } else {
-               Files.write(Paths.get(destination), ("No results for:" + queryName).getBytes());
-            }
-         } catch (Exception e) {
-            logger.error("Error writing response for " + queryName + " to disk.", e);
-         } finally {
-            HttpClientUtils.closeQuietly(response);
-         }
-      } catch (HttpHostConnectException e) {
-         throw new RuntimeException("Error connecting to host " + url, e);
-      } catch (Exception e) {
-         if (request.contains("_license")) {
-            logger.info("There were no licenses installed");
-         } else if (e.getMessage().contains("401 Unauthorized")) {
-            logger.error("Auth failure", e);
-            throw new RuntimeException("Authentication failure: invalid login credentials.", e);
-         } else {
-            logger.error("Diagnostic query: " + queryName + "failed.", e);
-         }
-      }
-
-      return true;
-
-   }*/
-
    protected String getResponseString(HttpResponse response) {
 
       try {
@@ -197,7 +153,7 @@ public class RestExec {
       String logMsg = "Http Status Code: {}, Reason: {}";
 
       if (statusCode != 200) {
-         logger.warn(logMsg, statusCode, reasonPhrase);
+         logger.error(logMsg, statusCode, reasonPhrase);
       }
 
       return statusCode;

@@ -1,20 +1,8 @@
 package com.elastic.support.test;
 
-import com.elastic.support.diagnostics.Constants;
-import com.elastic.support.util.ArchiveUtils;
-import com.elastic.support.util.ScrubberUtils;
-import com.elastic.support.util.SystemProperties;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.HashSet;
-import java.util.Random;
-import java.util.Set;
-import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.IntStream;
 
 
 public class ScrubTests {

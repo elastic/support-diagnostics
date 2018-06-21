@@ -4,22 +4,16 @@ import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.util.SystemProperties;
 import oshi.hardware.CentralProcessor.TickType;
 import oshi.json.SystemInfo;
-import oshi.json.hardware.Baseboard;
-import oshi.json.hardware.CentralProcessor;
-import oshi.json.hardware.ComputerSystem;
-import oshi.json.hardware.Firmware;
-import oshi.json.hardware.GlobalMemory;
-import oshi.json.hardware.HWDiskStore;
-import oshi.json.hardware.HWPartition;
-import oshi.json.hardware.HardwareAbstractionLayer;
-import oshi.json.hardware.NetworkIF;
+import oshi.json.hardware.*;
+import oshi.json.software.os.FileSystem;
 import oshi.json.software.os.*;
-import oshi.json.util.PropertiesUtil;
 import oshi.software.os.OperatingSystem.ProcessSort;
 import oshi.util.FormatUtil;
 import oshi.util.Util;
+
 import java.io.*;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
 
 public class SystemDigestCmd extends AbstractDiagnosticCmd {
 
@@ -36,7 +30,7 @@ public class SystemDigestCmd extends AbstractDiagnosticCmd {
          OperatingSystem os = si.getOperatingSystem();
          //Properties props = PropertiesUtil.loadProperties("oshi.json.properties");
 
-         File sysFileJson = new File(context.getTempDir() + SystemProperties.fileSeparator + "system-info.json");
+         File sysFileJson = new File(context.getTempDir() + SystemProperties.fileSeparator + "system-digest.json");
          OutputStream outputStreamJson = new FileOutputStream(sysFileJson);
          BufferedWriter jsonWriter = new BufferedWriter(new OutputStreamWriter(outputStreamJson));
          String jsonInfo = si.toPrettyJSON();
@@ -44,7 +38,7 @@ public class SystemDigestCmd extends AbstractDiagnosticCmd {
          jsonWriter.write(jsonInfo);
          jsonWriter.close();
 
-         File sysFile = new File(context.getTempDir() + SystemProperties.fileSeparator + "system-info.txt");
+         File sysFile = new File(context.getTempDir() + SystemProperties.fileSeparator + "system-digest.txt");
          OutputStream outputStream = new FileOutputStream(sysFile);
          BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream));
 
@@ -77,7 +71,7 @@ public class SystemDigestCmd extends AbstractDiagnosticCmd {
 
          writer.close();
       } catch (final Exception e) {
-         logger.error("Failed saving system-info.txt file.", e);
+         logger.error("Failed saving system-digest.txt file.", e);
          return false;
       }
 

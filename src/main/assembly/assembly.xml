@@ -24,12 +24,12 @@
         </fileSet>
 
         <fileSet>
-            <directory>${project.basedir}/src/main/resources</directory>
-            <outputDirectory>.</outputDirectory>
-            <includes>
-                <include>*</include>
-            </includes>
-        </fileSet>
+        <directory>${project.basedir}/src/main/resources</directory>
+        <outputDirectory>.</outputDirectory>
+        <includes>
+            <include>scrub.yml</include>
+        </includes>
+    </fileSet>
 
         <fileSet>
             <directory>${project.build.directory}</directory>

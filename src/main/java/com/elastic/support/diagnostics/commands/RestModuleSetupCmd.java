@@ -12,6 +12,7 @@ public class RestModuleSetupCmd extends AbstractDiagnosticCmd {
       logger.info("Configuring REST endpoint.");
 
       try {
+
          // Create an SSL enabled version - it will work for regular HTTP as well.
          // Note that it will function like a browser where you tell it to go ahead and trust an unknown CA
          int connectTimeout = (Integer) context.getConfig().get("connectTimeout");
@@ -34,11 +35,12 @@ public class RestModuleSetupCmd extends AbstractDiagnosticCmd {
          cb.setPassword(pass);
          cb.setConnectTimeout(connectTimeout);
          cb.setRequestTimeout(requestTimeout);
-         cb.setClientCred(keystore);
-         cb.setClientCreedPassword(keystorePass);
+         cb.setPkiCredentials(keystore);
+         cb.setPkiPassword(keystorePass);
          cb.setHost(context.getInputParams().getHost());
          cb.setPort(context.getInputParams().getPort());
          cb.setScheme(context.getInputParams().getProtocol());
+
          HttpClient client = cb.build();
 
          RestExec restExec = new RestExec()

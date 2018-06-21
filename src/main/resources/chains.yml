@@ -34,21 +34,17 @@ elastic-threads:
   - com.elastic.support.diagnostics.commands.DiagVersionCheckCmd
   - com.elastic.support.diagnostics.commands.VersionAndClusterNameCheckCmd
   - com.elastic.support.diagnostics.commands.RunClusterQueriesCmd
-  - com.elastic.support.diagnostics.commands.HostIdentifierCmd
-  - com.elastic.support.diagnostics.commands.SystemCallsCmd
-  - com.elastic.support.diagnostics.commands.SystemCallsWithDependenciesCmd
-  - com.elastic.support.diagnostics.commands.ScrubLogsCmd
-
-local-data:
-  - com.elastic.support.diagnostics.commands.GenerateManifestCmd
-  - com.elastic.support.diagnostics.commands.RestModuleSetupCmd
-  - com.elastic.support.diagnostics.commands.DiagVersionCheckCmd
-  - com.elastic.support.diagnostics.commands.VersionAndClusterNameCheckCmd
-  - com.elastic.support.diagnostics.commands.GetNodesInfoCmd
   - com.elastic.support.diagnostics.commands.SystemDigestCmd
   - com.elastic.support.diagnostics.commands.HostIdentifierCmd
-  - com.elastic.support.diagnostics.commands.LogCmd
   - com.elastic.support.diagnostics.commands.SystemCallsCmd
   - com.elastic.support.diagnostics.commands.SystemCallsWithDependenciesCmd
+
+local:
+  - com.elastic.support.diagnostics.commands.GenerateManifestCmd
+  - com.elastic.support.diagnostics.commands.DiagVersionCheckCmd
+  - com.elastic.support.diagnostics.commands.LocalCollectionSetup
+  - com.elastic.support.diagnostics.commands.SystemDigestCmd
+  - com.elastic.support.diagnostics.commands.LogCmd
+  - com.elastic.support.diagnostics.commands.SystemCallsCmd
 
 

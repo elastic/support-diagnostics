@@ -34,8 +34,6 @@ public class ArchiveUtils {
 
    public void createArchive(String dir, String archiveFileName) {
 
-      logger.info("Archiving diagnostic results.");
-
       try {
 
          File srcDir = new File(dir);
@@ -114,22 +112,26 @@ public class ArchiveUtils {
 
             if(name.contains("gc.log.")){
                logger.info("Processing: {}", name);
-               processEntry(archive, name + ".log", targetDir, false);
+               name = name.replace("logs/", "");
+               processEntry(archive, name + ".log", targetDir + SystemProperties.fileSeparator + "logs", false);
             }
             else if (name.endsWith(".gz")) {
                logger.info("Processing: {}", name);
                name = name.replace(".gz", "");
+               name = name.replace("logs/", "");
                GZIPInputStream zip = new GZIPInputStream(archive);
-               processEntry(zip, name, targetDir, false);
+               processEntry(zip, name, targetDir + SystemProperties.fileSeparator + "logs", false);
             }
             else if (name.contains(".log") && !name.equalsIgnoreCase("diagnostics.log")) {
                logger.info("Processing: {}", name);
-               processEntry(archive, name, targetDir, true);
+               name = name.replace("logs/", "");
+               processEntry(archive, name, targetDir + SystemProperties.fileSeparator + "logs", true);
              }
-             else if( ! (name.equals( "logs" + SystemProperties.fileSeparator ))) {
+             else if( ! (name.contains( "logs" + SystemProperties.fileSeparator )) && ! (name.contains( "log" + SystemProperties.fileSeparator ))) {
                logger.info("Processing: {}", name);
                processEntry(archive, name, targetDir, true);
             }
+
             tae = archive.getNextTarEntry();
          }
       } catch (IOException e)      {

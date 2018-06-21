@@ -1,7 +1,6 @@
 package com.elastic.support.diagnostics;
 
-import com.beust.jcommander.*;
-import com.elastic.support.util.SystemProperties;
+import com.beust.jcommander.Parameter;
 
 public class InputParams {
 
@@ -11,7 +10,7 @@ public class InputParams {
    @Parameter(names = {"-o", "--out", "--output", "--outputDir"}, description = "Fully qualified path to output directory or c for current working directory.")
    private String outputDir = "cwd";
 
-   @Parameter(names = {"-h", "--host",}, required = true, description = "Required field.  Hostname, IP Address, or localhost.  HTTP access must be enabled.")
+   @Parameter(names = {"-h", "--host"}, description = "Required field.  Hostname, IP Address, or localhost.  HTTP access must be enabled.")
    private String host = "";
 
    @Parameter(names = {"--port"}, description = "HTTP or HTTPS listening port. Defaults to 9200.")
@@ -38,9 +37,6 @@ public class InputParams {
    @Parameter(names = {"--interval"}, description = "Elapsed time in seconds between diagnostic runs when in repeating mode.")
    private long interval = 30;
 
-   @Parameter(names = {"--archivedLogs"}, description = "Get archived logs in addition to current ones if present - No value required, only the option.")
-   private boolean archivedLogs=false;
-
    @Parameter(names = {"--scrub"}, description = "Set to true to use the scrub.yml dictionary to scrub logs and config files.  See README for more info.")
    private boolean scrubFiles = false;
 
@@ -53,17 +49,17 @@ public class InputParams {
    @Parameter(names= {"--keystorePass"}, description = "Keystore password for client certificate.", password = true)
    private String keystorePass;
 
-   @Parameter(names = {"--noLogs"}, description = "Use this option to suppress log collection.")
-   private boolean skipLogs = false;
-
    @Parameter(names = {"--accessLogs"}, description = "Use this option to collect access logs as well.")
    private boolean accessLogs = false;
 
    @Parameter(names = {"--threads"}, description = "Collect only hot threads.")
    private boolean hotThreads = false;
 
-   @Parameter(names = {"--bypassDiagVerify"}, description = "Don't check the diagnostic version by querying Github.")
-   private boolean bypassDiagVerify = false;
+   @Parameter(names = {"--noLogs"}, description = "Don't collect logs.")
+   private boolean noLogs = false;
+
+   @Parameter(names = {"--noSystemCalls"}, description = "Don't make the system calls.")
+   private boolean noSystemCalls = false;
 
    @Parameter(names= {"--proxyHost"}, description = "HTTP Proxy host.")
    private String proxyHost;
@@ -80,14 +76,6 @@ public class InputParams {
 
    public void setHotThreads(boolean hotThreads) {
       this.hotThreads = hotThreads;
-   }
-
-   public boolean isSkipLogs() {
-      return skipLogs;
-   }
-
-   public void setSkipLogs(boolean skipLogs) {
-      this.skipLogs = skipLogs;
    }
 
    public String getKeystore() {
@@ -226,20 +214,28 @@ public class InputParams {
       this.plainTextPassword = plainTextPassword;
    }
 
-   public boolean isArchivedLogs() {
-      return archivedLogs;
-   }
-
-   public void setArchivedLogs(boolean archivedLogs) {
-      this.archivedLogs = archivedLogs;
-   }
-
    public boolean isAccessLogs() {
       return accessLogs;
    }
 
    public void setAccessLogs(boolean accessLogs) {
       this.accessLogs = accessLogs;
+   }
+
+   public boolean isNoLogs() {
+      return noLogs;
+   }
+
+   public void setNoLogs(boolean noLogs) {
+      this.noLogs = noLogs;
+   }
+
+   public boolean isNoSystemCalls() {
+      return noSystemCalls;
+   }
+
+   public void setNoSystemCalls(boolean noSystemCalls) {
+      this.noSystemCalls = noSystemCalls;
    }
 
    public String getUrl() {
@@ -265,11 +261,9 @@ public class InputParams {
          ", diagType='" + diagType + '\'' +
          ", reps=" + reps +
          ", interval=" + interval +
-         ", archivedLogs=" + archivedLogs +
          ", scrubFiles=" + scrubFiles +
          ", skipVerification=" + skipVerification +
          ", keystore='" + keystore + '\'' +
-         ", skipLogs=" + skipLogs +
          ", skipAccessLogs=" + accessLogs +
          ", secured=" + secured +
          ", wasPortSet=" + wasPortSet +

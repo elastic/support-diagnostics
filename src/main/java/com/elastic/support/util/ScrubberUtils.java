@@ -4,6 +4,7 @@ import com.elastic.support.diagnostics.Constants;
 import com.elastic.support.diagnostics.PostProcessor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -18,13 +19,13 @@ public class ScrubberUtils implements PostProcessor {
    LinkedHashMap<String, String> usedTokenMatches = new LinkedHashMap<>();
    List<String> configuredTokens = new ArrayList<>();
    List<String> tokens = new ArrayList<>();
-   int tokenReplacementLen;
 
-   public ScrubberUtils(){
+   public ScrubberUtils(String config){
 
       try {
-         Map<String, Object> scrubConfig = JsonYamlUtils.readYamlFromClasspath("scrub.yml", false);
-         tokenReplacementLen = SystemUtils.toInt(scrubConfig.get("tokenLenght"), 18);
+         logger.info("Using {} as source of input string tokens to scrub.", config);
+         Map<String, Object> scrubConfig = JsonYamlUtils.readYamlFromPath(config, false);
+
          if(scrubConfig.get("tokens") != null){
             tokens = (List<String>)scrubConfig.get("tokens");
             if (tokens.size() == 0){

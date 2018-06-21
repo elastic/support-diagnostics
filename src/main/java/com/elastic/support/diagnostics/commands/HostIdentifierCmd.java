@@ -6,23 +6,19 @@ import com.elastic.support.util.JsonYamlUtils;
 import com.elastic.support.util.SystemProperties;
 import com.elastic.support.util.SystemUtils;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.TextNode;
 
-import javax.json.Json;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 
 public class HostIdentifierCmd extends AbstractDiagnosticCmd {
 
    public boolean execute(DiagnosticContext context) {
 
       try {
+         logger.info("Checking the supplied hostname against the node information retrieved to verify location. This may take some time...");
          // If we're doing multiple runs we don't need to do this again.
          if(context.getCurrentRep() > 1){
             return true;
@@ -86,14 +82,13 @@ public class HostIdentifierCmd extends AbstractDiagnosticCmd {
             logger.warn("Could not determine which node is installed on this host: {}. Bypassing system calls and log collection", targetHost);
          }
          else{
-            context.setAttribute("diagNode", targetNode);
-            String pid = SystemUtils.toString(targetNode.path("process").path("id").asText(), "not found");
+            String pid = SystemUtils.toString(targetNode.path("process").path("id").asText(), Constants.NOT_FOUND);
             context.setPid(pid);
-            String nodeName = SystemUtils.toString(targetNode.path("name").asText(), "not found");
+            String nodeName = SystemUtils.toString(targetNode.path("name").asText(), Constants.NOT_FOUND);
             context.setDiagName(nodeName);
-            String logDir = SystemUtils.toString(targetNode.path("settings").path("path").path("logs").asText(), "not found");
+            String logDir = SystemUtils.toString(targetNode.path("settings").path("path").path("logs").asText(), Constants.NOT_FOUND);
             context.setLogDir(logDir);
-            String elasticHome = SystemUtils.toString(targetNode.path("settings").path("path").path("home").asText(), "not found");
+            String elasticHome = SystemUtils.toString(targetNode.path("settings").path("path").path("home").asText(), Constants.NOT_FOUND);
             context.setEsHome(elasticHome);
 
          }

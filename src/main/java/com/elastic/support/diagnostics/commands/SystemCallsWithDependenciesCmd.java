@@ -3,10 +3,7 @@ package com.elastic.support.diagnostics.commands;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.util.SystemProperties;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.PrintStream;
-import java.util.*;
+import java.util.Map;
 
 public class SystemCallsWithDependenciesCmd extends BaseSystemCallsCmd {
 

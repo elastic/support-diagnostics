@@ -1,9 +1,9 @@
 package com.elastic.support.diagnostics.commands;
 
-import com.elastic.support.util.SystemProperties;
-import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.diagnostics.InputParams;
+import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.util.RestExec;
+import com.elastic.support.util.SystemProperties;
 
 import java.util.List;
 import java.util.Map;
@@ -29,7 +29,12 @@ public abstract class AbstractQueryCmd extends AbstractDiagnosticCmd {
       }
 
       String fileName = context.getTempDir() + SystemProperties.fileSeparator + queryName + ext;
-      restExec.execConfiguredQuery(url, query, fileName);
+
+      if( ! restExec.execConfiguredQuery(url, query, fileName)){
+         logger.info("{} did not complete normally.", queryName);
+      }
+
+
       logger.info("Call to {} is complete.", queryName);
    }
 

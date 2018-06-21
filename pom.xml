@@ -4,7 +4,7 @@
 
     <groupId>com.elasticsearch</groupId>
     <artifactId>support-diagnostics</artifactId>
-    <version>6.4-beta</version>
+    <version>6.4</version>
     <packaging>jar</packaging>
     <name>Support Diagnostics Utilities</name>
     <properties>
@@ -42,7 +42,7 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.9.4</version>
+            <version>2.9.6</version>
         </dependency>
 
         <dependency>
@@ -147,10 +147,6 @@
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
-                <excludes>
-                    <exclude>*.*</exclude>
-                </excludes>
-                <filtering>true</filtering>
             </resource>
         </resources>
 

@@ -4,38 +4,42 @@ import com.elastic.support.diagnostics.Constants;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.util.SystemProperties;
 import com.elastic.support.util.SystemUtils;
-import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.comparator.LastModifiedFileComparator;
 import org.apache.commons.io.filefilter.RegexFileFilter;
-import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 public class LogCmd extends AbstractDiagnosticCmd {
 
    public boolean execute(DiagnosticContext context) {
 
+      if (context.getInputParams().isNoLogs()) {
+         context.setLogDir(Constants.NOT_FOUND);
+         logger.info("Bypassing logs....");
+         return true;
+      }
+
       String logs = context.getLogDir();
 
-      if (context.getInputParams().isSkipLogs() || logs.equalsIgnoreCase("not found") ) {
+      if (logs.equalsIgnoreCase(Constants.NOT_FOUND)) {
          logger.warn("Could not locate log directory bypassing log collection.");
          return true;
       }
 
       boolean getAccess = context.getInputParams().isAccessLogs();
       logger.info("Processing log files.");
-      String clusterName = context.getClusterName();
-      String home = context.getEsHome();
 
       try {
-         int maxLogs =  SystemUtils.toInt(context.getConfig().get("maxLogs"), 3 );
-         int maxGcLogs =  SystemUtils.toInt(context.getConfig().get("maxGcLogs"), 3 );
+         int maxLogs = SystemUtils.toInt(context.getConfig().get("maxLogs"), 3);
+         int maxGcLogs = SystemUtils.toInt(context.getConfig().get("maxGcLogs"), 3);
 
          List<String> fileDirs = new ArrayList<>();
          context.setAttribute("tempFileDirs", fileDirs);
@@ -49,31 +53,35 @@ public class LogCmd extends AbstractDiagnosticCmd {
          File logDest = new File(nodeDir);
          File logDir = new File(logs);
          if (logDir.exists()) {
-            if (context.getInputParams().isArchivedLogs()) {
-               FileUtils.copyDirectory(logDir, logDest, true);
-            } else {
-               //Get the top level log, slow search, and slow index logs
-               FileUtils.copyFileToDirectory(new File(logs + SystemProperties.fileSeparator + clusterName + ".log"), logDest);
-               FileUtils.copyFileToDirectory(new File(logs + SystemProperties.fileSeparator + clusterName + "_index_indexing_slowlog.log"), logDest);
-               FileUtils.copyFileToDirectory(new File(logs + SystemProperties.fileSeparator + clusterName + "_index_search_slowlog.log"), logDest);
-               if (getAccess) {
-                  FileUtils.copyFileToDirectory(new File(logs + SystemProperties.fileSeparator + clusterName + "_access.log"), logDest);
+
+            //Get the top level log, slow search, and slow index logs
+            Collection<File> logfiles = FileUtils.listFiles(logDir, new WildcardFileFilter("*.log"), null);
+            List<File> keepers = new ArrayList<>();
+            for (File logfile : logfiles) {
+               String name = logfile.getName();
+               if (name.contains("deprecation") ) {
+                  continue;
                }
-
-               int majorVersion = Integer.parseInt(context.getVersion().split("\\.")[0]);
-               String patternString = null;
-               if (majorVersion > 2) {
-                  patternString = clusterName + ".*\\.log\\.gz";
-               } else {
-                  patternString = clusterName + ".log.\\d{4}-\\d{2}-\\d{2}";
+               if(name.contains("access")){
+                  if(!getAccess){
+                     continue;
+                  }
                }
-
-               processLogVersions(patternString, maxLogs, logDir,logDest);
-
-               patternString = "gc*.log.*";
-               processLogVersions(patternString, maxGcLogs, logDir, logDest);
-
+               keepers.add(logfile);
             }
+
+            for (File keeper : keepers) {
+               FileUtils.copyFileToDirectory(keeper, logDest);
+            }
+
+            String patternString =  "*.log.gz";
+            processLogVersions(patternString, maxLogs, logDir, logDest, false);
+            patternString = "[a-zA-Z0-9_-]*$*.log.\\d{4}-\\d{2}-\\d{2}";
+            processLogVersions(patternString, maxLogs, logDir, logDest, true);
+            patternString = "gc*.log.*";
+            processLogVersions(patternString, maxGcLogs, logDir, logDest, false);
+
+
          } else {
             logger.error("Configured log directory is not readable or does not exist: " + logDir.getAbsolutePath());
          }
@@ -90,10 +98,18 @@ public class LogCmd extends AbstractDiagnosticCmd {
       return true;
    }
 
-   private void processLogVersions(String pattern, int maxToGet, File logDir, File logDest) throws Exception{
+   private void processLogVersions(String pattern, int maxToGet, File logDir, File logDest, boolean useRegex) throws Exception {
 
-      FileFilter logFileFilter = new RegexFileFilter(pattern);
-      File[] logFileList = logDir.listFiles(logFileFilter);
+      Collection<File> logs= null;
+      if(useRegex){
+         logs = FileUtils.listFiles(logDir, new RegexFileFilter(pattern), null);
+      }
+      else{
+         logs = FileUtils.listFiles( logDir, new WildcardFileFilter( (new String[] {pattern} )), null);
+      }
+
+      File logFileList[] = logs.toArray(new File[0]);
+      //File[] logFileList = FileUtils.listFiles(logDir.getName(), logFileFilter, null);
       Arrays.sort(logFileList, LastModifiedFileComparator.LASTMODIFIED_REVERSE);
       int limit = maxToGet, count = 0;
       for (File logfile : logFileList) {
@@ -105,4 +121,5 @@ public class LogCmd extends AbstractDiagnosticCmd {
          }
       }
    }
+
 }

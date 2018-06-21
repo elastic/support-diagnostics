@@ -1,12 +1,15 @@
 package com.elastic.support.diagnostics.chain;
 
-import com.elastic.support.diagnostics.InputParams;
 import com.elastic.support.diagnostics.Constants;
+import com.elastic.support.diagnostics.InputParams;
 import com.elastic.support.util.RestExec;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 public class DiagnosticContext {
@@ -26,6 +29,7 @@ public class DiagnosticContext {
    String nodeString = "";
    String hostNode = "";
    String diagName = Constants.ES_DIAG;
+   String diagNode = "";
    String pid = "0";
    String logDir = "";
    String esHome = "";
@@ -51,6 +55,14 @@ public class DiagnosticContext {
 
    public void setDiagName(String diagName) {
       this.diagName = diagName;
+   }
+
+   public String getDiagNode() {
+      return diagNode;
+   }
+
+   public void setDiagNode(String diagNode) {
+      this.diagNode = diagNode;
    }
 
    private static final String verTwo = "2(\\.\\d+)+";

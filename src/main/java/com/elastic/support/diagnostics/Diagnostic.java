@@ -6,23 +6,13 @@ import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.util.ArchiveUtils;
 import com.elastic.support.util.SystemProperties;
 import com.elastic.support.util.SystemUtils;
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
-import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
-import org.apache.commons.compress.compressors.CompressorOutputStream;
-import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
-import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.core.Appender;
-import org.apache.logging.log4j.core.Layout;
-import org.apache.logging.log4j.core.LoggerContext;
-import org.apache.logging.log4j.core.appender.FileAppender;
-import org.apache.logging.log4j.core.config.AppenderRef;
-import org.apache.logging.log4j.core.config.Configuration;
-import org.apache.logging.log4j.core.layout.PatternLayout;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -43,6 +33,12 @@ public class Diagnostic {
 
       try {
          jc.parse(args);
+
+         if(! inputs.getDiagType().equalsIgnoreCase(Constants.LOCAL_DIAG)){
+            if(StringUtils.isEmpty(inputs.getHost())){
+               throw new RuntimeException("Inputs error: You must enter the hostname of a running node within the cluster, preferably on the host you are running the diagnostic from.");
+            }
+         }
 
          if (!validateAuth(inputs)) {
             throw new RuntimeException("Inputs error: If authenticating both username and password are required.");
@@ -88,9 +84,9 @@ public class Diagnostic {
             for (int i = 1; i <= reps; i++) {
                ctx.setCurrentRep(i);
                if (inputs.getDiagType().equalsIgnoreCase(Constants.STANDARD_DIAG) && i < (reps)) {
-                  inputs.setSkipLogs(true);
+                  inputs.setNoLogs(true);
                } else {
-                  inputs.setSkipLogs(false);
+                  inputs.setNoLogs(false);
                }
                dc.runDiagnostic(ctx);
                System.out.println("Run " + i + " of " + reps + " completed.");

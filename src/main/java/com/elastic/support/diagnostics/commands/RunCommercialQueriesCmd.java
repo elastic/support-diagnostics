@@ -28,15 +28,15 @@ public class RunCommercialQueriesCmd extends AbstractQueryCmd {
          List<String> vals = node.findValuesAsText("component");
          int majorVersion = Integer.parseInt(context.getVersion().split("\\.")[0]);
          if(majorVersion > 2){
-            if(vals.contains("x-pack")){
-               context.setAttribute("commercialDir", "x-pack");
-               runCommercial = true;
-
+            for(String val: vals){
+               if(val.contains("x-pack")){
+                  runCommercial = true;
+                  break;
+               }
             }
          }
          else if (majorVersion <= 2){
             if(vals.contains("shield")){
-               context.setAttribute("commercialDir", "shield");
                runCommercial = true;
             }
          }

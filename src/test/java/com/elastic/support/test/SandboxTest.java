@@ -2,14 +2,10 @@ package com.elastic.support.test;
 
 
 import com.elastic.support.diagnostics.commands.AbstractDiagnosticCmd;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileFilter;
 import java.util.HashMap;
 
 public class SandboxTest {

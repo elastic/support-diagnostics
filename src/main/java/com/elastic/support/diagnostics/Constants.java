@@ -5,6 +5,10 @@ public class Constants {
    public static final String ES_DIAG = "diagnostics";
    public static final String LOGSTASH_DIAG = "logstash";
    public static final String REMOTE_DIAG = "remote";
+   public static final String LOCAL_DIAG = "local";
+   public static final String NOT_FOUND = "not found";
+
+
    public static final String STANDARD_DIAG = "standard";
    public static final String NODES = "nodes.json";
    public static final String PLUGINS = "plugins.json";

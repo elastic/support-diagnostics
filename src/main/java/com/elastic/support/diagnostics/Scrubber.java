@@ -50,10 +50,13 @@ public class Scrubber {
       if(targetDir == null){
          targetDir = archivePath.substring(0, pos) + SystemProperties.fileSeparator + "scrubbed";
       }
+      else{
+         targetDir = targetDir +  SystemProperties.fileSeparator + "scrubbed";
+      }
 
       SystemUtils.createFileAppender(targetDir, "scrubber.log");
-      String scrubbedName = (archivePath.substring(pos + 1)).replace("tar.gz", "");
-      ArchiveUtils archiveUtils = new ArchiveUtils(new ScrubberUtils());
+      String scrubbedName = (archivePath.substring(pos + 1)).replace(".tar.gz", "");
+      ArchiveUtils archiveUtils = new ArchiveUtils(new ScrubberUtils(inputs.getScrubFile()));
       archiveUtils.extractDiagnosticArchive(archivePath, targetDir );
       archiveUtils.createArchive(targetDir, scrubbedName);
       SystemUtils.cleanup(targetDir);

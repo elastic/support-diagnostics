@@ -14,6 +14,10 @@ network-cache-settings:
   networkaddress.cache.ttl:
   networkaddress.cache.negative.ttl:
 
+default-log-locations:
+  - "/var/log/elasticsearch"
+  - "C:\\ProgramData\\Elastic\\Elasticsearch\\Logs"
+
 password-keys:
   - password
   - secret
@@ -176,7 +180,7 @@ commercial-5:
 standard-6:
   alias: "_alias?pretty"
   allocation: "_cat/allocation?v"
-  cat_master: "__cat/master?format=json"
+  cat_master: "_cat/master?format=json"
   cat_nodes: "_cat/nodes?v&h=ip,heap.percent,ram.percent,cpu,load_1m,load_5m,load_15m,node.role,master,name,nodeId,diskAvail"
   cat_indices: "_cat/indices?v"
   cat_segments: "_cat/segments?v"
@@ -255,6 +259,7 @@ linuxOS:
   dmesg: "dmesg"
   huge_pages: "cat /sys/kernel/mm/transparent_hugepage/enabled"
   cpu_governor: "cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"
+  limits: "cat /etc/security/limits.conf"
 
 linuxOS-dep:
    proc-limit: "cat /proc/PID/limits"

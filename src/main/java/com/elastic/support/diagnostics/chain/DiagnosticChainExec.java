@@ -1,6 +1,5 @@
 package com.elastic.support.diagnostics.chain;
 
-import com.elastic.support.diagnostics.Constants;
 import com.elastic.support.util.JsonYamlUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

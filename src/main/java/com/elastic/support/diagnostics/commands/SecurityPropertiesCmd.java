@@ -7,7 +7,9 @@ import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.Security;
-import java.util.*;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 
 public final class SecurityPropertiesCmd extends AbstractDiagnosticCmd {
 
