@@ -77,20 +77,6 @@ As a first step the diagnostic will check the Github repo for the current releas
 
 ## Alternate Usages
 
-### NEW! Local 
-* This option will collect logs for the node on the current host and run the system statistics calls. It will allow the logs to be collected for a non-running or hung node without having to manually go to the log directory. It will follow the same rules as standard log collection. It will collect the current, as well as the last two rollovers, any slow logs, and three gc logs.
-* The standard REST API calls used for the normal and remote types will not be run.
-* User will be able to specify the log location in two ways.
-  * Provide an absolute path to the log location.
-  * Provide the URL to an alternate running node in the cluster. It will collect all possible log locations for these nodes and then use those to check the current host for a valid directory and logging content. This will work if you use standardized log locations for at least a portion of the nodes in your cluster. If you have a setup where you have shared storage and each node has a specific location, this won't work and you will need to specify the log directory manaully.
-    * If you use the URL option you will need to provide login credentials at the prompt.
-* Use the --type local parameter to enable this option.
-
-#### Local Example
-```
- ./diagnostics.sh --host 10.0.0.20 --type local -u elastic -p -ssl -o /home/admin/log-output
-```
-
 ### Remote
 * If you do not wish to run the utility on the host the node to be queried resides on, and wish to run it from a different host such as your workstation, you may use the --type remote option.
 * This will execute only the REST API calls and will not attempt to execute local system calls or collect log files. 
@@ -129,46 +115,6 @@ As a first step the diagnostic will check the Github repo for the current releas
 
 ### Heap Dumps
 * If you wish to take a heap dump of a running process use the --heapdump --nodename processoption
-
-#File Sanitization Utility
-
-#### Description
-* Works on diagnostics produced by version 6.4 and later. Please don't turn in a ticket if you run it on an older one.
-* Runs as a separate application from the diagnostic. It does not need to be run on the same host the diagnostic utility ran on.
-* Inputs an archive produced via a normal diagnostic run.
-* Goes through each file in that archive line by line and does the following:
-  * Automatically obfuscates all IPv4 and IPv6 addresses. These will be consistent throughout all files in the archive. In other words, it encounters 10.0.0.5 in one file, the obfuscated value will be used for all occurrences of the IP in other files. These will not, however be consistent from run to run.
-  * Obfuscates MAC addresses.
-  * If you include a configuration file of supplied string tokens, any occurrence of that token will be replaced with a generated replacement. As with IP's this will be consistent from file to file but not between runs. Literal strings or regex's may be used.
-* Re-archives the file with "scrubbed-" prepended to the  name. An example file (scrub.yml) is included as an example.
-* If you are processing a large cluster's diagnostic, this may take a while to run, and you may need to use the DIAG_JAVA_OPTS environment variable to bump up the Java Heap if you see OutOfMemoryExceptions.
-
-#### How to run
-* Run the diagnostic utility to get an archive.
-* Add any tokens for text you wish to conceal to a config file. By default the utility will look for scrub.yml in the working directory.
-* Run the utility with the necessary and optional inputs. It is a different script execution than the diagnostic with different arguments.
-  * *-a* &nbsp;&nbsp;&nbsp; An absolute path to the archive file you wish to sanitize(required)
-  * *-t* &nbsp;&nbsp;&nbsp; A target directory where you want the revised archive written. If not supplied it will be written to the same folder as the diagnostic archive it processed.
-  * *-f* &nbsp;&nbsp;&nbsp; A file containing any text tokens you wish to conceal. These can be literals or regex's. 
-
-#### Examples
-#####With no tokens specified, writing the same directory as the diagnostic:
-```$xslt
-./scrub.sh -a diagnostics-20180621-161231.tar.gz
-```
-#####With a token file writing to a specific output directory:
-```$xslt
-./scrub.sh -a diagnostics-20180621-161231.tar.gz -t /home/adminuser/sanitized-diags -f /home/adminuser/sanitized-diags/scrub.yml
-```
-#####Sample token scrub file entries:
-```$xslt
-tokens:
-  - node-[\d?]*
-  - cluster-630
-  - disk1
-  - Typhoid
-
-```
 
 # Troubleshooting
   * The file: diagnostic.log file will be generated  and included in the archive. In all but the worst case an archive will be created. Some messages will be written to the console output but granualar errors and stack traces will only be written to this log.
