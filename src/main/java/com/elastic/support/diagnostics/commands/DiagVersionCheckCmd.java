@@ -54,8 +54,8 @@ public class DiagVersionCheckCmd extends AbstractDiagnosticCmd {
          JsonNode asset = assests.get(0);
          String downloadUrl = asset.path("browser_download_url").asText();
 
-         if (!diagVersion.equals(ver)) {
-            logger.warn("Warning: Diagnostic version:{} is not the most recent release", diagVersion);
+         if (! diagVersion.equals(ver)) {
+            logger.warn("Warning: Diagnostic version:{} is not the current recommended release", diagVersion);
             logger.warn("The current release is {}", ver);
             logger.warn("The latest version can be downloaded at {}", downloadUrl);
 

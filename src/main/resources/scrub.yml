@@ -1,4 +1,6 @@
 tokens:
 # Examples:
-#  - WGCIWzf
-#  - Apple
+#  - node-[\d?]*
+#  - cluster-630
+#  - disk1
+#  - Typhoid
