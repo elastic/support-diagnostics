@@ -16,8 +16,8 @@ It will execute a series of REST API calls to the running cluster, run a number 
 * `cd` to the top level repo directory and type `mvn package`.
 
 ## Run Requirements
-* JDK **strongly recommended** - Oracle or OpenJDK, 1.8-10
-  * **Important Note:** The 1.7 version of the JDK is no longer supported. If you are running a 1.7 JRE/JDK you must upgrade or run an older version of the diagnostic.
+* JDK - Oracle or OpenJDK, 1.8-10
+  * **Important Note:** The 1.7 version of the JDK is no longer supported. If you are running a 1.7 JRE/JDK you must upgrade or run the 6.3 version of the diagnostic.
 * A JRE may be used, however certain functionality such as jstack generated thread dumps will not be available.
 * If you are running a package installation under Linux you MUST run the command with elevated sudo privileges. Otherwise the utility will not be able to run the system queries.
 * It is recommended that you set the JAVA_HOME environment variable.  It should point to the Java installation directory.  If JAVA_HOME is not found, the utility will attempt to locate a distribution but if errors occur it may be necessary to set this manually.
@@ -80,7 +80,7 @@ As a first step the diagnostic will check the Github repo for the current releas
 ### NEW! Local 
 * This option will collect logs for the node on the current host and run the system statistics calls. It will allow the logs to be collected for a non-running or hung node without having to manually go to the log directory. It will follow the same rules as standard log collection. It will collect the current, as well as the last two rollovers, any slow logs, and three gc logs.
 * The standard REST API calls used for the normal and remote types will not be run.
-* User will be able to specify the log location in two ways.
+* User will be able to specify the log location via a set of prompts displayed at the command line to walk through the process and validate the input.
   * Provide an absolute path to the log location.
   * Provide the URL to an alternate running node in the cluster. It will collect all possible log locations for these nodes and then use those to check the current host for a valid directory and logging content. This will work if you use standardized log locations for at least a portion of the nodes in your cluster. If you have a setup where you have shared storage and each node has a specific location, this won't work and you will need to specify the log directory manaully.
     * If you use the URL option you will need to provide login credentials at the prompt.
