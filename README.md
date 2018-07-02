@@ -131,7 +131,7 @@ As a first step the diagnostic will check the Github repo for the current releas
 * If you wish to take a heap dump of a running process use the --heapdump --nodename processoption
 
 
-##File Sanitization Utility
+## File Sanitization Utility
 
 #### Description
 * Works on diagnostics produced by version 6.4 and later. Please don't turn in a ticket if you run it on an older one.
