@@ -1,6 +1,6 @@
 # REST timeout settings - note:values are in milliseconds
 requestTimeout: 30000
-connectTimeout: 6000
+connectTimeout: 10000
 
 diagReleaseHost: "api.github.com"
 diagReleaseDest: "repos/elastic/support-diagnostics/releases/latest"
