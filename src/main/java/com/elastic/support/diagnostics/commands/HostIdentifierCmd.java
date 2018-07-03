@@ -7,11 +7,10 @@ import com.elastic.support.util.SystemProperties;
 import com.elastic.support.util.SystemUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.MissingNode;
+import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 public class HostIdentifierCmd extends AbstractDiagnosticCmd {
 
@@ -30,6 +29,11 @@ public class HostIdentifierCmd extends AbstractDiagnosticCmd {
          String systemDigest = context.getStringAttribute("systemDigest");
          HashSet<String> localAddr = parseNetworkAddresses(systemDigest);
 
+         if(! localAddr.contains(targetHost)){
+            logger.log(SystemProperties.DIAG, "{} host was not found in the following list of local network addresses: {}", targetHost, localAddr);
+            throw new RuntimeException("Running against remote host.");
+         }
+
          JsonNode rootNode = JsonYamlUtils.createJsonNodeFromFileName(temp, Constants.NODES);
          JsonNode nodes = rootNode.path("nodes");
          List<JsonNode> nodeList = new ArrayList();
@@ -39,16 +43,30 @@ public class HostIdentifierCmd extends AbstractDiagnosticCmd {
          }
 
          int nbrNodes = nodeList.size();
-         JsonNode targetNode = null;
 
+         JsonNode targetNode = null;
 
          if( nbrNodes == 1 &&
             (targetHost.equalsIgnoreCase("localhost") || targetHost.equals("127.0.0.1") ) ){
                targetNode = nodeList.get(0);
          }
-         else{
+         else if (nbrNodes > 1){
             for(JsonNode node: nodeList ){
-               List<String> addresses = new ArrayList<>();
+               Set<String> addresses = new HashSet<>();
+               String networkHost = SystemUtils.toString(node.path("settings").path("network").path("host").asText(), "");
+               if(!StringUtils.isEmpty(networkHost)){
+                  addresses.add(networkHost);
+               }
+               String host = SystemUtils.toString(node.path("host").asText(), "");
+               if(!StringUtils.isEmpty(host)){
+                  addresses.add(host);
+               }
+               String ip = SystemUtils.toString(node.path("ip").asText(), "");
+               if(!StringUtils.isEmpty(host)){
+                  addresses.add(ip);
+               }
+
+               String name =  SystemUtils.toString(node.path("name").asText(), "");
 
                if(version.startsWith("1.")){
                   String publishAddress = SystemUtils.toString(node.path("http").path("publish_address").asText(), "/:");
@@ -60,26 +78,27 @@ public class HostIdentifierCmd extends AbstractDiagnosticCmd {
                   }
                }
                else{
-                  ArrayNode boundAddresses = (ArrayNode)node.path("http").path("bound_address");
-                  for(JsonNode bnd: boundAddresses){
-                     String addr = bnd.asText();
-                     addr = addr.substring(0, addr.indexOf(":"));
-                     addresses.add(addr);
+                  JsonNode bnds = node.path("http").path("bound_address");
+                  if(  bnds instanceof ArrayNode){
+                     ArrayNode boundAddresses = (ArrayNode)bnds;
+                     for(JsonNode bnd: boundAddresses){
+                        String addr = bnd.asText();
+                        addr = addr.substring(0, addr.indexOf(":"));
+                        addresses.add(addr);
+                     }
                   }
                }
 
-               for(String ip: localAddr){
-                  if(addresses.contains(ip)){
-                     targetNode = node;
-                     break;
-                  }
+               if (addresses.contains(targetHost)){
+                  targetNode = node;
+                  break;
                }
-
             }
          }
 
          if(targetNode == null){
-            logger.warn("Could not determine which node is installed on this host: {}. Bypassing system calls and log collection", targetHost);
+            logger.log(SystemProperties.DIAG, "{} host was not found in the nodes output", targetHost);
+            throw new RuntimeException("Could not determine which node is installed on this host. Bypassing system calls and log collection");
          }
          else{
             String pid = SystemUtils.toString(targetNode.path("process").path("id").asText(), Constants.NOT_FOUND);
@@ -94,9 +113,12 @@ public class HostIdentifierCmd extends AbstractDiagnosticCmd {
          }
 
       } catch (Exception e) {
+         context.setPid(Constants.NOT_FOUND);
+         context.setDiagName(Constants.NOT_FOUND);
+         context.setLogDir(Constants.NOT_FOUND);
+         context.setEsHome(Constants.NOT_FOUND);
          logger.log(SystemProperties.DIAG, "Error identifying host of diag node.", e);
       }
-
 
       return true;
    }
