@@ -7,7 +7,6 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.BasicCredentialsProvider;
@@ -17,6 +16,8 @@ import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLSession;
 import java.io.FileInputStream;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
@@ -164,7 +165,7 @@ public class ClientBuilder {
          }
 
          if (bypassHostnameVerify) {
-            builder.setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE);
+            builder.setSSLHostnameVerifier(new BypassHostnameVerifier());
          }
 
          SSLContextBuilder sslContextBuiilder = new SSLContextBuilder();
@@ -181,7 +182,7 @@ public class ClientBuilder {
             logger.warn("Client Auth keystore password was entered with no store. Bypassing authentication");
          }
 
-         builder.setSSLSocketFactory(new SSLConnectionSocketFactory(sslContextBuiilder.build()));
+         builder.setSSLSocketFactory(new SSLConnectionSocketFactory(sslContextBuiilder.build(), new BypassHostnameVerifier()));
 
          httpClient = builder.build();
 
@@ -204,6 +205,17 @@ public class ClientBuilder {
       public boolean isTrusted(X509Certificate[] chain, String authType) {
          return true;
       }
+   }
+
+   /**
+    * This overrides any hostname mismatch in the certificate
+    */
+   private class BypassHostnameVerifier implements HostnameVerifier {
+
+      public boolean verify(String hostname, SSLSession session) {
+         return true;
+      }
+
    }
 
 }
