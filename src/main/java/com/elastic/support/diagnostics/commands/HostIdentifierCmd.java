@@ -41,8 +41,7 @@ public class HostIdentifierCmd extends AbstractDiagnosticCmd {
 
          JsonNode targetNode = null;
 
-         if (nbrNodes == 1 &&
-            (targetHost.equalsIgnoreCase("localhost") || targetHost.equals("127.0.0.1"))) {
+         if (nbrNodes == 1){
             targetNode = nodeList.get(0);
          } else {
             for (JsonNode node : nodeList) {
