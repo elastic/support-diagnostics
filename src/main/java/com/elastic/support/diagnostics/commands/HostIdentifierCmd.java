@@ -7,10 +7,9 @@ import com.elastic.support.util.SystemProperties;
 import com.elastic.support.util.SystemUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.MissingNode;
 import org.apache.commons.lang3.StringUtils;
-
 import java.util.*;
+
 
 public class HostIdentifierCmd extends AbstractDiagnosticCmd {
 
@@ -19,26 +18,22 @@ public class HostIdentifierCmd extends AbstractDiagnosticCmd {
       try {
          logger.info("Checking the supplied hostname against the node information retrieved to verify location. This may take some time...");
          // If we're doing multiple runs we don't need to do this again.
-         if(context.getCurrentRep() > 1){
+         if (context.getCurrentRep() > 1) {
             return true;
          }
 
          String version = context.getVersion();
          String temp = context.getTempDir();
          String targetHost = context.getInputParams().getHost();
+
          String systemDigest = context.getStringAttribute("systemDigest");
          HashSet<String> localAddr = parseNetworkAddresses(systemDigest);
-
-         if(! localAddr.contains(targetHost)){
-            logger.log(SystemProperties.DIAG, "{} host was not found in the following list of local network addresses: {}", targetHost, localAddr);
-            throw new RuntimeException("Running against remote host.");
-         }
 
          JsonNode rootNode = JsonYamlUtils.createJsonNodeFromFileName(temp, Constants.NODES);
          JsonNode nodes = rootNode.path("nodes");
          List<JsonNode> nodeList = new ArrayList();
          Iterator<JsonNode> it = nodes.iterator();
-         while (it.hasNext()){
+         while (it.hasNext()) {
             nodeList.add(it.next());
          }
 
@@ -46,61 +41,59 @@ public class HostIdentifierCmd extends AbstractDiagnosticCmd {
 
          JsonNode targetNode = null;
 
-         if( nbrNodes == 1 &&
-            (targetHost.equalsIgnoreCase("localhost") || targetHost.equals("127.0.0.1") ) ){
-               targetNode = nodeList.get(0);
-         }
-         else if (nbrNodes > 1){
-            for(JsonNode node: nodeList ){
-               Set<String> addresses = new HashSet<>();
+         if (nbrNodes == 1 &&
+            (targetHost.equalsIgnoreCase("localhost") || targetHost.equals("127.0.0.1"))) {
+            targetNode = nodeList.get(0);
+         } else {
+            for (JsonNode node : nodeList) {
+               Set<String> nodeAddr = new HashSet<>();
+
                String networkHost = SystemUtils.toString(node.path("settings").path("network").path("host").asText(), "");
-               if(!StringUtils.isEmpty(networkHost)){
-                  addresses.add(networkHost);
+               if (!StringUtils.isEmpty(networkHost)) {
+                  nodeAddr.add(networkHost);
                }
                String host = SystemUtils.toString(node.path("host").asText(), "");
-               if(!StringUtils.isEmpty(host)){
-                  addresses.add(host);
+               if (!StringUtils.isEmpty(host)) {
+                  nodeAddr.add(host);
                }
                String ip = SystemUtils.toString(node.path("ip").asText(), "");
-               if(!StringUtils.isEmpty(host)){
-                  addresses.add(ip);
+               if (!StringUtils.isEmpty(host)) {
+                  nodeAddr.add(ip);
                }
 
-               String name =  SystemUtils.toString(node.path("name").asText(), "");
+               String name = SystemUtils.toString(node.path("name").asText(), "");
 
-               if(version.startsWith("1.")){
+               if (version.startsWith("1.")) {
                   String publishAddress = SystemUtils.toString(node.path("http").path("publish_address").asText(), "/:");
                   int idxa = publishAddress.indexOf("/");
                   int idxb = publishAddress.indexOf(":");
-                  publishAddress = publishAddress.substring(idxa, idxb -1);
-                  if(! "".equals(publishAddress)){
-                     addresses.add(publishAddress);
+                  publishAddress = publishAddress.substring(idxa, idxb - 1);
+                  if (!"".equals(publishAddress)) {
+                     nodeAddr.add(publishAddress);
                   }
-               }
-               else{
+               } else {
                   JsonNode bnds = node.path("http").path("bound_address");
-                  if(  bnds instanceof ArrayNode){
-                     ArrayNode boundAddresses = (ArrayNode)bnds;
-                     for(JsonNode bnd: boundAddresses){
+                  if (bnds instanceof ArrayNode) {
+                     ArrayNode boundAddresses = (ArrayNode) bnds;
+                     for (JsonNode bnd : boundAddresses) {
                         String addr = bnd.asText();
                         addr = addr.substring(0, addr.indexOf(":"));
-                        addresses.add(addr);
+                        nodeAddr.add(addr);
                      }
                   }
                }
 
-               if (addresses.contains(targetHost)){
+               if (isLocalNode(localAddr, nodeAddr )){
                   targetNode = node;
                   break;
                }
             }
          }
 
-         if(targetNode == null){
+         if (targetNode == null) {
             logger.log(SystemProperties.DIAG, "{} host was not found in the nodes output", targetHost);
             throw new RuntimeException("Could not determine which node is installed on this host. Bypassing system calls and log collection");
-         }
-         else{
+         } else {
             String pid = SystemUtils.toString(targetNode.path("process").path("id").asText(), Constants.NOT_FOUND);
             context.setPid(pid);
             String nodeName = SystemUtils.toString(targetNode.path("name").asText(), Constants.NOT_FOUND);
@@ -123,17 +116,28 @@ public class HostIdentifierCmd extends AbstractDiagnosticCmd {
       return true;
    }
 
-    private HashSet<String> parseNetworkAddresses(String systemDigest) throws Exception{
+   private boolean isLocalNode(Set<String> localAddr, Set<String>nodeAddr){
+
+      for(String addr: localAddr){
+         if(nodeAddr.contains(addr)){
+            return true;
+         }
+      }
+
+      return false;
+   }
+
+   private HashSet<String> parseNetworkAddresses(String systemDigest) throws Exception {
 
       HashSet<String> ipAndHosts = new HashSet<>();
       JsonNode root = JsonYamlUtils.createJsonNodeFromString(systemDigest);
       Iterator<JsonNode> networks = root.path("hardware")
          .path("networks")
          .iterator();
-      while(networks.hasNext()){
+      while (networks.hasNext()) {
          JsonNode nic = networks.next();
          Iterator<JsonNode> addrs = nic.path("ipv4").iterator();
-         while(addrs.hasNext()){
+         while (addrs.hasNext()) {
             String ip = addrs.next().asText();
             ipAndHosts.add(ip);
          }
