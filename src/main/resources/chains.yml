@@ -1,4 +1,4 @@
-diagnostics:
+standard:
   - com.elastic.support.diagnostics.commands.GenerateManifestCmd
   - com.elastic.support.diagnostics.commands.RestModuleSetupCmd
   - com.elastic.support.diagnostics.commands.VersionAndClusterNameCheckCmd

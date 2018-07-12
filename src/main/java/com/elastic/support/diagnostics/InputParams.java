@@ -26,7 +26,7 @@ public class InputParams {
    private boolean isSsl = false;
 
    @Parameter(names = {"--type"}, description ="Diagnostic type to run. Enter standard, remote, logstash. Default is standard. Using remote will suppress retrieval of logs, configuration and system command info.")
-   private String diagType = "diagnostics";
+   private String diagType = "standard";
 
    @Parameter(names = {"--ptp"}, description = "Insecure plain text password - allows you to input the password as a plain text argument for scripts. WARNING: Exposes passwords in clear text. Inherently insecure.")
    private String plainTextPassword = "";

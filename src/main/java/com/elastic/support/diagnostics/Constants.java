@@ -2,9 +2,8 @@ package com.elastic.support.diagnostics;
 
 public class Constants {
 
+   public static final String ES_DIAG_DEFAULT = "standard";
    public static final String ES_DIAG = "diagnostics";
-   public static final String LOGSTASH_DIAG = "logstash";
-   public static final String REMOTE_DIAG = "remote";
    public static final String LOCAL_DIAG = "local";
    public static final String NOT_FOUND = "not found";
 
