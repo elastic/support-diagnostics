@@ -164,10 +164,6 @@ public class ClientBuilder {
             logger.warn("Password was entered with no user. Bypassing authentication");
          }
 
-         if (bypassHostnameVerify) {
-            builder.setSSLHostnameVerifier(new BypassHostnameVerifier());
-         }
-
          SSLContextBuilder sslContextBuiilder = new SSLContextBuilder();
 
          sslContextBuiilder.loadTrustMaterial(new LenientStrategy());
@@ -182,7 +178,12 @@ public class ClientBuilder {
             logger.warn("Client Auth keystore password was entered with no store. Bypassing authentication");
          }
 
-         builder.setSSLSocketFactory(new SSLConnectionSocketFactory(sslContextBuiilder.build(), new BypassHostnameVerifier()));
+         if (bypassHostnameVerify) {
+            builder.setSSLSocketFactory(new SSLConnectionSocketFactory(sslContextBuiilder.build(), new BypassHostnameVerifier()));
+         }
+         else{
+            builder.setSSLSocketFactory(new SSLConnectionSocketFactory(sslContextBuiilder.build()));
+         }
 
          httpClient = builder.build();
 

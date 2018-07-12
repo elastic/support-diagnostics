@@ -57,13 +57,10 @@ public class RestExec {
          response = exec(url);
          return getResponseString(response);
       } catch (Exception e) {
-         logger.error("Failed to execute request: {}", url);
+         throw new RuntimeException(e);
       } finally {
          HttpClientUtils.closeQuietly(response);
       }
-
-      return "";
-
    }
 
    public boolean execConfiguredQuery(String url, String query, String destination) {
@@ -84,7 +81,7 @@ public class RestExec {
    }
 
    protected HttpResponse exec(String url) {
-      String result = "";
+
       try {
          HttpGet httpget = new HttpGet(url);
          if (isSecured) {
@@ -105,8 +102,8 @@ public class RestExec {
    protected String getResponseString(HttpResponse response) {
 
       try {
+         checkResponseCode(response);
          HttpEntity entity = response.getEntity();
-         int status = checkResponseCode(response);
          return EntityUtils.toString(entity);
       } catch (Exception e) {
          logger.log(SystemProperties.DIAG, "Error while processing response.", e);
@@ -117,23 +114,7 @@ public class RestExec {
    protected boolean streamResponseToFile(HttpResponse response, String destination) {
 
       try {
-         int status = checkResponseCode(response);
-         if (status == 400) {
-            logger.error("No data retrieved. Bypassing write of: {}", destination);
-            throw new RuntimeException("No data retrieved.");
-         } else if (status == 401) {
-            logger.error("Authentication failure: invalid login credentials. Cannot continue.");
-            throw new RuntimeException("Authentication failure.");
-         } else if (status == 403) {
-            logger.error("Authorization failure: invalid login credentials. Cannot continue.");
-            throw new RuntimeException("Authorization failure.");
-         } else if (status == 404) {
-            logger.error("Endpoint does not exist.");
-            throw new RuntimeException("No endpoint for URL.");
-         } else if (status > 500 && status < 600) {
-            logger.error("Unrecoverable server error.");
-            throw new RuntimeException("Unrecoverable server error.");
-         }
+         checkResponseCode(response);
          org.apache.http.HttpEntity entity = response.getEntity();
          InputStream responseStream = entity.getContent();
          FileOutputStream fos = new FileOutputStream(destination);
@@ -141,6 +122,9 @@ public class RestExec {
          logger.log(SystemProperties.DIAG, "File {} was retrieved and saved to disk.", destination);
       } catch (Exception e) {
          logger.error("Error processing response", e);
+         if(e.getMessage().equals("400")){
+            logger.warn("{} will not be written.", destination);
+         }
          throw new RuntimeException("Failed to process response.");
       }
       return true;
@@ -154,6 +138,23 @@ public class RestExec {
 
       if (statusCode != 200) {
          logger.error(logMsg, statusCode, reasonPhrase);
+      }
+
+      if (statusCode == 400) {
+         logger.error("No data retrieved.");
+         throw new RuntimeException("400");
+      } else if (statusCode == 401) {
+         logger.error("Authentication failure: invalid login credentials. Cannot continue.");
+         throw new RuntimeException("401");
+      } else if (statusCode == 403) {
+         logger.error("Authorization failure: invalid login credentials. Cannot continue.");
+         throw new RuntimeException("403");
+      } else if (statusCode == 404) {
+         logger.error("Endpoint does not exist.");
+         throw new RuntimeException("404");
+      } else if (statusCode > 500 && statusCode < 600) {
+         logger.error("Unrecoverable server error.");
+         throw new RuntimeException("500-600");
       }
 
       return statusCode;

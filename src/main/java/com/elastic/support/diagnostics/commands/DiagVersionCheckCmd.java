@@ -6,6 +6,7 @@ import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.util.ClientBuilder;
 import com.elastic.support.util.JsonYamlUtils;
 import com.elastic.support.util.RestExec;
+import com.elastic.support.util.SystemProperties;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.http.client.HttpClient;
 
@@ -46,7 +47,8 @@ public class DiagVersionCheckCmd extends AbstractDiagnosticCmd {
             .setClient(client)
             .setHttpHost(cb.getHttpHost());
 
-         String result = restExec.execBasic(ghScheme + "://" + ghHost + "/" + ghEndpoint);
+         String result = null;
+         result = restExec.execBasic(ghScheme + "://" + ghHost + "/" + ghEndpoint);
 
          JsonNode rootNode = JsonYamlUtils.createJsonNodeFromString(result);
          String ver = rootNode.path("tag_name").asText();
@@ -54,7 +56,7 @@ public class DiagVersionCheckCmd extends AbstractDiagnosticCmd {
          JsonNode asset = assests.get(0);
          String downloadUrl = asset.path("browser_download_url").asText();
 
-         if (! diagVersion.equals(ver)) {
+         if (!diagVersion.equals(ver)) {
             logger.warn("Warning: Diagnostic version:{} is not the current recommended release", diagVersion);
             logger.warn("The current release is {}", ver);
             logger.warn("The latest version can be downloaded at {}", downloadUrl);
@@ -80,7 +82,10 @@ public class DiagVersionCheckCmd extends AbstractDiagnosticCmd {
 
          }
       } catch (Exception e) {
-         logger.error("Error while checking diagnostic version for updates.", e);
+         logger.log(SystemProperties.DIAG, e);
+         logger.warn("Issue encountered while checking diagnostic version for updates.");
+         logger.warn("Failed to get current diagnostic version from Github.");
+         logger.warn("If Github is not accessible from this environemnt current supported version cannot be confirmed.");
          rc = true;
       }
 
