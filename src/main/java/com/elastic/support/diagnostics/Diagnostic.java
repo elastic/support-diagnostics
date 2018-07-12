@@ -128,8 +128,11 @@ public class Diagnostic {
       logger.info("Results will be written to: " + outputDir);
       String diagType = context.getInputParams().getDiagType();
 
-      if (!diagType.equals(Constants.ES_DIAG)) {
+      if (!diagType.equals(Constants.ES_DIAG_DEFAULT)) {
          context.setDiagName(diagType + "-" + Constants.ES_DIAG);
+      }
+      else {
+         context.setDiagName(Constants.ES_DIAG);
       }
 
       String tempDir = outputDir + SystemProperties.fileSeparator + context.getDiagName();
