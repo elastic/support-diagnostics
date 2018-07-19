@@ -34,6 +34,12 @@ public class Diagnostic {
       try {
          jc.parse(args);
 
+         if (inputs.isHelp()) {
+            jc.usage();
+            proceedToRun = false;
+            return;
+         }
+
          if(! inputs.getDiagType().equalsIgnoreCase(Constants.LOCAL_DIAG)){
             if(StringUtils.isEmpty(inputs.getHost())){
                throw new RuntimeException("Inputs error: You must enter the hostname of a running node within the cluster, preferably on the host you are running the diagnostic from.");
@@ -42,12 +48,6 @@ public class Diagnostic {
 
          if (!validateAuth(inputs)) {
             throw new RuntimeException("Inputs error: If authenticating both username and password are required.");
-         }
-
-         if (inputs.isHelp()) {
-            jc.usage();
-            proceedToRun = false;
-            return;
          }
 
          // Set up the output directory
