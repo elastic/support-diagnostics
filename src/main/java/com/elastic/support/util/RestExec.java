@@ -57,7 +57,7 @@ public class RestExec {
          response = exec(url);
          return getResponseString(response);
       } catch (Exception e) {
-         throw new RuntimeException(e);
+         throw new RuntimeException(e.getMessage());
       } finally {
          HttpClientUtils.closeQuietly(response);
       }
@@ -91,10 +91,10 @@ public class RestExec {
          }
       } catch (HttpHostConnectException e) {
          logger.log(SystemProperties.DIAG, "Host connection error.", e);
-         throw new RuntimeException("Error connecting to host " + url, e);
+         throw new RuntimeException("Host connection error: " + e.getMessage() );
       } catch (Exception e) {
-         logger.log(SystemProperties.DIAG, "Error executing query.", e);
-         throw new RuntimeException(e);
+         logger.log(SystemProperties.DIAG, "Query Execution Error", e);
+         throw new RuntimeException("Query Execution Error: " + e.getMessage());
       }
 
    }

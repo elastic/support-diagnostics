@@ -4,6 +4,7 @@ import com.elastic.support.diagnostics.InputParams;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.util.JsonYamlUtils;
 import com.elastic.support.util.RestExec;
+import com.elastic.support.util.SystemProperties;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.Map;
@@ -28,9 +29,9 @@ public class VersionAndClusterNameCheckCmd extends AbstractDiagnosticCmd {
          context.setClusterName(clusterName);
          String versionNumber = root.path("version").path("number").asText();
          context.setVersion(versionNumber);
-
       } catch (Exception e) {
-         logger.info("Error retrieving Elasticsearch version  - unable to continue..  Please make sure the proper connection parameters were specified", e.getMessage());
+         logger.info(e.getMessage());
+         logger.info("Error retrieving Elasticsearch version  - unable to continue..  Please make sure the proper connection parameters were specified.");
          rc = false;
       }
 
