@@ -91,6 +91,10 @@ As a first step the diagnostic will check the Github repo for the current releas
  ./diagnostics.sh --host 10.0.0.20 --type local -u elastic -p -ssl -o /home/admin/log-output
 ```
 
+### Customizing the output
+The diag.yml file in the /lib/support-diagnostics-x.x.x contains all the REST and system commands that will be run. These are tied to a particular version. You can extract this file and remove commands you do not wish to run as well as adding any that may not be currently included. Place this revised file in the directory containing the diagnostics.sh script and it will override the settings contained in the jar.
+
+
 ### Remote
 * If you do not wish to run the utility on the host the node to be queried resides on, and wish to run it from a different host such as your workstation, you may use the --type remote option.
 * This will execute only the REST API calls and will not attempt to execute local system calls or collect log files. 
