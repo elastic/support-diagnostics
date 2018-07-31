@@ -40,8 +40,8 @@ public class Diagnostic {
             return;
          }
 
-         if(! inputs.getDiagType().equalsIgnoreCase(Constants.LOCAL_DIAG)){
-            if(StringUtils.isEmpty(inputs.getHost())){
+         if (!inputs.getDiagType().equalsIgnoreCase(Constants.LOCAL_DIAG)) {
+            if (StringUtils.isEmpty(inputs.getHost())) {
                throw new RuntimeException("Inputs error: You must enter the hostname of a running node within the cluster, preferably on the host you are running the diagnostic from.");
             }
          }
@@ -70,7 +70,7 @@ public class Diagnostic {
 
    }
 
-   public boolean isProceedToRun(){
+   public boolean isProceedToRun() {
       return proceedToRun;
    }
 
@@ -130,8 +130,7 @@ public class Diagnostic {
 
       if (!diagType.equals(Constants.ES_DIAG_DEFAULT)) {
          context.setDiagName(diagType + "-" + Constants.ES_DIAG);
-      }
-      else {
+      } else {
          context.setDiagName(Constants.ES_DIAG);
       }
 

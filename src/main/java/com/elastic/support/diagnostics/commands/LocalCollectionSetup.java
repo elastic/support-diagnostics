@@ -162,7 +162,7 @@ public class LocalCollectionSetup extends AbstractDiagnosticCmd {
          return queryClusterForLogLocations(url, restExec);
 
       } catch (RuntimeException e) {
-         System.out.println("An error occurred while using: " + url);
+         logger.info("An error occurred while using: " + url);
          logger.log(SystemProperties.DIAG, "url: {} failed.", url, e);
       }
 
@@ -221,7 +221,6 @@ public class LocalCollectionSetup extends AbstractDiagnosticCmd {
          } else {
             logDir = logList.get(0);
          }
-
 
       } catch (Exception e) {
          logger.log(SystemProperties.DIAG, "Error occurred while interrogating cluster for possible log locations.");

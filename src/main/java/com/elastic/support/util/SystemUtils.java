@@ -239,7 +239,7 @@ public class SystemUtils {
          return matcher6.group(0);
       }
 
-      logger.warn("The following string containing an IP Address could not be parsed.  Displaying as read. " + address);
+      logger.info("The following string containing an IP Address could not be parsed.  Displaying as read. " + address);
       return address;
 
    }

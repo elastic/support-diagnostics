@@ -159,9 +159,9 @@ public class ClientBuilder {
                new UsernamePasswordCredentials(user, password));
             builder.setDefaultCredentialsProvider(credentialsProvider);
          } else if (StringUtils.isEmpty(user) && !StringUtils.isEmpty(password)) {
-            logger.warn("User: {}  was entered with no password. Bypassing authentication", user);
+            logger.info("User: {}  was entered with no password. Bypassing authentication", user);
          } else if (StringUtils.isEmpty(user) && !StringUtils.isEmpty(password)) {
-            logger.warn("Password was entered with no user. Bypassing authentication");
+            logger.info("Password was entered with no user. Bypassing authentication");
          }
 
          SSLContextBuilder sslContextBuiilder = new SSLContextBuilder();
@@ -173,9 +173,9 @@ public class ClientBuilder {
             ks.load(new FileInputStream(pkiCredentials), pkiPassword.toCharArray());
             sslContextBuiilder.loadKeyMaterial(ks, pkiPassword.toCharArray());
          } else if (StringUtils.isEmpty(pkiCredentials) && !StringUtils.isEmpty(pkiPassword)) {
-            logger.warn("Client Auth keystore: {} was supplied with no password. Bypassing authentication", pkiCredentials);
+            logger.info("Client Auth keystore: {} was supplied with no password. Bypassing authentication", pkiCredentials);
          } else if (StringUtils.isEmpty(pkiCredentials) && !StringUtils.isEmpty(pkiPassword)) {
-            logger.warn("Client Auth keystore password was entered with no store. Bypassing authentication");
+            logger.info("Client Auth keystore password was entered with no store. Bypassing authentication");
          }
 
          if (bypassHostnameVerify) {

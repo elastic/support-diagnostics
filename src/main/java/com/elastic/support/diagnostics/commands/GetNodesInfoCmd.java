@@ -56,7 +56,8 @@ public class GetNodesInfoCmd extends AbstractDiagnosticCmd {
          context.setClusterName(clusterName);
 
       } catch (Exception e) {
-         logger.error("Error retrieving Elasticsearch version  - unable to continue..  Please make sure the proper connection parameters were specified", e);
+         logger.info("Error retrieving Elasticsearch node info  - unable to continue.");
+         logger.error(e);
          rc = false;
       }
 

@@ -1,7 +1,7 @@
 package com.elastic.support.util;
 
 import com.elastic.support.diagnostics.Constants;
-import org.apache.commons.compress.utils.IOUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
@@ -23,6 +23,8 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 
 public class RestExec {
 
@@ -53,14 +55,41 @@ public class RestExec {
    public String execBasic(String url) {
 
       HttpResponse response = null;
+      String responseString= "";
+      boolean completed = false;
+      String message = "An error occurred during REST call: " + url + " Check logs for more information.";
+
       try {
          response = exec(url);
-         return getResponseString(response);
+         int status  = response.getStatusLine().getStatusCode();
+
+         if(status != 200){
+            if(status == 401){
+               message = message + " Invalid authentication credentials provided.";
+            }
+            else if(status == 403){
+               message = message  + " Insufficient authority to execute query.";
+            }
+            logger.log(SystemProperties.DIAG, "{} could not be retrieved. Status:{}", url, status);
+            logger.log(SystemProperties.DIAG, "{}", getResponseString(response));
+
+         }
+         else {
+            completed = true;
+            responseString = getResponseString(response);
+         }
+
       } catch (Exception e) {
-         throw new RuntimeException(e.getMessage());
+         logger.log(SystemProperties.DIAG, "Exception during REST call", e);
       } finally {
          HttpClientUtils.closeQuietly(response);
       }
+
+      if(!completed){
+         throw new RuntimeException(message);
+      }
+
+      return responseString;
    }
 
    public boolean execConfiguredQuery(String url, String query, String destination) {
@@ -102,7 +131,6 @@ public class RestExec {
    protected String getResponseString(HttpResponse response) {
 
       try {
-         checkResponseCode(response);
          HttpEntity entity = response.getEntity();
          return EntityUtils.toString(entity);
       } catch (Exception e) {
@@ -114,19 +142,32 @@ public class RestExec {
    protected boolean streamResponseToFile(HttpResponse response, String destination) {
 
       try {
-         checkResponseCode(response);
+         int status = checkResponseCode(response);
          org.apache.http.HttpEntity entity = response.getEntity();
          InputStream responseStream = entity.getContent();
-         FileOutputStream fos = new FileOutputStream(destination);
-         IOUtils.copy(responseStream, fos);
-         logger.log(SystemProperties.DIAG, "File {} was retrieved and saved to disk.", destination);
+
+         if (status == 200) {
+            FileOutputStream fos = new FileOutputStream(destination);
+            IOUtils.copy(responseStream, fos);
+            logger.log(SystemProperties.DIAG, "File {} was retrieved and saved to disk.", destination);
+         }
+         else{
+            StringWriter writer = new StringWriter();
+            String encoding = StandardCharsets.UTF_8.name();
+            IOUtils.copy(responseStream, writer, encoding);
+            String msg = writer.toString();
+            logger.log(SystemProperties.DIAG, "File {} was retrieved and saved to disk.", destination);
+            return false;
+         }
       } catch (Exception e) {
          logger.error("Error processing response", e);
          if(e.getMessage().equals("400")){
-            logger.warn("{} will not be written.", destination);
+            logger.info("{} will not be written.", destination);
          }
-         throw new RuntimeException("Failed to process response.");
-      }
+
+         return false;
+
+       }
       return true;
    }
 
@@ -141,20 +182,15 @@ public class RestExec {
       }
 
       if (statusCode == 400) {
-         logger.error("No data retrieved.");
-         throw new RuntimeException("400");
-      } else if (statusCode == 401) {
-         logger.error("Authentication failure: invalid login credentials. Cannot continue.");
-         throw new RuntimeException("401");
+         logger.info("No data retrieved.");
+       } else if (statusCode == 401) {
+         logger.info("Authentication failure: invalid login credentials. Check logs for details.");
       } else if (statusCode == 403) {
-         logger.error("Authorization failure: invalid login credentials. Cannot continue.");
-         throw new RuntimeException("403");
+         logger.info("Authorization failure or invalid license. Check logs for details.");
       } else if (statusCode == 404) {
-         logger.error("Endpoint does not exist.");
-         throw new RuntimeException("404");
+         logger.info("Endpoint does not exist.");
       } else if (statusCode > 500 && statusCode < 600) {
-         logger.error("Unrecoverable server error.");
-         throw new RuntimeException("500-600");
+         logger.info("Unrecoverable server error.");
       }
 
       return statusCode;
