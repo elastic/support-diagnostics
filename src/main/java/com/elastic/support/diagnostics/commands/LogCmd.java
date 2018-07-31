@@ -30,7 +30,7 @@ public class LogCmd extends AbstractDiagnosticCmd {
       String logs = context.getLogDir();
 
       if (logs.equalsIgnoreCase(Constants.NOT_FOUND)) {
-         logger.warn("Could not locate log directory bypassing log collection.");
+         logger.info("Could not locate log directory bypassing log collection.");
          return true;
       }
 

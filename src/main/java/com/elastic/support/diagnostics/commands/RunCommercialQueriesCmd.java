@@ -27,13 +27,17 @@ public class RunCommercialQueriesCmd extends AbstractQueryCmd {
          JsonNode node = JsonYamlUtils.createJsonNodeFromFileName(temp, Constants.PLUGINS);
          List<String> vals = node.findValuesAsText("component");
          int majorVersion = Integer.parseInt(context.getVersion().split("\\.")[0]);
-         if(majorVersion > 2){
+         int minorVersion = Integer.parseInt(context.getVersion().split("\\.")[1]);
+         if( (majorVersion > 2 && majorVersion < 6) || (majorVersion == 6 && minorVersion < 3) ){
             for(String val: vals){
                if(val.contains("x-pack")){
                   runCommercial = true;
                   break;
                }
             }
+         }
+         else if ( majorVersion == 6 && minorVersion >= 3){
+            runCommercial = true;
          }
          else if (majorVersion <= 2){
             if(vals.contains("shield")){
@@ -65,8 +69,8 @@ public class RunCommercialQueriesCmd extends AbstractQueryCmd {
             runQuery(entry, context);
          }
       } catch (Exception e) {
-         System.out.println("Error querying commerical plugins");
-         logger.error("Error querying commercial plugins.", e);
+         logger.info("Error querying commerical functionality.");
+         logger.error(e);
       }
 
       return true;

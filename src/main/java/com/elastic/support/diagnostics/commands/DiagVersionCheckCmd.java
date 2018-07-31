@@ -60,9 +60,9 @@ public class DiagVersionCheckCmd extends AbstractDiagnosticCmd {
          String downloadUrl = asset.path("browser_download_url").asText();
 
          if (!diagVersion.equals(ver)) {
-            logger.warn("Warning: Diagnostic version:{} is not the current recommended release", diagVersion);
-            logger.warn("The current release is {}", ver);
-            logger.warn("The latest version can be downloaded at {}", downloadUrl);
+            logger.info("Warning: Diagnostic version:{} is not the current recommended release", diagVersion);
+            logger.info("The current release is {}", ver);
+            logger.info("The latest version can be downloaded at {}", downloadUrl);
 
             Scanner sc = new Scanner(System.in);
             String feedback = null;
@@ -86,9 +86,9 @@ public class DiagVersionCheckCmd extends AbstractDiagnosticCmd {
          }
       } catch (Exception e) {
          logger.log(SystemProperties.DIAG, e);
-         logger.warn("Issue encountered while checking diagnostic version for updates.");
-         logger.warn("Failed to get current diagnostic version from Github.");
-         logger.warn("If Github is not accessible from this environemnt current supported version cannot be confirmed.");
+         logger.info("Issue encountered while checking diagnostic version for updates.");
+         logger.info("Failed to get current diagnostic version from Github.");
+         logger.info("If Github is not accessible from this environemnt current supported version cannot be confirmed.");
          rc = true;
       }
 

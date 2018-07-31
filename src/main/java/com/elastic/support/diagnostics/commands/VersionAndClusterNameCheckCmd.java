@@ -30,8 +30,8 @@ public class VersionAndClusterNameCheckCmd extends AbstractDiagnosticCmd {
          String versionNumber = root.path("version").path("number").asText();
          context.setVersion(versionNumber);
       } catch (Exception e) {
+         logger.info("Error retrieving Elasticsearch version. Cannot continue.");
          logger.info(e.getMessage());
-         logger.info("Error retrieving Elasticsearch version  - unable to continue..  Please make sure the proper connection parameters were specified.");
          rc = false;
       }
 

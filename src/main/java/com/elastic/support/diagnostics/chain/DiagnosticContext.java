@@ -239,7 +239,7 @@ public class DiagnosticContext {
        T castValue;
 
        if(val == null){
-           logger.warn("Attribute: " + key + "cannot be converted since it is null");
+           logger.info("Attribute: " + key + "cannot be converted since it is null");
            return null;
        }
 
