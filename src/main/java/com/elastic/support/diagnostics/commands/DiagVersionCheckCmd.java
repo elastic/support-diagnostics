@@ -21,6 +21,9 @@ public class DiagVersionCheckCmd extends AbstractDiagnosticCmd {
 
       Map resultMap = null;
       InputParams inputs = context.getInputParams();
+
+      if(inputs.isBypassDiagVerify()){return true;}
+
       boolean rc = true;
 
       logger.info("Checking for diagnostic version updates.");
