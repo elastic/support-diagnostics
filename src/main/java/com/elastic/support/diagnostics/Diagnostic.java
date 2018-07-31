@@ -22,7 +22,7 @@ public class Diagnostic {
    private DiagnosticChainExec dc = new DiagnosticChainExec();
    private DiagnosticContext ctx = new DiagnosticContext(inputs);
    private Logger logger = LogManager.getLogger();
-   private boolean proceedToRun = true;
+   private boolean proceedToRun = false;
 
    Diagnostic(String args[]) {
 
@@ -60,13 +60,15 @@ public class Diagnostic {
          logger.info("Configuring log file.");
 
       } catch (RuntimeException re) {
-         logger.error("Error during diagnostic initialization: {}", re.getMessage());
+         logger.info("Error during diagnostic initialization: {}", re.getMessage());
          jc.usage();
          return;
       } catch (Exception e) {
-         logger.error("Error during diagnostic initialization", e);
+         logger.info("Error during diagnostic initialization", e);
          return;
       }
+
+      proceedToRun = true;
 
    }
 
