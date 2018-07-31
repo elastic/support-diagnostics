@@ -67,6 +67,9 @@ public class InputParams {
    @Parameter(names= {"--proxyPort"}, description = "HTTP Proxy port.")
    private int proxyPort;
 
+   @Parameter(names = {"--bypassDiagVerify"}, description = "Bypass the diagnostic version check.")
+   private boolean bypassDiagVerify = false;
+
    private boolean secured = false;
    private boolean wasPortSet = false;
 
@@ -232,6 +235,14 @@ public class InputParams {
 
    public boolean isNoSystemCalls() {
       return noSystemCalls;
+   }
+
+   public boolean isBypassDiagVerify() {
+      return bypassDiagVerify;
+   }
+
+   public void setBypassDiagVerify(boolean bypassDiagVerify) {
+      this.bypassDiagVerify = bypassDiagVerify;
    }
 
    public void setNoSystemCalls(boolean noSystemCalls) {
