@@ -35,6 +35,7 @@ It will execute a series of REST API calls to the running cluster, run a number 
 As a first step the diagnostic will check the Github repo for the current released version, and if not the same as the one running will:
 * Provide the URL for the current release.
 * Ask the user whether they wish to continue. 
+* For air gapped environments this can be bypassed by adding --bypassDiagVerify to the command line.
 
 ## Usage - Simplest Case
 * Run the application via the diagnostics.sh or diagnostics.bat script. The host name or IP address used by the HTTP connector of the node is required.

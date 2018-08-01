@@ -237,16 +237,16 @@ public class InputParams {
       return noSystemCalls;
    }
 
+   public void setNoSystemCalls(boolean noSystemCalls) {
+      this.noSystemCalls = noSystemCalls;
+   }
+
    public boolean isBypassDiagVerify() {
       return bypassDiagVerify;
    }
 
    public void setBypassDiagVerify(boolean bypassDiagVerify) {
       this.bypassDiagVerify = bypassDiagVerify;
-   }
-
-   public void setNoSystemCalls(boolean noSystemCalls) {
-      this.noSystemCalls = noSystemCalls;
    }
 
    public String getUrl() {
