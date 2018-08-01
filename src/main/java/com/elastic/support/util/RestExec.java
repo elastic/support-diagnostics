@@ -57,7 +57,7 @@ public class RestExec {
       HttpResponse response = null;
       String responseString= "";
       boolean completed = false;
-      String message = "An error occurred during REST call: " + url + " Check logs for more information.";
+      String message = "An error occurred during REST call: " + url + " Check logs for more information. ";
 
       try {
          response = exec(url);
@@ -81,6 +81,7 @@ public class RestExec {
 
       } catch (Exception e) {
          logger.log(SystemProperties.DIAG, "Exception during REST call", e);
+         message = message + e.getMessage();
       } finally {
          HttpClientUtils.closeQuietly(response);
       }
@@ -167,7 +168,7 @@ public class RestExec {
 
          return false;
 
-       }
+      }
       return true;
    }
 
@@ -183,7 +184,7 @@ public class RestExec {
 
       if (statusCode == 400) {
          logger.info("No data retrieved.");
-       } else if (statusCode == 401) {
+      } else if (statusCode == 401) {
          logger.info("Authentication failure: invalid login credentials. Check logs for details.");
       } else if (statusCode == 403) {
          logger.info("Authorization failure or invalid license. Check logs for details.");
