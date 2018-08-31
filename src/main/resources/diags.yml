@@ -242,7 +242,7 @@ logstash:
   logstash_version: "?pretty"
   logstash_node: "_node?pretty"
   logstash_node_stats: "_node/stats?pretty"
-  logstash_nodes_hot_threads: "_node/hot_threads?human=true"
+  logstash_nodes_hot_threads: "_node/hot_threads?human=true&threads=10000"
   logstash_plugins: "_node/plugins?pretty"
 
 linuxOS:
