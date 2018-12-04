@@ -2,6 +2,7 @@ package com.elastic.support.diagnostics.commands;
 
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.util.SystemProperties;
+import com.elastic.support.util.SystemUtils;
 import oshi.hardware.CentralProcessor.TickType;
 import oshi.json.SystemInfo;
 import oshi.json.hardware.*;
@@ -113,7 +114,7 @@ public class SystemDigestCmd extends AbstractDiagnosticCmd {
       writer.newLine();
 
       writer.write("  release date: " + (firmware.getReleaseDate() == null ? "unknown"
-         : firmware.getReleaseDate() == null ? "unknown" : FormatUtil.formatDate(firmware.getReleaseDate())));
+         : firmware.getReleaseDate() == null ? "unknown" : firmware.getReleaseDate()));
       writer.newLine();
 
       final Baseboard baseboard = computerSystem.getBaseboard();
