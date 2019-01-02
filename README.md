@@ -20,11 +20,11 @@ It will execute a series of REST API calls to the running cluster, run a number 
   * **Important Note:** The 1.7 version of the JDK is no longer supported. If you are running a 1.7 JRE/JDK you must upgrade or run the 6.3 version of the diagnostic.
 * A JRE may be used, however certain functionality such as jstack generated thread dumps will not be available.
 * If you are running a package installation under Linux you MUST run the command with elevated sudo privileges. Otherwise the utility will not be able to run the system queries.
-* It is recommended that you set the JAVA_HOME environment variable.  It should point to the Java installation directory.  If JAVA_HOME is not found, the utility will attempt to locate a distribution but if errors occur it may be necessary to set this manually.
+* It is recommended that you set the `JAVA_HOME` environment variable.  It should point to the Java installation directory.  If `JAVA_HOME` is not found, the utility will attempt to locate a distribution but if errors occur it may be necessary to set this manually.
 * The system account running the utility must have read access to the Elasticsearch files and write access to the output location.
 * If you are using Shield/Security the supplied user id must have permission to execute the diagnostic URL's.
 * Linux, Windows, and Mac OSX are supported.
-* Docker installations should use the --type remote option. See below for examples. 
+* Docker installations should use the `--type remote` option. See below for examples. 
 
 ## Installation
 * Download [support-diagnostics-latest-dist.zip](https://github.com/elastic/elasticsearch-support-diagnostics/releases/latest) from the Github release area.
@@ -35,13 +35,13 @@ It will execute a series of REST API calls to the running cluster, run a number 
 As a first step the diagnostic will check the Github repo for the current released version, and if not the same as the one running will:
 * Provide the URL for the current release.
 * Ask the user whether they wish to continue. 
-* For air gapped environments this can be bypassed by adding --bypassDiagVerify to the command line.
+* For air gapped environments this can be bypassed by adding `--bypassDiagVerify` to the command line.
 
 ## Usage - Simplest Case
 * Run the application via the diagnostics.sh or diagnostics.bat script. The host name or IP address used by the HTTP connector of the node is required.
 * In order to assure that all artifacts are collected it is recommended that you run the tool with elevated privileges. This means sudo on Linux type platforms and via an Administor Prompt in Windows.
-* A hostname or IP address must now be specified via the --host parameter. This is due to the changes in default port binding what were introduced starting with version 2. You must supply this even if you are running as localhost.
-* The utility will use default listening port of 9200 if you do not specify one.
+* A hostname or IP address must now be specified via the `--host` parameter. This is due to the changes in default port binding what were introduced starting with version 2. You must supply this even if you are running as localhost.
+* The utility will use default listening port of `9200` if you do not specify one.
 * If the utility cannot find a running ES version for that host/port combination the utility will exit and you will need to run it again.
 * Input parameters may be specified in any order.
 * An archive with the format diagnostics-`<DateTimeStamp>`.tar.gz will be created in the utility directory. If you wish to specify a specific output folder you may do so by using the -o `<Full path to custom output folder>` option.
@@ -60,10 +60,10 @@ As a first step the diagnostic will check the Github repo for the current releas
 
 ## Using With Shield/Security
 * a truststore does not need to be specified - it's assumed you are running this against a node that you set up and if you didn't trust it you wouldn't be running this.
-* When using Shield authentication, do not specify a password and the -p option.  Using the -p option will bring up a prompt for you to type an obfuscated value that will not be displayed on the command history.
-* --noVerify will bypass hostname verification with SSL.
-* --keystore and --keystorePass allow you to specify client side certificates for authentication.
-* To script the utility when using Shield/Security, you may use the --ptp option to allow you to pass a plain text password to the command line rather than use -p and get a prompt.  Note that this is inherently insecure - use at your own risk.
+* When using Shield authentication, do not specify a password and the `-p` option.  Using the `-p` option will bring up a prompt for you to type an obfuscated value that will not be displayed on the command history.
+* `--noVerify` will bypass hostname verification with SSL.
+* `--keystore` and --keystorePass` allow you to specify client side certificates for authentication.
+* To script the utility when using Shield/Security, you may use the `--ptp` option to allow you to pass a plain text password to the command line rather than use `-p` and get a prompt.  Note that this is inherently insecure - use at your own risk.
 
 #### Examples - Without SSL
     * sudo ./diagnostics.sh --host localhost -u elastic -p
@@ -72,9 +72,9 @@ As a first step the diagnostic will check the Github repo for the current releas
     * sudo ./diagnostics.sh --host 10.0.0.20 -u <your username> -p --ssl
 
 ## Additional Options
-* You can specify additional java options such as a higher -Xmx value by setting the environment variable DIAG_JAVA_OPTS.
-* To suppress all log file collection use the --skipLogs option.
-* Because of the potential size access logs are no longer collected by default. If you need these use the --accessLogs option to have them copied.
+* You can specify additional java options such as a higher `-Xmx` value by setting the environment variable `DIAG_JAVA_OPTS`.
+* To suppress all log file collection use the `--skipLogs` option.
+* Because of the potential size access logs are no longer collected by default. If you need these use the `--accessLogs` option to have them copied.
 
 ## Alternate Usages
 
@@ -85,7 +85,7 @@ As a first step the diagnostic will check the Github repo for the current releas
   * Provide an absolute path to the log location.
   * Provide the URL to an alternate running node in the cluster. It will collect all possible log locations for these nodes and then use those to check the current host for a valid directory and logging content. This will work if you use standardized log locations for at least a portion of the nodes in your cluster. If you have a setup where you have shared storage and each node has a specific location, this won't work and you will need to specify the log directory manaully.
     * If you use the URL option you will need to provide login credentials at the prompt.
-* Use the --type local parameter to enable this option.
+* Use the `--type local` parameter to enable this option.
 
 #### Local Example
 ```
@@ -93,19 +93,19 @@ As a first step the diagnostic will check the Github repo for the current releas
 ```
 
 ### Customizing the output
-The diag.yml file in the /lib/support-diagnostics-x.x.x contains all the REST and system commands that will be run. These are tied to a particular version. You can extract this file and remove commands you do not wish to run as well as adding any that may not be currently included. Place this revised file in the directory containing the diagnostics.sh script and it will override the settings contained in the jar.
+The `diag.yml` file in the `/lib/support-diagnostics-x.x.x` contains all the REST and system commands that will be run. These are tied to a particular version. You can extract this file and remove commands you do not wish to run as well as adding any that may not be currently included. Place this revised file in the directory containing the diagnostics.sh script and it will override the settings contained in the jar.
 
 
 ### Remote
-* If you do not wish to run the utility on the host the node to be queried resides on, and wish to run it from a different host such as your workstation, you may use the --type remote option.
+* If you do not wish to run the utility on the host the node to be queried resides on, and wish to run it from a different host such as your workstation, you may use the `--type remote` option.
 * This will execute only the REST API calls and will not attempt to execute local system calls or collect log files. 
 #### Remote Example
      ./diagnostics.sh --host 10.0.0.20 --type remote
     
 
 ### Logstash Diagnostics
-* Use the --type logstash argument to get diagnostic information from a running Logstash process. It will query the process in a manner similar to the Elasticsearch REST API calls.
-* The default port will be 9600. This can be modified at startup, or will be automatically incremented if you start multiple Logstash processes on the same host. You can connect to these other Logstash processes with the --port option.
+* Use the `--type logstash` argument to get diagnostic information from a running Logstash process. It will query the process in a manner similar to the Elasticsearch REST API calls.
+* The default port will be `9600`. This can be modified at startup, or will be automatically incremented if you start multiple Logstash processes on the same host. You can connect to these other Logstash processes with the `--port` option.
 * Available for 5.0 or greater.
 * System statistics relevant for the platform will also be collected, similar to the standard diagnostic type.
 #### Logstash Examples
@@ -113,7 +113,7 @@ The diag.yml file in the /lib/support-diagnostics-x.x.x contains all the REST an
     * sudo ./diagnostics.sh --host localhost --type logstash --port 9610
 
 ### Multiple Runs At Timed Intervals
-* If the cluster is not running X-Pack Monitoring you may find it beneficial to see how some statistics change over time. You can accomplish this by using the --interval x (in seconds) and --reps (times to repeat)to take a diagnostic.
+* If the cluster is not running X-Pack Monitoring you may find it beneficial to see how some statistics change over time. You can accomplish this by using the `--interval x` (in seconds) and `--reps` (times to repeat)to take a diagnostic.
 * You run the diagnostic once and it will execute a run, sleep for the interval duration, and then take another diagnostic. 
 * Each run will get it's own archive with the same DateTime stamp and with run-`<run number>` appended.
 * Logs will only be collected in the archive of the final run. If you are running in standard rather than remote mode, however, all the system level calls will be executed.
@@ -124,16 +124,13 @@ The diag.yml file in the /lib/support-diagnostics-x.x.x contains all the REST an
     * sudo ./diagnostics.sh --host localhost -u elastic -p --interval 20 --reps 6 --type logstash 
 
 ### Timed Thread Dumps
-* If you wish to take thread dumps at timed intervals without running the full gamut of API calls use the --type elastic-threads option. 
+* If you wish to take thread dumps at timed intervals without running the full gamut of API calls use the `--type elastic-threads` option. 
 * For each run it will collect output from the Hot Threads API call, as well as running a full thread dump against the process using jstack.
 * This **must** be run on the physical host of the node you will to check.
 * You do not need to supply a process id, only the host/port. It will query the node for the information on the one running on that host and use it in the call.
 * Since there are fewer calls for Logstash it does not have a separate type. Use the standard repitition options and both hot threads and jstack will be included.
 #### Elasticseach Timed Thread Dumps Example
     * sudo ./diagnostics.sh --host localhost -u elastic -p --interval 20 --reps 6 --type elastic-threads    
-
-### Heap Dumps
-* If you wish to take a heap dump of a running process use the --heapdump --nodename processoption
 
 
 ## File Sanitization Utility
@@ -146,8 +143,8 @@ The diag.yml file in the /lib/support-diagnostics-x.x.x contains all the REST an
   * Automatically obfuscates all IPv4 and IPv6 addresses. These will be consistent throughout all files in the archive. In other words, it encounters 10.0.0.5 in one file, the obfuscated value will be used for all occurrences of the IP in other files. These will not, however be consistent from run to run.
   * Obfuscates MAC addresses.
   * If you include a configuration file of supplied string tokens, any occurrence of that token will be replaced with a generated replacement. As with IP's this will be consistent from file to file but not between runs. Literal strings or regex's may be used.
-* Re-archives the file with "scrubbed-" prepended to the  name. An example file (scrub.yml) is included as an example.
-* If you are processing a large cluster's diagnostic, this may take a while to run, and you may need to use the DIAG_JAVA_OPTS environment variable to bump up the Java Heap if you see OutOfMemoryExceptions.
+* Re-archives the file with "scrubbed-" prepended to the  name. An example file (`scrub.yml`) is included as an example.
+* If you are processing a large cluster's diagnostic, this may take a while to run, and you may need to use the `DIAG_JAVA_OPTS` environment variable to bump up the Java Heap if you see OutOfMemoryExceptions.
 
 #### How to run
 * Run the diagnostic utility to get an archive.
@@ -183,5 +180,5 @@ tokens:
   * Make sure the account you are running from has read access to all the Elasticsearch log directories.  This account must have write access to any directory you are using for output.
   * Make sure you have a valid Java installation that the JAVA_HOME environment variable is pointing to.
   * If you are not in the installation directory CD in and run it from there.
-  * If you encounter OutOfMemoryExceptions, use the DIAG_JAVA_OPTS environment variable to set an -Xmx value greater than the standard 2g.  Start with -Xmx4g and move up from there if necessary.
+  * If you encounter OutOfMemoryExceptions, use the `DIAG_JAVA_OPTS` environment variable to set an `-Xmx` value greater than the standard `2g`.  Start with `-Xmx4g` and move up from there if necessary.
   * If reporting an issue make sure to include that.
