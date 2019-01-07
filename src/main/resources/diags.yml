@@ -120,6 +120,7 @@ standard-2:
 commercial-2:
   licenses: "_license?pretty"
   watcher_stats: "_watcher/stats/_all?pretty"
+  watcher_stack: "_watcher/stats?emit_stacktraces=true"
   security_users: "_shield/user?pretty"
   security_roles: "_shield/role?pretty"
 
@@ -173,6 +174,7 @@ commercial-5:
   ml_anomaly_detectors: "_xpack/ml/anomaly_detectors?pretty"
   ml_stats: "_xpack/ml/anomaly_detectors/_stats?pretty"
   watcher_stats: "_watcher/stats/_all"
+  watcher_stack: "_watcher/stats?emit_stacktraces=true"
   security_users: "_xpack/security/user?pretty"
   security_roles: "_xpack/security/role?pretty"
   security_role_mappings: "_xpack/security/role_mapping?pretty"
@@ -227,6 +229,7 @@ commercial-6:
   ml_anomaly_detectors: "_xpack/ml/anomaly_detectors?pretty"
   ml_stats: "_xpack/ml/anomaly_detectors/_stats?pretty"
   watcher_stats: "_watcher/stats/_all"
+  watcher_stack: "_watcher/stats?emit_stacktraces=true"
   security_users: "_xpack/security/user?pretty"
   security_roles: "_xpack/security/role?pretty"
   security_role_mappings: "_xpack/security/role_mapping?pretty"
