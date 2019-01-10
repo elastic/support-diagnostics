@@ -29,10 +29,7 @@ public abstract class AbstractQueryCmd extends AbstractDiagnosticCmd {
       }
 
       String fileName = context.getTempDir() + SystemProperties.fileSeparator + queryName + ext;
-
-      if (!restExec.execConfiguredQuery(url, query, fileName)) {
-         logger.info("{} did not complete normally.", queryName);
-      }
+      restExec.execConfiguredQuery(url, fileName);
    }
 
 }
