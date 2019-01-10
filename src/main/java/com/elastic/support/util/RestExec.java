@@ -157,7 +157,7 @@ public class RestExec {
             String encoding = StandardCharsets.UTF_8.name();
             IOUtils.copy(responseStream, writer, encoding);
             String msg = writer.toString();
-            logger.log(SystemProperties.DIAG, "File {} was retrieved and saved to disk.", destination);
+            logger.log(SystemProperties.DIAG, "File {} was retrieved and saved to disk with errors.", destination);
             return false;
          }
       } catch (Exception e) {
