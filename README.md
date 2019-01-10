@@ -89,7 +89,7 @@ As a first step the diagnostic will check the Github repo for the current releas
 
 #### Local Example
 ```
- ./diagnostics.sh --host 10.0.0.20 --type local -u elastic -p -ssl -o /home/admin/log-output
+ ./diagnostics.sh --host 10.0.0.20 --type local -u elastic -p --ssl -o /home/admin/log-output
 ```
 
 ### Customizing the output
