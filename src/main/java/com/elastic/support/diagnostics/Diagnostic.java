@@ -20,7 +20,7 @@ public class Diagnostic {
 
    private InputParams inputs = new InputParams();
    private DiagnosticChainExec dc = new DiagnosticChainExec();
-   private DiagnosticContext ctx = new DiagnosticContext(inputs);
+   private DiagnosticContext ctx = new DiagnosticContext();
    private Logger logger = LogManager.getLogger();
    private boolean proceedToRun = false;
 

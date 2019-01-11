@@ -36,11 +36,6 @@ public class DiagnosticContext {
    int currentRep;
    boolean localAddressLocated = true;
 
-
-   public DiagnosticContext(InputParams inputs){
-      this.inputParams = inputs;
-   }
-
    public boolean isLocalAddressLocated() {
       return localAddressLocated;
    }

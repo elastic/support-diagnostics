@@ -4,7 +4,6 @@ standard:
   - com.elastic.support.diagnostics.commands.VersionAndClusterNameCheckCmd
   - com.elastic.support.diagnostics.commands.DiagVersionCheckCmd
   - com.elastic.support.diagnostics.commands.RunClusterQueriesCmd
-  - com.elastic.support.diagnostics.commands.RunCommercialQueriesCmd
   - com.elastic.support.diagnostics.commands.SystemDigestCmd
   - com.elastic.support.diagnostics.commands.HostIdentifierCmd
   - com.elastic.support.diagnostics.commands.LogCmd

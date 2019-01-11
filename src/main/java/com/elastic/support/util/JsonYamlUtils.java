@@ -13,6 +13,7 @@ import org.yaml.snakeyaml.Yaml;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 
@@ -21,47 +22,72 @@ public class JsonYamlUtils {
 
    private static final Logger logger = LoggerFactory.getLogger(JsonYamlUtils.class);
 
-   public static JsonNode createJsonNodeFromFileName(String fileName) throws Exception {
+   public static JsonNode createJsonNodeFromFileName(String fileName) {
       File jsonFile = FileUtils.getFile(fileName);
       return createJsonNodeFromFile(jsonFile);
    }
 
-   public static JsonNode createJsonNodeFromFileName(String dir, String fileName) throws Exception {
+   public static JsonNode createJsonNodeFromFileName(String dir, String fileName) {
       File jsonFile = FileUtils.getFile(dir, fileName);
       return createJsonNodeFromFile(jsonFile);
    }
 
-   public static JsonNode createJsonNodeFromFile(File jsonFile) throws Exception {
-      String fileString = FileUtils.readFileToString(jsonFile, "UTF8");
-      return JsonYamlUtils.createJsonNodeFromString(fileString);
+   public static JsonNode createJsonNodeFromFile(File jsonFile)  {
+      try {
+         String fileString = FileUtils.readFileToString(jsonFile, "UTF8");
+         return JsonYamlUtils.createJsonNodeFromString(fileString);
+      } catch (IOException e) {
+         logger.error("Error reading in JSON string from file: {}", jsonFile);
+         throw new RuntimeException(e);
+      }
    }
 
-   public static JsonNode createJsonNodeFromString(String nodeString) throws Exception {
-      ObjectMapper mapper = new ObjectMapper();
-      return mapper.readTree(nodeString);
+   public static JsonNode createJsonNodeFromString(String nodeString) {
+      try {
+         ObjectMapper mapper = new ObjectMapper();
+         return mapper.readTree(nodeString);
+      } catch (IOException e) {
+         logger.error("Error creating JSON node from input string: {}", nodeString);
+         throw new RuntimeException(e);
+      }
    }
 
-   public static JsonNode createJsonNodeFromClasspath(String path) throws Exception {
-      InputStream is;
-      is = JsonYamlUtils.class.getClassLoader().getResourceAsStream(path);
-      String nodeString = new String(IOUtils.toByteArray(is));
-      ObjectMapper mapper = new ObjectMapper();
-      return mapper.readTree(nodeString);
+   public static JsonNode createJsonNodeFromClasspath(String path) {
+      try {
+         InputStream is;
+         is = JsonYamlUtils.class.getClassLoader().getResourceAsStream(path);
+         String nodeString = new String(IOUtils.toByteArray(is));
+         ObjectMapper mapper = new ObjectMapper();
+         return mapper.readTree(nodeString);
+      } catch (IOException e) {
+         logger.error("Error creating JSON node {}", path);
+         throw new RuntimeException(e);
+      }
    }
 
-   public static void writeYaml(String path, Map tree) throws Exception {
-      DumperOptions options = new DumperOptions();
-      options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-      Yaml yaml = new Yaml(options);
-      FileWriter writer = new FileWriter(path);
-      yaml.dump(tree, writer);
+   public static void writeYaml(String path, Map tree) {
+      try {
+         DumperOptions options = new DumperOptions();
+         options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+         Yaml yaml = new Yaml(options);
+         FileWriter writer = new FileWriter(path);
+         yaml.dump(tree, writer);
+      } catch (IOException e) {
+         logger.error("Error writing YAML to: {}", path);
+         throw new RuntimeException(e);
+      }
    }
 
-   public static Map<String, Object> readYamlFromClasspath(String path, boolean isBlock) throws Exception {
-      InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(path);
-      Map<String, Object> doc = JsonYamlUtils.readYaml(inputStream, isBlock);
-      SystemUtils.streamClose(path, inputStream);
-      return doc;
+   public static Map<String, Object> readYamlFromClasspath(String path, boolean isBlock)  {
+      try {
+         InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(path);
+         Map<String, Object> doc = JsonYamlUtils.readYaml(inputStream, isBlock);
+         SystemUtils.streamClose(path, inputStream);
+         return doc;
+      } catch (Exception e) {
+         logger.error("Error reading YAML from {}", path);
+         throw new RuntimeException(e);
+      }
    }
 
    public static Map<String, Object> readYamlFromPath(String path, boolean isBlock) throws Exception {
@@ -102,7 +128,7 @@ public class JsonYamlUtils {
       return flattenYaml(map);
    }
 
-   public static Map<String, Object> flattenNode(JsonNode node) throws RuntimeException {
+   public static Map<String, Object> flattenNode(JsonNode node) {
       try {
          ObjectMapper mapper = new ObjectMapper();
          Map<String, Object> jsonMap = mapper.convertValue(node, Map.class);
