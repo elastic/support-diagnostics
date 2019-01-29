@@ -120,6 +120,10 @@ rest-calls:
       minor-5:
         rollup_index_caps: "*/_xpack/rollup/data"
         security_priv: "_xpack/security/privilege?pretty"
+        ccr_stats: "_ccr/stats?pretty"
+        ccr_autofollow_patterns: "/_ccr/auto_follow?pretty"
+      minor-7:
+        ccr_follower_info: "_all/_ccr/info?pretty"
 
 elastic-threads:
   nodes: "_nodes?pretty&human"
