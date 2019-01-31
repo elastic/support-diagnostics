@@ -1,8 +1,10 @@
 package com.elastic.support.diagnostics.commands;
 
+import com.elastic.support.diagnostics.chain.Command;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.util.SystemProperties;
-import com.elastic.support.util.SystemUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import oshi.hardware.CentralProcessor.TickType;
 import oshi.json.SystemInfo;
 import oshi.json.hardware.*;
@@ -16,9 +18,13 @@ import java.io.*;
 import java.util.Arrays;
 import java.util.List;
 
-public class SystemDigestCmd extends AbstractDiagnosticCmd {
+public class SystemDigestCmd  implements Command {
 
-   public boolean execute(DiagnosticContext context) {
+    private final Logger logger = LogManager.getLogger(SystemDigestCmd.class);
+
+    public void execute(DiagnosticContext context) {
+
+      // Todo Try with resources...
 
       try {
          SystemInfo si = new SystemInfo();
@@ -64,14 +70,12 @@ public class SystemDigestCmd extends AbstractDiagnosticCmd {
          writer.newLine();
 
          writer.close();
+         logger.info("Finished querying SysInfo.");
+
       } catch (final Exception e) {
          logger.error("Failed saving system-digest.txt file.", e);
-         return false;
       }
 
-      logger.info("Finished querying SysInfo.");
-
-      return true;
    }
 
    private static void printComputerSystem(BufferedWriter writer, final ComputerSystem computerSystem) throws Exception{

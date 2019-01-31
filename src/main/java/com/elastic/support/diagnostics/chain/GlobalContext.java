@@ -1,35 +1,103 @@
-package com.elastic.support.diagnostics;
+package com.elastic.support.diagnostics.chain;
 
+import com.elastic.support.diagnostics.DiagnosticInputs;
 import com.elastic.support.rest.RestExec;
-
+import com.elastic.support.util.JsonYamlUtils;
+import com.fasterxml.jackson.databind.JsonNode;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import java.util.Map;
 
-public class GlobalState {
-    private static RestExec restExec = new RestExec();
-    private static Inputs inputs;
+public class GlobalContext {
+
+    private static Logger logger = LogManager.getLogger(GlobalContext.class);
+
+    // These should all be immutable after initialization
+    private static RestExec restExec;
+    private static DiagnosticInputs diagnosticInputs;
     private static Map config;
+    private static Map<String, Object> chains;
+    private static boolean initialized = false;
+    private static JsonNode nodeManifest;
 
-    public static RestExec getRestExec() {
-        return restExec;
+
+    private static void init(DiagnosticInputs diagnosticInputs){
+
+        GlobalContext.diagnosticInputs = diagnosticInputs;
+
+        try {
+            Map<String, Object> configuration = JsonYamlUtils.readYamlFromClasspath("diags.yml", true);
+            if (configuration.size() == 0) {
+                logger.error("Required config file diags.yml was not found. Exiting application.");
+                throw new RuntimeException("Missing diags.yml");
+            }
+
+            GlobalContext.config = configuration;
+
+
+            Map<String, Object> chains = JsonYamlUtils.readYamlFromClasspath("chains.yml", false);
+            if (chains.size() == 0) {
+                logger.error("Required config file chains.yml was not found. Exiting application.");
+                throw new RuntimeException("Missing chain.yml");
+            }
+
+            GlobalContext.chains = chains;
+
+            Map<String, Integer> restSettings = (Map<String, Integer>)configuration.get("rest-settings");
+
+            GlobalContext.restExec = new RestExec(diagnosticInputs, restSettings);
+
+
+        } catch (Exception e) {
+            logger.error("Error encountered running diagnostic. See logs for additional information.  Exiting application.", e);
+            throw new RuntimeException("Diagnostic runtime error", e);
+        }
+
     }
 
-    public static void setRestExec(RestExec restExec) {
-        GlobalState.restExec = restExec;
+
+    public static  RestExec getRestExec() {
+        if(initialized){
+            return GlobalContext.restExec;
+        }
+        else{
+            throw new IllegalStateException("Context not initialized");
+        }
+
     }
 
-    public static Inputs getInputs() {
-        return inputs;
-    }
-
-    public static void setInputs(Inputs inputs) {
-        GlobalState.inputs = inputs;
+    public static DiagnosticInputs getDiagnosticInputs() {
+        if(initialized){
+            return GlobalContext.diagnosticInputs;
+        }
+        else{
+            throw new IllegalStateException("Context not initialized");
+        }
     }
 
     public static Map getConfig() {
-        return config;
+        if(initialized){
+            return GlobalContext.config;
+        }
+        else{
+            throw new IllegalStateException("Context not initialized");
+        }
     }
 
-    public static void setConfig(Map config) {
-        GlobalState.config = config;
+    public static Map getChains(){
+        if(initialized){
+            return GlobalContext.chains;
+        }
+        else{
+            throw new IllegalStateException("Context not initialized");
+        }
+    }
+
+    public static JsonNode getNodeManifest() {
+        return nodeManifest;
+    }
+
+    public static void setNodeManifest(JsonNode nodeManifest) {
+        GlobalContext.nodeManifest = nodeManifest;
     }
 }

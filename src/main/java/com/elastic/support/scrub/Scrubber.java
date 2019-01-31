@@ -1,5 +1,5 @@
-package com.elastic.support.diagnostics.scrub;
-import com.elastic.support.diagnostics.AbstractDiagnostic;
+package com.elastic.support.scrub;
+import com.elastic.support.diagnostics.BaseDiagnostic;
 import com.elastic.support.util.ArchiveUtils;
 import com.elastic.support.util.SystemProperties;
 import com.elastic.support.util.SystemUtils;
@@ -8,9 +8,13 @@ import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.IOException;
 
-public class Scrubber extends AbstractDiagnostic {
+public class Scrubber extends BaseDiagnostic {
 
-   private ScrubInputParams inputs = new ScrubInputParams();
+   private ScrubInputs inputs;
+
+   public Scrubber(ScrubInputs inputs){
+      this.inputs = inputs;
+   }
 
    public void exec(){
       try {
@@ -26,13 +30,13 @@ public class Scrubber extends AbstractDiagnostic {
             targetDir = targetDir +  SystemProperties.fileSeparator + "scrubbed";
          }
 
-         SystemUtils.createFileAppender(targetDir, "scrubber.log");
+         createFileAppender(targetDir, "scrubber.log");
          String scrubbedName = (archivePath.substring(pos + 1)).replace(".tar.gz", "");
          ArchiveUtils archiveUtils = new ArchiveUtils(new ScrubberUtils(inputs.getScrubFile()));
          archiveUtils.extractDiagnosticArchive(archivePath, targetDir );
-         SystemUtils.closeLogs();
+         closeLogs();
          archiveUtils.createArchive(targetDir, scrubbedName);
-         SystemUtils.nukeTempDir(targetDir);
+         nukeTempDir(targetDir);
 
          File tmp = new File(targetDir);
          //tmp.setWritable(true, false);
@@ -45,6 +49,10 @@ public class Scrubber extends AbstractDiagnostic {
       catch(Exception e){
          logger.error("Error extracting diagnostic archive", e);
       }
+
+   }
+
+   public void close(){
 
    }
 

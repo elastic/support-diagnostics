@@ -1,11 +1,16 @@
 package com.elastic.support.diagnostics.commands;
 
 import com.elastic.support.diagnostics.Constants;
-import com.elastic.support.diagnostics.InputParams;
+import com.elastic.support.diagnostics.Diagnostic;
+import com.elastic.support.diagnostics.DiagnosticInputs;
+import com.elastic.support.diagnostics.chain.Command;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
+import com.elastic.support.diagnostics.chain.GlobalContext;
 import com.elastic.support.util.SystemProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.text.DateFormat;
@@ -15,9 +20,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
 
-public class GenerateManifestCmd extends AbstractDiagnosticCmd {
+public class GenerateManifestCmd  implements Command {
 
-   public boolean execute(DiagnosticContext context) {
+   private final Logger logger = LogManager.getLogger(GenerateManifestCmd.class);
+
+   public void execute(DiagnosticContext context) {
 
       logger.info("Writing diagnostic manifest.");
       try {
@@ -28,8 +35,8 @@ public class GenerateManifestCmd extends AbstractDiagnosticCmd {
          manifest.put(Constants.DIAG_VERSION, diagVersion);
          context.setDiagVersion(diagVersion);
          manifest.put("collectionDate", SystemProperties.getUtcDateString());
-         InputParams params = context.getInputParams();
-         manifest.put("inputs", params.toString());
+         DiagnosticInputs params = GlobalContext.getDiagnosticInputs();
+         manifest.put("diagnosticInputs", params.toString());
 
          File manifestFile = new File(context.getTempDir() + SystemProperties.fileSeparator + "manifest.json");
          mapper.writeValue(manifestFile, manifest);
@@ -38,7 +45,6 @@ public class GenerateManifestCmd extends AbstractDiagnosticCmd {
          logger.error("Error creating the manifest file\n", e);
       }
 
-      return true;
    }
 
    public String getToolVersion() {

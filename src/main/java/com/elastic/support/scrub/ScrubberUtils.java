@@ -1,4 +1,4 @@
-package com.elastic.support.diagnostics.scrub;
+package com.elastic.support.scrub;
 
 import com.elastic.support.diagnostics.Constants;
 import com.elastic.support.util.JsonYamlUtils;

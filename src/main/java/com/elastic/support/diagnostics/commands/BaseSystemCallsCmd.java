@@ -1,7 +1,10 @@
 package com.elastic.support.diagnostics.commands;
 
+import com.elastic.support.diagnostics.chain.Command;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.util.SystemProperties;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -9,8 +12,9 @@ import java.io.PrintStream;
 import java.nio.file.Paths;
 import java.util.*;
 
-public abstract class BaseSystemCallsCmd extends AbstractDiagnosticCmd {
+public abstract class BaseSystemCallsCmd implements Command {
 
+   protected final Logger logger = LogManager.getLogger(BaseSystemCallsCmd.class);
 
       protected void processCalls(DiagnosticContext context, Map<String, String> osCmds){
 

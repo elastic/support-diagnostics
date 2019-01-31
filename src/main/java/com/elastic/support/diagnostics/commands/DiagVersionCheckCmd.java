@@ -1,57 +1,55 @@
 package com.elastic.support.diagnostics.commands;
 
-import com.elastic.support.diagnostics.Constants;
-import com.elastic.support.diagnostics.InputParams;
+import com.elastic.support.diagnostics.Diagnostic;
+import com.elastic.support.diagnostics.DiagnosticInputs;
+import com.elastic.support.diagnostics.chain.Command;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
-import com.elastic.support.util.ClientBuilder;
+import com.elastic.support.diagnostics.chain.GlobalContext;
+import com.elastic.support.rest.ClientBuilder;
 import com.elastic.support.util.JsonYamlUtils;
-import com.elastic.support.util.RestExec;
+import com.elastic.support.rest.RestExec;
 import com.elastic.support.util.SystemProperties;
 import com.fasterxml.jackson.databind.JsonNode;
+import org.apache.http.HttpHost;
 import org.apache.http.client.HttpClient;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
 
-public class DiagVersionCheckCmd extends AbstractDiagnosticCmd {
+public class DiagVersionCheckCmd  implements Command {
 
-   public boolean execute(DiagnosticContext context) {
+   private final Logger logger = LogManager.getLogger(DiagVersionCheckCmd.class);
+
+   public void execute(DiagnosticContext context) {
 
       Map resultMap = null;
-      InputParams inputs = context.getInputParams();
+      DiagnosticInputs diagnosticInputs = GlobalContext.getDiagnosticInputs();
 
-      if(inputs.isBypassDiagVerify()){return true;}
-
-      boolean rc = true;
+      if(diagnosticInputs.isBypassDiagVerify()){
+         return;
+      }
 
       logger.info("Checking for diagnostic version updates.");
 
       try {
+         Map config = GlobalContext.getConfig();
+         String ghHost = (String) config.get("diagReleaseHost");
+         String ghEndpoint = (String) config.get("diagReleaseDest");
+         String ghScheme = (String) config.get("diagReleaseScheme");
+         HttpHost httpHost = new HttpHost(ghHost, 443, ghScheme);
 
-         String ghHost = (String) context.getConfig().get("diagReleaseHost");
-         String ghEndpoint = (String) context.getConfig().get("diagReleaseDest");
-         String ghScheme = (String) context.getConfig().get("diagReleaseScheme");
          String diagVersion = context.getDiagVersion();
          if (diagVersion.equalsIgnoreCase("debug")) {
             logger.info("Running in debugger - bypassing check");
-            return true;
+            return;
          }
 
-         ClientBuilder cb = new ClientBuilder();
-         cb.setConnectTimeout(6000);
-         cb.setRequestTimeout(10000);
-         cb.setHost(ghHost);
-         cb.setScheme(ghScheme);
-         HttpClient client = cb.defaultClient();
-
-         RestExec restExec = new RestExec()
-            .setClient(client)
-            .setHttpHost(cb.getHttpHost());
-
-         String result = null;
-         result = restExec.execBasic(ghScheme + "://" + ghHost + "/" + ghEndpoint);
+         RestExec restExec = GlobalContext.getRestExec();
+         String result = restExec.execGeneric(ghEndpoint, httpHost, null, null );
 
          JsonNode rootNode = JsonYamlUtils.createJsonNodeFromString(result);
          String ver = rootNode.path("tag_name").asText();
@@ -80,18 +78,14 @@ public class DiagVersionCheckCmd extends AbstractDiagnosticCmd {
 
             if ("n".equalsIgnoreCase(feedback)) {
                System.out.println("Exiting application");
-               rc = false;
             }
-
          }
       } catch (Exception e) {
          logger.log(SystemProperties.DIAG, e);
          logger.info("Issue encountered while checking diagnostic version for updates.");
          logger.info("Failed to get current diagnostic version from Github.");
          logger.info("If Github is not accessible from this environemnt current supported version cannot be confirmed.");
-         rc = true;
       }
 
-      return rc;
    }
 }

@@ -1,53 +1,61 @@
 package com.elastic.support.diagnostics.commands;
 
-import com.elastic.support.diagnostics.Diagnostic;
 import com.elastic.support.diagnostics.DiagnosticInputs;
 import com.elastic.support.diagnostics.chain.Command;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
+import com.elastic.support.diagnostics.chain.GlobalContext;
 import com.elastic.support.rest.RestExec;
 import com.elastic.support.util.SystemProperties;
+import org.apache.http.HttpHost;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 import java.util.Map;
 
-public abstract class AbstractQueryCmd  implements Command {
+public abstract class BaseQueryCmd implements Command {
 
-   protected final Logger logger = LogManager.getLogger(AbstractQueryCmd.class);
+    protected final Logger logger = LogManager.getLogger(BaseQueryCmd.class);
 
-   public void runQuery(Map.Entry<String, String> entry, DiagnosticContext context) {
+    public void runQuery(Map.Entry<String, String> entry, DiagnosticContext context) {
 
-      RestExec restExec = Diagnostic.globalContext.getRestExec();
-      DiagnosticInputs diagnosticInputs = Diagnostic.globalContext.getDiagnosticInputs();
-      String queryName = entry.getKey();
-      String query = entry.getValue();
+        RestExec restExec = GlobalContext.getRestExec();
+        DiagnosticInputs diagnosticInputs = GlobalContext.getDiagnosticInputs();
 
-      logger.debug(": now processing " + queryName + ", " + query);
+        String queryName = entry.getKey();
+        String query = entry.getValue();
 
-      String url = diagnosticInputs.getUrl() + "/" + query;
-      logger.info("Currently running query: {}", query);
+        logger.debug(": now processing " + queryName + ", " + query);
 
-      String fileName = buildFileName(queryName, context );
-      restExec.execConfiguredQuery(url, fileName);
-   }
+        logger.info("Currently running query: {}", query);
 
-   protected String buildFileName(String queryName, DiagnosticContext context){
+        String fileName = buildFileName(queryName, context);
+        HttpHost httpHost = new HttpHost(
+                diagnosticInputs.getHost(),
+                diagnosticInputs.getPort(),
+                diagnosticInputs.getScheme()
+      );
 
-      List textFileExtensions = (List) Diagnostic.globalContext.getConfig().get("textFileExtensions");
+        restExec.execConfiguredDiagnosticQuery(query, fileName, httpHost);
+    }
 
-      String ext;
-      if (textFileExtensions.contains(queryName)) {
-         ext = ".txt";
-      } else {
-         ext = ".json";
-      }
-      String fileName = context.getTempDir() + SystemProperties.fileSeparator + queryName + ext;
+    protected String buildFileName(String queryName, DiagnosticContext context) {
 
-      return fileName;
+        List textFileExtensions = (List) GlobalContext
+                .getConfig().get("textFileExtensions");
+
+        String ext;
+        if (textFileExtensions.contains(queryName)) {
+            ext = ".txt";
+        } else {
+            ext = ".json";
+        }
+        String fileName = context.getTempDir() + SystemProperties.fileSeparator + queryName + ext;
+
+        return fileName;
 
 
-   }
+    }
 
 
 }
