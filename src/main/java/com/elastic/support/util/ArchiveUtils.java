@@ -1,7 +1,7 @@
 package com.elastic.support.util;
 
-import com.elastic.support.diagnostics.PostProcessor;
-import com.elastic.support.diagnostics.PostProcessorBypass;
+import com.elastic.support.scrub.PostProcessor;
+import com.elastic.support.scrub.PostProcessorBypass;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;

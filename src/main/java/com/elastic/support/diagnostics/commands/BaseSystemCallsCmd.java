@@ -118,10 +118,4 @@ public abstract class BaseSystemCallsCmd extends AbstractDiagnosticCmd {
       return false;
    }
 
-   protected boolean isProcessPresent(String pid) {
-      if (pid.equals("0")) {
-         return false;
-      }
-      return true;
-   }
 }

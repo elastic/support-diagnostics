@@ -24,43 +24,43 @@ public class TestRestCalls {
     @Test
     public void testVersionOne() {
         Map<String, String > statements = cmd.buildStatementsByVersion("1.6", calls);
-        assertEquals( 38, statements.size());
+        assertEquals( 37, statements.size());
     }
 
     @Test
     public void testVersionTwo(){
         Map<String, String > statements = cmd.buildStatementsByVersion("2.4", calls);
-        assertEquals(43, statements.size());
+        assertEquals(44, statements.size());
     }
 
     @Test
     public void testVersionFive(){
         Map<String, String > statements = cmd.buildStatementsByVersion("5.6", calls);
-        assertEquals(51, statements.size());
+        assertEquals(52, statements.size());
     }
 
     @Test
     public void testVersionSix(){
         Map<String, String > statements = cmd.buildStatementsByVersion("6.0", calls);
-        assertEquals(53, statements.size());
+        assertEquals(54, statements.size());
     }
 
     @Test
     public void testVersionSixFour(){
         Map<String, String > statements = cmd.buildStatementsByVersion("6.4", calls);
-        assertEquals(56, statements.size());
+        assertEquals(57, statements.size());
     }
 
     @Test
     public void testVersionSixFive(){
         Map<String, String > statements = cmd.buildStatementsByVersion("6.5", calls);
-        assertEquals(58, statements.size());
+        assertEquals(59, statements.size());
     }
 
     @Test
     public void testVersionSeven(){
         Map<String, String > statements = cmd.buildStatementsByVersion("7.0", calls);
-        assertEquals(58, statements.size());
+        assertEquals(59, statements.size());
     }
 
 }

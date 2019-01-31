@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-public final class SecurityPropertiesCmd extends AbstractDiagnosticCmd {
+public final class NetworkCacheCheckCmd extends AbstractDiagnosticCmd {
 
    @Override
    public boolean execute(final DiagnosticContext context) {

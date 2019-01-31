@@ -1,4 +1,4 @@
-package com.elastic.support.diagnostics;
+package com.elastic.support.scrub;
 
 public class PostProcessorBypass implements PostProcessor {
 

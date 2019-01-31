@@ -1,5 +1,6 @@
 package com.elastic.support.diagnostics.chain;
 
+import com.elastic.support.diagnostics.Diagnostic;
 import com.elastic.support.util.JsonYamlUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,22 +15,11 @@ public class DiagnosticChainExec {
    public void runDiagnostic(DiagnosticContext context) {
 
       try {
-         Map<String, Object> diags = JsonYamlUtils.readYamlFromClasspath("diags.yml", true);
-         if (diags.size() == 0) {
-            logger.error("Required config file diags.yml was not found. Exiting application.");
-            throw new RuntimeException("Missing diags.yml");
-         }
 
-         context.setConfig(diags);
-
-         Map<String, Object> chains = JsonYamlUtils.readYamlFromClasspath("chains.yml", false);
-         if (chains.size() == 0) {
-            logger.error("Required config file chains.yml was not found. Exiting application.");
-            throw new RuntimeException("Missing chain.yml");
-         }
-
-         String diagType = context.getInputParams().getDiagType();
-         List<String> chain = (List) chains.get(diagType);
+         String diagType = GlobalContext
+.getDiagnosticInputs().getDiagType();
+         List<String> chain = (List) GlobalContext
+.getChains().get(diagType);
 
          Chain diagnostic = new Chain(chain);
          diagnostic.execute(context);

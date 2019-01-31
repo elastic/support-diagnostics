@@ -1,17 +1,19 @@
 package com.elastic.support.diagnostics.commands;
 
+import com.elastic.support.diagnostics.Diagnostic;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
+import com.elastic.support.diagnostics.chain.GlobalContext;
 import com.elastic.support.util.JsonYamlUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.Map;
 import java.util.Set;
 
-public class RunLogstashQueriesCmd extends AbstractQueryCmd {
+public class RunLogstashQueriesCmd extends BaseQueryCmd {
 
-   public boolean execute(DiagnosticContext context) {
+   public void execute(DiagnosticContext context) {
 
-      Map<String, String> statements = (Map<String, String>) context.getConfig().get("logstash");
+      Map<String, String> statements = (Map<String, String>) GlobalContext.getConfig().get("logstash");
       Set<Map.Entry<String, String>> entries = statements.entrySet();
 
       logger.debug("Generating full diagnostic.");
@@ -31,7 +33,6 @@ public class RunLogstashQueriesCmd extends AbstractQueryCmd {
          logger.error("Error obtaining logstash process id", e);
       }
 
-      return true;
    }
 
 

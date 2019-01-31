@@ -1,17 +1,18 @@
 package com.elastic.support.diagnostics.commands;
 
+import com.elastic.support.diagnostics.Diagnostic;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
-import org.apache.commons.lang3.ObjectUtils;
+import com.elastic.support.diagnostics.chain.GlobalContext;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class RunClusterQueriesCmd extends AbstractQueryCmd {
+public class RunClusterQueriesCmd extends BaseQueryCmd {
 
-   public boolean execute(DiagnosticContext context) {
-      Map config = (Map)context.getConfig().get("rest-calls");
+   public void execute(DiagnosticContext context) {
+      Map config = (Map) GlobalContext.getConfig().get("rest-calls");
       String version = context.getVersion();
 
       Map<String, String> statements = buildStatementsByVersion(version, config);
@@ -24,7 +25,6 @@ public class RunClusterQueriesCmd extends AbstractQueryCmd {
          runQuery(entry, context);
       }
 
-      return true;
    }
 
    public Map<String, String> buildStatementsByVersion(String version, Map calls ) {

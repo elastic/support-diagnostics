@@ -33,7 +33,7 @@ public class DiagVersionCheckCmd extends AbstractDiagnosticCmd {
          String ghHost = (String) context.getConfig().get("diagReleaseHost");
          String ghEndpoint = (String) context.getConfig().get("diagReleaseDest");
          String ghScheme = (String) context.getConfig().get("diagReleaseScheme");
-         String diagVersion = context.getStringAttribute(Constants.DIAG_VERSION);
+         String diagVersion = context.getDiagVersion();
          if (diagVersion.equalsIgnoreCase("debug")) {
             logger.info("Running in debugger - bypassing check");
             return true;

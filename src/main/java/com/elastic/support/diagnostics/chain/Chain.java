@@ -26,16 +26,12 @@ public class Chain implements Command {
         }
     }
 
-    public boolean execute(DiagnosticContext context){
+    public void execute(DiagnosticContext context){
 
         //Set up initial generic chain
         for(Command dc : commandChain){
-            boolean rc = dc.execute(context);
-            if(!rc){
-                return rc;
-            }
+            dc.execute(context);
         }
-        return true;
     }
 
 }

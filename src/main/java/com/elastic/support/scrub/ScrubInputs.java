@@ -1,10 +1,11 @@
-package com.elastic.support.diagnostics;
+package com.elastic.support.scrub;
 
 import com.beust.jcommander.Parameter;
+import com.elastic.support.diagnostics.BaseInputs;
 import com.elastic.support.util.SystemProperties;
 
 
-public class ScrubInputParams {
+public class ScrubInputs extends BaseInputs {
 
    @Parameter(names = {"-a", "--archive",}, required = true, description = "Required field.  Full path to the archive file to be scrubbed.")
    private String archive;

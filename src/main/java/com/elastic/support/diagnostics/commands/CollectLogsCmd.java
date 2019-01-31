@@ -17,7 +17,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-public class LogCmd extends AbstractDiagnosticCmd {
+public class CollectLogsCmd extends AbstractDiagnosticCmd {
 
    public boolean execute(DiagnosticContext context) {
 
@@ -41,14 +41,9 @@ public class LogCmd extends AbstractDiagnosticCmd {
          int maxLogs = SystemUtils.toInt(context.getConfig().get("maxLogs"), 3);
          int maxGcLogs = SystemUtils.toInt(context.getConfig().get("maxGcLogs"), 3);
 
-         List<String> fileDirs = new ArrayList<>();
-         context.setAttribute("tempFileDirs", fileDirs);
 
          // Create a directory for this node
          String nodeDir = context.getTempDir() + SystemProperties.fileSeparator + "logs";
-
-         fileDirs.add(nodeDir);
-
          Files.createDirectories(Paths.get(nodeDir));
          File logDest = new File(nodeDir);
          File logDir = new File(logs);

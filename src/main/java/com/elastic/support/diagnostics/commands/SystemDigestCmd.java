@@ -20,22 +20,15 @@ public class SystemDigestCmd extends AbstractDiagnosticCmd {
 
    public boolean execute(DiagnosticContext context) {
 
-      if (! context.isLocalAddressLocated()) {
-         logger.info("Not running on a host with a deployed node - bypassing.");
-         return true;
-      }
-
       try {
          SystemInfo si = new SystemInfo();
          HardwareAbstractionLayer hal = si.getHardware();
          OperatingSystem os = si.getOperatingSystem();
-         //Properties props = PropertiesUtil.loadProperties("oshi.json.properties");
-
          File sysFileJson = new File(context.getTempDir() + SystemProperties.fileSeparator + "system-digest.json");
          OutputStream outputStreamJson = new FileOutputStream(sysFileJson);
          BufferedWriter jsonWriter = new BufferedWriter(new OutputStreamWriter(outputStreamJson));
          String jsonInfo = si.toPrettyJSON();
-         context.setAttribute("systemDigest", jsonInfo);
+         context.setSystemDigest(jsonInfo);
          jsonWriter.write(jsonInfo);
          jsonWriter.close();
 

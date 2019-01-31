@@ -26,7 +26,7 @@ public class HostIdentifierCmd extends AbstractDiagnosticCmd {
          String temp = context.getTempDir();
          String targetHost = context.getInputParams().getHost();
 
-         String systemDigest = context.getStringAttribute("systemDigest");
+         String systemDigest = context.getSystemDigest();
          HashSet<String> localAddr = parseNetworkAddresses(systemDigest);
 
          JsonNode rootNode = JsonYamlUtils.createJsonNodeFromFileName(temp, Constants.NODES);
@@ -47,18 +47,14 @@ public class HostIdentifierCmd extends AbstractDiagnosticCmd {
             for (JsonNode node : nodeList) {
                Set<String> nodeAddr = new HashSet<>();
 
-               String networkHost = SystemUtils.toString(node.path("settings").path("network").path("host").asText(), "");
-               if (!StringUtils.isEmpty(networkHost)) {
-                  nodeAddr.add(networkHost);
-               }
-               String host = SystemUtils.toString(node.path("host").asText(), "");
-               if (!StringUtils.isEmpty(host)) {
-                  nodeAddr.add(host);
-               }
-               String ip = SystemUtils.toString(node.path("ip").asText(), "");
-               if (!StringUtils.isEmpty(host)) {
-                  nodeAddr.add(ip);
-               }
+               String host = SystemUtils.toString(node.path("settings").path("network").path("host").asText(), "");
+               addToHostList(host, nodeAddr);
+
+               host = SystemUtils.toString(node.path("host").asText(), "");
+               addToHostList(host, nodeAddr);
+
+               host = SystemUtils.toString(node.path("ip").asText(), "");
+               addToHostList(host, nodeAddr);
 
                String name = SystemUtils.toString(node.path("name").asText(), "");
 
@@ -99,20 +95,22 @@ public class HostIdentifierCmd extends AbstractDiagnosticCmd {
             context.setDiagName(nodeName);
             String logDir = SystemUtils.toString(targetNode.path("settings").path("path").path("logs").asText(), Constants.NOT_FOUND);
             context.setLogDir(logDir);
-            String elasticHome = SystemUtils.toString(targetNode.path("settings").path("path").path("home").asText(), Constants.NOT_FOUND);
-            context.setEsHome(elasticHome);
-
          }
 
       } catch (Exception e) {
          context.setPid(Constants.NOT_FOUND);
          context.setDiagName(Constants.NOT_FOUND);
          context.setLogDir(Constants.NOT_FOUND);
-         context.setEsHome(Constants.NOT_FOUND);
          logger.log(SystemProperties.DIAG, "Error identifying host of diag node.", e);
       }
 
       return true;
+   }
+
+   private void addToHostList(String host, Set hostList){
+      if (! StringUtils.isEmpty(host)){
+         hostList.add(host);
+      }
    }
 
    private boolean isLocalNode(Set<String> localAddr, Set<String>nodeAddr){

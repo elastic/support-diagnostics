@@ -1,7 +1,8 @@
-package com.elastic.support.util;
+package com.elastic.support.diagnostics.scrub;
 
 import com.elastic.support.diagnostics.Constants;
-import com.elastic.support.diagnostics.PostProcessor;
+import com.elastic.support.util.JsonYamlUtils;
+import com.elastic.support.util.SystemUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
