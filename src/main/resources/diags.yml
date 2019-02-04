@@ -107,6 +107,12 @@ rest-calls:
         security_roles: "_xpack/security/role?pretty"
         security_role_mappings: "_xpack/security/role_mapping?pretty"
         xpack: "_xpack/usage?pretty&human"
+      minor-2:
+        # sorting appeared in the REST API spec for these in 5.2, but the feature appeared in 5.1.1
+        # see elastic/elasticsearch/pull/20658
+        cat_indices: "_cat/indices?v&s=index"
+        cat_segments: "_cat/segments?v&s=index"
+        cat_shards: "_cat/shards?v&s=index"
 
     major-6:
       minor-0:
