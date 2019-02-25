@@ -111,18 +111,23 @@ retries:
     major-5:
       # count 11 - 3 override = 9
       minor-0:
-        allocation_explain: "/_cluster/allocation/explain?pretty"
-        allocation_explain_disk: "/_cluster/allocation/explain?include_disk_info=true&pretty"
-        fielddata_stats: "/_nodes/stats/indices/fielddata?level=shards&pretty=true&fields=*" #override
-        ml_anomaly_detectors: "/_xpack/ml/anomaly_detectors?pretty"
-        ml_datafeeds: "/_xpack/ml/datafeeds?pretty"
-        ml_stats: "/_xpack/ml/anomaly_detectors/_stats?pretty"
-        pipelines: "/_ingest/pipeline/*?pretty&human"
-        security_users: "/_xpack/security/user?pretty" #override
-        security_roles: "/_xpack/security/role?pretty" #override
-        security_role_mappings: "/_xpack/security/role_mapping?pretty"
-        xpack: "/_xpack/usage?pretty&human"
-    # total: 52
+        allocation_explain: "_cluster/allocation/explain?pretty"
+        allocation_explain_disk: "_cluster/allocation/explain?include_disk_info=true&pretty"
+        fielddata_stats: "_nodes/stats/indices/fielddata?level=shards&pretty=true&fields=*"
+        ml_anomaly_detectors: "_xpack/ml/anomaly_detectors?pretty"
+        ml_datafeeds: "_xpack/ml/datafeeds?pretty"
+        ml_stats: "_xpack/ml/anomaly_detectors/_stats?pretty"
+        pipelines: "_ingest/pipeline/*?pretty&human"
+        security_users: "_xpack/security/user?pretty"
+        security_roles: "_xpack/security/role?pretty"
+        security_role_mappings: "_xpack/security/role_mapping?pretty"
+        xpack: "_xpack/usage?pretty&human"
+      minor-2:
+        # sorting appeared in the REST API spec for these in 5.2, but the feature appeared in 5.1.1
+        # see elastic/elasticsearch/pull/20658
+        cat_indices: "_cat/indices?v&s=index"
+        cat_segments: "_cat/segments?v&s=index"
+        cat_shards: "_cat/shards?v&s=index"
 
     major-6:
       minor-0:
@@ -143,10 +148,12 @@ retries:
       #total 57
 
       minor-5:
-        # count 2
-        rollup_index_caps: "/*/_xpack/rollup/data"
-        security_priv: "/_xpack/security/privilege?pretty"
-     # total 59
+        rollup_index_caps: "*/_xpack/rollup/data"
+        security_priv: "_xpack/security/privilege?pretty"
+        ccr_stats: "_ccr/stats?pretty"
+        ccr_autofollow_patterns: "/_ccr/auto_follow?pretty"
+      minor-7:
+        ccr_follower_info: "_all/_ccr/info?pretty"
 
 elastic-threads:
   nodes: "/_nodes?pretty&human"
