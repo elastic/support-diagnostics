@@ -49,7 +49,8 @@ retries:
   nodes-stats: 3
   shards: 3
 
-# count: 36
+rest-calls:
+  # count: 36
   common:
     alias: "/_alias?pretty&human"
     cat_aliases: "/_cat/aliases?v"
@@ -146,7 +147,7 @@ retries:
         # count 2
         rollup_index_caps: "/*/_xpack/rollup/data"
         security_priv: "/_xpack/security/privilege?pretty"
-     # total 59
+      # total 59
 
 elastic-threads:
   nodes: "/_nodes?pretty&human"
@@ -179,9 +180,9 @@ linuxOS:
   limits: "cat /etc/security/limits.conf"
 
 linuxOS-dep:
-   proc-limit: "cat /proc/PID/limits"
-   jps: "JAVA_HOME/bin/jps -l -m -v"
-   jstack: "JAVA_HOME/bin/jstack PID"
+  proc-limit: "cat /proc/PID/limits"
+  jps: "JAVA_HOME/bin/jps -l -m -v"
+  jstack: "JAVA_HOME/bin/jstack PID"
 
 macOS:
   ss: "ss"

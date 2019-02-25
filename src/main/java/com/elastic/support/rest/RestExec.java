@@ -170,10 +170,8 @@ public class RestExec implements Closeable {
 
         try (FileOutputStream fos = new FileOutputStream(destination)) {
 
-            // Use HttpEntity.writeTo
-            org.apache.http.HttpEntity entity = response.getEntity();
-            InputStream responseStream = entity.getContent();
-            IOUtils.copy(responseStream, fos);
+            HttpEntity entity = response.getEntity();
+            entity.writeTo(new FileOutputStream(destination));
             if (response.getStatusLine().getStatusCode() == 200) {
                 logger.log(SystemProperties.DIAG, "File {} was retrieved and saved to disk.", destination);
             } else {
