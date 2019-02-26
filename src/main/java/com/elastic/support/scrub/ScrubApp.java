@@ -1,11 +1,8 @@
 package com.elastic.support.scrub;
 
-import com.elastic.support.diagnostics.Diagnostic;
-import com.elastic.support.diagnostics.DiagnosticInputs;
+import com.elastic.support.config.ScrubInputs;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.sql.CallableStatement;
 
 
 public class ScrubApp {
@@ -21,7 +18,7 @@ public class ScrubApp {
             System.exit(0);
         }
 
-        try(Scrubber scrub = new Scrubber(scrubInputs);){
+        try(ScrubService scrub = new ScrubService(scrubInputs);){
             scrub.exec();
         }
         catch (Exception e){

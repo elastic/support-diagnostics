@@ -49,7 +49,7 @@ retries:
   nodes-stats: 3
   shards: 3
 
-# count: 36
+rest-calls:
   common:
     alias: "/_alias?pretty&human"
     cat_aliases: "/_cat/aliases?v"
@@ -89,14 +89,12 @@ retries:
     watcher_stack: "/_watcher/stats?emit_stacktraces=true"
 
   versions:
-    # count 1
+
     major-1:
       minor-0:
         licenses: "/_licenses"
-    # total 37
 
     major-2:
-      # count: 8 - 1 override = 7
       minor-0:
         cat_nodeattrs: "/_cat/nodeattrs?v&h=node,id,pid,host,ip,port,attr,value"
         cat_repositories: "/_cat/repositories?v"
@@ -109,7 +107,6 @@ retries:
     #total 44
 
     major-5:
-      # count 11 - 3 override = 9
       minor-0:
         allocation_explain: "_cluster/allocation/explain?pretty"
         allocation_explain_disk: "_cluster/allocation/explain?include_disk_info=true&pretty"
@@ -131,22 +128,13 @@ retries:
 
     major-6:
       minor-0:
-        # count 2
         nodes_usage: "/_nodes/usage"
         remote_cluster_info: "/_remote/info"
-      #total 54
-
       minor-3:
-        # count 2
         rollup_jobs: "/_xpack/rollup/job/_all"
         rollup_caps: "/_xpack/rollup/data/_all"
-      #total 56
-
       minor-4:
-        # count 1
         cluster_settings_defaults: "/_cluster/settings?include_defaults&pretty&flat_settings"
-      #total 57
-
       minor-5:
         rollup_index_caps: "*/_xpack/rollup/data"
         security_priv: "_xpack/security/privilege?pretty"

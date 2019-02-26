@@ -1,8 +1,7 @@
 package com.elastic.support.diagnostics.commands;
 
-import com.elastic.support.diagnostics.Constants;
-import com.elastic.support.diagnostics.Diagnostic;
-import com.elastic.support.diagnostics.DiagnosticInputs;
+import com.elastic.support.config.Constants;
+import com.elastic.support.config.DiagnosticInputs;
 import com.elastic.support.diagnostics.chain.Command;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.diagnostics.chain.GlobalContext;

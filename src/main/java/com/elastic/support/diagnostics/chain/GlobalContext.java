@@ -1,6 +1,6 @@
 package com.elastic.support.diagnostics.chain;
 
-import com.elastic.support.diagnostics.DiagnosticInputs;
+import com.elastic.support.config.DiagnosticInputs;
 import com.elastic.support.rest.RestExec;
 import com.elastic.support.util.JsonYamlUtils;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -14,11 +14,12 @@ public class GlobalContext {
 
     // These should all be immutable after initialization
     private static RestExec restExec;
-    private static DiagnosticInputs diagnosticInputs;
     private static Map config;
     private static Map<String, Object> chains;
     private static boolean initialized = false;
     private static JsonNode nodeManifest;
+    private static DiagnosticInputs diagnosticInputs;
+
 
 
     private static void init(DiagnosticInputs diagnosticInputs){
@@ -50,7 +51,7 @@ public class GlobalContext {
 
         } catch (Exception e) {
             logger.error("Error encountered running diagnostic. See logs for additional information.  Exiting application.", e);
-            throw new RuntimeException("Diagnostic runtime error", e);
+            throw new RuntimeException("DiagnosticService runtime error", e);
         }
 
     }
@@ -93,11 +94,11 @@ public class GlobalContext {
         }
     }
 
-    public static JsonNode getNodeManifest() {
+/*    public static JsonNode getNodeManifest() {
         return nodeManifest;
     }
 
     public static void setNodeManifest(JsonNode nodeManifest) {
         GlobalContext.nodeManifest = nodeManifest;
-    }
+    }*/
 }

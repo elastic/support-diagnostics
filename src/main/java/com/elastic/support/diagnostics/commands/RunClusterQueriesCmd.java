@@ -1,6 +1,5 @@
 package com.elastic.support.diagnostics.commands;
 
-import com.elastic.support.diagnostics.Diagnostic;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.diagnostics.chain.GlobalContext;
 
@@ -21,9 +20,9 @@ public class RunClusterQueriesCmd extends BaseQueryCmd {
 
       logger.debug("Generating full diagnostic.");
 
-      for (Map.Entry<String, String> entry : entries) {
-         runQuery(entry, context);
-      }
+      runQueries(entries, context, GlobalContext.getDiagnosticInputs().getHost(),
+              GlobalContext.getDiagnosticInputs().getPort(),
+              GlobalContext.getDiagnosticInputs().getScheme());
 
    }
 

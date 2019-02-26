@@ -1,6 +1,7 @@
 package com.elastic.support.scrub;
 
-import com.elastic.support.diagnostics.Constants;
+import com.elastic.support.PostProcessor;
+import com.elastic.support.config.Constants;
 import com.elastic.support.util.JsonYamlUtils;
 import com.elastic.support.util.SystemUtils;
 import org.apache.logging.log4j.LogManager;
@@ -11,7 +12,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 
-public class ScrubberUtils implements PostProcessor {
+public class ScubProcessor implements PostProcessor {
 
    private static final Logger logger = LogManager.getLogger();
 
@@ -21,7 +22,7 @@ public class ScrubberUtils implements PostProcessor {
    List<String> configuredTokens = new ArrayList<>();
    List<String> tokens = new ArrayList<>();
 
-   public ScrubberUtils(String config){
+   public ScubProcessor(String config){
 
       try {
          logger.info("Using {} as source of input string tokens to scrub.", config);

@@ -1,14 +1,13 @@
-package com.elastic.support.diagnostics;
+package com.elastic.support.config;
 
 import com.beust.jcommander.JCommander;
-import com.elastic.support.diagnostics.chain.GlobalContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public abstract class BaseInputs {
 
     protected JCommander jCommander;
-    protected Logger logger = LogManager.getLogger(BaseInputs.class);
+    private static final Logger logger = LogManager.getLogger(BaseInputs.class);
 
 
     public boolean validate(){

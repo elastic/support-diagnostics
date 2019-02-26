@@ -1,5 +1,6 @@
 package com.elastic.support.scrub;
-import com.elastic.support.diagnostics.BaseDiagnostic;
+import com.elastic.support.config.ScrubInputs;
+import com.elastic.support.BaseService;
 import com.elastic.support.util.ArchiveUtils;
 import com.elastic.support.util.SystemProperties;
 import com.elastic.support.util.SystemUtils;
@@ -8,11 +9,11 @@ import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.IOException;
 
-public class Scrubber extends BaseDiagnostic {
+public class ScrubService extends BaseService {
 
    private ScrubInputs inputs;
 
-   public Scrubber(ScrubInputs inputs){
+   public ScrubService(ScrubInputs inputs){
       this.inputs = inputs;
    }
 
@@ -32,11 +33,11 @@ public class Scrubber extends BaseDiagnostic {
 
          createFileAppender(targetDir, "scrubber.log");
          String scrubbedName = (archivePath.substring(pos + 1)).replace(".tar.gz", "");
-         ArchiveUtils archiveUtils = new ArchiveUtils(new ScrubberUtils(inputs.getScrubFile()));
+         ArchiveUtils archiveUtils = new ArchiveUtils(new ScubProcessor(inputs.getScrubFile()));
          archiveUtils.extractDiagnosticArchive(archivePath, targetDir );
          closeLogs();
          archiveUtils.createArchive(targetDir, scrubbedName);
-         nukeTempDir(targetDir);
+         SystemUtils.nukeDirectory(targetDir);
 
          File tmp = new File(targetDir);
          //tmp.setWritable(true, false);

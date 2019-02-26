@@ -1,5 +1,6 @@
 package com.elastic.support.diagnostics;
 
+import com.elastic.support.config.DiagnosticInputs;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -16,7 +17,7 @@ public class DiagnosticApp {
            System.exit(0);
        }
 
-       try(Diagnostic diag = new Diagnostic();){
+       try(DiagnosticService diag = new DiagnosticService();){
            diag.run();
        }
        catch (Exception e){

@@ -1,9 +1,8 @@
 package com.elastic.support.rest;
 
-import com.elastic.support.diagnostics.DiagnosticInputs;
+import com.elastic.support.config.DiagnosticInputs;
 import com.elastic.support.diagnostics.chain.GlobalContext;
 import com.elastic.support.util.SystemProperties;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
@@ -27,7 +26,6 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.Closeable;
 import java.io.FileOutputStream;
-import java.io.InputStream;
 import java.util.Map;
 
 public class RestExec implements Closeable {

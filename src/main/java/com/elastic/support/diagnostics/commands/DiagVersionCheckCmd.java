@@ -1,17 +1,14 @@
 package com.elastic.support.diagnostics.commands;
 
-import com.elastic.support.diagnostics.Diagnostic;
-import com.elastic.support.diagnostics.DiagnosticInputs;
+import com.elastic.support.config.DiagnosticInputs;
 import com.elastic.support.diagnostics.chain.Command;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.diagnostics.chain.GlobalContext;
-import com.elastic.support.rest.ClientBuilder;
 import com.elastic.support.util.JsonYamlUtils;
 import com.elastic.support.rest.RestExec;
 import com.elastic.support.util.SystemProperties;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.http.HttpHost;
-import org.apache.http.client.HttpClient;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -58,7 +55,7 @@ public class DiagVersionCheckCmd  implements Command {
          String downloadUrl = asset.path("browser_download_url").asText();
 
          if (!diagVersion.equals(ver)) {
-            logger.info("Warning: Diagnostic version:{} is not the current recommended release", diagVersion);
+            logger.info("Warning: DiagnosticService version:{} is not the current recommended release", diagVersion);
             logger.info("The current release is {}", ver);
             logger.info("The latest version can be downloaded at {}", downloadUrl);
 

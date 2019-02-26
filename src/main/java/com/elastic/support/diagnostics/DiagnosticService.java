@@ -1,8 +1,11 @@
 package com.elastic.support.diagnostics;
 
+import com.elastic.support.BaseService;
 import com.elastic.support.diagnostics.chain.DiagnosticChainExec;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.diagnostics.chain.GlobalContext;
+import com.elastic.support.config.DiagnosticInputs;
+import com.elastic.support.rest.RestExec;
 import com.elastic.support.util.ArchiveUtils;
 import com.elastic.support.util.SystemProperties;
 import com.elastic.support.util.SystemUtils;
@@ -13,8 +16,22 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-public class Diagnostic extends BaseDiagnostic {
+public class DiagnosticService extends BaseService {
 
+    public DiagnosticService(DiagnosticInputs diagnosticInputs){
+
+        super();
+
+        try {
+
+            GlobalContext.restExec = new RestExec(diagnosticInputs, restSettings);
+
+
+        } catch (Exception e) {
+            logger.error("Error encountered running diagnostic. See logs for additional information.  Exiting application.", e);
+            throw new RuntimeException("DiagnosticService runtime error", e);
+        }
+    }
 
     public void run() {
 
@@ -39,22 +56,9 @@ public class Diagnostic extends BaseDiagnostic {
         DiagnosticInputs diagnosticInputs = GlobalContext.getDiagnosticInputs();
 
         // Set up the output directory
-        logger.info("Creating temp directory.");
+        String tempDir = diagnosticInputs.getTempDir();
+        logger.info("Creating temp directory: {}", tempDir);
 
-        // If an output directory was not specified use the current working directory.
-        String outputDir = SystemProperties.userDir;
-        if (diagnosticInputs.getOutputDir() != null) {
-            outputDir = diagnosticInputs.getOutputDir();
-        }
-
-        logger.info("Results will be written to: " + outputDir);
-
-        String diagName = Constants.ES_DIAG;
-        String diagType = diagnosticInputs.getDiagType();
-        if (!diagType.equals(Constants.ES_DIAG_DEFAULT)) {
-            diagName = diagType + "-" + Constants.ES_DIAG;
-        }
-        String tempDir = outputDir + SystemProperties.fileSeparator + diagName;
 
         // Create the temp directory - delete if first if it exists from a previous run
         try {
@@ -78,7 +82,7 @@ public class Diagnostic extends BaseDiagnostic {
         dc.runDiagnostic(ctx);
         closeLogs();
         createArchive(ctx);
-        nukeTempDir(tempDir);
+        SystemUtils.nukeDirectory(tempDir);
 
     }
 

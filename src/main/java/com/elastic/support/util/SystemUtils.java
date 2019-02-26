@@ -348,7 +348,16 @@ public class SystemUtils {
 
     }
 
-
+    public static void nukeDirectory(String dir){
+        try {
+            File tmp = new File(dir);
+            tmp.setWritable(true, false);
+            FileUtils.deleteDirectory(tmp);
+            logger.info("Deleted temp directory: {}.", dir);
+        } catch (IOException e) {
+            logger.error("Access issue with temp directory", e);
+        }
+    }
 
 
 

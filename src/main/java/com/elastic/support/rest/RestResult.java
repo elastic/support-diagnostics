@@ -15,7 +15,6 @@ public class RestResult implements Cloneable {
 
     private static final Logger logger = LogManager.getLogger(RestResult.class);
 
-    HttpResponse response;
     String responseString;
     int status;
 
@@ -23,6 +22,7 @@ public class RestResult implements Cloneable {
     public RestResult(HttpResponse response) {
         this.status = response.getStatusLine().getStatusCode();
         responseString = response.getEntity().toString();
+        HttpClientUtils.closeQuietly(response);
     }
 
     public RestResult(HttpResponse response, String fileName) {
@@ -39,21 +39,13 @@ public class RestResult implements Cloneable {
                 Exception e) {
             logger.log(SystemProperties.DIAG, "Error Processing Response", e);
             throw new RuntimeException();
-        }
-    }
-
-    public void close() {
-        if (response != null) {
+        } finally {
             HttpClientUtils.closeQuietly(response);
         }
     }
 
-    public String toString(){
+    public String toString() {
         return responseString;
-    }
-
-    public void toFile(String fileName){
-
     }
 
 
