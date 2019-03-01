@@ -1,7 +1,6 @@
 package com.elastic.support.diagnostics.commands;
 
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
-import com.elastic.support.diagnostics.chain.GlobalContext;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;

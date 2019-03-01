@@ -22,13 +22,9 @@ public class DiagConfig {
     private Map configuration;
 
 
-    public DiagConfig(String filename) {
+    public DiagConfig(Map configuratione) {
 
-        configuration = JsonYamlUtils.readYamlFromClasspath(filename, true);
-        if (configuration.size() == 0) {
-            logger.error("Required config file diags.yml was not found. Exiting application.");
-            throw new RuntimeException("Missing diags.yml");
-        }
+        this.configuration = configuratione;
 
         githubSettings = (Map<String, String>) configuration.get("github-settings");
         logSettings = (Map<String, Integer>) configuration.get("log-settings");

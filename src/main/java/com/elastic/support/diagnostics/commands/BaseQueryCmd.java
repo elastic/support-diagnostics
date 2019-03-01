@@ -2,7 +2,6 @@ package com.elastic.support.diagnostics.commands;
 
 import com.elastic.support.config.DiagnosticInputs;
 import com.elastic.support.diagnostics.chain.Command;
-import com.elastic.support.diagnostics.chain.GlobalContext;
 import com.elastic.support.rest.RestExec;
 import com.elastic.support.util.SystemProperties;
 import org.apache.logging.log4j.LogManager;
@@ -61,6 +60,29 @@ public abstract class BaseQueryCmd implements Command {
 
         return fileName;
 
+
+    }
+
+    private boolean isRetryable(int statusCode) {
+
+        if (statusCode == 400) {
+            logger.info("No data retrieved.");
+            return true;
+        } else if (statusCode == 401) {
+            logger.info("Authentication failure: invalid login credentials. Check logs for details.");
+            return false;
+        } else if (statusCode == 403) {
+            logger.info("Authorization failure or invalid license. Check logs for details.");
+            return false;
+        } else if (statusCode == 404) {
+            logger.info("Endpoint does not exist.");
+            return true;
+        } else if (statusCode > 500 && statusCode < 600) {
+            logger.info("Unrecoverable server error.");
+            return true;
+        }
+
+        return false;
 
     }
 

@@ -20,7 +20,7 @@ password-keys:
   - access
   - key
 
-textFileExtensions:
+text-file-extensions:
   - allocation
   - cat_aliases
   - cat_count
@@ -44,7 +44,7 @@ rest-config:
   connectTimeout: 5000
   socketTimeout:  5000
 
-retries:
+call-retries:
   nodes: 3
   nodes-stats: 3
   shards: 3

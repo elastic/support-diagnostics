@@ -1,6 +1,7 @@
 package com.elastic.support.config;
 
 import com.beust.jcommander.Parameter;
+import com.elastic.support.rest.RestClient;
 import com.elastic.support.util.SystemProperties;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -38,14 +39,22 @@ public class DiagnosticInputs extends BaseInputs {
     @Parameter(names = {"--noVerify"}, description = "Use this option to bypass hostname verification for certificate. This is inherently unsafe and NOT recommended.")
     private boolean skipVerification = false;
     @Parameter(names = {"--keystore"}, description = "Keystore for client certificate.")
-    private String keystore;
+    private String pkiKeystore;
     @Parameter(names = {"--keystorePass"}, description = "Keystore password for client certificate.", password = true)
-    private String keystorePass;
+    private String pkiKeystorePass;
     @Parameter(names = {"--accessLogs"}, description = "Use this option to collect access logs as well.")
     private boolean accessLogs = false;
     @Parameter(names = {"--bypassDiagVerify"}, description = "Bypass the diagnostic version check.")
     private boolean bypassDiagVerify = false;
-    private boolean secured = false;
+    @Parameter (names = {"--proxyHost"}, description = "Proxy server hostname.")
+    private String proxyHost;
+    @Parameter (names = {"--proxyPort"}, description = "Proxy server port.")
+    private int proxyPort = RestClient.DEEFAULT_HTTP_PORT;
+    @Parameter (names = {"--proxyUser"}, description = "Proxy server user name.")
+    private String proxyUser;
+    @Parameter (names = {"--proxyPassword"}, description = "Proxy server password.")
+    private String proxyPassword;
+
 
     public boolean isHelp() {
         return help;
@@ -152,20 +161,52 @@ public class DiagnosticInputs extends BaseInputs {
         this.skipVerification = skipVerification;
     }
 
-    public String getKeystore() {
-        return keystore;
+    public String getPkiKeystore() {
+        return pkiKeystore;
     }
 
-    public void setKeystore(String keystore) {
-        this.keystore = keystore;
+    public void setPkiKeystore(String pkiKeystore) {
+        this.pkiKeystore = pkiKeystore;
     }
 
-    public String getKeystorePass() {
-        return keystorePass;
+    public String getPkiKeystorePass() {
+        return pkiKeystorePass;
     }
 
-    public void setKeystorePass(String keystorePass) {
-        this.keystorePass = keystorePass;
+    public void setPkiKeystorePass(String pkiKeystorePass) {
+        this.pkiKeystorePass = pkiKeystorePass;
+    }
+
+    public String getProxyHost() {
+        return proxyHost;
+    }
+
+    public void setProxyHost(String proxyHost) {
+        this.proxyHost = proxyHost;
+    }
+
+    public int getProxyPort() {
+        return proxyPort;
+    }
+
+    public void setProxyPort(int proxyPort) {
+        this.proxyPort = proxyPort;
+    }
+
+    public String getProxyUser() {
+        return proxyUser;
+    }
+
+    public void setProxyUser(String proxyUser) {
+        this.proxyUser = proxyUser;
+    }
+
+    public String getProxyPassword() {
+        return proxyPassword;
+    }
+
+    public void setProxyPassword(String proxyPassword) {
+        this.proxyPassword = proxyPassword;
     }
 
     public boolean isAccessLogs() {
@@ -206,16 +247,34 @@ public class DiagnosticInputs extends BaseInputs {
         }
     }
 
-    public boolean validate() {
+    public boolean isPki(){
+        if(StringUtils.isEmpty(pkiKeystore) || StringUtils.isEmpty(pkiKeystorePass)){
+            return false;
+        }
+        return true;
+    }
 
+    public boolean isProxy(){
+        if(StringUtils.isEmpty(proxyHost) ){
+            return false;
+        }
+        return true;
+    }
+
+    public boolean isProtectedProxy(){
+        if(StringUtils.isEmpty(proxyUser) || StringUtils.isEmpty(proxyPassword) ){
+            return false;
+        }
+        return true;
+    }
+
+    public boolean validate() {
         // If we're in help just shut down.
         if (isHelp()) {
             this.jCommander.usage();
             return false;
         }
-
         return (validateAuth() && validateIntervals());
-
     }
 
     public boolean validateAuth() {
@@ -238,7 +297,6 @@ public class DiagnosticInputs extends BaseInputs {
 
         return (!StringUtils.isNotEmpty(user) || !StringUtils.isEmpty(password)) &&
                 (!StringUtils.isNotEmpty(password) || !StringUtils.isEmpty(user));
-
     }
 
     public boolean validateIntervals() {
@@ -274,9 +332,7 @@ public class DiagnosticInputs extends BaseInputs {
                 ", isSsl=" + isSsl +
                 ", diagType='" + diagType + '\'' +
                 ", skipVerification=" + skipVerification +
-                ", keystore='" + keystore + '\'' +
                 ", skipAccessLogs=" + accessLogs +
-                ", secured=" + secured +
                 '}';
     }
 }

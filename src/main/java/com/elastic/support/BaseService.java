@@ -17,45 +17,23 @@ import org.apache.logging.log4j.core.layout.PatternLayout;
 import java.io.Closeable;
 import java.util.Map;
 
-public abstract  class BaseService implements Closeable {
+public abstract  class BaseService {
 
     protected Logger logger = LogManager.getLogger(BaseService.class);
-    protected static Map config;
-    protected static RestExec restExec;
-    protected static Map chains;
-
-
-    public BaseService(){
-
-        // Initialize the configuration files. This is common to any of the app runs.
-        try {
-            this.config = JsonYamlUtils.readYamlFromClasspath("diags.yml", true);
-            if (this.config.size() == 0) {
-                logger.error("Required config file diags.yml was not found. Exiting application.");
-                throw new RuntimeException("Missing diags.yml");
-            }
-
-            this.chains = JsonYamlUtils.readYamlFromClasspath("chains.yml", false);
-            if (chains.size() == 0) {
-                logger.error("Required config file chains.yml was not found. Exiting application.");
-                throw new RuntimeException("Missing chain.yml");
-            }
-
-        } catch (Exception e) {
-            logger.error("Error encountered running diagnostic. See logs for additional information.  Exiting application.", e);
-            throw new RuntimeException("DiagnosticService runtime error", e);
-        }
-
-    }
+    protected boolean isLogClosed = false;
 
     protected void closeLogs() {
 
+        if(isLogClosed){
+            return;
+        }
         LoggerContext lc = (LoggerContext) LogManager.getContext(false);
-        final Configuration logConfig = lc.getConfiguration();
+        Configuration logConfig = lc.getConfiguration();
         Appender appndr = logConfig.getAppender("File");
         appndr.stop();
         logConfig.getRootLogger().removeAppender("File");
         logger.info("Log close complete.");
+        isLogClosed = true;
 
     }
 
@@ -63,10 +41,8 @@ public abstract  class BaseService implements Closeable {
 
         logDir = logDir + SystemProperties.fileSeparator + logFile;
 
-        final LoggerContext context = (LoggerContext) LogManager.getContext(false);
-        final Configuration logConfig = context.getConfiguration();
-      /*Layout layout = PatternLayout.createLayout("%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n", null, logConfig, null,
-         null,true, true, null, null );*/
+        LoggerContext context = (LoggerContext) LogManager.getContext(false);
+        Configuration logConfig = context.getConfiguration();
         Layout layout = PatternLayout.newBuilder()
                 .withConfiguration(logConfig)
                 .withPattern("%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n")
@@ -94,6 +70,4 @@ public abstract  class BaseService implements Closeable {
 
     }
 
-    public abstract void exec();
-    public abstract void close();
 }

@@ -1,24 +1,14 @@
 package com.elastic.support.rest;
 
-import com.elastic.support.config.DiagnosticInputs;
-import com.elastic.support.diagnostics.chain.GlobalContext;
 import com.elastic.support.util.SystemProperties;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.AuthCache;
-import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.client.utils.HttpClientUtils;
 import org.apache.http.conn.HttpHostConnectException;
-import org.apache.http.impl.auth.BasicScheme;
-import org.apache.http.impl.client.BasicAuthCache;
-import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
@@ -26,35 +16,36 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.Closeable;
 import java.io.FileOutputStream;
-import java.util.Map;
+import java.io.OutputStream;
 
 public class RestExec implements Closeable {
 
     private PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
-    private AuthScope authScope = new AuthScope(AuthScope.ANY_HOST, AuthScope.ANY_PORT);
     private HttpClient genericClient, esClient;
-    private static final int retries = 3;
 
     private final static Logger logger = LogManager.getLogger(RestExec.class);
 
-    public RestExec(DiagnosticInputs diagnosticInputs, Map<String, Integer> settings) {
+    public RestExec(int socketTimeout,
+                    int requestTimeout,
+                    int connectTimeout,
+                    boolean isByassVerify,
+                    String pkiKeystore,
+                    String pkiKeystorePass) {
         try {
-            connectionManager.setMaxTotal(25);
-            connectionManager.setDefaultMaxPerRoute(5);
 
-            ClientBuilder builder = new ClientBuilder(
-                    settings.get("socketTimeout"),
-                    settings.get("requestTimeout"),
-                    settings.get("connectTimeout")
+            RestClientBuilder builder = new RestClientBuilder(
+                    socketTimeout,
+                    requestTimeout,
+                    connectTimeout
             );
 
             builder.setConnectionManager(connectionManager);
             genericClient = builder.build();
 
-            // Set some extra options for the ES specific client.
-            builder.setBypassVerify(diagnosticInputs.isBypassDiagVerify());
-            builder.setKeyStore(diagnosticInputs.getKeystore());
-            builder.setKeyStorePass(diagnosticInputs.getKeystorePass());
+            // Set extra options for the ES specific client.
+            builder.setBypassVerify(isByassVerify);
+            builder.setKeyStore(pkiKeystore);
+            builder.setKeyStorePass(pkiKeystorePass);
 
             esClient = builder.build();
 
@@ -67,19 +58,32 @@ public class RestExec implements Closeable {
         connectionManager.shutdown();
     }
 
-    public String execGeneric(String url, HttpHost httpHost, String user, String password) {
 
-        HttpClientContext httpContext = getLocalContext(httpHost);
-        applyCredentials(httpContext, user, password);
-        return execQuery(genericClient, url, httpHost, httpContext);
+    public RestResult execSimpleQuery(String url, String host, int port, String scheme) {
+
+        RestClient restClient = new RestClient(genericClient, host, port, scheme);
+        return new RestResult(execGet(url, restClient));
 
     }
 
-    public String execSimpleDiagnosticQuery(String url,  HttpHost httpHost){
+    public RestResult execSimpleQuery(String url, String host, int port, String scheme, String user, String password) {
 
-        HttpClientContext httpContext = getLocalContext(httpHost);
-        applyCredentials(httpContext, GlobalContext.getDiagnosticInputs().getUser(), GlobalContext.getDiagnosticInputs().getPassword());
-        return execQuery(genericClient, url, httpHost, httpContext);
+        RestClient restClient = new RestClient(genericClient, host, port, scheme, user, password);
+        return new RestResult(execGet(url, restClient));
+
+    }
+
+    public RestResult execQuerye(String url, String host, int port, String scheme, String user, String password) {
+
+        RestClient restClient = new RestClient(esClient, host, port, scheme, user, password);
+        return new RestResult( execGet(url, restClient));
+
+    }
+
+    public RestResult execQuery(String url, String host, int port, String scheme, String user, String password, OutputStream out) {
+
+        RestClient restClient = new RestClient(esClient, host, port, scheme, user, password);
+        return new RestResult( execGet(url, restClient), out);
 
     }
 
@@ -137,11 +141,11 @@ public class RestExec implements Closeable {
         }
     }
 
-    public HttpResponse exec(HttpClient client, String query, HttpHost httpHost, HttpClientContext httpContext) {
+    public HttpResponse execGet(String query, RestClient restClient) {
 
         try {
             HttpGet httpget = new HttpGet(query);
-            return esClient.execute(httpHost, httpget, httpContext);
+            return esClient.execute(restClient.getHttpHost(), httpget, restClient.getHttpContext());
         } catch (HttpHostConnectException e) {
             logger.log(SystemProperties.DIAG, "Host connection error.", e);
             throw new RuntimeException("Host connection");
@@ -180,53 +184,6 @@ public class RestExec implements Closeable {
         }
     }
 
-    private boolean isRetryable(int statusCode) {
 
-        if (statusCode == 400) {
-            logger.info("No data retrieved.");
-            return true;
-        } else if (statusCode == 401) {
-            logger.info("Authentication failure: invalid login credentials. Check logs for details.");
-            return false;
-        } else if (statusCode == 403) {
-            logger.info("Authorization failure or invalid license. Check logs for details.");
-            return false;
-        } else if (statusCode == 404) {
-            logger.info("Endpoint does not exist.");
-            return true;
-        } else if (statusCode > 500 && statusCode < 600) {
-            logger.info("Unrecoverable server error.");
-            return true;
-        }
-
-        return false;
-
-    }
-
-    private HttpClientContext getLocalContext(HttpHost httpHost) {
-
-        AuthCache authCache = new BasicAuthCache();
-        // Generate BASIC scheme object and add it to the local
-        // auth cache
-        BasicScheme basicAuth = new BasicScheme();
-        authCache.put(httpHost, basicAuth);
-
-        HttpClientContext localContext = HttpClientContext.create();
-        localContext.setAuthCache(authCache);
-
-        return localContext;
-    }
-
-    private void applyCredentials(HttpClientContext context, String user, String password) {
-
-        if (StringUtils.isNotEmpty(user) && StringUtils.isNotEmpty(password)) {
-            CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-            credentialsProvider.setCredentials(
-                    authScope,
-                    new UsernamePasswordCredentials(user, password));
-            context.setCredentialsProvider(credentialsProvider);
-        }
-
-    }
 
 }

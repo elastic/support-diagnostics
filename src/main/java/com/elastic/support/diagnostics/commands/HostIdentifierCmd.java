@@ -3,7 +3,6 @@ package com.elastic.support.diagnostics.commands;
 import com.elastic.support.config.Constants;
 import com.elastic.support.diagnostics.chain.Command;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
-import com.elastic.support.diagnostics.chain.GlobalContext;
 import com.elastic.support.util.JsonYamlUtils;
 import com.elastic.support.util.SystemProperties;
 import com.elastic.support.util.SystemUtils;

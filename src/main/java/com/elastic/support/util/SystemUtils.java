@@ -45,7 +45,6 @@ public class SystemUtils {
 
     public static StringUtils CommonsStringUtils;
     public static NumberUtils CommonsNumberUtils;
-    public static org.springframework.util.StringUtils SpringStringUtils;
     public static PropertyUtils CommonsPropertyUtils;
     public static java.util.Objects JavaObjects;
 
