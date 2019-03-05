@@ -1,5 +1,6 @@
 package com.elastic.support.diagnostics.commands;
 
+import com.elastic.support.config.DiagConfig;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.util.SystemProperties;
 
@@ -24,7 +25,8 @@ public class SystemCallsCmd extends BaseSystemCallsCmd {
 
         try {
             String os = checkOS();
-            Map<String, String> osCmds = (Map<String, String>) GlobalContext.getConfig().get(os);
+            DiagConfig diagConfig = context.getDiagsConfig();
+            Map<String, String> osCmds = diagConfig.getCommandMap(os);
             String javaHome = SystemProperties.javaHome;
             if (!isJdkPresent()) {
                 logger.info("Either JDK or Process Id was not present - bypassing those checks");

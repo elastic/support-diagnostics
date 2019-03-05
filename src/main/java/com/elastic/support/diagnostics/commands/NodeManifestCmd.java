@@ -3,6 +3,7 @@ package com.elastic.support.diagnostics.commands;
 import com.elastic.support.config.DiagnosticInputs;
 import com.elastic.support.diagnostics.chain.Command;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
+import com.elastic.support.rest.RestClient;
 import com.elastic.support.rest.RestExec;
 import com.elastic.support.util.JsonYamlUtils;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -18,14 +19,11 @@ public class NodeManifestCmd implements Command {
     public void execute(DiagnosticContext context) {
 
         logger.info("Trying REST Endpoint.");
-        DiagnosticInputs diagnosticInputs = GlobalContext.getDiagnosticInputs();
-        RestExec restExec = GlobalContext.getRestExec();
-        HttpHost httpHost = new HttpHost(diagnosticInputs.getHost(),
-                diagnosticInputs.getPort(),
-                diagnosticInputs.getScheme());
-        String result = restExec.execSimpleDiagnosticQuery("/_nodes/*/name,ip,host", httpHost);
+        DiagnosticInputs diagnosticInputs = context.getDiagnosticInputs();
+        RestClient restClient = context.getEsRestClient();
+        String result = restClient.execQuery("/_nodes/*/name,ip,host").toString();
         JsonNode root = JsonYamlUtils.createJsonNodeFromString(result);
-        GlobalContext.setNodeManifest(root);
+        context.setNodeManifest(root);
 
     }
 

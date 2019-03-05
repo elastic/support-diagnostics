@@ -25,12 +25,6 @@ public final class NetworkCacheCheckCmd implements Command {
     public void execute(final DiagnosticContext context) {
 
         Properties securityProperties = new Properties();
-        Map diagProps = (Map) GlobalContext.getConfig().get("network-cache-settings");
-        Set<String> keys = diagProps.keySet();
-        for (String key : keys) {
-            String value = SystemUtils.toString(Security.getProperty(key), "");
-            securityProperties.put(key, value);
-        }
 
         final Path path = Paths.get(context.getTempDir(), "network-cache-settings.properties");
         try {

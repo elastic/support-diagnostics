@@ -27,7 +27,7 @@ public class HostIdentifierCmd  implements Command {
 
          String version = context.getVersion();
          String temp = context.getTempDir();
-         String targetHost = GlobalContext.getDiagnosticInputs().getHost();
+         String targetHost = context.getDiagnosticInputs().getHost();
 
          String systemDigest = context.getSystemDigest();
          HashSet<String> localAddr = parseNetworkAddresses(systemDigest);

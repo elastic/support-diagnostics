@@ -18,9 +18,9 @@ import java.io.Closeable;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 
-public class RestExec implements Closeable {
+public class RestExec {
 
-    private PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
+/*    private PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
     private HttpClient genericClient, esClient;
 
     private final static Logger logger = LogManager.getLogger(RestExec.class);
@@ -182,7 +182,7 @@ public class RestExec implements Closeable {
         } catch (Exception e) {
             logger.error("Error processing response", e);
         }
-    }
+    }*/
 
 
 

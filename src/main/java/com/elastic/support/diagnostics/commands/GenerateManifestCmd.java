@@ -24,25 +24,28 @@ public class GenerateManifestCmd  implements Command {
 
    public void execute(DiagnosticContext context) {
 
+      // Dump out background information to provide information for potentially debugging the diagnostic if an issue occurs.
       logger.info("Writing diagnostic manifest.");
       try {
          ObjectMapper mapper = new ObjectMapper();
          mapper.enable(SerializationFeature.INDENT_OUTPUT);
+
          Map<String, Object> manifest = new HashMap<>();
+
          String diagVersion = getToolVersion();
          manifest.put(Constants.DIAG_VERSION, diagVersion);
+
          context.setDiagVersion(diagVersion);
          manifest.put("collectionDate", SystemProperties.getUtcDateString());
-         DiagnosticInputs params = GlobalContext.getDiagnosticInputs();
+
+         DiagnosticInputs params = context.getDiagnosticInputs();
          manifest.put("diagnosticInputs", params.toString());
 
          File manifestFile = new File(context.getTempDir() + SystemProperties.fileSeparator + "manifest.json");
          mapper.writeValue(manifestFile, manifest);
-
       } catch (Exception e) {
-         logger.error("Error creating the manifest file\n", e);
+         logger.error("Error creating the manifest file", e);
       }
-
    }
 
    public String getToolVersion() {

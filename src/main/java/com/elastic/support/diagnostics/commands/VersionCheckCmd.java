@@ -3,7 +3,9 @@ package com.elastic.support.diagnostics.commands;
 import com.elastic.support.config.DiagnosticInputs;
 import com.elastic.support.diagnostics.chain.Command;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
+import com.elastic.support.rest.RestClient;
 import com.elastic.support.rest.RestExec;
+import com.elastic.support.rest.RestResult;
 import com.elastic.support.util.JsonYamlUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.http.HttpHost;
@@ -21,12 +23,10 @@ public class VersionCheckCmd implements Command {
         // by just submitting the host/port combo
         logger.info("Getting Elasticsearch Version.");
 
-        DiagnosticInputs diagnosticInputs = GlobalContext.getDiagnosticInputs();
-        RestExec restExec = GlobalContext.getRestExec();
-        HttpHost httpHost = new HttpHost(diagnosticInputs.getHost(),
-                diagnosticInputs.getPort(),
-                diagnosticInputs.getScheme());
-        String result = restExec.execSimpleDiagnosticQuery("/", httpHost);
+        DiagnosticInputs diagnosticInputs = context.getDiagnosticInputs();
+        RestClient restClient = context.getEsRestClient();
+
+        String result = restClient.execQuery("/").toString();
         JsonNode root = JsonYamlUtils.createJsonNodeFromString(result);
         String versionNumber = root.path("version").path("number").asText();
         context.setVersion(versionNumber);

@@ -53,8 +53,4 @@ public class ScrubService extends BaseService {
 
    }
 
-   public void close(){
-
-   }
-
 }

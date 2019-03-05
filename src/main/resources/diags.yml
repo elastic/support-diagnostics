@@ -10,10 +10,6 @@ log-settings:
   maxLogs: 2
   maxGcLogs: 3
 
-network-cache-settings:
-  networkaddress.cache.ttl:
-  networkaddress.cache.negative.ttl:
-
 password-keys:
   - password
   - secret
@@ -40,9 +36,9 @@ text-file-extensions:
   - nodes_hot_threads
 
 rest-config:
-  requestTimeout: 10000
-  connectTimeout: 5000
-  socketTimeout:  5000
+  requestTimeout: 30000
+  connectTimeout: 30000
+  socketTimeout:  30000
 
 call-retries:
   nodes: 3

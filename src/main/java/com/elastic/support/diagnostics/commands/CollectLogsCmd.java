@@ -33,15 +33,12 @@ public class CollectLogsCmd implements Command {
             return;
         }
 
-        boolean getAccess = GlobalContext.getDiagnosticInputs().isAccessLogs();
+        boolean getAccess = context.getDiagnosticInputs().isAccessLogs();
         logger.info("Processing log files.");
 
         try {
-            int maxLogs = SystemUtils.toInt(GlobalContext
-                    .getConfig().get("maxLogs"), 3);
-            int maxGcLogs = SystemUtils.toInt(GlobalContext
-                    .getConfig().get("maxGcLogs"), 3);
-
+            int maxLogs = context.getDiagsConfig().getLogSettings().get("maxLogs");
+            int maxGcLogs = context.getDiagsConfig().getLogSettings().get("maxGcLogs");
 
             // Create a directory for this node
             String nodeDir = context.getTempDir() + SystemProperties.fileSeparator + "logs";

@@ -60,7 +60,7 @@ public class RestClient implements Closeable {
         this.httpContext.setCredentialsProvider(credentialsProvider);
     }
 
-    public RestResult execQuerye(String url) {
+    public RestResult execQuery(String url) {
         return new RestResult(execGet(url));
     }
 

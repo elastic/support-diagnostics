@@ -56,6 +56,12 @@ public class DiagnosticService extends BaseService {
 
         RestClient esRestClient = builder.build();
 
+        // For now at least all the queries will be going to the same host/port with the same credentials so set that up now
+        esRestClient.configureDestination(diagnosticInputs.getHost(), diagnosticInputs.getPort(), diagnosticInputs.getScheme());
+        if(diagnosticInputs.isSecured()){
+            esRestClient.setCredentials(diagnosticInputs.getUser(), diagnosticInputs.getPassword());
+        }
+
         try {
             // Create the temp directory - delete if first if it exists from a previous run
             String tempDir = diagnosticInputs.getTempDir();
@@ -77,7 +83,6 @@ public class DiagnosticService extends BaseService {
 
             DiagnosticChainExec dc = new DiagnosticChainExec();
             DiagnosticContext ctx = new DiagnosticContext();
-
 
             ctx.setEsRestClient(esRestClient);
             ctx.setGenericClient(genericClient);

@@ -21,12 +21,9 @@ public class ScrubApp {
             System.exit(0);
         }
 
-        try(ScrubService scrub = new ScrubService(scrubInputs);){
-            scrub.exec();
-        }
-        catch (Exception e){
-            logger.error("Error occurred - exiting:", e);
-        }
+        ScrubService scrub = new ScrubService(scrubInputs);
+        scrub.exec();
+
     }
 
 }
