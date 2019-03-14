@@ -1,72 +1,123 @@
 package com.elastic.support.diagnostics.commands;
 
 import com.elastic.support.config.DiagConfig;
-import com.elastic.support.config.DiagnosticInputs;
 import com.elastic.support.diagnostics.chain.Command;
-import com.elastic.support.diagnostics.chain.DiagnosticContext;
+import com.elastic.support.rest.RestCallManifest;
 import com.elastic.support.rest.RestClient;
-import com.elastic.support.rest.RestExec;
 import com.elastic.support.rest.RestResult;
 import com.elastic.support.util.SystemProperties;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.FileOutputStream;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public abstract class BaseQueryCmd implements Command {
 
+    /**
+     * This class has shared functionality for both the Elasticsearch and
+     * Logstash based REST calls. It interates through set of endpoints from the
+     * configuration and executes each. In all cases the results are written
+     * directly to disk to a successful access. For some specialized configured
+     * cases such as the node and shard calls, a failure will result in a reattempt
+     * after the configured number of seconds.
+     */
+
     private final Logger logger = LogManager.getLogger(BaseQueryCmd.class);
 
-    public void runQueries(RestClient restClient, Map<String, String> entries, String tempDir, DiagConfig diagConfig) {
+
+    public RestCallManifest runQueries(RestClient restClient, Map<String, String> entries, String tempDir, DiagConfig diagConfig) {
+
         List<String> textExtensions = diagConfig.getTextFileExtensions();
-        Map<String, Integer> retrySettings = diagConfig.getCallRetries();
+        int attempts = diagConfig.getCallRetries();
+        int pause = diagConfig.getPauseRetries();
+        List<String> requireRetry = diagConfig.getRequireRetry();
+        RestCallManifest restCallManifest = new RestCallManifest();
+        Map<String, String> workEntries = new LinkedHashMap<>();
+        workEntries.putAll(entries);
 
-        for (Map.Entry<String, String> entry : entries.entrySet()) {
-            String queryName = entry.getKey();
-            int attempts = retrySettings.get(queryName);
-            String query = entry.getValue();
-            String filename = buildFileName(queryName, tempDir, textExtensions);
-            runQuery(filename, query, restClient, attempts);
-        }
+        // We will go through a max of three tries attmmpting to get file output
+        // or until there are no more entries to get.
+        // If an attempt is succesful it's written to disk and removed from the work entries map
+        // If an attempt is unsuccessful and it's not in the retry list, remove it anyway.
+        // If an attempt is unsuccessful and it's in the retry iist, it will be there for the
+        // next pass until you hit the limit or it succeeds. If we get to the last try and it
+        // still hasn't worked, write the error content in the result to the target file.
+        for (int i = 1; i <= attempts; i++) {
+            // If everything worked last pass, get out
+            if (workEntries.size() == 0) {
+                break;
+            }
 
-    }
+            // We've made the first pass through - wait a few
+            // seconds before trying again.
+            if (i > 1 && i <= attempts) {
+                try {
+                    logger.info("Some calls failed: retrying in {} seconds.", pause / 1000);
+                    Thread.sleep(pause);
+                } catch (Exception e) {
+                    logger.error("Failed pause on error.", e);
+                }
+            }
 
-    public RestResult runQuery(String filename, String url, RestClient restClient, int attempts) {
+            restCallManifest.setRuns(i);
+            Set<String> keys = workEntries.keySet();
+            Set<String> removalEntries = new HashSet<>();
 
-        // At the end of this something should have been written to disk...
-        try (FileOutputStream fs = new FileOutputStream(filename)) {
-
-            // Some queries such as the nodes and shards related will be reattempted for a non 200 response status based on configuration up to a configured limit.
-            // If you get a successful run, just break out of the loop. Yes, I know some people don't like break. I do for cases like this.
-            // When the number of configured attempts is exhausted with a non-200 status the response body containing the error will be written to the
-            // file and it proceeds to the next query.
-            for (int i = 0; i < attempts; i++) {
-                RestResult restResult = restClient.execQuery(url, fs);
+            for (String queryName : keys) {
+                String query = workEntries.get(queryName);
+                String filename = buildFileName(queryName, tempDir, textExtensions);
+                logger.info("Running query:{} -  {}", queryName, query);
+                RestResult restResult = runQuery(filename, query, restClient);
+                // If it succeeded take it out of future work
                 if (restResult.getStatus() == 200) {
-                    return restResult;
+                    removalEntries.add(queryName);
+                    restCallManifest.setCallHistory(queryName, i, true);
+                    logger.info("Results written to: {}", filename);
                 } else {
-                    logger.info("Unsuccessful query attempt for: {}. Attempting again in 5 seconds.", url);
-                    logger.log(SystemProperties.DIAG, "Status: {}, Status Reason: {}", restResult.getStatus(), restResult.getReason());
-                    if ((i + 1) == attempts) {
+                    // If it didn't succeed but it's not in the retry list or if it's not an
+                    // error that's retryable such as an auth error remove it.
+                    restCallManifest.setCallHistory(queryName, i, false);
+
+                    if (!requireRetry.contains(queryName) || !isRetryable(restResult.getStatus())) {
+                        removalEntries.add(queryName);
                         restResult.toFile(filename);
-                        return restResult;
-                    }
-                    else{
-                        if (isRetryable(restResult.getStatus())){
-                            Thread.sleep(5000);
+                        logger.info("Call failed. Bypassing.");
+
+                    } else {
+                        // If it failed, it's in the list and it's last try, write it out
+                        if (i == attempts) {
+                            restResult.toFile(filename);
+                        }
+                        else {
+                            logger.info("Call failed: flagged for retry.");
                         }
                     }
                 }
             }
-        } catch (Exception e) {
-            // Something happens just log it and go to the nexe query.
-            logger.log(SystemProperties.DIAG, "Error occurred executing query {}", url, e);
+
+            // if it was on the failed list remove it - do it this way to avoid modifying the
+            // Collection you're iterating through
+            for(String entry: removalEntries){
+                workEntries.remove(entry);
+            }
         }
 
-        return null;
+        // Send back information on how many things didn't succeed and how many tries it took.
+        // Not used except for unit tests currently
+        return restCallManifest;
+    }
+
+    public RestResult runQuery(String filename, String url, RestClient restClient) {
+
+        // At the end of this something should have been written to disk...
+        try (FileOutputStream fs = new FileOutputStream(filename)) {
+            return restClient.execQuery(url, fs);
+        } catch (Exception e) {
+            // Something happens just log it and go to the next query.
+            logger.log(SystemProperties.DIAG, "Error occurred executing query {}", url, e);
+            return new RestResult(url + ";" + e.getMessage());
+        }
     }
 
     public String buildFileName(String queryName, String temp, List<String> extensions) {

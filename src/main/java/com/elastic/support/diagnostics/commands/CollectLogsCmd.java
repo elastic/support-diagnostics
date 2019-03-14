@@ -22,6 +22,12 @@ import java.util.List;
 
 public class CollectLogsCmd implements Command {
 
+    /**
+     * Collects logs on the host the diagnostic is run on. It will collect
+     * the current log, plus the previous 3 rollovers. We got the Log directory
+     * from the nodes output previously. If that call did not succeed this won't
+     * be possible however.
+     */
     private final Logger logger = LogManager.getLogger(CollectLogsCmd.class);
 
     public void execute(DiagnosticContext context) {
@@ -99,7 +105,6 @@ public class CollectLogsCmd implements Command {
         }
 
         File logFileList[] = logs.toArray(new File[0]);
-        //File[] logFileList = FileUtils.listFiles(logDir.getName(), logFileFilter, null);
         Arrays.sort(logFileList, LastModifiedFileComparator.LASTMODIFIED_REVERSE);
         int limit = maxToGet, count = 0;
         for (File logfile : logFileList) {

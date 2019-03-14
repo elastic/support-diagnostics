@@ -18,8 +18,8 @@ public class RestResult implements Cloneable {
 
     private static final Logger logger = LogManager.getLogger(RestResult.class);
 
-    String responseString;
-    int status;
+    String responseString = "Undetermined error = check logs";
+    int status = -1;
     String reason;
 
     // Sending in a response object to be processed implicitly
@@ -38,6 +38,10 @@ public class RestResult implements Cloneable {
         finally {
             HttpClientUtils.closeQuietly(response);
         }
+    }
+
+    public RestResult(String reason){
+        this.reason = reason;
     }
 
     public RestResult(HttpResponse response, OutputStream out) {

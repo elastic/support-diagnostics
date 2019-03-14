@@ -35,15 +35,26 @@ text-file-extensions:
   - logstash_nodes_hot_threads
   - nodes_hot_threads
 
+# Uncomment only if modifying defaults
 rest-config:
-  requestTimeout: 30000
-  connectTimeout: 30000
-  socketTimeout:  30000
+   requestTimeout: 10000
+   connectTimeout: 5000
+   socketTimeout:  5000
+   maxTotalConn: 100
+   maxConnPerRoute: 10
 
-call-retries:
-  nodes: 3
-  nodes-stats: 3
-  shards: 3
+# Number of tiems to re-attempt a rest call
+call-retries: 3
+
+# Time before re-attempts in milliseconnds
+pause-retries: 5000
+
+# Which calls to re-attempt
+require-retry:
+  - nodes
+  - nodes-stats
+  - shards
+  - cluster_state
 
 rest-calls:
   common:

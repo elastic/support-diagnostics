@@ -4,11 +4,19 @@ import com.elastic.support.config.DiagConfig;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.util.JsonYamlUtils;
 import com.fasterxml.jackson.databind.JsonNode;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Map;
 import java.util.Set;
 
 public class RunLogstashQueriesCmd extends BaseQueryCmd {
+
+   /**
+    * Executes the REST calls for Logstash
+    */
+
+   private static final Logger logger = LogManager.getLogger(BaseQueryCmd.class);
 
    public void execute(DiagnosticContext context) {
 

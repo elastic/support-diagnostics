@@ -1,5 +1,6 @@
 package com.elastic.support.diagnostics;
 
+import com.elastic.support.config.Constants;
 import com.elastic.support.config.DiagConfig;
 import com.elastic.support.config.DiagnosticInputs;
 import com.elastic.support.util.JsonYamlUtils;
@@ -22,9 +23,9 @@ public class DiagnosticApp {
             System.exit(0);
         }
 
-        Map diagMap =JsonYamlUtils.readYamlFromClasspath("diag.yml", true);
+        Map diagMap =JsonYamlUtils.readYamlFromClasspath(Constants.DIAG_CONFIG, true);
         DiagConfig diagConfig = new DiagConfig(diagMap);
-        Map<String, List<String>> chains = JsonYamlUtils.readYamlFromClasspath("chains.yml", true);
+        Map<String, List<String>> chains = JsonYamlUtils.readYamlFromClasspath(Constants.CHAINS_CONFIG, true);
 
         DiagnosticService diag = new DiagnosticService();
         if (diagnosticInputs.getReps() == 1) {

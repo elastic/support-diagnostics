@@ -14,6 +14,12 @@ import java.util.*;
 
 public abstract class BaseSystemCallsCmd implements Command {
 
+   /**
+    * Contains the base functionality for running system calls
+    * on the base OS. For the configured commands, execute each on the host that this
+    * node resides on. For some commands we will need to have extracted the
+    * process id and the JAVA_HOME directory to use in the command.
+    */
    protected final Logger logger = LogManager.getLogger(BaseSystemCallsCmd.class);
 
       protected void processCalls(DiagnosticContext context, Map<String, String> osCmds){

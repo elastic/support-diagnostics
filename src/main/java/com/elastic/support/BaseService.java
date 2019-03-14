@@ -1,7 +1,5 @@
 package com.elastic.support;
 
-import com.elastic.support.rest.RestExec;
-import com.elastic.support.util.JsonYamlUtils;
 import com.elastic.support.util.SystemProperties;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -13,9 +11,6 @@ import org.apache.logging.log4j.core.appender.FileAppender;
 import org.apache.logging.log4j.core.config.AppenderRef;
 import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.layout.PatternLayout;
-
-import java.io.Closeable;
-import java.util.Map;
 
 public abstract  class BaseService {
 

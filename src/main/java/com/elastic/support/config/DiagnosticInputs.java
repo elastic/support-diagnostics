@@ -49,7 +49,7 @@ public class DiagnosticInputs extends BaseInputs {
     @Parameter (names = {"--proxyHost"}, description = "Proxy server hostname.")
     private String proxyHost;
     @Parameter (names = {"--proxyPort"}, description = "Proxy server port.")
-    private int proxyPort = RestClient.DEEFAULT_HTTP_PORT;
+    private int proxyPort = Constants.DEEFAULT_HTTP_PORT;
     @Parameter (names = {"--proxyUser"}, description = "Proxy server user name.")
     private String proxyUser;
     @Parameter (names = {"--proxyPassword"}, description = "Proxy server password.")
@@ -248,21 +248,7 @@ public class DiagnosticInputs extends BaseInputs {
     }
 
     public boolean isPki(){
-        if(StringUtils.isEmpty(pkiKeystore) || StringUtils.isEmpty(pkiKeystorePass)){
-            return false;
-        }
-        return true;
-    }
-
-    public boolean isProxy(){
-        if(StringUtils.isEmpty(proxyHost) ){
-            return false;
-        }
-        return true;
-    }
-
-    public boolean isProtectedProxy(){
-        if(StringUtils.isEmpty(proxyUser) || StringUtils.isEmpty(proxyPassword) ){
+        if(StringUtils.isEmpty(pkiKeystore) ){
             return false;
         }
         return true;

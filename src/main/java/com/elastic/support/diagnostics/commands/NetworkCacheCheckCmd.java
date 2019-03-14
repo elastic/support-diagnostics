@@ -20,6 +20,12 @@ import java.util.Set;
 
 public final class NetworkCacheCheckCmd implements Command {
 
+    /**
+     *  Check the network cache settings in the security properties and dump out
+     *  the contents as a file. This is for instances where the DNS caching
+     *  invalidates a machine's address and connects vail, usually manifesting
+     *  in LDAP or AD errors.
+     */
     private final Logger logger = LogManager.getLogger(NetworkCacheCheckCmd.class);
 
     public void execute(final DiagnosticContext context) {

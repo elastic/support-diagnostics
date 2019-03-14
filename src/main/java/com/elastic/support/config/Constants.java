@@ -6,11 +6,18 @@ public class Constants {
    public static final String ES_DIAG = "diagnostics";
    public static final String NOT_FOUND = "not found";
 
+   public static final String DIAG_CONFIG = "diags.yml";
+   public static final String CHAINS_CONFIG = "chains.yml";
 
    public static final String NODES = "nodes.json";
    public static final String DIAG_VERSION = "diagVersion";
 
+   public static int DEEFAULT_HTTP_PORT = 80;
+   public static int DEEFAULT_HTTPS_PORT = 443;
+
+   public static int DEEFAULT_ES_PORT = 9200;
    public static final int LOGSTASH_PORT = 9600;
+
    public static final String UTF8 = "UTF8";
 
    public static final String IPv6Regex =

@@ -17,20 +17,24 @@ import java.util.*;
 
 public class HostIdentifierCmd  implements Command {
 
+   /**
+    * In this command the list of network interfaces is obtained from the Java runtime
+    * and compared against the addresses in the nodes output to determine which node
+    * the diagnostic is running on. Note that this can be fairly slow on some OS's
+    * particularly OSX on Macbooks.
+    */
    private final Logger logger = LogManager.getLogger(HostIdentifierCmd.class);
 
    public void execute(DiagnosticContext context) {
 
       try {
          logger.info("Checking the supplied hostname against the node information retrieved to verify location. This may take some time...");
-         // If we're doing multiple runs we don't need to do this again.
-
          String version = context.getVersion();
          String temp = context.getTempDir();
          String targetHost = context.getDiagnosticInputs().getHost();
 
          String systemDigest = context.getSystemDigest();
-         HashSet<String> localAddr = parseNetworkAddresses(systemDigest);
+         Set<String> localAddr = SystemUtils.getNetworkInterfaces();
 
          JsonNode rootNode = JsonYamlUtils.createJsonNodeFromFileName(temp, Constants.NODES);
          JsonNode nodes = rootNode.path("nodes");
@@ -50,19 +54,19 @@ public class HostIdentifierCmd  implements Command {
             for (JsonNode node : nodeList) {
                Set<String> nodeAddr = new HashSet<>();
 
-               String host = SystemUtils.toString(node.path("settings").path("network").path("host").asText(), "");
+               String host = node.path("settings").path("network").path("host").asText();
                addToHostList(host, nodeAddr);
 
-               host = SystemUtils.toString(node.path("host").asText(), "");
+               host = node.path("host").asText();
                addToHostList(host, nodeAddr);
 
-               host = SystemUtils.toString(node.path("ip").asText(), "");
+               host = node.path("ip").asText();
                addToHostList(host, nodeAddr);
 
-               String name = SystemUtils.toString(node.path("name").asText(), "");
+               String name = node.path("name").asText();
 
                if (version.startsWith("1.")) {
-                  String publishAddress = SystemUtils.toString(node.path("http").path("publish_address").asText(), "/:");
+                  String publishAddress = node.path("http").path("publish_address").asText();
                   int idxa = publishAddress.indexOf("/");
                   int idxb = publishAddress.indexOf(":");
                   publishAddress = publishAddress.substring(idxa, idxb - 1);
@@ -92,10 +96,10 @@ public class HostIdentifierCmd  implements Command {
             logger.log(SystemProperties.DIAG, "{} host was not found in the nodes output", targetHost);
             throw new RuntimeException("Could not determine which node is installed on this host. Bypassing system calls and log collection");
          } else {
-            String pid = SystemUtils.toString(targetNode.path("process").path("id").asText(), Constants.NOT_FOUND);
+            String pid = targetNode.path("process").path("id").asText();
             context.setPid(pid);
-            String nodeName = SystemUtils.toString(targetNode.path("name").asText(), Constants.NOT_FOUND);
-            String logDir = SystemUtils.toString(targetNode.path("settings").path("path").path("logs").asText(), Constants.NOT_FOUND);
+            String nodeName = targetNode.path("name").asText();
+            String logDir = targetNode.path("settings").path("path").path("logs").asText();
             context.setLogDir(logDir);
          }
 

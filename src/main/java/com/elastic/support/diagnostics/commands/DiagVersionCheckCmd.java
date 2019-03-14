@@ -1,16 +1,15 @@
 package com.elastic.support.diagnostics.commands;
 
+import com.elastic.support.config.Constants;
 import com.elastic.support.config.DiagConfig;
 import com.elastic.support.config.DiagnosticInputs;
 import com.elastic.support.diagnostics.chain.Command;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.rest.RestClient;
-import com.elastic.support.rest.RestExec;
 import com.elastic.support.rest.RestResult;
 import com.elastic.support.util.JsonYamlUtils;
 import com.elastic.support.util.SystemProperties;
 import com.fasterxml.jackson.databind.JsonNode;
-import org.apache.http.HttpHost;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -23,10 +22,18 @@ public class DiagVersionCheckCmd implements Command {
 
     private final Logger logger = LogManager.getLogger(DiagVersionCheckCmd.class);
 
+    /**
+     * Checks the embedded version of the current diagnostic created when the jar was built
+     *     with the release version of the current deployment on Github.
+     *     If it is not that version, prompt the user on whether to continue.
+     *     It will also provide a download URL for the current version.
+     */
+
     public void execute(DiagnosticContext context) {
 
         DiagnosticInputs diagnosticInputs = context.getDiagnosticInputs();
 
+        // For airgapped environments allow them to bypass this check
         if (diagnosticInputs.isBypassDiagVerify()) {
             return;
         }
@@ -37,21 +44,24 @@ public class DiagVersionCheckCmd implements Command {
             DiagConfig diagConfig = context.getDiagsConfig();
             Map<String, String> ghSettings = diagConfig.getGithubSettings();
 
-            String ghHost = (String) ghSettings.get("diagReleaseHost");
-            String ghEndpoint = (String) ghSettings.get("diagReleaseDest");
-            String ghScheme = (String) ghSettings.get("diagReleaseScheme");
+            String ghHost = ghSettings.get("diagReleaseHost");
+            String ghEndpoint = ghSettings.get("diagReleaseDest");
+            String ghScheme = ghSettings.get("diagReleaseScheme");
 
             RestClient restClient = context.getGenericClient();
-            restClient.configureDestination(ghHost, RestClient.DEEFAULT_HTTPS_PORT, ghScheme);
 
+            // Get the current diagnostic version that was populated in the
+            // manifest generation step - if we're running in
+            // the IDE via a run configuration and/or debugger it will
+            // have a value of "debug" instead of an actual version.
             String diagVersion = context.getDiagVersion();
             if (diagVersion.equalsIgnoreCase("debug")) {
                 logger.info("Running in debugger - bypassing check");
                 return;
             }
 
-            String result = restClient.execQuery(ghEndpoint).toString();
-            JsonNode rootNode = JsonYamlUtils.createJsonNodeFromString(result);
+            RestResult restResult= new RestResult(restClient.exec(ghEndpoint, ghHost, Constants.DEEFAULT_HTTPS_PORT, ghScheme));
+            JsonNode rootNode = JsonYamlUtils.createJsonNodeFromString(restResult.toString());
             String ver = rootNode.path("tag_name").asText();
             List<JsonNode> assests = rootNode.findValues("assets");
             JsonNode asset = assests.get(0);
@@ -86,6 +96,5 @@ public class DiagVersionCheckCmd implements Command {
             logger.info("Failed to get current diagnostic version from Github.");
             logger.info("If Github is not accessible from this environemnt current supported version cannot be confirmed.");
         }
-
     }
 }

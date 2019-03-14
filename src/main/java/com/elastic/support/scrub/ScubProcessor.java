@@ -115,9 +115,9 @@ public class ScubProcessor implements PostProcessor {
          String group = matcher.group();
          String[] ipSegments = splitIpSegments(group, "\\.");
          for(int i = 0; i < 4; i++){
-            int set = SystemUtils.toInt(ipSegments[i]);
+            int set = Integer.parseInt(ipSegments[i]);
             if (!ipv4.containsKey(set)){
-               logger.error("Error converting ip segment {} from address: {}", SystemUtils.toString(set), group);
+               logger.error("Error converting ip segment {} from address: {}", Integer.toString(set), group);
                throw new RuntimeException("Error scrubbing IP Addresses");
             }
             int replace = ipv4.get(set);

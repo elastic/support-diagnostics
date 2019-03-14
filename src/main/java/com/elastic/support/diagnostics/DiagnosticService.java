@@ -26,41 +26,34 @@ public class DiagnosticService extends BaseService {
     public void exec(DiagnosticInputs diagnosticInputs, DiagConfig diagConfig, Map<String, List<String>> chains) {
 
         // Create two clients, one generic for Github and one customized for this ES cluster
-        // We use the same connection manager for both to pool all connections.
-        PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
-        connectionManager.setMaxTotal(25);
-        connectionManager.setDefaultMaxPerRoute(5);
-
         RestClientBuilder builder = new RestClientBuilder();
         RestClient genericClient = builder
-                .setClientTimeouts(diagConfig.getRestConfig().get("requestTimeout"),
-                        diagConfig.getRestConfig().get("connectTimeout"),
-                        diagConfig.getRestConfig().get("socketTimeout"))
-                .setConnectionManager(connectionManager)
+                .setConnectTimeout(diagConfig.getRestConfig().get("connectTimeout"))
+                .setRequestTimeout(diagConfig.getRestConfig().get("requestTimeout"))
+                .setSocketTimeout(diagConfig.getRestConfig().get("socketTimeout"))
+                .setProxyHost(diagnosticInputs.getProxyUser())
+                .setProxPort(diagnosticInputs.getProxyPort())
+                .setProxyUser(diagnosticInputs.getUser())
+                .setProxyPass(diagnosticInputs.getProxyPassword())
                 .build();
 
-        builder = builder.setBypassVerify(diagnosticInputs.isBypassDiagVerify());
+        // Set the extra things wee need for the Elasticsearch client.
+        builder = builder.setBypassVerify(diagnosticInputs.isBypassDiagVerify())
+                .setHost(diagnosticInputs.getHost())
+                .setPort(diagnosticInputs.getPort())
+                .setScheme(diagnosticInputs.getScheme());
 
-        if (diagnosticInputs.isProxy()) {
-            builder = builder.setProxy(diagnosticInputs.getProxyHost(), diagnosticInputs.getProxyPort());
-            if (diagnosticInputs.isProtectedProxy()) {
-                builder = builder.setProxyAuth(
-                        diagnosticInputs.getProxyHost(), diagnosticInputs.getProxyPort(),
-                        diagnosticInputs.getProxyUser(), diagnosticInputs.getProxyPassword());
-            }
+        if(diagnosticInputs.isSecured()){
+            builder.setUser(diagnosticInputs.getUser())
+                    .setPassword(diagnosticInputs.getPassword());
         }
 
-        if (diagnosticInputs.isPki()) {
-            builder.setPkiKeystore(diagnosticInputs.getPkiKeystore(), diagnosticInputs.getPkiKeystorePass());
+        if(diagnosticInputs.isPki()){
+            builder.setPkiKeystore(diagnosticInputs.getPkiKeystore())
+                    .setPkiKeystorePass(diagnosticInputs.getPkiKeystorePass());
         }
 
         RestClient esRestClient = builder.build();
-
-        // For now at least all the queries will be going to the same host/port with the same credentials so set that up now
-        esRestClient.configureDestination(diagnosticInputs.getHost(), diagnosticInputs.getPort(), diagnosticInputs.getScheme());
-        if(diagnosticInputs.isSecured()){
-            esRestClient.setCredentials(diagnosticInputs.getUser(), diagnosticInputs.getPassword());
-        }
 
         try {
             // Create the temp directory - delete if first if it exists from a previous run
@@ -87,6 +80,8 @@ public class DiagnosticService extends BaseService {
             ctx.setEsRestClient(esRestClient);
             ctx.setGenericClient(genericClient);
             ctx.setDiagsConfig(diagConfig);
+            ctx.setDiagnosticInputs(diagnosticInputs);
+            ctx.setTempDir(tempDir);
 
             dc.runDiagnostic(ctx, chain);
 
@@ -101,7 +96,6 @@ public class DiagnosticService extends BaseService {
             closeLogs();
             esRestClient.close();
             genericClient.close();
-            connectionManager.close();
         }
     }
 

@@ -52,4 +52,11 @@ public class TestConfigureElasticRestCalls {
         assertEquals(7, statements.size());
     }
 
+    @Test
+    public void findJavaHHome(){
+        String javaHome = System.getenv("JAVA_HOME");
+        String props = System.getProperty("java.home");
+        logger.info("");
+    }
+
 }

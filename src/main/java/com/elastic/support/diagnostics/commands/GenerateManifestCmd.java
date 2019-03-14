@@ -20,6 +20,11 @@ import java.util.TimeZone;
 
 public class GenerateManifestCmd  implements Command {
 
+   /**
+    * Generate a manifest containing the basic runtime info for the diagnostic runtime.
+    * Some of the values we get, like the Diagnostic version will be used again
+    * downstream.
+    */
    private final Logger logger = LogManager.getLogger(GenerateManifestCmd.class);
 
    public void execute(DiagnosticContext context) {
