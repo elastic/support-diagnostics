@@ -2,9 +2,11 @@ package com.elastic.support.scrub;
 import com.elastic.support.config.ScrubInputs;
 import com.elastic.support.BaseService;
 import com.elastic.support.util.ArchiveUtils;
+import com.elastic.support.util.JsonYamlUtils;
 import com.elastic.support.util.SystemProperties;
 import com.elastic.support.util.SystemUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,14 +35,14 @@ public class ScrubService extends BaseService {
 
          createFileAppender(targetDir, "scrubber.log");
          String scrubbedName = (archivePath.substring(pos + 1)).replace(".tar.gz", "");
-         ArchiveUtils archiveUtils = new ArchiveUtils(new ScubProcessor(inputs.getScrubFile()));
+
+         ArchiveUtils archiveUtils = new ArchiveUtils(new ScrubProcessor(inputs.getScrubFile()));
          archiveUtils.extractDiagnosticArchive(archivePath, targetDir );
          closeLogs();
          archiveUtils.createArchive(targetDir, scrubbedName);
          SystemUtils.nukeDirectory(targetDir);
 
          File tmp = new File(targetDir);
-         //tmp.setWritable(true, false);
          FileUtils.deleteDirectory(tmp);
          logger.info("Deleted temp directory: {}.", targetDir);
       } catch (IOException ioe) {

@@ -1,7 +1,6 @@
 package com.elastic.support.config;
 
 import com.beust.jcommander.Parameter;
-import com.elastic.support.rest.RestClient;
 import com.elastic.support.util.SystemProperties;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -54,7 +53,8 @@ public class DiagnosticInputs extends BaseInputs {
     private String proxyUser;
     @Parameter (names = {"--proxyPassword"}, description = "Proxy server password.")
     private String proxyPassword;
-
+    @Parameter (names = {"--dockerId"}, description = "ID of the docker container Elasticsearch is running in.")
+    private String dockerId;
 
     public boolean isHelp() {
         return help;
@@ -227,6 +227,14 @@ public class DiagnosticInputs extends BaseInputs {
 
     public boolean isSecured() {
         return (StringUtils.isNotEmpty(this.user) && StringUtils.isNotEmpty(this.password));
+    }
+
+    public String getDockerId() {
+        return dockerId;
+    }
+
+    public void setDockerId(String dockerId) {
+        this.dockerId = dockerId;
     }
 
     public String getTempDir() {

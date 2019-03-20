@@ -286,6 +286,12 @@ public class SystemDigestCmd implements Command {
         // Todo Try with resources...
 
         try {
+            // Check for Docker, which usually shows up as a PID of 1 for Elasticsearch
+            String pid = context.getPid();
+            if (pid.equals("1")) {
+                return;
+            }
+
             SystemInfo si = new SystemInfo();
             HardwareAbstractionLayer hal = si.getHardware();
             OperatingSystem os = si.getOperatingSystem();

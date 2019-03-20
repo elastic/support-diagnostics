@@ -12,7 +12,7 @@ import java.util.Map;
 
 public class DiagnosticApp {
 
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger logger = LogManager.getLogger(DiagnosticApp.class);
 
     public static void main(String[] args) {
 

@@ -86,7 +86,7 @@ public class DiagnosticService extends BaseService {
             dc.runDiagnostic(ctx, chain);
 
             closeLogs();
-            createArchive(ctx);
+            createArchive(ctx.getTempDir());
             SystemUtils.nukeDirectory(tempDir);
 
         } catch (IOException e) {
@@ -96,21 +96,6 @@ public class DiagnosticService extends BaseService {
             closeLogs();
             esRestClient.close();
             genericClient.close();
-        }
-    }
-
-    private void createArchive(DiagnosticContext context) {
-
-        logger.info("Archiving diagnostic results.");
-
-        try {
-            String archiveFilename = SystemProperties.getFileDateString();
-            String dir = context.getDiagnosticInputs().getTempDir();
-            ArchiveUtils archiveUtils = new ArchiveUtils();
-            archiveUtils.createArchive(dir, archiveFilename);
-
-        } catch (Exception ioe) {
-            logger.error("Couldn't create archive. {}", ioe);
         }
     }
 

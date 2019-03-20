@@ -179,11 +179,9 @@ linuxOS:
   huge_pages: "cat /sys/kernel/mm/transparent_hugepage/enabled"
   cpu_governor: "cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"
   limits: "cat /etc/security/limits.conf"
-
-linuxOS-dep:
-   proc-limit: "cat /proc/PID/limits"
-   jps: "JAVA_HOME/bin/jps -l -m -v"
-   jstack: "JAVA_HOME/bin/jstack PID"
+  proc-limit: "cat /proc/PID/limits"
+  jps: "JAVA_HOME/bin/jps -l -m -v"
+  jstack: "JAVA_HOME/bin/jstack PID"
 
 macOS:
   ss: "ss"
@@ -192,18 +190,28 @@ macOS:
   process-list: "ps -ef"
   ulimit: "ulimit -a"
   jps: "jps -l -m -v"
-
-macOS-dep:
   jstack: "jstack PID"
-  jps: "jps -l -m -v"
 
 winOS:
   process-list: "tasklist /v"
   netstat: "netstat -ano"
   cpu: "wmic CPU"
-
-winOS-dep:
   jps: "JAVA_HOME\\bin\\jps -l -m -v"
   jstack: "JAVA_HOME\\bin\\jstack PID"
+
+docker-system:
+  docker-ulimit: "docker exec -i CONTAINER_ID bash -c 'ulimit -a'"
+  docker-internal-top: "docker exec -i CONTAINER_ID bash -c 'top -b -n1'"
+  docker-uname: "docker exec -i CONTAINER_ID bash -c 'uname -a -r'"
+  docker-top-threads: "docker exec -i CONTAINER_ID bash -c 'top -b -n1 -H'"
+  docker-process-list: "docker exec -i CONTAINER_ID bash -c 'ps -ef'"
+  docker-cpu-info: "docker exec -i CONTAINER_ID bash -c 'cat /proc/cpuinfo'"
+  docker-sysctl: "docker exec -i CONTAINER_ID bash -c 'sysctl -a'"
+  docker-logs: "docker logs CONTAINER_ID"
+  docker-top: "docker top CONTAINER_ID"
+
+
+
+
 
 

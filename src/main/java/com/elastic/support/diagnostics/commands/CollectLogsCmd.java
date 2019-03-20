@@ -40,14 +40,19 @@ public class CollectLogsCmd implements Command {
         }
 
         boolean getAccess = context.getDiagnosticInputs().isAccessLogs();
+        int maxLogs = context.getDiagsConfig().getLogSettings().get("maxLogs");
+        int maxGcLogs = context.getDiagsConfig().getLogSettings().get("maxGcLogs");
+        String tempDir = context.getTempDir();
         logger.info("Processing log files.");
+        collectLogs(logs, tempDir, maxLogs, maxGcLogs, getAccess);
+        logger.info("Finished processing logs.");
 
+    }
+
+    public void collectLogs(String logs, String tempDir, int maxLogs, int maxGcLogs, boolean getAccess){
         try {
-            int maxLogs = context.getDiagsConfig().getLogSettings().get("maxLogs");
-            int maxGcLogs = context.getDiagsConfig().getLogSettings().get("maxGcLogs");
-
             // Create a directory for this node
-            String nodeDir = context.getTempDir() + SystemProperties.fileSeparator + "logs";
+            String nodeDir = tempDir + SystemProperties.fileSeparator + "logs";
             Files.createDirectories(Paths.get(nodeDir));
             File logDest = new File(nodeDir);
             File logDir = new File(logs);
@@ -90,9 +95,6 @@ public class CollectLogsCmd implements Command {
             logger.error("Log directory: " + logs);
             logger.log(SystemProperties.DIAG, "Error reading log dir", e);
         }
-
-        logger.info("Finished processing logs.");
-
     }
 
     private void processLogVersions(String pattern, int maxToGet, File logDir, File logDest, boolean useRegex) throws Exception {

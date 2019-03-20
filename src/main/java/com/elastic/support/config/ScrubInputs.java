@@ -13,7 +13,7 @@ public class ScrubInputs extends BaseInputs {
     @Parameter(names = {"-a", "--archive",}, required = true, description = "Required field.  Full path to the archive file to be scrubbed.")
     private String archive;
     @Parameter(names = {"-s", "--scrubFile"}, required = false, description = "Optional field.  Full path to the file where string tokens you wish to have removed resides.")
-    private String scrubFile = SystemProperties.userDir + SystemProperties.fileSeparator + "scrub.yml";
+    private String scrubFile = "";
     @Parameter(names = {"-t", "--target",}, required = false, description = "Optional field.  Full path to the directory where the scrubbed archive will be written.")
     private String targetDir;
     @Parameter(names = {"-?", "--help"}, description = "Help contents.", help = true)

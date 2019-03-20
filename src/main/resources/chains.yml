@@ -3,10 +3,10 @@ standard:
   - com.elastic.support.diagnostics.commands.VersionCheckCmd
   - com.elastic.support.diagnostics.commands.DiagVersionCheckCmd
   - com.elastic.support.diagnostics.commands.RunClusterQueriesCmd
-  - com.elastic.support.diagnostics.commands.SystemDigestCmd
   - com.elastic.support.diagnostics.commands.HostIdentifierCmd
   - com.elastic.support.diagnostics.commands.CollectLogsCmd
   - com.elastic.support.diagnostics.commands.SystemCallsCmd
+  - com.elastic.support.diagnostics.commands.SystemDigestCmd
   - com.elastic.support.diagnostics.commands.NetworkCacheCheckCmd
 
 remote:
@@ -31,5 +31,11 @@ elastic-threads:
   - com.elastic.support.diagnostics.commands.HostIdentifierCmd
   - com.elastic.support.diagnostics.commands.SystemCallsCmd
 
-
+local:
+  - com.elastic.support.diagnostics.commands.GenerateManifestCmd
+  - com.elastic.support.diagnostics.commands.DiagVersionCheckCmd
+  - com.elastic.support.diagnostics.commands.LocalCollectionSetup
+  - com.elastic.support.diagnostics.commands.SystemDigestCmd
+  - com.elastic.support.diagnostics.commands.LogCmd
+  - com.elastic.support.diagnostics.commands.SystemCallsCmd
 

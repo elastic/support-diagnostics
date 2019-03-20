@@ -1,5 +1,6 @@
 package com.elastic.support;
 
+import com.elastic.support.util.ArchiveUtils;
 import com.elastic.support.util.SystemProperties;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -64,5 +65,20 @@ public abstract  class BaseService {
         context.updateLoggers();
 
     }
+
+    public void createArchive(String tempDir) {
+
+        logger.info("Archiving diagnostic results.");
+
+        try {
+            String archiveFilename = SystemProperties.getFileDateString();
+            ArchiveUtils archiveUtils = new ArchiveUtils();
+            archiveUtils.createArchive(tempDir, archiveFilename);
+
+        } catch (Exception ioe) {
+            logger.error("Couldn't create archive. {}", ioe);
+        }
+    }
+
 
 }
