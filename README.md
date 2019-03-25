@@ -1,5 +1,5 @@
 ## Support Diagnostics Utility
-The support diagnostic utility is a Java executable that will interrogate the node on the the host it is running on to obtain data and statistics on the running cluster. 
+The support diagnostic utility is a Java executable that will interrogate the node on the host it is running on to obtain data and statistics on the running cluster. 
 It will execute a series of REST API calls to the running cluster, run a number of OS related commands(such as top, netstat, etc.), and collect logs, then bundle them into one or more archives.
 
 * Compatible with versions 6.x, 5.x, 2.x, 1.x
