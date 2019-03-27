@@ -2,13 +2,11 @@ package com.elastic.support.diagnostics.local;
 
 import com.elastic.support.config.Constants;
 import com.elastic.support.config.DiagConfig;
-import com.elastic.support.config.DiagnosticInputs;
-import com.elastic.support.diagnostics.DiagnosticService;
+import com.elastic.support.config.LocalCollectionInputs;
 import com.elastic.support.util.JsonYamlUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.List;
 import java.util.Map;
 
 public class LocalCollectionApp {

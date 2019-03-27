@@ -12,11 +12,11 @@ public class Constants {
    public static final String NODES = "nodes.json";
    public static final String DIAG_VERSION = "diagVersion";
 
-   public static int DEEFAULT_HTTP_PORT = 80;
-   public static int DEEFAULT_HTTPS_PORT = 443;
+   public static final int DEEFAULT_HTTP_PORT = 80;
+   public static final int DEEFAULT_HTTPS_PORT = 443;
 
-   public static int DEEFAULT_ES_PORT = 9200;
    public static final int LOGSTASH_PORT = 9600;
+   public static final String LOCAL_ADDRESSES = "127.0.0.1;localhost";
 
    public static final String UTF8 = "UTF8";
 

@@ -111,7 +111,6 @@ rest-calls:
         security_roles: "/_shield/role?pretty"
         shard_stores: "/_shard_stores?pretty"
         tasks: "/_tasks?pretty&human&detailed=true"
-    #total 44
 
     major-5:
       minor-0:
@@ -135,7 +134,7 @@ rest-calls:
 
     major-6:
       minor-0:
-        nodes_usage: "/_nodes/usage"
+        nodes_usage: "/_nodes/usage?pretty"
         remote_cluster_info: "/_remote/info"
       minor-3:
         rollup_jobs: "/_xpack/rollup/job/_all"
@@ -189,8 +188,8 @@ macOS:
   netstat: "netstat -an"
   process-list: "ps -ef"
   ulimit: "ulimit -a"
-  jps: "jps -l -m -v"
-  jstack: "jstack PID"
+  jps: "JAVA_HOME/bin/jps -l -m -v"
+  jstack: "JAVA_HOME/bin/jstack PID"
 
 winOS:
   process-list: "tasklist /v"
@@ -199,19 +198,23 @@ winOS:
   jps: "JAVA_HOME\\bin\\jps -l -m -v"
   jstack: "JAVA_HOME\\bin\\jstack PID"
 
-docker-system:
-  docker-ulimit: "docker exec -i CONTAINER_ID bash -c 'ulimit -a'"
-  docker-internal-top: "docker exec -i CONTAINER_ID bash -c 'top -b -n1'"
-  docker-uname: "docker exec -i CONTAINER_ID bash -c 'uname -a -r'"
-  docker-top-threads: "docker exec -i CONTAINER_ID bash -c 'top -b -n1 -H'"
-  docker-process-list: "docker exec -i CONTAINER_ID bash -c 'ps -ef'"
-  docker-cpu-info: "docker exec -i CONTAINER_ID bash -c 'cat /proc/cpuinfo'"
-  docker-sysctl: "docker exec -i CONTAINER_ID bash -c 'sysctl -a'"
+docker-global:
+  docker-info: "docker info"
+  docker-ps-all: "docker ps -a --no-trunc"
+
+# This looks a little weird, but we have to tokenize 2x, once for the
+# part that would normally be in single quotes and contains spaces and
+# once for the space separate first section. Due to quirks in how the
+# Java Processbuilder works.
+docker-containers:
+  docker-ulimit: "docker exec -i CONTAINER_ID bash -c ;; ulimit -a"
+  docker-internal-top: "docker exec -i CONTAINER_ID bash -c ;; top -b -n1"
+  docker-uname: "docker exec -i CONTAINER_ID bash -c ;; uname -a -r"
+  docker-top-threads: "docker exec -i CONTAINER_ID bash -c ;; top -b -n1 -H"
+  docker-process-list: "docker exec -i CONTAINER_ID bash -c ;; ps -ef"
+  docker-cpu-info: "docker exec -i CONTAINER_ID bash -c ;; cat /proc/cpuinfo"
+  docker-sysctl: "docker exec -i CONTAINER_ID bash -c ;; sysctl -a"
   docker-logs: "docker logs CONTAINER_ID"
   docker-top: "docker top CONTAINER_ID"
-
-
-
-
 
 

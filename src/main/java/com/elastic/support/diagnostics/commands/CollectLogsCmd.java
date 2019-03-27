@@ -34,8 +34,8 @@ public class CollectLogsCmd implements Command {
 
         String logs = context.getLogDir();
 
-        if (logs.equalsIgnoreCase(Constants.NOT_FOUND)) {
-            logger.info("Could not locate log directory bypassing log collection.");
+        if (logs.equalsIgnoreCase(Constants.NOT_FOUND) || context.isDocker()) {
+            logger.info("Bypassing log collection.");
             return;
         }
 

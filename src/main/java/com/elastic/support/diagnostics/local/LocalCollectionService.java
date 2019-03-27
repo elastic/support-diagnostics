@@ -2,11 +2,11 @@ package com.elastic.support.diagnostics.local;
 
 import com.elastic.support.BaseService;
 import com.elastic.support.config.DiagConfig;
+import com.elastic.support.config.LocalCollectionInputs;
 import com.elastic.support.diagnostics.commands.CollectLogsCmd;
 import com.elastic.support.diagnostics.commands.SystemCallsCmd;
 import com.elastic.support.util.SystemProperties;
 import com.elastic.support.util.SystemUtils;
-import com.fasterxml.jackson.databind.ser.Serializers;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -22,6 +22,7 @@ public class LocalCollectionService extends BaseService {
     private static final Logger logger = LogManager.getLogger(LocalCollectionService.class);
 
     public void exec(LocalCollectionInputs inputs, DiagConfig diagConfig){
+
 
         CollectLogsCmd collectLogsCmd = new CollectLogsCmd();
 
@@ -52,7 +53,9 @@ public class LocalCollectionService extends BaseService {
         String os = systemCallsCmd.checkOS();
         Map<String, String> osCmds = diagConfig.getCommandMap(os);
 
-        systemCallsCmd.processCalls(tempDir, osCmds, inputs.getPid());
+        ProcessBuilder pb = systemCallsCmd.getProcessBuilder();
+        systemCallsCmd.preProcessOsCmds(osCmds, inputs.getPid(), SystemProperties.javaHome);
+        systemCallsCmd.processCalls(tempDir, osCmds, pb);
 
         closeLogs();
         createArchive(tempDir);

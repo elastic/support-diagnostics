@@ -1,7 +1,6 @@
 package com.elastic.support.diagnostics.commands;
 
 import com.elastic.support.config.Constants;
-import com.elastic.support.config.DiagConfig;
 import com.elastic.support.diagnostics.chain.Command;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.util.SystemProperties;
@@ -9,9 +8,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.PrintStream;
+import java.io.*;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 
@@ -26,40 +24,60 @@ public class SystemCallsCmd implements Command {
 
     public void execute(DiagnosticContext context) {
 
-        // Check for Docker, which usually shows up as a PID of 1 for Elasticsearch
+        String tempDir = context.getTempDir();
         String pid = context.getPid();
-        if (pid.equals("1")) {
-            logger.info("The node appears running in a Docker container since it shows a PID of 1.");
-            logger.info("No system calls will be run. Utility should probably be run with --type remote.");
+        ProcessBuilder pb = getProcessBuilder();
+
+        if (Constants.NOT_FOUND.equals(pid)) {
+            logger.info("The host this utility is running on could not be found in the cluster - Bypassing system calls");
             return;
+        } else if (context.isDocker()) {
+            // If docker is running and we got an id passed in check to see if it's
+            // in the list of container id's we obtained in the host check. If it is
+            // just get that one. If it's not there or there was no id go get all the containers in the list.
+            List<String> containers = context.getDockerContainers();
+            String dockerId = context.getDiagnosticInputs().getDockerId();
+            if (StringUtils.isNotEmpty(dockerId)) {
+                boolean isDockerIdInList = containers.contains(dockerId);
+                if (isDockerIdInList) {
+                    containers.clear();
+                    containers.add(dockerId);
+                }
+            }
+
+            // Run the non-container specific docker calls
+            Map<String, String> dockerGlobal = context.getDiagsConfig().getCommandMap("docker-global");
+            processCalls(tempDir, dockerGlobal, pb);
+
+            Map<String, String> dockerContainers = context.getDiagsConfig().getCommandMap("docker-containers");
+            // Now get the stats for each container in the list. If they passed one in and we found it this will
+            // be a single iteration
+            for (String container : containers) {
+                try {
+                    String dir = context.getTempDir() + SystemProperties.fileSeparator + container;
+                    Files.createDirectories(Paths.get(dir));
+                    Map<String, String> containerCalls = preProcessDockerCommands(dockerContainers, container);
+                    processCalls(dir, containerCalls, pb);
+                } catch (IOException e) {
+                    logger.log(SystemProperties.DIAG, e);
+                    logger.info("Error creating container directory - bypassing Docker container calls.");
+                }
+            }
+        } else {
+            String calls = checkOS();
+            Map<String, String> osCmds = context.getDiagsConfig().getCommandMap(calls);
+            osCmds = preProcessOsCmds(osCmds, pid, SystemProperties.javaHome);
+            processCalls(tempDir, osCmds, pb);
         }
-
-        String os = checkOS();
-        DiagConfig diagConfig = context.getDiagsConfig();
-        Map<String, String> osCmds = diagConfig.getCommandMap(os);
-
-        processCalls(context.getTempDir(), osCmds, pid);
 
     }
 
-    public void processCalls(String targeDir, Map<String, String> osCmds, String pid) {
+    public void processCalls(String targetDir, Map<String, String> commandMap, ProcessBuilder pb) {
 
-        ProcessBuilder pb = getProcessBuilder();
-
-        try {
-            osCmds = processArgsWithPid(osCmds, pid, SystemProperties.javaHome);
-
-            Set<Map.Entry<String, String>> cmds = osCmds.entrySet();
-
-            for(Map.Entry<String, String> ent: cmds) {
-                String cmdLabel = ent.getKey();
-                String cmdText = ent.getValue();
-                runCommand(targeDir, cmdLabel, cmdText, pb);
-            }
-
-        } catch (Exception e) {
-            logger.error("Error executing system calls.", e);
-        }
+        commandMap.forEach((k, v) -> {
+                    runCommand(targetDir, k, v, pb);
+                }
+        );
     }
 
     public String checkOS() {
@@ -76,55 +94,67 @@ public class SystemCallsCmd implements Command {
         }
     }
 
-    public Map<String, String> processArgsWithPid(Map<String, String> osCmds, String pid, String javaHome) {
-
-        boolean pidPresent = true, javaHomeFound = true;
-
-        // If we couldn't find a PID don't run the commands
-        if (StringUtils.isEmpty(pid) || pid.equalsIgnoreCase(Constants.NOT_FOUND)) {
-            logger.info("The diagnostic does not appear to be running on a host that contains a running node or that node could not be located in the retrieved list from the cluster.");
-            logger.info("Some system calls will not be run. This utility should probably be run with --type remote.");
-            pidPresent = false;
-        }
+    public Map<String, String> preProcessOsCmds(Map<String, String> osCmds, String pid, String javaHome) {
 
         // If this is a JRE rather than a JDK there are commands we won't be able to run
         if (!isJdkPresent(SystemProperties.javaHome + SystemProperties.fileSeparator + "bin" + SystemProperties.fileSeparator + "javac")) {
-            logger.info("Either JDK or Process Id was not present - bypassing those checks");
-            javaHomeFound = false;
+            logger.info("JDK was not present - bypassing jps and jstack");
+            osCmds.remove("jps");
+            osCmds.remove("jstack");
         }
 
-
-        HashMap revMap = new HashMap();
-        Iterator<Map.Entry<String, String>> iter = osCmds.entrySet().iterator();
-        while (iter.hasNext()) {
-            boolean addToRev = true;
-            Map.Entry<String, String> entry = iter.next();
-            String cmdKey = entry.getKey();
-            String cmdText = entry.getValue();
-
+        Map<String, String> revMap = new HashMap();
+        osCmds.forEach((k, v) -> {
             // Looks weird but cmd may have java home and a pid, and either might be missing.
+            String cmdText = v;
             if (cmdText.contains("JAVA_HOME")) {
-                if (javaHomeFound) {
-                    cmdText = cmdText.replace("JAVA_HOME", javaHome);
-                } else {
-                    addToRev = false;
-                }
+                cmdText = cmdText.replace("JAVA_HOME", javaHome);
             }
 
-            if (cmdText.contains("PID")){
-                if(pidPresent){
-                    cmdText = cmdText.replace("PID", pid);
-                }
-                else{
-                    addToRev = false;
-                }
+            if (cmdText.contains("PID")) {
+                cmdText = cmdText.replace("PID", pid);
             }
 
-            if(addToRev){
-                revMap.put(cmdKey, cmdText);
-            }
-        }
+            revMap.put(k, cmdText);
+
+        });
+
         return revMap;
+    }
+
+    public Map<String, String> preProcessDockerCommands(Map<String, String> cmds, String container){
+
+        Map<String, String> revMap = new HashMap<>();
+        cmds.forEach((k, v) ->{
+            String cmdText = v.replace("CONTAINER_ID", container);
+            revMap.put(k, cmdText);
+        });
+
+        return revMap;
+
+    }
+
+    public String runCommand(String command){
+        Runtime rt = Runtime.getRuntime();
+        command.replace("'", "");
+        try {
+            Process ps = rt.exec(command);
+            ps.waitFor();
+            InputStreamReader processReader = new InputStreamReader(ps.getErrorStream());
+            BufferedReader br = new BufferedReader(processReader);
+            String line, result = "";
+            while((line = br.readLine()) != null){
+                logger.info(line);
+            }
+
+            ps.destroy();
+            logger.info(result);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "";
+
     }
 
     public void runCommand(String targetDir,
@@ -132,13 +162,9 @@ public class SystemCallsCmd implements Command {
                            String cmdText,
                            ProcessBuilder pb) {
 
-        final List<String> cmds = new ArrayList<>();
+        List<String> cmds = buildCommandTokens(cmdText);
 
         try {
-            StringTokenizer st = new StringTokenizer(cmdText, " ");
-            while (st.hasMoreTokens()) {
-                cmds.add(st.nextToken());
-            }
             logger.info("Running: " + cmdText);
             pb.redirectOutput(new File(targetDir + SystemProperties.fileSeparator + cmdLabel + ".txt"));
             pb.command(cmds);
@@ -149,7 +175,6 @@ public class SystemCallsCmd implements Command {
             try {
                 FileOutputStream fos = new FileOutputStream(new File(targetDir + SystemProperties.fileSeparator + cmdLabel + ".txt"), true);
                 PrintStream ps = new PrintStream(fos);
-                e.printStackTrace(ps);
             } catch (Exception ie) {
                 logger.error("Error processing system command", ie);
             }
@@ -163,6 +188,30 @@ public class SystemCallsCmd implements Command {
         pb.redirectErrorStream(true);
         return pb;
     }
+
+    public List<String> buildCommandTokens(String cmdText) {
+        List<String> cmds = new ArrayList<>();
+
+        // Check for single quote arguments in Docker commands
+        // 2 entry array if it has them.
+        String[] args = cmdText.split(" ;; ");
+
+        // Tokenize the first section.
+        StringTokenizer st = new StringTokenizer(args[0], " ");
+        while (st.hasMoreTokens()) {
+            cmds.add(st.nextToken());
+        }
+
+        // If there was a quote delimited set of parameters to
+        // pass it in add it now, sans quote.
+        if(args.length > 1){
+            cmds.add(args[1]);
+        }
+
+        return cmds;
+
+    }
+
 
     public boolean isJdkPresent(String pathToJavac) {
         try {

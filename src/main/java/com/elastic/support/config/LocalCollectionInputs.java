@@ -1,7 +1,6 @@
-package com.elastic.support.diagnostics.local;
+package com.elastic.support.config;
 
 import com.beust.jcommander.Parameter;
-import com.elastic.support.config.BaseInputs;
 import com.elastic.support.util.SystemProperties;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

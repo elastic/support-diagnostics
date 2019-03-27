@@ -5,6 +5,9 @@ import com.elastic.support.config.DiagnosticInputs;
 import com.elastic.support.rest.RestClient;
 import com.fasterxml.jackson.databind.JsonNode;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class DiagnosticContext {
 
    private String version = "";
@@ -14,6 +17,8 @@ public class DiagnosticContext {
    private String systemDigest;
    private String diagVersion;
    private  JsonNode nodeManifest;
+   private boolean isDocker = false;
+   private List<String> dockerContainers = new ArrayList<>();
 
    private RestClient genericClient, esRestClient;
    private  DiagConfig diagsConfig;
@@ -105,5 +110,21 @@ public class DiagnosticContext {
 
    public void setEsRestClient(RestClient esRestClient) {
       this.esRestClient = esRestClient;
+   }
+
+   public boolean isDocker() {
+      return isDocker;
+   }
+
+   public void setDocker(boolean docker) {
+      isDocker = docker;
+   }
+
+   public List<String> getDockerContainers() {
+      return dockerContainers;
+   }
+
+   public void setDockerContainers(List<String> dockerContainers) {
+      this.dockerContainers = dockerContainers;
    }
 }
