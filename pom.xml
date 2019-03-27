@@ -189,7 +189,7 @@
                     <fork>true</fork>
                     <source>1.8</source>
                     <target>1.8</target>
-                    <compilerVersion>11</compilerVersion>
+                    <compilerVersion>12</compilerVersion>
                 </configuration>
             </plugin>
 
