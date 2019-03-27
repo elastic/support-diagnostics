@@ -12,11 +12,11 @@ public class LocalCollectionInputs  extends BaseInputs {
     @Parameter(names = {"-?", "--help"}, description = "Help contents.", help = true)
     private boolean help;
 
-    @Parameter(names = {"-o", "--out", "--output", "--outputDir"}, description = "Fully qualified path to output directory.")
+    @Parameter(names = {"-o", "--outputDir"}, description = "Fully qualified path to output directory.")
     // If no output directory was specified default to the working directory
     private String outputDir = SystemProperties.userDir;
 
-    @Parameter(names = {"-l", "--logs"}, description = "Required field.  Full path to Elasticsearch log directory.")
+    @Parameter(names = {"-l", "--logDir"}, description = "Required field.  Full path to Elasticsearch log directory.")
     private String logDir = "";
 
     @Parameter(names = {"-p", "--pid"}, description = "Optional field.  Process id of ES process if a full set of system calls is desired.")

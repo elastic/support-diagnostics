@@ -87,7 +87,10 @@ The `diag.yml` file in the `/lib/support-diagnostics-x.x.x` contains all the RES
 #### Remote Example
      ./diagnostics.sh --host 10.0.0.20 --type remote
     
-
+### Docker Containers
+* The diagnostic will examine the nodes output for process id's. that have a value of 1 If it finds any it will assume that all nodes are running in Docker containers and bypass normal system calls and log collection.
+* By default, once the diagnostic detects Docker containers, it will generate system calls for all running containers. If you wish to limit output to a single container, you may do this by using the --dockerId option.  The output for each container will be stored in a subfolder named for the container id.  
+    
 ### Logstash Diagnostics
 * Use the `--type logstash` argument to get diagnostic information from a running Logstash process. It will query the process in a manner similar to the Elasticsearch REST API calls.
 * The default port will be `9600`. This can be modified at startup, or will be automatically incremented if you start multiple Logstash processes on the same host. You can connect to these other Logstash processes with the `--port` option.
@@ -101,23 +104,13 @@ The `diag.yml` file in the `/lib/support-diagnostics-x.x.x` contains all the RES
 * If the cluster is not running X-Pack Monitoring you may find it beneficial to see how some statistics change over time. You can accomplish this by using the `--interval x` (in seconds) and `--reps` (times to repeat)to take a diagnostic.
 * You run the diagnostic once and it will execute a run, sleep for the interval duration, and then take another diagnostic. 
 * Each run will get it's own archive with it's own unique time stamp.
-* Logs will only be collected in the archive of each run. If you are running in standard rather than remote mode, however, all the system level calls will also be executed for each run.
+* Logs will for each run so if you are running in standard rather than remote mode you can wind up with a number of large archives. It is recommended to stick to using the --type remote option.
 * This can be used for either Elasticsearch or Logstash
 * The maximum number of repitions is 6. The shortest interval between runs allowed is 10 minutes.
 #### Examples - 6 runs with 20 seconds separating each run
     * sudo ./diagnostics.sh --host localhost -u elastic -p --interval 600 --reps 6
     * sudo ./diagnostics.sh --host localhost -u elastic -p --interval 600 --reps 6 --type remote
     * sudo ./diagnostics.sh --host localhost -u elastic -p --interval 600 --reps 6 --type logstash 
-
-### Timed Thread Dumps
-* If you wish to take thread dumps at timed intervals without running the full gamut of API calls use the `--type elastic-threads` option. 
-* For each run it will collect output from the Hot Threads API call, as well as running a full thread dump against the process using jstack.
-* This **must** be run on the physical host of the node you will to check.
-* You do not need to supply a process id, only the host/port. It will query the node for the information on the one running on that host and use it in the call.
-* Since there are fewer calls for Logstash it does not have a separate type. Use the standard repitition options and both hot threads and jstack will be included.
-#### Elasticseach Timed Thread Dumps Example
-    * sudo ./diagnostics.sh --host localhost -u elastic -p --interval 20 --reps 6 --type elastic-threads    
-
 
 ## File Sanitization Utility
 
@@ -156,6 +149,20 @@ tokens:
   - cluster-630
   - disk1
   - Typhoid
+
+```
+###  Local Artifacts Collection
+##### Important - Please do not run this option when asked for an initial diagnostic unless _explicitly_ instructed to do so by support! It is also currently under review and may be removed in the future.
+* This option will collect logs for the node on the current host and run the system statistics calls. It will allow the logs to be collected for a non-running or hung node without having to manually go to the log directory. It will follow the same rules as standard log collection. It will collect the current, as well as the last two rollovers, any slow logs, and three gc logs.
+* It runs via a separate script than the standard diagnostic function.
+* The standard REST API calls used for the normal and remote types will not be run.
+* The user *must* specify the log location via the command line via the -l or --logDir option.
+* If a full set of system calls is desired for a running Elasticsearch instance you must specify the process id with -p or --pid. Optional, will collect calls that do not require a pid otherweise.
+* Output written to the diagnostics directory by default, otherwise specify a custom location with -o or --outputDir.
+#### Examples
+```
+ ./log-collection.sh -l /var/log/elasticsearch -o /admin/storage/logs -p 444999
+ ./log-collection.sh --logDir /var/log/elasticsearch --outpotDir /admin/storage/logs --pid 444999
 
 ```
 
