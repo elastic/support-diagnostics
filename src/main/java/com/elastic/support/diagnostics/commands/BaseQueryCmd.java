@@ -51,7 +51,7 @@ public abstract class BaseQueryCmd implements Command {
 
             // We've made the first pass through - wait a few
             // seconds before trying again.
-            if (i > 1 && i <= attempts) {
+            if (i > 1) {
                 try {
                     logger.info("Some calls failed: retrying in {} seconds.", pause / 1000);
                     Thread.sleep(pause);
