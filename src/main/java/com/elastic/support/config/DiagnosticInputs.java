@@ -300,7 +300,7 @@ public class DiagnosticInputs extends BaseInputs {
         if (this.getReps() > 1) {
 
             if (this.getReps() > 6) {
-                logger.info("Reps specified exceed the maximum allowed.");
+                logger.info("'--reps' specified [{}] exceed the maximum allowed [6].", this.getReps());
                 logger.info("Use --help for allowed values.");
                 repsOK = false;
             }
