@@ -103,7 +103,7 @@ The `diag.yml` file in the `/lib/support-diagnostics-x.x.x` contains all the RES
 ### Multiple Runs At Timed Intervals
 * If the cluster is not running X-Pack Monitoring you may find it beneficial to see how some statistics change over time. You can accomplish this by using the `--interval x` (in seconds) and `--reps` (times to repeat)to take a diagnostic.
 * You run the diagnostic once and it will execute a run, sleep for the interval duration, and then take another diagnostic. 
-* Each run will get it's own archive with it's own unique time stamp.
+* Each run will get it's own archive with its own unique time stamp.
 * Logs will for each run so if you are running in standard rather than remote mode you can wind up with a number of large archives. It is recommended to stick to using the --type remote option.
 * This can be used for either Elasticsearch or Logstash
 * The maximum number of repitions is 6. The shortest interval between runs allowed is 10 minutes.
