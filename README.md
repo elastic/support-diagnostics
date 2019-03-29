@@ -106,7 +106,7 @@ The `diag.yml` file in the `/lib/support-diagnostics-x.x.x` contains all the RES
 * Each run will get it's own archive with its own unique time stamp.
 * Logs will for each run so if you are running in standard rather than remote mode you can wind up with a number of large archives. It is recommended to stick to using the --type remote option.
 * This can be used for either Elasticsearch or Logstash
-* The maximum number of repitions is 6. The shortest interval between runs allowed is 10 minutes.
+* The maximum number of repetitions is `6`. The shortest interval between runs allowed is `10` minutes.
 #### Examples - 6 runs with 20 seconds separating each run
     * sudo ./diagnostics.sh --host localhost -u elastic -p --interval 600 --reps 6
     * sudo ./diagnostics.sh --host localhost -u elastic -p --interval 600 --reps 6 --type remote
