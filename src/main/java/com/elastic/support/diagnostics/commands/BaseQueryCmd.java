@@ -147,7 +147,7 @@ public abstract class BaseQueryCmd implements Command {
         } else if (statusCode == 404) {
             logger.info("Endpoint does not exist.");
             return true;
-        } else if (statusCode > 500 && statusCode < 600) {
+        } else if (statusCode >= 500 && statusCode < 600) {
             logger.info("Unrecoverable server error.");
             return true;
         }
