@@ -31,7 +31,7 @@ public class DiagnosticInputs extends BaseInputs {
     private String plainTextPassword = "";
     @Parameter(names = {"--reps"}, description = "Number of times to execute the diagnostic. Use to create multiple runs at timed intervals.")
     private int reps = 1;
-    @Parameter(names = {"--interval"}, description = "Timed interval at which to execute the diagnostic. Minimum interval is 10 minutes.")
+    @Parameter(names = {"--interval"}, description = "Timed interval in minutes at which to execute the diagnostic. Minimum interval is 10 minutes.")
     private int interval = 600000;
     @Parameter(names = {"--scrub"}, description = "Set to true to use the scrub.yml dictionary to scrub logs and config files.  See README for more info.")
     private boolean scrubFiles = false;
