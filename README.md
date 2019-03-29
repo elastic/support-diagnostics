@@ -88,7 +88,7 @@ The `diag.yml` file in the `/lib/support-diagnostics-x.x.x` contains all the RES
      ./diagnostics.sh --host 10.0.0.20 --type remote
     
 ### Docker Containers
-* The diagnostic will examine the nodes output for process id's. that have a value of 1 If it finds any it will assume that all nodes are running in Docker containers and bypass normal system calls and log collection.
+* The diagnostic will examine the nodes output for process id's that have a value of `1`. If it finds any it will assume that all nodes are running in Docker containers and bypass normal system calls and log collection.
 * By default, once the diagnostic detects Docker containers, it will generate system calls for all running containers. If you wish to limit output to a single container, you may do this by using the --dockerId option.  The output for each container will be stored in a subfolder named for the container id.  
     
 ### Logstash Diagnostics
