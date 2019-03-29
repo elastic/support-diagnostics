@@ -40,7 +40,7 @@ public abstract class BaseQueryCmd implements Command {
         // or until there are no more entries to get.
         // If an attempt is succesful it's written to disk and removed from the work entries map
         // If an attempt is unsuccessful and it's not in the retry list, remove it anyway.
-        // If an attempt is unsuccessful and it's in the retry iist, it will be there for the
+        // If an attempt is unsuccessful and it's in the retry list, it will be there for the
         // next pass until you hit the limit or it succeeds. If we get to the last try and it
         // still hasn't worked, write the error content in the result to the target file.
         for (int i = 1; i <= attempts; i++) {
