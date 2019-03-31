@@ -62,7 +62,7 @@ rest-calls:
     cluster_stats: "_cluster/stats?pretty&human"
     fielddata: "_cat/fielddata?format=json&bytes&pretty"
     fielddata_stats: "_nodes/stats/indices/fielddata?pretty=true&fields=*"
-    indices_stats: "_stats?pretty&human"
+    indices_stats: "_stats?level=shards&pretty&human"
     mapping: "_mapping?pretty"
     master: "_cat/master?format=json"
     nodes_hot_threads: "_nodes/hot_threads?threads=10000"
