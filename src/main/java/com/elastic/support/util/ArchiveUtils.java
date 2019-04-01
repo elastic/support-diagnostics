@@ -1,7 +1,7 @@
 package com.elastic.support.util;
 
-import com.elastic.support.diagnostics.PostProcessor;
-import com.elastic.support.diagnostics.PostProcessorBypass;
+import com.elastic.support.PostProcessor;
+import com.elastic.support.PostProcessorBypass;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
@@ -20,12 +20,12 @@ import java.util.zip.GZIPInputStream;
 
 public class ArchiveUtils {
 
-   private static final Logger logger = LogManager.getLogger();
+   private static final Logger logger = LogManager.getLogger(ArchiveUtils.class);
    PostProcessor postProcessor = new PostProcessorBypass();
 
-   public ArchiveUtils(PostProcessor scrubberUtils){
+   public ArchiveUtils(PostProcessor scrubberService){
       super();
-      this.postProcessor = scrubberUtils;
+      this.postProcessor = scrubberService;
    }
 
    public ArchiveUtils(){

@@ -1,0 +1,66 @@
+# REST timeout settings - note:values are in second
+
+github-settings:
+  diagReleaseHost: "api.github.com"
+  diagReleaseDest: "/repos/elastic/support-diagnostics/releases/latest"
+  diagReleaseScheme: "https"
+  diagLatestRelease: "https://api.github.com/repos/elastic/support-diagnostics/releases/latest"
+
+log-settings:
+  maxLogs: 2
+  maxGcLogs: 3
+
+password-keys:
+  - password
+  - secret
+  - access
+  - key
+
+text-file-extensions:
+  - allocation
+  - cat_aliases
+  - cat_count
+  - cat_fielddata
+  - cat_health
+  - cat_indices
+  - cat_master
+  - cat_nodeattrs
+  - cat_nodes
+  - cat_pending_tasks
+  - cat_recovery
+  - cat_repositories
+  - cat_segments
+  - cat_shards
+  - cat_thread_pool
+  - logstash_nodes_hot_threads
+  - nodes_hot_threads
+
+# Uncomment only if modifying defaults
+rest-config:
+   requestTimeout: 10000
+   connectTimeout: 5000
+   socketTimeout:  5000
+   maxTotalConn: 100
+   maxConnPerRoute: 10
+
+# Number of tiems to reattempt a rest call
+call-retries: 3
+# Time before reattempts in milliseconnds
+pause-retries: 5000
+# Calls to reattempt
+require-retry:
+  - nodes
+  - nodes-stats
+  - shards
+  - cluster_state
+
+rest-calls:
+  common:
+    nodes: "/_nodes?pretty&human"
+
+  versions:
+    major-1:
+    major-2:
+    major-5:
+    major-6:
+

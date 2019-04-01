@@ -1,11 +1,14 @@
 package com.elastic.support.diagnostics.commands;
 
-import com.elastic.support.diagnostics.Constants;
-import com.elastic.support.diagnostics.InputParams;
+import com.elastic.support.config.Constants;
+import com.elastic.support.config.DiagnosticInputs;
+import com.elastic.support.diagnostics.chain.Command;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.util.SystemProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.text.DateFormat;
@@ -15,30 +18,39 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
 
-public class GenerateManifestCmd extends AbstractDiagnosticCmd {
+public class GenerateManifestCmd  implements Command {
 
-   public boolean execute(DiagnosticContext context) {
+   /**
+    * Generate a manifest containing the basic runtime info for the diagnostic runtime.
+    * Some of the values we get, like the Diagnostic version will be used again
+    * downstream.
+    */
+   private final Logger logger = LogManager.getLogger(GenerateManifestCmd.class);
 
+   public void execute(DiagnosticContext context) {
+
+      // Dump out background information to provide information for potentially debugging the diagnostic if an issue occurs.
       logger.info("Writing diagnostic manifest.");
       try {
          ObjectMapper mapper = new ObjectMapper();
          mapper.enable(SerializationFeature.INDENT_OUTPUT);
+
          Map<String, Object> manifest = new HashMap<>();
+
          String diagVersion = getToolVersion();
          manifest.put(Constants.DIAG_VERSION, diagVersion);
-         context.setAttribute(Constants.DIAG_VERSION, diagVersion);
+
+         context.setDiagVersion(diagVersion);
          manifest.put("collectionDate", SystemProperties.getUtcDateString());
-         InputParams params = context.getInputParams();
-         manifest.put("inputs", params.toString());
+
+         DiagnosticInputs params = context.getDiagnosticInputs();
+         manifest.put("diagnosticInputs", params.toString());
 
          File manifestFile = new File(context.getTempDir() + SystemProperties.fileSeparator + "manifest.json");
          mapper.writeValue(manifestFile, manifest);
-
       } catch (Exception e) {
-         logger.error("Error creating the manifest file\n", e);
+         logger.error("Error creating the manifest file", e);
       }
-
-      return true;
    }
 
    public String getToolVersion() {

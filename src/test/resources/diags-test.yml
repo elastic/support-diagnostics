@@ -1,0 +1,136 @@
+# REST timeout settings - note:values are in second
+
+github-settings:
+  diagReleaseHost: "api.github.com"
+  diagReleaseDest: "/repos/elastic/support-diagnostics/releases/latest"
+  diagReleaseScheme: "https"
+  diagLatestRelease: "https://api.github.com/repos/elastic/support-diagnostics/releases/latest"
+
+log-settings:
+  maxLogs: 2
+  maxGcLogs: 3
+
+network-cache-settings:
+  networkaddress.cache.ttl:
+  networkaddress.cache.negative.ttl:
+
+password-keys:
+  - password
+  - secret
+  - access
+  - key
+
+textFileExtensions:
+  - allocation
+  - cat_aliases
+  - cat_count
+  - cat_fielddata
+  - cat_health
+  - cat_indices
+  - cat_master
+  - cat_nodeattrs
+  - cat_nodes
+  - cat_pending_tasks
+  - cat_recovery
+  - cat_repositories
+  - cat_segments
+  - cat_shards
+  - cat_thread_pool
+  - logstash_nodes_hot_threads
+  - nodes_hot_threads
+
+
+rest-config:
+  requestTimeout: 30000
+  connectTimeout: 30000
+  socketTimeout:  30000
+
+retries:
+  nodes: 3
+  nodes-stats: 3
+  shards: 3
+
+rest-calls:
+
+  common:
+    alias: "/_alias?pretty&human"
+    cat_indices: "/_cat/indices?v"
+
+  versions:
+    major-1:
+      minor-0:
+        licenses: "/_licenses"
+
+    major-2:
+      minor-0:
+        cat_nodeattrs: "/_cat/nodeattrs?v&h=node,id,pid,host,ip,port,attr,value"
+
+    major-5:
+      minor-0:
+        allocation_explain: "/_cluster/allocation/explain?pretty"
+      minor-2:
+        cat_indices: "_cat/indices?v&s=index"
+
+    major-6:
+      minor-0:
+        nodes_usage: "/_nodes/usage"
+      minor-5:
+        security_priv: "/_xpack/security/privilege?pretty"
+
+elastic-threads:
+  nodes: "/_nodes?pretty&human"
+  nodes_hot_threads: "/_nodes/hot_threads?threads=10000"
+
+thread-dump:
+  jstack: "jstack PID"
+
+logstash:
+  logstash_version: "/?pretty"
+  logstash_node: "/_node?pretty"
+  logstash_node_stats: "/_node/stats?pretty"
+  logstash_nodes_hot_threads: "/_node/hot_threads?human=true&threads=10000"
+  logstash_plugins: "/_node/plugins?pretty"
+
+linuxOS:
+  top: "top -b -n1"
+  netstat: "netstat -an"
+  ss: "ss"
+  process-list: "ps -ef"
+  top_threads: "top -b -n1 -H"
+  uname: "uname -a -r"
+  cpu: "cat /proc/cpuinfo"
+  iostat: "iostat -c -d -x -t -m 1 5"
+  sar: "sar -A"
+  sysctl: "sysctl -a"
+  dmesg: "dmesg"
+  huge_pages: "cat /sys/kernel/mm/transparent_hugepage/enabled"
+  cpu_governor: "cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"
+  limits: "cat /etc/security/limits.conf"
+
+linuxOS-dep:
+  proc-limit: "cat /proc/PID/limits"
+  jps: "JAVA_HOME/bin/jps -l -m -v"
+  jstack: "JAVA_HOME/bin/jstack PID"
+
+macOS:
+  ss: "ss"
+  top: "top -l 1"
+  netstat: "netstat -an"
+  process-list: "ps -ef"
+  ulimit: "ulimit -a"
+  jps: "jps -l -m -v"
+
+macOS-dep:
+  jstack: "jstack PID"
+  jps: "jps -l -m -v"
+
+winOS:
+  process-list: "tasklist /v"
+  netstat: "netstat -ano"
+  cpu: "wmic CPU"
+
+winOS-dep:
+  jps: "JAVA_HOME\\bin\\jps -l -m -v"
+  jstack: "JAVA_HOME\\bin\\jstack PID"
+
+

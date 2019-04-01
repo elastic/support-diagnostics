@@ -4,9 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
@@ -78,10 +78,10 @@ public class JsonYamlUtils {
       }
    }
 
-   public static Map<String, Object> readYamlFromClasspath(String path, boolean isBlock)  {
+   public static Map readYamlFromClasspath(String path, boolean isBlock)  {
       try {
          InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(path);
-         Map<String, Object> doc = JsonYamlUtils.readYaml(inputStream, isBlock);
+         Map doc = JsonYamlUtils.readYaml(inputStream, isBlock);
          SystemUtils.streamClose(path, inputStream);
          return doc;
       } catch (Exception e) {
@@ -90,16 +90,16 @@ public class JsonYamlUtils {
       }
    }
 
-   public static Map<String, Object> readYamlFromPath(String path, boolean isBlock) throws Exception {
+   public static Map readYamlFromPath(String path, boolean isBlock) throws Exception {
       File fl = FileUtils.getFile(path);
       InputStream inputStream = new FileInputStream(fl);
-      Map<String, Object> doc = JsonYamlUtils.readYaml(inputStream, isBlock);
+      Map doc = JsonYamlUtils.readYaml(inputStream, isBlock);
       SystemUtils.streamClose(path, inputStream);
       return doc;
    }
 
-   public static Map<String, Object> readYaml(InputStream in, boolean isBlock) throws Exception {
-      Map<String, Object> doc = null;
+   public static Map readYaml(InputStream in, boolean isBlock) throws Exception {
+      Map doc = null;
 
       try {
          DumperOptions options = new DumperOptions();
@@ -108,7 +108,7 @@ public class JsonYamlUtils {
          }
 
          Yaml yaml = new Yaml(options);
-         doc = (Map<String, Object>) yaml.load(in);
+         doc = (Map) yaml.load(in);
 
       } catch (Exception e) {
          logger.error("Error encountered retrieving yml file.", e);
@@ -118,33 +118,35 @@ public class JsonYamlUtils {
       }
    }
 
-   public static Map<String, Object> flattenYaml(Map<String, Object> map) {
-      Map<String, Object> result = new LinkedHashMap<>();
+   public static Map flattenYaml(Map map) {
+      Map result = new LinkedHashMap<>();
       buildFlattenedMap(result, map, null);
       return result;
    }
 
-   public static Map<String, Object> flattenMap(Map<String, Object> map){
+   public static Map flattenMap(Map map){
       return flattenYaml(map);
    }
 
-   public static Map<String, Object> flattenNode(JsonNode node) {
+   public static Map flattenNode(JsonNode node) {
       try {
          ObjectMapper mapper = new ObjectMapper();
-         Map<String, Object> jsonMap = mapper.convertValue(node, Map.class);
+         Map jsonMap = mapper.convertValue(node, Map.class);
          //String json = mapper.writeValueAsString(node)
-         //Map<String, Object> jsonMap = mapper.readValue(json, new TypeReference<Map<String, Object>>() {});
-         Map<String, Object> flat = flattenYaml(jsonMap);
+         //Map jsonMap = mapper.readValue(json, new TypeReference<Map>() {});
+         Map flat = flattenYaml(jsonMap);
          return flat;
       } catch (Exception e) {
          throw new RuntimeException(e);
       }
    }
 
-   public static void buildFlattenedMap(Map<String, Object> result, Map<String, Object> source, String path) {
-      for (Map.Entry<String, Object> entry : source.entrySet()) {
+   public static void buildFlattenedMap(Map result, Map source, String path) {
+
+      Set<Map.Entry<Object, Object>> entries = source.entrySet();
+      for (Map.Entry<Object, Object> entry : entries) {
          String key = entry.getKey().toString();
-         if (StringUtils.hasText(path)) {
+         if (StringUtils.isNoneEmpty(path)) {
             if (key.startsWith("[")) {
                key = path + key;
             } else {
@@ -156,8 +158,7 @@ public class JsonYamlUtils {
             result.put(key, value);
          } else if (value instanceof Map) {
             // Need a compound key
-            @SuppressWarnings("unchecked")
-            Map<String, Object> map = (Map<String, Object>) value;
+            Map map = (Map) value;
             buildFlattenedMap(result, map, key);
          //} else if (value instanceof List) {
          //   result.put(key, value);
@@ -176,16 +177,16 @@ public class JsonYamlUtils {
       }
    }
 
-   private static Map<String, Object> nullSafeYamlMap(Map<String, Object> doc){
+   private static Map nullSafeYamlMap(Map doc){
       if (doc == null){
-         doc = new HashMap<String, Object>();
+         doc = new HashMap();
       }
       return doc;
    }
 
-   private static Map<String, Object> listToMap(List input){
+   private static Map listToMap(List input){
       int sz = input.size();
-      Map<String, Object> output = new LinkedHashMap<>();
+      Map output = new LinkedHashMap<>();
       for(int i=0; i < sz; i++){
          output.put("idx_" + i, input.get(i));
       }
