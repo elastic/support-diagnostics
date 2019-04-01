@@ -1,18 +1,14 @@
-# REST timeout settings - note:values are in milliseconds
-requestTimeout: 30000
-connectTimeout: 10000
+# REST timeout settings - note:values are in second
 
-diagReleaseHost: "api.github.com"
-diagReleaseDest: "repos/elastic/support-diagnostics/releases/latest"
-diagReleaseScheme: "https"
-diagLatestRelease: "https://api.github.com/repos/elastic/support-diagnostics/releases/latest"
+github-settings:
+  diagReleaseHost: "api.github.com"
+  diagReleaseDest: "/repos/elastic/support-diagnostics/releases/latest"
+  diagReleaseScheme: "https"
+  diagLatestRelease: "https://api.github.com/repos/elastic/support-diagnostics/releases/latest"
 
-maxLogs: 2
-maxGcLogs: 3
-
-network-cache-settings:
-  networkaddress.cache.ttl:
-  networkaddress.cache.negative.ttl:
+log-settings:
+  maxLogs: 2
+  maxGcLogs: 3
 
 password-keys:
   - password
@@ -20,7 +16,7 @@ password-keys:
   - access
   - key
 
-textFileExtensions:
+text-file-extensions:
   - allocation
   - cat_aliases
   - cat_count
@@ -39,60 +35,82 @@ textFileExtensions:
   - logstash_nodes_hot_threads
   - nodes_hot_threads
 
+# Uncomment only if modifying defaults
+rest-config:
+   requestTimeout: 10000
+   connectTimeout: 5000
+   socketTimeout:  5000
+   maxTotalConn: 100
+   maxConnPerRoute: 10
+
+# Number of tiems to re-attempt a rest call
+call-retries: 3
+
+# Time before re-attempts in milliseconnds
+pause-retries: 5000
+
+# Which calls to re-attempt
+require-retry:
+  - nodes
+  - nodes-stats
+  - shards
+  - cluster_state
+
 rest-calls:
   common:
-    alias: "_alias?pretty&human"
-    cat_aliases: "_cat/aliases?v"
-    cat_allocation: "_cat/allocation?v"
-    cat_count: "_cat/count"
-    cat_fielddata: "_cat/fielddata?v"
-    cat_health: "_cat/health?v"
-    cat_indices: "_cat/indices?v"
-    cat_master: "_cat/master?format=json"
-    cat_nodes: "_cat/nodes?v&h=n,m,i,r,d,hp,rp,cpu,load_1m,load_5m,load_15m,nodeId"
-    cat_pending_tasks: "_cat/pending_tasks?v"
-    cat_segments: "_cat/segments?v"
-    cat_recovery: "_cat/recovery?v"
-    cat_shards: "_cat/shards?v"
-    cat_thread_pool: "_cat/thread_pool?v"
-    cluster_health: "_cluster/health?pretty"
-    cluster_pending_tasks: "_cluster/pending_tasks?pretty&human"
-    cluster_settings: "_cluster/settings?pretty&flat_settings"
-    cluster_state: "_cluster/state?pretty&human"
-    cluster_stats: "_cluster/stats?pretty&human"
-    fielddata: "_cat/fielddata?format=json&bytes&pretty"
-    fielddata_stats: "_nodes/stats/indices/fielddata?pretty=true&fields=*"
-    indices_stats: "_stats?pretty&human"
-    mapping: "_mapping?pretty"
-    master: "_cat/master?format=json"
-    nodes_hot_threads: "_nodes/hot_threads?threads=10000"
-    nodes_stats: "_nodes/stats?pretty&human"
-    nodes: "_nodes?pretty&human"
-    plugins: "_cat/plugins?format=json"
-    recovery: "_recovery?pretty&human&detailed=true"
-    segments: "_segments?pretty&human&verbose"
-    settings: "_settings?pretty&human"
-    shards: "_cat/shards?format=json&bytes=b&pretty"
-    templates: "_template?pretty"
-    version: ""
-    watcher_stats: "_watcher/stats/_all"
-    watcher_stack: "_watcher/stats?emit_stacktraces=true"
+    alias: "/_alias?pretty&human"
+    cat_aliases: "/_cat/aliases?v"
+    cat_allocation: "/_cat/allocation?v"
+    cat_count: "/_cat/count"
+    cat_fielddata: "/_cat/fielddata?v"
+    cat_health: "/_cat/health?v"
+    cat_indices: "/_cat/indices?v"
+    cat_master: "/_cat/master?format=json"
+    cat_nodes: "/_cat/nodes?v&h=n,m,i,r,d,hp,rp,cpu,load_1m,load_5m,load_15m,nodeId"
+    cat_pending_tasks: "/_cat/pending_tasks?v"
+    cat_segments: "/_cat/segments?v"
+    cat_recovery: "/_cat/recovery?v"
+    cat_shards: "/_cat/shards?v"
+    cat_thread_pool: "/_cat/thread_pool?v"
+    cluster_health: "/_cluster/health?pretty"
+    cluster_pending_tasks: "/_cluster/pending_tasks?pretty&human"
+    cluster_settings: "/_cluster/settings?pretty&flat_settings"
+    cluster_state: "/_cluster/state?pretty&human"
+    cluster_stats: "/_cluster/stats?pretty&human"
+    fielddata: "/_cat/fielddata?format=json&bytes&pretty"
+    fielddata_stats: "/_nodes/stats/indices/fielddata?pretty=true&fields=*"
+    indices_stats: "/_stats?pretty&human"
+    mapping: "/_mapping?pretty"
+    master: "/_cat/master?format=json"
+    nodes: "/_nodes?pretty&human"
+    nodes_hot_threads: "/_nodes/hot_threads?threads=10000"
+    nodes_stats: "/_nodes/stats?pretty&human"
+    plugins: "/_cat/plugins?format=json"
+    recovery: "/_recovery?pretty&human&detailed=true"
+    segments: "/_segments?pretty&human&verbose"
+    settings: "/_settings?pretty&human"
+    shards: "/_cat/shards?format=json&bytes=b&pretty"
+    templates: "/_template?pretty"
+    version: "/"
+    watcher_stats: "/_watcher/stats/_all"
+    watcher_stack: "/_watcher/stats?emit_stacktraces=true"
 
   versions:
+
     major-1:
       minor-0:
-        licenses: "_licenses"
+        licenses: "/_licenses"
 
     major-2:
       minor-0:
-        cat_nodeattrs: "_cat/nodeattrs?v&h=node,id,pid,host,ip,port,attr,value"
-        cat_repositories: "_cat/repositories?v"
-        count: "_count"
-        licenses: "_license?pretty"
-        security_users: "_shield/user?pretty"
-        security_roles: "_shield/role?pretty"
-        shard_stores: "_shard_stores?pretty"
-        tasks: "_tasks?pretty&human&detailed=true"
+        cat_nodeattrs: "/_cat/nodeattrs?v&h=node,id,pid,host,ip,port,attr,value"
+        cat_repositories: "/_cat/repositories?v"
+        count: "/_count"
+        licenses: "/_license?pretty"  #override
+        security_users: "/_shield/user?pretty"
+        security_roles: "/_shield/role?pretty"
+        shard_stores: "/_shard_stores?pretty"
+        tasks: "/_tasks?pretty&human&detailed=true"
 
     major-5:
       minor-0:
@@ -116,13 +134,13 @@ rest-calls:
 
     major-6:
       minor-0:
-        nodes_usage: "_nodes/usage"
-        remote_cluster_info: "_remote/info"
+        nodes_usage: "/_nodes/usage?pretty"
+        remote_cluster_info: "/_remote/info"
       minor-3:
-        rollup_jobs: "_xpack/rollup/job/_all"
-        rollup_caps: "_xpack/rollup/data/_all"
+        rollup_jobs: "/_xpack/rollup/job/_all"
+        rollup_caps: "/_xpack/rollup/data/_all"
       minor-4:
-        cluster_settings_defaults: "_cluster/settings?include_defaults&pretty&flat_settings"
+        cluster_settings_defaults: "/_cluster/settings?include_defaults&pretty&flat_settings"
       minor-5:
         rollup_index_caps: "*/_xpack/rollup/data"
         security_priv: "_xpack/security/privilege?pretty"
@@ -132,18 +150,18 @@ rest-calls:
         ccr_follower_info: "_all/_ccr/info?pretty"
 
 elastic-threads:
-  nodes: "_nodes?pretty&human"
-  nodes_hot_threads: "_nodes/hot_threads?threads=10000"
+  nodes: "/_nodes?pretty&human"
+  nodes_hot_threads: "/_nodes/hot_threads?threads=10000"
 
 thread-dump:
   jstack: "jstack PID"
 
 logstash:
-  logstash_version: "?pretty"
-  logstash_node: "_node?pretty"
-  logstash_node_stats: "_node/stats?pretty"
-  logstash_nodes_hot_threads: "_node/hot_threads?human=true&threads=10000"
-  logstash_plugins: "_node/plugins?pretty"
+  logstash_version: "/?pretty"
+  logstash_node: "/_node?pretty"
+  logstash_node_stats: "/_node/stats?pretty"
+  logstash_nodes_hot_threads: "/_node/hot_threads?human=true&threads=10000"
+  logstash_plugins: "/_node/plugins?pretty"
 
 linuxOS:
   top: "top -b -n1"
@@ -160,11 +178,9 @@ linuxOS:
   huge_pages: "cat /sys/kernel/mm/transparent_hugepage/enabled"
   cpu_governor: "cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"
   limits: "cat /etc/security/limits.conf"
-
-linuxOS-dep:
-   proc-limit: "cat /proc/PID/limits"
-   jps: "JAVA_HOME/bin/jps -l -m -v"
-   jstack: "JAVA_HOME/bin/jstack PID"
+  proc-limit: "cat /proc/PID/limits"
+  jps: "JAVA_HOME/bin/jps -l -m -v"
+  jstack: "JAVA_HOME/bin/jstack PID"
 
 macOS:
   ss: "ss"
@@ -172,18 +188,33 @@ macOS:
   netstat: "netstat -an"
   process-list: "ps -ef"
   ulimit: "ulimit -a"
-  jps: "jps -l -m -v"
-
-macOS-dep:
-  jstack: "jstack PID"
-  jps: "jps -l -m -v"
+  jps: "JAVA_HOME/bin/jps -l -m -v"
+  jstack: "JAVA_HOME/bin/jstack PID"
 
 winOS:
   process-list: "tasklist /v"
   netstat: "netstat -ano"
   cpu: "wmic CPU"
-
-winOS-dep:
   jps: "JAVA_HOME\\bin\\jps -l -m -v"
   jstack: "JAVA_HOME\\bin\\jstack PID"
+
+docker-global:
+  docker-info: "docker info"
+  docker-ps-all: "docker ps -a --no-trunc"
+
+# This looks a little weird, but we have to tokenize 2x, once for the
+# part that would normally be in single quotes and contains spaces and
+# once for the space separate first section. Due to quirks in how the
+# Java Processbuilder works.
+docker-containers:
+  docker-ulimit: "docker exec -i CONTAINER_ID bash -c ;; ulimit -a"
+  docker-internal-top: "docker exec -i CONTAINER_ID bash -c ;; top -b -n1"
+  docker-uname: "docker exec -i CONTAINER_ID bash -c ;; uname -a -r"
+  docker-top-threads: "docker exec -i CONTAINER_ID bash -c ;; top -b -n1 -H"
+  docker-process-list: "docker exec -i CONTAINER_ID bash -c ;; ps -ef"
+  docker-cpu-info: "docker exec -i CONTAINER_ID bash -c ;; cat /proc/cpuinfo"
+  docker-sysctl: "docker exec -i CONTAINER_ID bash -c ;; sysctl -a"
+  docker-logs: "docker logs CONTAINER_ID"
+  docker-top: "docker top CONTAINER_ID"
+
 

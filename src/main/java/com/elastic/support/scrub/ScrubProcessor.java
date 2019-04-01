@@ -1,7 +1,10 @@
-package com.elastic.support.util;
+package com.elastic.support.scrub;
 
-import com.elastic.support.diagnostics.Constants;
-import com.elastic.support.diagnostics.PostProcessor;
+import com.elastic.support.PostProcessor;
+import com.elastic.support.config.Constants;
+import com.elastic.support.util.JsonYamlUtils;
+import com.elastic.support.util.SystemUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -10,7 +13,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 
-public class ScrubberUtils implements PostProcessor {
+public class ScrubProcessor implements PostProcessor {
 
    private static final Logger logger = LogManager.getLogger();
 
@@ -20,11 +23,16 @@ public class ScrubberUtils implements PostProcessor {
    List<String> configuredTokens = new ArrayList<>();
    List<String> tokens = new ArrayList<>();
 
-   public ScrubberUtils(String config){
+   public ScrubProcessor(String config){
 
       try {
-         logger.info("Using {} as source of input string tokens to scrub.", config);
-         Map<String, Object> scrubConfig = JsonYamlUtils.readYamlFromPath(config, false);
+         Map<String, Object> scrubConfig;
+         if(StringUtils.isEmpty(config)){
+            scrubConfig = JsonYamlUtils.readYamlFromClasspath("scrub.yml", false);
+         }
+         else{
+            scrubConfig = JsonYamlUtils.readYamlFromPath(config, false);
+         }
 
          if(scrubConfig.get("tokens") != null){
             tokens = (List<String>)scrubConfig.get("tokens");
@@ -113,9 +121,9 @@ public class ScrubberUtils implements PostProcessor {
          String group = matcher.group();
          String[] ipSegments = splitIpSegments(group, "\\.");
          for(int i = 0; i < 4; i++){
-            int set = SystemUtils.toInt(ipSegments[i]);
+            int set = Integer.parseInt(ipSegments[i]);
             if (!ipv4.containsKey(set)){
-               logger.error("Error converting ip segment {} from address: {}", SystemUtils.toString(set), group);
+               logger.error("Error converting ip segment {} from address: {}", Integer.toString(set), group);
                throw new RuntimeException("Error scrubbing IP Addresses");
             }
             int replace = ipv4.get(set);

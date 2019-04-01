@@ -1,82 +1,86 @@
 package com.elastic.support.diagnostics.commands;
 
+import com.elastic.support.config.DiagConfig;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
-import org.apache.commons.lang3.ObjectUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
 
-public class RunClusterQueriesCmd extends AbstractQueryCmd {
+public class RunClusterQueriesCmd extends BaseQueryCmd {
 
-   public boolean execute(DiagnosticContext context) {
-      Map config = (Map)context.getConfig().get("rest-calls");
-      String version = context.getVersion();
+    /**
+     * Builds the list of queries for Elasticsearch version that was retrieved previously,
+     * then executes them and saves the result to temporary storage.
+     */
 
-      Map<String, String> statements = buildStatementsByVersion(version, config);
+    private static final Logger logger = LogManager.getLogger(RunClusterQueriesCmd.class);
 
-      Set<Map.Entry<String, String>> entries = statements.entrySet();
+    public void execute(DiagnosticContext context) {
 
-      logger.debug("Generating full diagnostic.");
+        String version = context.getVersion();
 
-      for (Map.Entry<String, String> entry : entries) {
-         runQuery(entry, context);
-      }
+        DiagConfig diagConfig = context.getDiagsConfig();
+        Map restCalls = diagConfig.getRestCalls();
 
-      return true;
-   }
+        Map<String, String> entries = buildStatementsByVersion(version, restCalls);
 
-   public Map<String, String> buildStatementsByVersion(String version, Map calls ) {
+        runQueries(context.getEsRestClient(), entries, context.getTempDir(), diagConfig);
 
-      String[] ver = version.split("\\.");
-      int major = Integer.parseInt(ver[0]);
-      int minor = Integer.parseInt(ver[1]);
+    }
 
-      Map statements = new LinkedHashMap<>();
+    public Map<String, String> buildStatementsByVersion(String version, Map calls) {
 
-      // First get the statements that work for all versions
-      statements.putAll((Map)calls.get("common"));
+        String[] ver = version.split("\\.");
+        int major = Integer.parseInt(ver[0]);
+        int minor = Integer.parseInt(ver[1]);
 
-      // Go through any additional calls up to the current version
-      Map versionSpecificCalls = ((Map) calls.get("versions"));
-      for (int ma = 1; ma <= major; ma++) {
-         String majKey = "major-" + ma ;
+        Map statements = new LinkedHashMap<>();
 
-         // See if there are calls specific to this major version
-         // If nothing skip to next major version
-         Map majorVersionCalls = getCalls(majKey, versionSpecificCalls);
-         if(majorVersionCalls.size() == 0){
-            continue;
-         }
+        // First get the statements that work for all versions
+        statements.putAll((Map) calls.get("common"));
 
-         //If we are on a lower major version get all the minors
-         if( ma < major){
-            Collection values = majorVersionCalls.values();
-            for(Object verEntry : values ){
-               statements.putAll((Map)verEntry);
+        // Go through any additional calls up to the current version
+        Map versionSpecificCalls = ((Map) calls.get("versions"));
+        for (int ma = 1; ma <= major; ma++) {
+            String majKey = "major-" + ma;
+
+            // See if there are calls specific to this major version
+            // If nothing skip to next major version
+            Map majorVersionCalls = getCalls(majKey, versionSpecificCalls);
+            if (majorVersionCalls.size() == 0) {
+                continue;
             }
-         }
-         // Otherwise just get the ones at or below the input minor
-         else{
-            for (int mi = 0; mi <= minor; mi++) {
-               String minKey = "minor-" + mi ;
-               statements.putAll(getCalls(minKey, majorVersionCalls));
+
+            //If we are on a lower major version get all the minors
+            if (ma < major) {
+                Collection values = majorVersionCalls.values();
+                for (Object verEntry : values) {
+                    statements.putAll((Map) verEntry);
+                }
             }
-         }
-      }
+            // Otherwise just get the ones at or below the input minor
+            else {
+                for (int mi = 0; mi <= minor; mi++) {
+                    String minKey = "minor-" + mi;
+                    statements.putAll(getCalls(minKey, majorVersionCalls));
+                }
+            }
+        }
 
-      return statements;
-   }
+        return statements;
+    }
 
-   // Don't want to check each potential addiition to the base statements for emptiness so just
-   // use an emoty map if there are no results for this version check.
-   public Map getCalls(String key, Map calls){
-      Map result = (Map) calls.get(key);
-      if (result == null){
-         return new LinkedHashMap();
-      }
-      return result;
-   }
+    // Don't want to check each potential addiition to the base statements for emptiness so just
+    // use an emoty map if there are no results for this version check.
+    public Map getCalls(String key, Map calls) {
+        Map result = (Map) calls.get(key);
+        if (result == null) {
+            return new LinkedHashMap();
+        }
+        return result;
+    }
 
 }
