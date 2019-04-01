@@ -32,9 +32,7 @@ It will execute a series of REST API calls to the running cluster, run a number 
 * Switch to the diagnostics distribution directory.
 
 ## Version check
-As a first step the diagnostic will check the Github repo for the current released version, and if not the same as the one running will:
-* Provide the URL for the current release.
-* Ask the user whether they wish to continue. 
+As a first step the diagnostic will check the Github repo for the current released version, and if not the same as the one running will provide the URL for the current release and then stop. The user will then be prompted to to press Enter before the diag continues.
 * For air gapped environments this can be bypassed by adding `--bypassDiagVerify` to the command line.
 
 ## Usage - Simplest Case

@@ -71,24 +71,11 @@ public class DiagVersionCheckCmd implements Command {
                 logger.info("Warning: DiagnosticService version:{} is not the current recommended release", diagVersion);
                 logger.info("The current release is {}", ver);
                 logger.info("The latest version can be downloaded at {}", downloadUrl);
+                logger.info("Press the Enter key to continue.");
 
                 Scanner sc = new Scanner(System.in);
-                String feedback = null;
-                boolean valid = false;
-                System.out.println("Continue anyway? [Y/N]");
-                feedback = sc.nextLine();
-                while (!valid) {
-                    if ("y".equalsIgnoreCase(feedback) || "n".equalsIgnoreCase(feedback)) {
-                        valid = true;
-                    } else {
-                        System.out.println("Continue anyway? [Y/N]");
-                        feedback = sc.nextLine();
-                    }
-                }
+                sc.nextLine();
 
-                if ("n".equalsIgnoreCase(feedback)) {
-                    System.out.println("Exiting application");
-                }
             }
         } catch (Exception e) {
             logger.log(SystemProperties.DIAG, e);
