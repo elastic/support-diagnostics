@@ -29,8 +29,6 @@ public class DiagConfig {
 
     public DiagConfig(Map configuration) {
 
-        super();
-
         this.configuration = configuration;
 
         githubSettings = (Map<String, String>) configuration.get("github-settings");

@@ -76,6 +76,14 @@ As a first step the diagnostic will check the Github repo for the current releas
 
 ## Alternate Usages
 
+### Proxy Servers
+If the presence of a proxy server prevents the diagnostic from being run(generally due to running with the remote option on a client workstation) you can specify the settings with the parameters: 
+* --proxyHost
+* --proxyPort
+* --proxyUser
+* --proxyPassword 
+
+
 ### Customizing the output
 The `diag.yml` file in the `/lib/support-diagnostics-x.x.x` contains all the REST and system commands that will be run. These are tied to a particular version. You can extract this file and remove commands you do not wish to run as well as adding any that may not be currently included. Place this revised file in the directory containing the diagnostics.sh script and it will override the settings contained in the jar.
 

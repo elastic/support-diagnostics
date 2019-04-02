@@ -10,10 +10,6 @@ public abstract class BaseInputs {
     protected JCommander jCommander;
     private static final Logger logger = LogManager.getLogger(BaseInputs.class);
 
-    public boolean validate(){
-        return true;
-    }
-
     public void parseInputs(String[] args){
         logger.info("Processing diagnosticInputs...");
         JCommander jc = new JCommander(this);
