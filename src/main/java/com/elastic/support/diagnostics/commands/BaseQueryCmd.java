@@ -14,7 +14,11 @@ import java.util.*;
 
 public abstract class BaseQueryCmd implements Command {
 
-    /**
+
+
+    private final Logger logger = LogManager.getLogger(BaseQueryCmd.class);
+
+    /*
      * This class has shared functionality for both the Elasticsearch and
      * Logstash based REST calls. It interates through set of endpoints from the
      * configuration and executes each. In all cases the results are written
@@ -22,10 +26,6 @@ public abstract class BaseQueryCmd implements Command {
      * cases such as the node and shard calls, a failure will result in a reattempt
      * after the configured number of seconds.
      */
-
-    private final Logger logger = LogManager.getLogger(BaseQueryCmd.class);
-
-
     public RestCallManifest runQueries(RestClient restClient, Map<String, String> entries, String tempDir, DiagConfig diagConfig) {
 
         List<String> textExtensions = diagConfig.getTextFileExtensions();
@@ -34,7 +34,7 @@ public abstract class BaseQueryCmd implements Command {
         List<String> requireRetry = diagConfig.getRequireRetry();
         RestCallManifest restCallManifest = new RestCallManifest();
         Map<String, String> workEntries = new LinkedHashMap<>();
-        workEntries.putAll(entries);
+        //workEntries.putAll(entries);
 
         // We will go through a max of three tries attmmpting to get file output
         // or until there are no more entries to get.
@@ -45,7 +45,7 @@ public abstract class BaseQueryCmd implements Command {
         // still hasn't worked, write the error content in the result to the target file.
         for (int i = 1; i <= attempts; i++) {
             // If everything worked last pass, get out
-            if (workEntries.size() == 0) {
+            if (entries.size() == 0) {
                 break;
             }
 
@@ -61,17 +61,18 @@ public abstract class BaseQueryCmd implements Command {
             }
 
             restCallManifest.setRuns(i);
-            Set<String> keys = workEntries.keySet();
-            Set<String> removalEntries = new HashSet<>();
+            Iterator<Map.Entry<String,String>> iter = entries.entrySet().iterator();
 
-            for (String queryName : keys) {
-                String query = workEntries.get(queryName);
+            while (iter.hasNext()) {
+                Map.Entry<String,String> entry = iter.next();
+                String queryName = entry.getKey();
+                String query = entry.getValue();
                 String filename = buildFileName(queryName, tempDir, textExtensions);
                 logger.info("Running query:{} -  {}", queryName, query);
                 RestResult restResult = runQuery(filename, query, restClient);
                 // If it succeeded take it out of future work
                 if (restResult.getStatus() == 200) {
-                    removalEntries.add(queryName);
+                    iter.remove();
                     restCallManifest.setCallHistory(queryName, i, true);
                     logger.info("Results written to: {}", filename);
                 } else {
@@ -80,7 +81,7 @@ public abstract class BaseQueryCmd implements Command {
                     restCallManifest.setCallHistory(queryName, i, false);
 
                     if (!requireRetry.contains(queryName) || !isRetryable(restResult.getStatus())) {
-                        removalEntries.add(queryName);
+                        iter.remove();
                         restResult.toFile(filename);
                         logger.info("Call failed. Bypassing.");
 
@@ -94,12 +95,6 @@ public abstract class BaseQueryCmd implements Command {
                         }
                     }
                 }
-            }
-
-            // if it was on the failed list remove it - do it this way to avoid modifying the
-            // Collection you're iterating through
-            for(String entry: removalEntries){
-                workEntries.remove(entry);
             }
         }
 

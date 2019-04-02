@@ -16,7 +16,7 @@ public class Constants {
    public static final int DEEFAULT_HTTPS_PORT = 443;
 
    public static final int LOGSTASH_PORT = 9600;
-   public static final String LOCAL_ADDRESSES = "127.0.0.1;localhost";
+   public static final String LOCAL_ADDRESSES = "127.0.0.1;localhost;::1";
 
    public static final String UTF8 = "UTF8";
 

@@ -29,10 +29,6 @@ public class DiagnosticInputs extends BaseInputs {
     private String diagType = "standard";
     @Parameter(names = {"--ptp"}, description = "Insecure plain text password - allows you to input the password as a plain text argument for scripts. WARNING: Exposes passwords in clear text. Inherently insecure.")
     private String plainTextPassword = "";
-    @Parameter(names = {"--reps"}, description = "Number of times to execute the diagnostic. Use to create multiple runs at timed intervals.")
-    private int reps = 1;
-    @Parameter(names = {"--interval"}, description = "Timed interval in minutes at which to execute the diagnostic. Minimum interval is 10 minutes.")
-    private int interval = 600000;
     @Parameter(names = {"--scrub"}, description = "Set to true to use the scrub.yml dictionary to scrub logs and config files.  See README for more info.")
     private boolean scrubFiles = false;
     @Parameter(names = {"--noVerify"}, description = "Use this option to bypass hostname verification for certificate. This is inherently unsafe and NOT recommended.")
@@ -127,22 +123,6 @@ public class DiagnosticInputs extends BaseInputs {
 
     public void setPlainTextPassword(String plainTextPassword) {
         this.plainTextPassword = plainTextPassword;
-    }
-
-    public int getReps() {
-        return reps;
-    }
-
-    public void setReps(int reps) {
-        this.reps = reps;
-    }
-
-    public int getInterval() {
-        return interval;
-    }
-
-    public void setInterval(int interval) {
-        this.interval = interval;
     }
 
     public boolean isScrubFiles() {
@@ -268,10 +248,6 @@ public class DiagnosticInputs extends BaseInputs {
             this.jCommander.usage();
             return false;
         }
-        return (validateAuth() && validateIntervals());
-    }
-
-    public boolean validateAuth() {
 
         if (StringUtils.isNotEmpty(this.plainTextPassword)) {
             this.password = plainTextPassword;
@@ -293,28 +269,6 @@ public class DiagnosticInputs extends BaseInputs {
                 (!StringUtils.isNotEmpty(password) || !StringUtils.isEmpty(user));
     }
 
-    public boolean validateIntervals() {
-
-        boolean repsOK = true, intervalOK = true;
-
-        if (this.getReps() > 1) {
-
-            if (this.getReps() > 6) {
-                logger.info("'--reps' specified [{}] exceed the maximum allowed [6].", this.getReps());
-                logger.info("Use --help for allowed values.");
-                repsOK = false;
-            }
-
-            if (this.getInterval() < 10) {
-                logger.info("Interval specificed is lower than the minium allowed.");
-                logger.info("Use --help for allowed values.");
-                intervalOK = false;
-            }
-        }
-
-        return (repsOK && intervalOK);
-
-    }
 
     @Override
     public String toString() {

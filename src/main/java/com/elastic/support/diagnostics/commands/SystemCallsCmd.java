@@ -62,12 +62,23 @@ public class SystemCallsCmd implements Command {
                     logger.log(SystemProperties.DIAG, e);
                     logger.info("Error creating container directory - bypassing Docker container calls.");
                 }
+                catch (Exception e){
+                    logger.log(SystemProperties.DIAG, e);
+                    logger.info("Unexpected error - bypassing Docker container calls.");
+                }
             }
         } else {
-            String calls = checkOS();
-            Map<String, String> osCmds = context.getDiagsConfig().getCommandMap(calls);
-            osCmds = preProcessOsCmds(osCmds, pid, SystemProperties.javaHome);
-            processCalls(tempDir, osCmds, pb);
+            try{
+                String calls = checkOS();
+                Map<String, String> osCmds = context.getDiagsConfig().getCommandMap(calls);
+                osCmds = preProcessOsCmds(osCmds, pid, SystemProperties.javaHome);
+                processCalls(tempDir, osCmds, pb);
+            }
+            catch (Exception e){
+                logger.log(SystemProperties.DIAG, e);
+                logger.info("Unexpected error - bypassing System calls.");
+            }
+
         }
 
     }
@@ -90,7 +101,7 @@ public class SystemCallsCmd implements Command {
             return "macOS";
         } else {
             logger.error("Failed to detect operating system!");
-            throw new RuntimeException("Unsupported OS");
+            throw new RuntimeException("Unsupported OS - " + osName);
         }
     }
 
