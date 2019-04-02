@@ -28,18 +28,7 @@ public class DiagnosticApp {
         Map<String, List<String>> chains = JsonYamlUtils.readYamlFromClasspath(Constants.CHAINS_CONFIG, true);
 
         DiagnosticService diag = new DiagnosticService();
-        if (diagnosticInputs.getReps() == 1) {
-            diag.exec(diagnosticInputs, diagConfig, chains);
-        } else {
-            try {
-                for (int r = 1; r <= diagnosticInputs.getReps(); r++) {
-                    diag.exec(diagnosticInputs, diagConfig, chains);
-                    Thread.sleep(diagnosticInputs.getInterval() * 60 * 1000);
-                }
-            } catch (Exception e) {
-                logger.error("Worker error executing multiple diag runs");
-            }
-        }
+        diag.exec(diagnosticInputs, diagConfig, chains);
     }
 
 }
