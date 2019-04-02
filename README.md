@@ -24,7 +24,7 @@ It will execute a series of REST API calls to the running cluster, run a number 
 * The system account running the utility must have read access to the Elasticsearch files and write access to the output location.
 * If you are using Shield/Security the supplied user id must have permission to execute the diagnostic URL's.
 * Linux, Windows, and Mac OSX are supported.
-* Docker installations should use the `--type remote` option. See below for examples. 
+* For Docker installations see the section below for details. 
 
 ## Installation
 * Download [support-diagnostics-latest-dist.zip](https://github.com/elastic/elasticsearch-support-diagnostics/releases/latest) from the Github release area.
@@ -32,9 +32,7 @@ It will execute a series of REST API calls to the running cluster, run a number 
 * Switch to the diagnostics distribution directory.
 
 ## Version check
-As a first step the diagnostic will check the Github repo for the current released version, and if not the same as the one running will:
-* Provide the URL for the current release.
-* Ask the user whether they wish to continue. 
+As a first step the diagnostic will check the Github repo for the current released version, and if not the same as the one running will provide the URL for the current release and then stop. The user will then be prompted to to press Enter before the diag continues.
 * For air gapped environments this can be bypassed by adding `--bypassDiagVerify` to the command line.
 
 ## Usage - Simplest Case
@@ -48,15 +46,15 @@ As a first step the diagnostic will check the Github repo for the current releas
 
 
 #### Basic Usage Examples
-    * NOTE: Windows users use `diagnostics` instead of `./diagnostics.sh`
-    * sudo ./diagnostics.sh --host localhost
-    * sudo ./diagnostics.sh --host 10.0.0.20
-    * sudo ./diagnostics.sh --host myhost.mycompany.com
-    * sudo ./diagnostics.sh --host 10.0.0.20 --port 9201
-    * sudo ./diagnostics.sh --host localhost -o /home/myusername/diag-out
+    NOTE: Windows users use `diagnostics` instead of `./diagnostics.sh`
+    sudo ./diagnostics.sh --host localhost
+    sudo ./diagnostics.sh --host 10.0.0.20
+    sudo ./diagnostics.sh --host myhost.mycompany.com
+    sudo ./diagnostics.sh --host 10.0.0.20 --port 9201
+    sudo ./diagnostics.sh --host localhost -o /home/myusername/diag-out
 
 #### Getting Command Line Help
-    * /diagnostics.sh --help
+    /diagnostics.sh --help
 
 ## Using With Shield/Security
 * a truststore does not need to be specified - it's assumed you are running this against a node that you set up and if you didn't trust it you wouldn't be running this.
@@ -66,10 +64,10 @@ As a first step the diagnostic will check the Github repo for the current releas
 * To script the utility when using Shield/Security, you may use the `--ptp` option to allow you to pass a plain text password to the command line rather than use `-p` and get a prompt.  Note that this is inherently insecure - use at your own risk.
 
 #### Examples - Without SSL
-    * sudo ./diagnostics.sh --host localhost -u elastic -p
-    * sudo ./diagnostics.sh --host 10.0.0.20 -u elastic -p
+    sudo ./diagnostics.sh --host localhost -u elastic -p
+    sudo ./diagnostics.sh --host 10.0.0.20 -u elastic -p
 #### Example - With SSL
-    * sudo ./diagnostics.sh --host 10.0.0.20 -u <your username> -p --ssl
+    sudo ./diagnostics.sh --host 10.0.0.20 -u <your username> -p --ssl
 
 ## Additional Options
 * You can specify additional java options such as a higher `-Xmx` value by setting the environment variable `DIAG_JAVA_OPTS`.
@@ -89,28 +87,34 @@ The `diag.yml` file in the `/lib/support-diagnostics-x.x.x` contains all the RES
     
 ### Docker Containers
 * The diagnostic will examine the nodes output for process id's that have a value of `1`. If it finds any it will assume that all nodes are running in Docker containers and bypass normal system calls and log collection.
+* If issues are encountered, consider bypassing any local system calls by using _--type remote_
 * By default, once the diagnostic detects Docker containers, it will generate system calls for all running containers. If you wish to limit output to a single container, you may do this by using the --dockerId option.  The output for each container will be stored in a subfolder named for the container id.  
-    
+####### To run the docker calls only for the container elasticsearch2:
+```$xslt
+$ docker ps
+CONTAINER ID        IMAGE                                                 COMMAND                  
+4577fe120750        docker.elastic.co/elasticsearch/elasticsearch:6.6.2   "/usr/local/bin/dock…"   elasticsearch2
+e29d2b491f8d        docker.elastic.co/elasticsearch/elasticsearch:6.6.2   "/usr/local/bin/dock…"   elasticsearch
+
+$ sudo .diagnostics.sh --host 10.0.0.20 --dockerId 4577fe120750
+```    
 ### Logstash Diagnostics
 * Use the `--type logstash` argument to get diagnostic information from a running Logstash process. It will query the process in a manner similar to the Elasticsearch REST API calls.
 * The default port will be `9600`. This can be modified at startup, or will be automatically incremented if you start multiple Logstash processes on the same host. You can connect to these other Logstash processes with the `--port` option.
 * Available for 5.0 or greater.
-* System statistics relevant for the platform will also be collected, similar to the standard diagnostic type.
+* System statistics relevant for the platform will also be collected, similar to the standard diagnostic type
+
 #### Logstash Examples
-    * sudo ./diagnostics.sh --host localhost --type logstash
-    * sudo ./diagnostics.sh --host localhost --type logstash --port 9610
+    sudo ./diagnostics.sh --host localhost --type logstash
+    sudo ./diagnostics.sh --host localhost --type logstash --port 9610
 
 ### Multiple Runs At Timed Intervals
-* If the cluster is not running X-Pack Monitoring you may find it beneficial to see how some statistics change over time. You can accomplish this by using the `--interval x` (in seconds) and `--reps` (times to repeat)to take a diagnostic.
-* You run the diagnostic once and it will execute a run, sleep for the interval duration, and then take another diagnostic. 
-* Each run will get it's own archive with its own unique time stamp.
-* Logs will for each run so if you are running in standard rather than remote mode you can wind up with a number of large archives. It is recommended to stick to using the --type remote option.
-* This can be used for either Elasticsearch or Logstash
-* The maximum number of repetitions is `6`. The shortest interval between runs allowed is `10` minutes.
+This option has been removed. If you used this feature or have a use case for this functionality, please open an issue.
+
 #### Examples - 6 runs with 20 seconds separating each run
-    * sudo ./diagnostics.sh --host localhost -u elastic -p --interval 600 --reps 6
-    * sudo ./diagnostics.sh --host localhost -u elastic -p --interval 600 --reps 6 --type remote
-    * sudo ./diagnostics.sh --host localhost -u elastic -p --interval 600 --reps 6 --type logstash 
+    sudo ./diagnostics.sh --host localhost -u elastic -p --interval 600 --reps 6
+    sudo ./diagnostics.sh --host localhost -u elastic -p --interval 600 --reps 6 --type remote
+    sudo ./diagnostics.sh --host localhost -u elastic -p --interval 600 --reps 6 --type logstash 
 
 ## File Sanitization Utility
 

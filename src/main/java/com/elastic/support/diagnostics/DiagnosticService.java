@@ -7,11 +7,8 @@ import com.elastic.support.diagnostics.chain.DiagnosticChainExec;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.rest.RestClient;
 import com.elastic.support.rest.RestClientBuilder;
-import com.elastic.support.util.ArchiveUtils;
-import com.elastic.support.util.SystemProperties;
 import com.elastic.support.util.SystemUtils;
 import org.apache.commons.io.FileUtils;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,35 +22,9 @@ public class DiagnosticService extends BaseService {
 
     public void exec(DiagnosticInputs diagnosticInputs, DiagConfig diagConfig, Map<String, List<String>> chains) {
 
-        // Create two clients, one generic for Github and one customized for this ES cluster
-        RestClientBuilder builder = new RestClientBuilder();
-        RestClient genericClient = builder
-                .setConnectTimeout(diagConfig.getRestConfig().get("connectTimeout"))
-                .setRequestTimeout(diagConfig.getRestConfig().get("requestTimeout"))
-                .setSocketTimeout(diagConfig.getRestConfig().get("socketTimeout"))
-                .setProxyHost(diagnosticInputs.getProxyUser())
-                .setProxPort(diagnosticInputs.getProxyPort())
-                .setProxyUser(diagnosticInputs.getUser())
-                .setProxyPass(diagnosticInputs.getProxyPassword())
-                .build();
-
-        // Set the extra things wee need for the Elasticsearch client.
-        builder = builder.setBypassVerify(diagnosticInputs.isBypassDiagVerify())
-                .setHost(diagnosticInputs.getHost())
-                .setPort(diagnosticInputs.getPort())
-                .setScheme(diagnosticInputs.getScheme());
-
-        if(diagnosticInputs.isSecured()){
-            builder.setUser(diagnosticInputs.getUser())
-                    .setPassword(diagnosticInputs.getPassword());
-        }
-
-        if(diagnosticInputs.isPki()){
-            builder.setPkiKeystore(diagnosticInputs.getPkiKeystore())
-                    .setPkiKeystorePass(diagnosticInputs.getPkiKeystorePass());
-        }
-
-        RestClient esRestClient = builder.build();
+        // Create two clients, one generic for Github or any other external site and one customized for this ES cluster
+        RestClient genericClient = createGenericClient(diagConfig, diagnosticInputs);
+        RestClient esRestClient = createEsRestClient(diagConfig, diagnosticInputs);
 
         try {
             // Create the temp directory - delete if first if it exists from a previous run
@@ -98,5 +69,48 @@ public class DiagnosticService extends BaseService {
             genericClient.close();
         }
     }
+
+    private RestClient createGenericClient(DiagConfig diagConfig, DiagnosticInputs diagnosticInputs) {
+        RestClientBuilder builder = new RestClientBuilder();
+        return builder
+                .setConnectTimeout(diagConfig.getRestConfig().get("connectTimeout"))
+                .setRequestTimeout(diagConfig.getRestConfig().get("requestTimeout"))
+                .setSocketTimeout(diagConfig.getRestConfig().get("socketTimeout"))
+                .setProxyHost(diagnosticInputs.getProxyUser())
+                .setProxPort(diagnosticInputs.getProxyPort())
+                .setProxyUser(diagnosticInputs.getUser())
+                .setProxyPass(diagnosticInputs.getProxyPassword())
+                .build();
+
+    }
+
+    private RestClient createEsRestClient(DiagConfig diagConfig, DiagnosticInputs diagnosticInputs) {
+        RestClientBuilder builder = new RestClientBuilder();
+        builder
+                .setConnectTimeout(diagConfig.getRestConfig().get("connectTimeout"))
+                .setRequestTimeout(diagConfig.getRestConfig().get("requestTimeout"))
+                .setSocketTimeout(diagConfig.getRestConfig().get("socketTimeout"))
+                .setProxyHost(diagnosticInputs.getProxyUser())
+                .setProxPort(diagnosticInputs.getProxyPort())
+                .setProxyUser(diagnosticInputs.getUser())
+                .setProxyPass(diagnosticInputs.getProxyPassword())
+                .setBypassVerify(diagnosticInputs.isBypassDiagVerify())
+                .setHost(diagnosticInputs.getHost())
+                .setPort(diagnosticInputs.getPort())
+                .setScheme(diagnosticInputs.getScheme());
+
+        if (diagnosticInputs.isSecured()) {
+            builder.setUser(diagnosticInputs.getUser())
+                    .setPassword(diagnosticInputs.getPassword());
+        }
+
+        if (diagnosticInputs.isPki()) {
+            builder.setPkiKeystore(diagnosticInputs.getPkiKeystore())
+                    .setPkiKeystorePass(diagnosticInputs.getPkiKeystorePass());
+        }
+
+        return builder.build();
+    }
+
 
 }
