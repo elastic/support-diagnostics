@@ -72,10 +72,11 @@ public class DiagnosticService extends BaseService {
 
     private RestClient createGenericClient(DiagConfig diagConfig, DiagnosticInputs diagnosticInputs) {
         RestClientBuilder builder = new RestClientBuilder();
+
         return builder
-                .setConnectTimeout(diagConfig.getRestConfig().get("connectTimeout"))
-                .setRequestTimeout(diagConfig.getRestConfig().get("requestTimeout"))
-                .setSocketTimeout(diagConfig.getRestConfig().get("socketTimeout"))
+                .setConnectTimeout(diagConfig.getRestConfig().get("connectTimeout") * 1000)
+                .setRequestTimeout(diagConfig.getRestConfig().get("requestTimeout") * 1000)
+                .setSocketTimeout(diagConfig.getRestConfig().get("socketTimeout") * 1000)
                 .setProxyHost(diagnosticInputs.getProxyUser())
                 .setProxPort(diagnosticInputs.getProxyPort())
                 .setProxyUser(diagnosticInputs.getUser())
@@ -87,9 +88,9 @@ public class DiagnosticService extends BaseService {
     private RestClient createEsRestClient(DiagConfig diagConfig, DiagnosticInputs diagnosticInputs) {
         RestClientBuilder builder = new RestClientBuilder();
         builder
-                .setConnectTimeout(diagConfig.getRestConfig().get("connectTimeout"))
-                .setRequestTimeout(diagConfig.getRestConfig().get("requestTimeout"))
-                .setSocketTimeout(diagConfig.getRestConfig().get("socketTimeout"))
+                .setConnectTimeout(diagConfig.getRestConfig().get("connectTimeout") * 1000)
+                .setRequestTimeout(diagConfig.getRestConfig().get("requestTimeout") * 1000)
+                .setSocketTimeout(diagConfig.getRestConfig().get("socketTimeout") * 1000)
                 .setProxyHost(diagnosticInputs.getProxyUser())
                 .setProxPort(diagnosticInputs.getProxyPort())
                 .setProxyUser(diagnosticInputs.getUser())
