@@ -148,6 +148,9 @@ rest-calls:
         security_priv: "_xpack/security/privilege?pretty"
         ccr_stats: "_ccr/stats?pretty"
         ccr_autofollow_patterns: "/_ccr/auto_follow?pretty"
+      minor-6:
+        ilm_explain: "*/_ilm/explain?human&pretty"
+        ilm_policies: "_ilm/policy?human&pretty"
       minor-7:
         ccr_follower_info: "_all/_ccr/info?pretty"
 
