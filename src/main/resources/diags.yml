@@ -38,9 +38,10 @@ text-file-extensions:
 
 # Uncomment only if modifying defaults
 rest-config:
-   requestTimeout: 30000
-   connectTimeout: 30000
-   socketTimeout:  120000
+   # timeouts in seconds
+   requestTimeout: 60
+   connectTimeout: 60
+   socketTimeout:  120
    maxTotalConn: 100
    maxConnPerRoute: 10
 
@@ -88,7 +89,7 @@ rest-calls:
     nodes: "_nodes?pretty&human"
     plugins: "_cat/plugins?format=json"
     recovery: "_recovery?pretty&human&detailed=true"
-    segments: "_segments?pretty&human&verbose"
+    segments: "_segments?pretty&human"
     settings: "_settings?pretty&human"
     shards: "_cat/shards?format=json&bytes=b&pretty"
     templates: "_template?pretty"
