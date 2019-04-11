@@ -151,6 +151,7 @@ rest-calls:
       minor-6:
         ilm_explain: "*/_ilm/explain?human&pretty"
         ilm_policies: "_ilm/policy?human&pretty"
+        ilm_status: "_ilm/status?pretty"
       minor-7:
         ccr_follower_info: "_all/_ccr/info?pretty"
 
