@@ -12,8 +12,8 @@ public abstract class BaseInputs {
 
     public void parseInputs(String[] args){
         logger.info("Processing diagnosticInputs...");
-        JCommander jc = new JCommander(this);
-        jc.setCaseSensitiveOptions(true);
-        jc.parse(args);
+        jCommander = new JCommander(this);
+        jCommander.setCaseSensitiveOptions(true);
+        jCommander.parse(args);
     }
 }
