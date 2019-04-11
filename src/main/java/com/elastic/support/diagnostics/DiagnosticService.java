@@ -95,7 +95,7 @@ public class DiagnosticService extends BaseService {
                 .setProxPort(diagnosticInputs.getProxyPort())
                 .setProxyUser(diagnosticInputs.getUser())
                 .setProxyPass(diagnosticInputs.getProxyPassword())
-                .setBypassVerify(diagnosticInputs.isBypassDiagVerify())
+                .setBypassVerify(diagnosticInputs.isSkipVerification())
                 .setHost(diagnosticInputs.getHost())
                 .setPort(diagnosticInputs.getPort())
                 .setScheme(diagnosticInputs.getScheme());
