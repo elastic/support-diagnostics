@@ -14,6 +14,6 @@ if not defined DIAG_JAVA_OPTIONS (
   set DIAG_JAVA_OPTIONS=-Xmx2000m
 )
 
-"%JAVA_EXEC%" %DIAG_JAVA_OPTIONS% -cp .\;.\lib\* com.elastic.support.diagnostics.ScrubApp %*
+"%JAVA_EXEC%" %DIAG_JAVA_OPTIONS% -cp .\;.\lib\* com.elastic.support.scrub.ScrubApp %*
 
 endlocal
