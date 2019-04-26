@@ -18,4 +18,4 @@ fi
 [[ ${DIAG_JAVA_OPTS} == "" ]] && export DIAG_JAVA_OPTS="-Xms256m -Xmx2000m"
 
 echo "Using ${DIAG_JAVA_OPTS} ${DIAG_DEBUG_OPTS} for options."
-"$JAVA" $DIAG_JAVA_OPTS ${DIAG_DEBUG_OPTS} -cp .:./lib/*  com.elastic.support.diagnostics.ScrubApp "$@"
+"$JAVA" $DIAG_JAVA_OPTS ${DIAG_DEBUG_OPTS} -cp .:./lib/*  com.elastic.support.scrub.ScrubApp "$@"
