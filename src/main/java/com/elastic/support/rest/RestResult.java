@@ -53,6 +53,7 @@ public class RestResult implements Cloneable {
             if (status == 200) {
                 response.getEntity().writeTo(out);
             } else {
+                this.reason = response.getStatusLine().getReasonPhrase();
                 this.responseString = EntityUtils.toString(response.getEntity());
             }
         } catch (Exception e) {
@@ -78,7 +79,7 @@ public class RestResult implements Cloneable {
 
     public void toFile(String fileName){
         try(FileOutputStream fs = new FileOutputStream(fileName)){
-            IOUtils.write(responseString, fs, Constants.UTF8);
+            IOUtils.write(reason + " - " + responseString, fs, Constants.UTF8);
         }
         catch (Exception e){
             logger.log(SystemProperties.DIAG, "Error writing Response To OutputStream", e);
