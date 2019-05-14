@@ -2,7 +2,7 @@
 The support diagnostic utility is a Java executable that will interrogate the node on the host it is running on to obtain data and statistics on the running cluster. 
 It will execute a series of REST API calls to the running cluster, run a number of OS related commands(such as top, netstat, etc.), and collect logs, then bundle them into one or more archives.
 
-* Compatible with versions 6.x, 5.x, 2.x, 1.x
+* Compatible with all versions of Elasticsearch, including beta and release candidates. If it cannot match the targeted version, it will attempt to use the calls from the latest release.
   * Note: the version of this tool is independent of the version of Elasticsearch/Logstash targeted.
 * OS specific versions are not required.
 * The application can be run from any directory on the machine.  It does not require installation to a specific location, and the only requirement is that the user has read access to the Elasticsearch artifacts, write access to the chosen output directory, and sufficient disk space for the generated archive.
