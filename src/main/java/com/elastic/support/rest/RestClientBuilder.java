@@ -17,7 +17,11 @@ import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustAllStrategy;
 import org.apache.http.impl.auth.BasicScheme;
-import org.apache.http.impl.client.*;
+import org.apache.http.impl.client.BasicAuthCache;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.logging.log4j.LogManager;
@@ -25,7 +29,6 @@ import org.apache.logging.log4j.Logger;
 
 import javax.net.ssl.SSLContext;
 import java.io.File;
-
 import java.io.FileInputStream;
 import java.security.KeyStore;
 
@@ -137,12 +140,13 @@ public class RestClientBuilder {
 
         pkiKeystoreFile = new File(pkiKeystore);
 
-        // If they specified an invalid input keytstore error it out now since it won't work.
-        if (! pkiKeystoreFile.exists()) {
-            this.pkiKeystore = pkiKeystore;
+        // If they specified an invalid input keystore error it out now since it won't work.
+        if (!pkiKeystoreFile.exists()) {
+            logger.error("Invalid PKI authorization store specified");
+            throw new IllegalArgumentException("Java keystore " + pkiKeystoreFile.getAbsolutePath() +
+                    " could not be located on the system.");
         } else {
-            logger.error("Invalid PKI authorizetion store specified");
-            throw new IllegalArgumentException("Java keystore {} could not be located on the system.");
+            this.pkiKeystore = pkiKeystore;
         }
 
         return this;
@@ -160,6 +164,10 @@ public class RestClientBuilder {
 
     public RestClient build() {
 
+        if (StringUtils.isNotEmpty(pkiKeystore) && pkiKeystorePass == null) {
+            throw new IllegalStateException("No password provided for keystore " + pkiKeystore);
+        }
+
         HttpClientBuilder clientBuilder = HttpClients.custom();
 
         // Set up is the target destination.
@@ -172,6 +180,14 @@ public class RestClientBuilder {
         try{
             SSLContextBuilder sslContextBuilder = new SSLContextBuilder();
             sslContextBuilder.loadTrustMaterial(new TrustAllStrategy());
+
+            if(StringUtils.isNotEmpty(pkiKeystore) ) {
+                // If they are using a PKI auth set it up now
+                KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+                ks.load(new FileInputStream(pkiKeystoreFile), pkiKeystorePass.toCharArray());
+                sslContextBuilder.loadKeyMaterial(ks, pkiKeystorePass.toCharArray());
+            }
+
             SSLContext sslCtx = sslContextBuilder.build();
             SSLConnectionSocketFactory factory = new SSLConnectionSocketFactory(sslCtx);
             clientBuilder.setSSLSocketFactory(new SSLConnectionSocketFactory(sslCtx));
@@ -189,13 +205,6 @@ public class RestClientBuilder {
                 clientBuilder.setConnectionManager(mgr);
             }
 
-            if(StringUtils.isNotEmpty(pkiKeystore) ) {
-                // If they are using a PKI auth set it up now
-                KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
-                ks.load(new FileInputStream(pkiKeystoreFile), pkiKeystorePass.toCharArray());
-                sslContextBuilder.loadKeyMaterial(ks, pkiKeystorePass.toCharArray());
-            }
-
             if (bypassVerify) {
                 clientBuilder.setSSLSocketFactory(new SSLConnectionSocketFactory(sslCtx, new NoopHostnameVerifier()));
             }
@@ -205,7 +214,7 @@ public class RestClientBuilder {
         }
         catch (Exception e){
             logger.log(SystemProperties.DIAG, "Connection setup failed", e);
-            throw new RuntimeException("Error establishing http connection for: " + host);
+            throw new RuntimeException("Error establishing http connection for: " + host, e);
         }
 
         // Set up the default request config
