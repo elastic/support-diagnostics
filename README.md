@@ -174,7 +174,7 @@ tokens:
 #### Examples
 ```
  ./log-collection.sh -l /var/log/elasticsearch -o /admin/storage/logs -p 444999
- ./log-collection.sh --logDir /var/log/elasticsearch --outpotDir /admin/storage/logs --pid 444999
+ ./log-collection.sh --logDir /var/log/elasticsearch --outputDir /admin/storage/logs --pid 444999
 
 ```
 
