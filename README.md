@@ -46,7 +46,7 @@ As a first step the diagnostic will check the Github repo for the current releas
 
 
 #### Basic Usage Examples
-    NOTE: Windows users use `diagnostics` instead of `./diagnostics.sh`
+    NOTE: Windows users use .\diagnostics.bat instead of ./diagnostics.sh
     sudo ./diagnostics.sh --host localhost
     sudo ./diagnostics.sh --host 10.0.0.20
     sudo ./diagnostics.sh --host myhost.mycompany.com
@@ -54,7 +54,8 @@ As a first step the diagnostic will check the Github repo for the current releas
     sudo ./diagnostics.sh --host localhost -o /home/myusername/diag-out
 
 #### Getting Command Line Help
-    /diagnostics.sh --help
+    ./diagnostics.sh --help
+    .\diagnostics.bat --help
 
 ## Using With Shield/Security
 * a truststore does not need to be specified - it's assumed you are running this against a node that you set up and if you didn't trust it you wouldn't be running this.
