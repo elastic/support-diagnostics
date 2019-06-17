@@ -14,8 +14,6 @@ import java.util.*;
 
 public abstract class BaseQueryCmd implements Command {
 
-
-
     private final Logger logger = LogManager.getLogger(BaseQueryCmd.class);
 
     /*

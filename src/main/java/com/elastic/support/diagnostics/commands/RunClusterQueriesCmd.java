@@ -1,6 +1,7 @@
 package com.elastic.support.diagnostics.commands;
 
 import com.elastic.support.config.DiagConfig;
+import com.elastic.support.config.Version;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -20,7 +21,7 @@ public class RunClusterQueriesCmd extends BaseQueryCmd {
 
     public void execute(DiagnosticContext context) {
 
-        String version = context.getVersion();
+        Version version = context.getVersion();
 
         DiagConfig diagConfig = context.getDiagsConfig();
         Map restCalls = diagConfig.getRestCalls();
@@ -31,11 +32,8 @@ public class RunClusterQueriesCmd extends BaseQueryCmd {
 
     }
 
-    public Map<String, String> buildStatementsByVersion(String version, Map calls) {
+    public Map<String, String> buildStatementsByVersion(Version version, Map calls) {
 
-        String[] ver = version.split("\\.");
-        int major = Integer.parseInt(ver[0]);
-        int minor = Integer.parseInt(ver[1]);
 
         Map statements = new LinkedHashMap<>();
 
@@ -44,7 +42,7 @@ public class RunClusterQueriesCmd extends BaseQueryCmd {
 
         // Go through any additional calls up to the current version
         Map versionSpecificCalls = ((Map) calls.get("versions"));
-        for (int ma = 1; ma <= major; ma++) {
+        for (int ma = 1; ma <= version.getMajor(); ma++) {
             String majKey = "major-" + ma;
 
             // See if there are calls specific to this major version
@@ -55,7 +53,7 @@ public class RunClusterQueriesCmd extends BaseQueryCmd {
             }
 
             //If we are on a lower major version get all the minors
-            if (ma < major) {
+            if (ma < version.getMajor()) {
                 Collection values = majorVersionCalls.values();
                 for (Object verEntry : values) {
                     statements.putAll((Map) verEntry);
@@ -63,7 +61,7 @@ public class RunClusterQueriesCmd extends BaseQueryCmd {
             }
             // Otherwise just get the ones at or below the input minor
             else {
-                for (int mi = 0; mi <= minor; mi++) {
+                for (int mi = 0; mi <= version.getMinor(); mi++) {
                     String minKey = "minor-" + mi;
                     statements.putAll(getCalls(minKey, majorVersionCalls));
                 }

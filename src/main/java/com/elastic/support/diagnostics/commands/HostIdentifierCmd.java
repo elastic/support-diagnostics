@@ -34,11 +34,17 @@ public class HostIdentifierCmd implements Command {
     public void execute(DiagnosticContext context) {
 
         logger.info("Checking the supplied hostname against the node information retrieved to verify location. This may take some time if localhost was specified in a multi-node cluster");
-        String version = context.getVersion();
+        int version = context.getVersion().getMajor();
         String temp = context.getTempDir();
         String targetHost = context.getDiagnosticInputs().getHost();
 
-        JsonNode rootNode = JsonYamlUtils.createJsonNodeFromFileName(temp, Constants.NODES);
+        JsonNode rootNode = null;
+        try {
+            rootNode = JsonYamlUtils.createJsonNodeFromFileName(temp, Constants.NODES);
+        } catch (Exception e) {
+            logger.error("Could not verify hostname - issue with node info json.");
+            return;
+        }
         JsonNode nodes = rootNode.path("nodes");
 
         // First check for indications that there are docker containers running, in which case the
@@ -91,11 +97,11 @@ public class HostIdentifierCmd implements Command {
 
     /**
      * @param hostsAndIps - String set containing either a single host name that was passed in, or if localhost was used and it is bigger than a one node cluster, a complete list of possible IP And host names.
-     * @param version     - Elasticsearch version, since the place to find this could change.
+     * @param majorVersion     - Elasticsearch version, since the place to find this could change.
      * @param nodes       - JsonNode containing the output of the _nodes command
      * @return - JsonNode running on the host the utility is being executed on or null if it couldn't be identified.
      */
-    public JsonNode findTargetNode(Set<String> hostsAndIps, String version, JsonNode nodes) {
+    public JsonNode findTargetNode(Set<String> hostsAndIps, int majorVersion, JsonNode nodes) {
 
         for (String targetHost : hostsAndIps) {
             for (JsonNode node : nodes) {
@@ -113,7 +119,7 @@ public class HostIdentifierCmd implements Command {
                 }
 
 
-                if (version.startsWith("1.")) {
+                if (majorVersion == 1) {
                     String publishAddress = node.path("http").path("publish_address").asText();
                     int idxa = publishAddress.indexOf("/");
                     int idxb = publishAddress.indexOf(":");

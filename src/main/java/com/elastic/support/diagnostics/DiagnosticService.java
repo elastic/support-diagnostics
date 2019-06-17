@@ -30,7 +30,6 @@ public class DiagnosticService extends BaseService {
             // Create the temp directory - delete if first if it exists from a previous run
             String tempDir = diagnosticInputs.getTempDir();
             logger.info("Creating temp directory: {}", tempDir);
-            Map<String, Integer> restConfig = diagConfig.getRestConfig();
 
             FileUtils.deleteDirectory(new File(tempDir));
             Files.createDirectories(Paths.get(tempDir));
