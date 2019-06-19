@@ -24,6 +24,7 @@ public class DiagnosticContext {
    private RestClient genericClient, esRestClient;
    private  DiagConfig diagsConfig;
    private  DiagnosticInputs diagnosticInputs;
+   private boolean isAuthorized;
 
    public Version getVersion() {
       return version;
@@ -127,5 +128,13 @@ public class DiagnosticContext {
 
    public void setDockerContainers(List<String> dockerContainers) {
       this.dockerContainers = dockerContainers;
+   }
+
+   public boolean isAuthorized() {
+      return isAuthorized;
+   }
+
+   public void setAuthorized(boolean isAuthorized) {
+      this.isAuthorized = isAuthorized;
    }
 }

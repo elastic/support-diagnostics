@@ -23,62 +23,44 @@ public class UserRoleCheckCmd implements Command {
 
         RestClient restClient = context.getEsRestClient();
         String user = context.getDiagnosticInputs().getUser();
+        boolean hasAuthorization = false;
 
         Version version = context.getVersion();
         String url = null;
         int major = version.getMajor();
         int minor = version.getMinor();
 
-        if(major == 2){
+        if (major <= 2) {
             url = "/_shield/user/" + user;
-        }
-        else if (major <= 6){
+        } else if (major <= 6) {
             url = "/_xpack/security/user/" + user;
-        }
-        else{
+        } else {
             url = "/_security/user/" + user;
         }
 
-        boolean hasAuthorization = false;
         RestResult result = restClient.execQuery(url);
-        if(result.getStatus() == 200){
+        if (result.getStatus() == 200) {
             String userJsonString = result.toString();
             JsonNode userNode = JsonYamlUtils.createJsonNodeFromString(userJsonString);
             JsonNode rolesNode = userNode.path("roles");
             List<String> roles = new ArrayList<>();
-            if(rolesNode.isArray()){
+            if (rolesNode.isArray()) {
                 ObjectMapper mapper = new ObjectMapper();
                 roles = mapper.convertValue(rolesNode, List.class);
             }
 
-            if(major < 6){
-                if(roles.contains("admin")){
+            if (major <= 6) {
+                if (roles.contains("admin")) {
                     hasAuthorization = true;
                 }
-            }
-            else if(major == 6 ){
-                if(minor < 3){
-                    if(roles.contains("admin")){
-                        hasAuthorization = true;
-                    }
-                }
-                else{
-                    if(roles.contains("superuser")){
-                        hasAuthorization = true;
-                    }
-                }
-            }
-            else if(major > 6){
-                if(roles.contains("superuser")){
+            } else {
+                if (roles.contains("superuser")) {
                     hasAuthorization = true;
                 }
             }
 
-        }
+            context.setAuthorized(hasAuthorization);
 
-        if(! hasAuthorization){
-            logger.warn("The elasticsearch user entered: {} does not appear to have sufficient authorization to access all collected information", user);
-            logger.warn("If you are using a custom role please verify that it has the admin role for versions prior to 6.3 or the superuser role for subsequent versions.");
         }
 
     }
