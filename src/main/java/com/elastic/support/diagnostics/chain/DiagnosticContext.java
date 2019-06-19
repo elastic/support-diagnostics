@@ -2,6 +2,7 @@ package com.elastic.support.diagnostics.chain;
 
 import com.elastic.support.config.DiagConfig;
 import com.elastic.support.config.DiagnosticInputs;
+import com.elastic.support.config.Version;
 import com.elastic.support.rest.RestClient;
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -10,7 +11,7 @@ import java.util.List;
 
 public class DiagnosticContext {
 
-   private String version = "";
+   private Version version;
    private String tempDir = "";
    private String pid = "0";
    private String logDir = "";
@@ -23,12 +24,13 @@ public class DiagnosticContext {
    private RestClient genericClient, esRestClient;
    private  DiagConfig diagsConfig;
    private  DiagnosticInputs diagnosticInputs;
+   private boolean isAuthorized;
 
-   public String getVersion() {
+   public Version getVersion() {
       return version;
    }
 
-   public void setVersion(String version) {
+   public void setVersion(Version version) {
       this.version = version;
    }
 
@@ -126,5 +128,13 @@ public class DiagnosticContext {
 
    public void setDockerContainers(List<String> dockerContainers) {
       this.dockerContainers = dockerContainers;
+   }
+
+   public boolean isAuthorized() {
+      return isAuthorized;
+   }
+
+   public void setAuthorized(boolean isAuthorized) {
+      this.isAuthorized = isAuthorized;
    }
 }

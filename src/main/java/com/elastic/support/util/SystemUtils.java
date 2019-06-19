@@ -130,6 +130,14 @@ public class SystemUtils {
 
     }
 
+    public static String buildStringFromChar(int len, char seed){
+
+        char[] charArray = new char[len];
+        Arrays.fill(charArray, seed);
+        return new String(charArray);
+
+    }
+
 
 
 }

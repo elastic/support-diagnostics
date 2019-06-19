@@ -1,7 +1,8 @@
 standard:
   - com.elastic.support.diagnostics.commands.GenerateManifestCmd
-  - com.elastic.support.diagnostics.commands.VersionCheckCmd
   - com.elastic.support.diagnostics.commands.DiagVersionCheckCmd
+  - com.elastic.support.diagnostics.commands.VersionCheckCmd
+  - com.elastic.support.diagnostics.commands.UserRoleCheckCmd
   - com.elastic.support.diagnostics.commands.RunClusterQueriesCmd
   - com.elastic.support.diagnostics.commands.HostIdentifierCmd
   - com.elastic.support.diagnostics.commands.CollectLogsCmd
@@ -13,6 +14,7 @@ remote:
   - com.elastic.support.diagnostics.commands.GenerateManifestCmd
   - com.elastic.support.diagnostics.commands.DiagVersionCheckCmd
   - com.elastic.support.diagnostics.commands.VersionCheckCmd
+  - com.elastic.support.diagnostics.commands.UserRoleCheckCmd
   - com.elastic.support.diagnostics.commands.RunClusterQueriesCmd
 
 logstash:

@@ -1,5 +1,6 @@
 package com.elastic.support.test;
 
+import com.elastic.support.config.Version;
 import com.elastic.support.diagnostics.commands.RunClusterQueriesCmd;
 import com.elastic.support.util.JsonYamlUtils;
 import org.slf4j.Logger;
@@ -23,32 +24,32 @@ public class TestConfigureElasticRestCalls {
 
     @Test
     public void testBaseVersione() {
-        Map<String, String > statements = cmd.buildStatementsByVersion("1.0", calls);
+        Map<String, String > statements = cmd.buildStatementsByVersion(new Version("1.0"), calls);
         assertEquals( 3, statements.size());
     }
 
     @Test
     public void testMinorRelease(){
-        Map<String, String > statements = cmd.buildStatementsByVersion("2.4", calls);
+        Map<String, String > statements = cmd.buildStatementsByVersion(new Version("2.4"), calls);
         assertEquals(4, statements.size());
     }
 
     @Test
     public void testMinorReleaseWithoutStatements(){
-        Map<String, String > statements = cmd.buildStatementsByVersion("5.7", calls);
+        Map<String, String > statements = cmd.buildStatementsByVersion(new Version("5.7"), calls);
         assertEquals(5, statements.size());
     }
 
     @Test
     public void testOverrides(){
-        Map<String, String > statements = cmd.buildStatementsByVersion("5.6", calls);
+        Map<String, String > statements = cmd.buildStatementsByVersion(new Version("5.6"), calls);
         assertEquals(5, statements.size());
     }
 
 
     @Test
     public void testUnreleasedVersion(){
-        Map<String, String > statements = cmd.buildStatementsByVersion("7.0", calls);
+        Map<String, String > statements = cmd.buildStatementsByVersion(new Version("7.0"), calls);
         assertEquals(7, statements.size());
     }
 

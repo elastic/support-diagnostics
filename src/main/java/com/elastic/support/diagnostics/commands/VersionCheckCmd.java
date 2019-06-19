@@ -1,6 +1,7 @@
 package com.elastic.support.diagnostics.commands;
 
 import com.elastic.support.config.DiagnosticInputs;
+import com.elastic.support.config.Version;
 import com.elastic.support.diagnostics.chain.Command;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.rest.RestClient;
@@ -27,13 +28,18 @@ public class VersionCheckCmd implements Command {
         // by just submitting the host/port combo
         logger.info("Getting Elasticsearch Version.");
 
-        DiagnosticInputs diagnosticInputs = context.getDiagnosticInputs();
-        RestClient restClient = context.getEsRestClient();
+        try {
+            DiagnosticInputs diagnosticInputs = context.getDiagnosticInputs();
+            RestClient restClient = context.getEsRestClient();
 
-        String result = restClient.execQuery("/").toString();
-        JsonNode root = JsonYamlUtils.createJsonNodeFromString(result);
-        String versionNumber = root.path("version").path("number").asText();
-        context.setVersion(versionNumber);
+            String result = restClient.execQuery("/").toString();
+            JsonNode root = JsonYamlUtils.createJsonNodeFromString(result);
+            String versionNumber = root.path("version").path("number").asText();
+            Version version = new Version(versionNumber);
+            context.setVersion(version);
+        } catch (Exception e) {
+            logger.error("Could not retrieve the Elasticsearch version - unable to continue.");
+        }
 
     }
 }
