@@ -8,6 +8,7 @@ import com.elastic.support.rest.RestResult;
 import com.elastic.support.util.JsonYamlUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -23,6 +24,11 @@ public class UserRoleCheckCmd implements Command {
 
         RestClient restClient = context.getEsRestClient();
         String user = context.getDiagnosticInputs().getUser();
+
+        if(StringUtils.isEmpty(user) ){
+            return;
+        }
+
         boolean hasAuthorization = false;
 
         Version version = context.getVersion();
@@ -39,17 +45,28 @@ public class UserRoleCheckCmd implements Command {
         }
 
         RestResult result = restClient.execQuery(url);
+
         if (result.getStatus() == 200) {
             String userJsonString = result.toString();
             JsonNode userNode = JsonYamlUtils.createJsonNodeFromString(userJsonString);
-            JsonNode rolesNode = userNode.path("roles");
-            List<String> roles = new ArrayList<>();
-            if (rolesNode.isArray()) {
-                ObjectMapper mapper = new ObjectMapper();
-                roles = mapper.convertValue(rolesNode, List.class);
-            }
+            hasAuthorization = checkForAuth(major, user, userNode);
+        }
 
-            if (major <= 6) {
+        context.setAuthorized(hasAuthorization);
+
+    }
+
+    public boolean checkForAuth(int major, String user, JsonNode userNode){
+
+        JsonNode rolesNode = userNode.path(user).path("roles");
+        List<String> roles = null;
+        boolean hasAuthorization = false;
+
+        if (rolesNode.isArray()) {
+            ObjectMapper mapper = new ObjectMapper();
+            roles = mapper.convertValue(rolesNode, List.class);
+
+            if (major <= 2) {
                 if (roles.contains("admin")) {
                     hasAuthorization = true;
                 }
@@ -58,10 +75,9 @@ public class UserRoleCheckCmd implements Command {
                     hasAuthorization = true;
                 }
             }
-
-            context.setAuthorized(hasAuthorization);
-
         }
+
+        return hasAuthorization;
 
     }
 }
