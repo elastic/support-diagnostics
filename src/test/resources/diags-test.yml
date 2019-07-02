@@ -94,7 +94,7 @@ logstash:
 linuxOS:
   top: "top -b -n1"
   netstat: "netstat -an"
-  ss: "ss"
+  ss: "ss -an"
   process-list: "ps -ef"
   top_threads: "top -b -n1 -H"
   uname: "uname -a -r"
@@ -113,7 +113,6 @@ linuxOS-dep:
   jstack: "JAVA_HOME/bin/jstack PID"
 
 macOS:
-  ss: "ss"
   top: "top -l 1"
   netstat: "netstat -an"
   process-list: "ps -ef"
