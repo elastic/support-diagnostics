@@ -8,6 +8,7 @@ import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.AuthCache;
 import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.config.Registry;
@@ -16,6 +17,7 @@ import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustAllStrategy;
+import org.apache.http.cookie.CookieSpec;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.BasicCredentialsProvider;
@@ -219,6 +221,7 @@ public class RestClientBuilder {
 
         // Set up the default request config
         RequestConfig.Builder requestConfigBuilder = RequestConfig.custom()
+                .setCookieSpec(CookieSpecs.STANDARD)
                 .setConnectTimeout(connectionTimeout)
                 .setSocketTimeout(socketTimeout)
                 .setConnectionRequestTimeout(connectionRequestTimeout);
