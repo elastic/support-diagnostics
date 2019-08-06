@@ -88,16 +88,6 @@ public class RestResult implements Cloneable {
         }
     }
 
-    public static boolean isSuccess(int statusCode){
-
-        if (statusCode == 200){
-            return true;
-        }
-
-        return false;
-
-    }
-
     public static boolean isRetryable(int statusCode) {
 
         if (statusCode == 400) {

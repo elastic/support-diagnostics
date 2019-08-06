@@ -34,8 +34,7 @@ public class VersionCheckCmd implements Command {
             DiagnosticInputs diagnosticInputs = context.getDiagnosticInputs();
             RestClient restClient = context.getEsRestClient();
             RestResult res = restClient.execQuery("/");
-            if(! RestResult.isSuccess(res.getStatus())){
-                RestResult.isRetryable(res.getStatus());
+            if(res.getStatus() != 200)){
                 throw new DiagnosticException("Unrecoverable ES query error.");
             }
 
