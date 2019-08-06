@@ -39,10 +39,6 @@ public class RestResult implements Cloneable {
         }
     }
 
-    public RestResult(String reason){
-        this.reason = reason;
-    }
-
     public RestResult(HttpResponse response, OutputStream out) {
 
         // If the query got a success status stream the result immediately to the target file.

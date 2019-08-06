@@ -67,7 +67,17 @@ public abstract class BaseQueryCmd implements Command {
                 String query = entry.getValue();
                 String filename = buildFileName(queryName, tempDir, textExtensions);
                 logger.info("Running query:{} -  {}", queryName, query);
-                RestResult restResult = runQuery(filename, query, restClient);
+
+                // At the end of this something should have been written to disk...
+                RestResult restResult = null;
+                try (FileOutputStream fs = new FileOutputStream(filename)) {
+                    restResult = restClient.execQuery(query, fs);
+                } catch (Exception e) {
+                    // Something happens just log it and go to the next query.
+                    logger.log(SystemProperties.DIAG, "Error occurred executing query {}", query, e);
+                    continue;
+                }
+
                 // If it succeeded take it out of future work
                 if (restResult.getStatus() == 200) {
                     iter.remove();
@@ -81,7 +91,7 @@ public abstract class BaseQueryCmd implements Command {
                     if (!requireRetry.contains(queryName) || ! RestResult.isRetryable(restResult.getStatus())) {
                         iter.remove();
                         restResult.toFile(filename);
-                        logger.info("Call failed. Bypassing. See archived diagnostics.log for more detail.");
+                        logger.info("Call failed: {}  {}. Bypassing. See archived diagnostics.log for more detail.", restResult.getStatus(), restResult.getReason());
 
                     } else {
                         // If it failed, it's in the list and it's last try, write it out
@@ -89,7 +99,7 @@ public abstract class BaseQueryCmd implements Command {
                             restResult.toFile(filename);
                         }
                         else {
-                            logger.info("Call failed: flagged for retry.");
+                            logger.info("Call failed: {}  {} - Flagged for retry.", restResult.getStatus(), restResult.getReason());
                         }
                     }
                 }
@@ -99,18 +109,6 @@ public abstract class BaseQueryCmd implements Command {
         // Send back information on how many things didn't succeed and how many tries it took.
         // Not used except for unit tests currently
         return restCallManifest;
-    }
-
-    public RestResult runQuery(String filename, String url, RestClient restClient) {
-
-        // At the end of this something should have been written to disk...
-        try (FileOutputStream fs = new FileOutputStream(filename)) {
-            return restClient.execQuery(url, fs);
-        } catch (Exception e) {
-            // Something happens just log it and go to the next query.
-            logger.log(SystemProperties.DIAG, "Error occurred executing query {}", url, e);
-            return new RestResult(url + ";" + e.getMessage());
-        }
     }
 
     public String buildFileName(String queryName, String temp, List<String> extensions) {
