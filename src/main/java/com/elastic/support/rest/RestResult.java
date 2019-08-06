@@ -27,8 +27,7 @@ public class RestResult implements Cloneable {
     // to disk or the body is stored as a string and the status retained as well.
     public RestResult(HttpResponse response) {
         try{
-            this.status = response.getStatusLine().getStatusCode();
-            this.reason = response.getStatusLine().getReasonPhrase();
+            processCodes(response);
             responseString = EntityUtils.toString(response.getEntity());
         }
         catch (Exception e){
@@ -49,12 +48,11 @@ public class RestResult implements Cloneable {
         // If the query got a success status stream the result immediately to the target file.
         // If not, the result should be small and contain diagnostic info so stgre it in the response string.
         try{
-            this.status = response.getStatusLine().getStatusCode();
+            processCodes(response);
             if (status == 200) {
                 response.getEntity().writeTo(out);
             } else {
-                this.reason = response.getStatusLine().getReasonPhrase();
-                this.responseString = EntityUtils.toString(response.getEntity());
+                responseString = EntityUtils.toString(response.getEntity());
             }
         } catch (Exception e) {
             logger.log(SystemProperties.DIAG, "Error Streaming Response To OutputStream", e);
@@ -62,6 +60,14 @@ public class RestResult implements Cloneable {
         }
         finally {
             HttpClientUtils.closeQuietly(response);
+        }
+    }
+
+    private void processCodes(HttpResponse response){
+        status = response.getStatusLine().getStatusCode();
+        reason = response.getStatusLine().getReasonPhrase();
+        if(status != 200){
+            logger.log(SystemProperties.DIAG, "Error occurred. Status: {}, Reason: {}", status, reason);
         }
     }
 
