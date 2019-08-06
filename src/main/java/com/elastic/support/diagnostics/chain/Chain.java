@@ -1,7 +1,10 @@
 package com.elastic.support.diagnostics.chain;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import com.elastic.support.diagnostics.DiagnosticException;
+import com.elastic.support.util.SystemProperties;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +12,7 @@ import java.util.List;
 
 public class Chain implements Command {
 
-    Logger logger = LoggerFactory.getLogger(Chain.class);
+    Logger logger = LogManager.getLogger(Chain.class);
     List<Command> commandChain = new ArrayList<>();
 
     public Chain(List<String> commandList){
@@ -28,9 +31,14 @@ public class Chain implements Command {
 
     public void execute(DiagnosticContext context){
 
-        //Set up initial generic chain
-        for(Command dc : commandChain){
-            dc.execute(context);
+        try {
+            //Set up initial generic chain
+            for(Command dc : commandChain){
+                dc.execute(context);
+            }
+        }
+        catch (Exception e){
+            throw new DiagnosticException("Uncaught error", e);
         }
     }
 

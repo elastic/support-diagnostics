@@ -1,6 +1,7 @@
 package com.elastic.support.diagnostics.commands;
 
 import com.elastic.support.config.DiagConfig;
+import com.elastic.support.diagnostics.DiagnosticException;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.util.JsonYamlUtils;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -30,10 +31,10 @@ public class RunLogstashQueriesCmd extends BaseQueryCmd {
          String pid = jvm.path("pid").asText();
          context.setPid(pid);
 
-      } catch (Exception e) {
-         logger.error("Error obtaining logstash output and/or process id", e);
+      } catch (Throwable t) {
+         logger.error("Error obtaining logstash output and/or process id");
+         throw new DiagnosticException("Logstash Query Execution error", t);
       }
-
    }
 
 

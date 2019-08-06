@@ -2,9 +2,11 @@ package com.elastic.support.diagnostics.commands;
 
 import com.elastic.support.config.DiagnosticInputs;
 import com.elastic.support.config.Version;
+import com.elastic.support.diagnostics.DiagnosticException;
 import com.elastic.support.diagnostics.chain.Command;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.rest.RestClient;
+import com.elastic.support.rest.RestResult;
 import com.elastic.support.util.JsonYamlUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.logging.log4j.LogManager;
@@ -31,14 +33,20 @@ public class VersionCheckCmd implements Command {
         try {
             DiagnosticInputs diagnosticInputs = context.getDiagnosticInputs();
             RestClient restClient = context.getEsRestClient();
+            RestResult res = restClient.execQuery("/");
+            if(! RestResult.isSuccess(res.getStatus())){
+                RestResult.isRetryable(res.getStatus());
+                throw new DiagnosticException("Unrecoverable ES query error.");
+            }
 
-            String result = restClient.execQuery("/").toString();
+            String result = res.toString();
             JsonNode root = JsonYamlUtils.createJsonNodeFromString(result);
             String versionNumber = root.path("version").path("number").asText();
             Version version = new Version(versionNumber);
             context.setVersion(version);
         } catch (Exception e) {
             logger.error("Could not retrieve the Elasticsearch version - unable to continue.");
+            throw new DiagnosticException("Undetermined error", e);
         }
 
     }

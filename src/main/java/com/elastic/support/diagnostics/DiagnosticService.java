@@ -27,6 +27,7 @@ public class DiagnosticService extends BaseService {
         // Create two clients, one generic for Github or any other external site and one customized for this ES cluster
         RestClient genericClient = createGenericClient(diagConfig, diagnosticInputs);
         RestClient esRestClient = createEsRestClient(diagConfig, diagnosticInputs);
+        DiagnosticContext ctx = new DiagnosticContext();
 
         try {
 
@@ -48,8 +49,6 @@ public class DiagnosticService extends BaseService {
             List<String> chain = chains.get(diagnosticInputs.getDiagType());
 
             DiagnosticChainExec dc = new DiagnosticChainExec();
-            DiagnosticContext ctx = new DiagnosticContext();
-
             ctx.setEsRestClient(esRestClient);
             ctx.setGenericClient(genericClient);
             ctx.setDiagsConfig(diagConfig);
@@ -58,9 +57,16 @@ public class DiagnosticService extends BaseService {
 
             dc.runDiagnostic(ctx, chain);
 
+            if(ctx.isBypassSystemCalls()){
+                logger.warn("Could not locate local node - bypassing log collection and system calls.");
+            }
+            else if (ctx.isDocker()){
+                logger.warn("Identified Docker installations - bypassing log collection and system calls.");
+            }
+
             String user = ctx.getDiagnosticInputs().getUser();
 
-            if(StringUtils.isNotEmpty(user) && !ctx.isAuthorized()){
+            if (StringUtils.isNotEmpty(user) && !ctx.isAuthorized()) {
 
                 String border = SystemUtils.buildStringFromChar(60, '*');
                 logger.warn(SystemProperties.lineSeparator);
@@ -75,16 +81,17 @@ public class DiagnosticService extends BaseService {
                 logger.warn(border);
 
             }
-
-            closeLogs();
-            createArchive(ctx.getTempDir());
-            SystemUtils.nukeDirectory(tempDir);
+        } catch (DiagnosticException de) {
+            logger.info("Fatal error in diagnostic - could not continue. See diagnostics.log in archive or temp directory for more details.");
+            logger.log(SystemProperties.DIAG, "Fatal error in commands", de);
 
         } catch (IOException e) {
             logger.error("Access issue with temp directory", e);
             throw new RuntimeException("Issue with creating temp directory - see logs for details.");
         } finally {
             closeLogs();
+            createArchive(ctx.getTempDir());
+            SystemUtils.nukeDirectory(ctx.getTempDir());
             esRestClient.close();
             genericClient.close();
         }

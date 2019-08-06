@@ -78,7 +78,7 @@ public abstract class BaseQueryCmd implements Command {
                     // error that's retryable such as an auth error remove it.
                     restCallManifest.setCallHistory(queryName, i, false);
 
-                    if (!requireRetry.contains(queryName) || !isRetryable(restResult.getStatus())) {
+                    if (!requireRetry.contains(queryName) || ! RestResult.isRetryable(restResult.getStatus())) {
                         iter.remove();
                         restResult.toFile(filename);
                         logger.info("Call failed. Bypassing.");
@@ -126,28 +126,7 @@ public abstract class BaseQueryCmd implements Command {
         return fileName;
     }
 
-    public boolean isRetryable(int statusCode) {
 
-        if (statusCode == 400) {
-            logger.info("No data retrieved.");
-            return true;
-        } else if (statusCode == 401) {
-            logger.info("Authentication failure: invalid login credentials. Check logs for details.");
-            return false;
-        } else if (statusCode == 403) {
-            logger.info("Authorization failure or invalid license. Check logs for details.");
-            return false;
-        } else if (statusCode == 404) {
-            logger.info("Endpoint does not exist.");
-            return true;
-        } else if (statusCode >= 500 && statusCode < 600) {
-            logger.info("Unrecoverable server error.");
-            return true;
-        }
-
-        return false;
-
-    }
 
 
 }

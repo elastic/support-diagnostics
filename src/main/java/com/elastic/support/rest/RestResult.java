@@ -85,4 +85,37 @@ public class RestResult implements Cloneable {
             logger.log(SystemProperties.DIAG, "Error writing Response To OutputStream", e);
         }
     }
+
+    public static boolean isSuccess(int statusCode){
+
+        if (statusCode == 200){
+            return true;
+        }
+
+        return false;
+
+    }
+
+    public static boolean isRetryable(int statusCode) {
+
+        if (statusCode == 400) {
+            logger.info("No data retrieved.");
+            return true;
+        } else if (statusCode == 401) {
+            logger.info("Authentication failure: invalid login credentials. Check logs for details.");
+            return false;
+        } else if (statusCode == 403) {
+            logger.info("Authorization failure or invalid license. Check logs for details.");
+            return false;
+        } else if (statusCode == 404) {
+            logger.info("Endpoint does not exist.");
+            return true;
+        } else if (statusCode >= 500 && statusCode < 600) {
+            logger.info("Undetermined server error.");
+            return true;
+        }
+
+        return false;
+
+    }
 }

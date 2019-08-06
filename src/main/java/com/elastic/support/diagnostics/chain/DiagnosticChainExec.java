@@ -1,5 +1,6 @@
 package com.elastic.support.diagnostics.chain;
 
+import com.elastic.support.diagnostics.DiagnosticException;
 import com.elastic.support.util.SystemProperties;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,7 +20,7 @@ public class DiagnosticChainExec {
 
         } catch (Exception e) {
             logger.log(SystemProperties.DIAG, "Error encountered running diagnostic. See logs for additional information.  Exiting application.", e);
-            throw new RuntimeException("DiagnosticService runtime error");
+            throw new DiagnosticException("DiagnosticService runtime error");
         }
 
     }
