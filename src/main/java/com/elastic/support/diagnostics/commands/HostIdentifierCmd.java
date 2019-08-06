@@ -50,7 +50,7 @@ public class HostIdentifierCmd implements Command {
             }
             logger.info("Docker containers detected, bypassing host checks.");
             context.setDocker(true);
-            context.setBypassSystemCalls(true);
+            context.setBypassSystemCalls(true);;
             return;
         }
 
@@ -58,10 +58,10 @@ public class HostIdentifierCmd implements Command {
         try {
             targetNode = findTargetNode(localAddr, nodeAddrInfo, targetHost);
             context.setLogDir(targetNode.logDir);
-        } catch (DiagnosticException de) {
+        } catch (Exception e) {
             context.setBypassSystemCalls(true);
-            logger.log(SystemProperties.DIAG,de.getMessage(), de.getParams().get(0), de.getParams().get(1));
-            logger.warn("Could not match target node or local address info to a node in the cluster. System calls and log collection will be disabled.");
+            logger.warn("Could not match target node or local address info to a node in the cluster. See archived logs for more details.");
+            logger.warn("System calls and log collection will be disabled.");
         }
 
     }
@@ -111,10 +111,9 @@ public class HostIdentifierCmd implements Command {
         }
 
         // If we got this far and came up empty, signal our displeasure
-        ArrayList params = new ArrayList<>();
-        params.add(localAddrs);
-        params.add(nodeAddrs);
-        throw new DiagnosticException("Could not find any of these addresses: {} in these associated node hosts : {}", params);
+
+        logger.log(SystemProperties.DIAG,"Comparison did not result in an IP or Host match. {} {}", localAddrs, nodeAddrs);
+        throw new RuntimeException();
     }
 
 
@@ -154,9 +153,7 @@ public class HostIdentifierCmd implements Command {
                 if (!Constants.LOCAL_ADDRESSES.contains(targetHost)) {
                     nn.isTargetHost = nn.hostAndIp.contains(targetHost);
                 }
-
                 nodeNetworkInfo.add(nn);
-
             }
         } catch (Exception e) {
             logger.log(SystemProperties.DIAG, "Error extracting node network addresses from nodes output", e);
