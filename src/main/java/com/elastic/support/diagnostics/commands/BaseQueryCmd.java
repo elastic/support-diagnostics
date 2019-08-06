@@ -81,7 +81,7 @@ public abstract class BaseQueryCmd implements Command {
                     if (!requireRetry.contains(queryName) || ! RestResult.isRetryable(restResult.getStatus())) {
                         iter.remove();
                         restResult.toFile(filename);
-                        logger.info("Call failed. Bypassing.");
+                        logger.info("Call failed. Bypassing. See archived diagnostics.log for more detail.");
 
                     } else {
                         // If it failed, it's in the list and it's last try, write it out

@@ -5,12 +5,6 @@ import java.util.List;
 
 public class DiagnosticException extends RuntimeException {
 
-    List params;
-
-    public List getParams() {
-        return params;
-    }
-
     public DiagnosticException() {
     }
 
@@ -28,11 +22,6 @@ public class DiagnosticException extends RuntimeException {
 
     public DiagnosticException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
-    }
-
-    public DiagnosticException(String message, List params){
-        super(message);
-        this.params = params;
     }
 
 }

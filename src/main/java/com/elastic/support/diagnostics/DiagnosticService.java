@@ -57,10 +57,7 @@ public class DiagnosticService extends BaseService {
 
             dc.runDiagnostic(ctx, chain);
 
-            if(ctx.isBypassSystemCalls()){
-                logger.warn("Could not locate local node - bypassing log collection and system calls.");
-            }
-            else if (ctx.isDocker()){
+            if (ctx.isDocker()){
                 logger.warn("Identified Docker installations - bypassing log collection and system calls.");
             }
 

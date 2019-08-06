@@ -102,10 +102,10 @@ public class RestResult implements Cloneable {
             logger.info("No data retrieved.");
             return true;
         } else if (statusCode == 401) {
-            logger.info("Authentication failure: invalid login credentials. Check logs for details.");
+            logger.info("Authentication failure: invalid login credentials.");
             return false;
         } else if (statusCode == 403) {
-            logger.info("Authorization failure or invalid license. Check logs for details.");
+            logger.info("Authorization failure or invalid license.");
             return false;
         } else if (statusCode == 404) {
             logger.info("Endpoint does not exist.");
