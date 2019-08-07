@@ -32,12 +32,12 @@ public class CollectLogsCmd implements Command {
 
     public void execute(DiagnosticContext context) {
 
-        String logs = context.getLogDir();
-
-        if (logs.equalsIgnoreCase(Constants.NOT_FOUND) || context.isDocker()) {
-            logger.info("Bypassing log collection.");
+        if(context.isDocker() || context.isBypassSystemCalls()){
+            logger.log(SystemProperties.DIAG, "Identified Docker installations or could not locate local node - bypassing collection.");
             return;
         }
+
+        String logs = context.getLogDir();
 
         boolean getAccess = context.getDiagnosticInputs().isAccessLogs();
         int maxLogs = context.getDiagsConfig().getLogSettings().get("maxLogs");

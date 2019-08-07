@@ -19,6 +19,9 @@ public class DiagnosticContext {
    private String diagVersion;
    private  JsonNode nodeManifest;
    private boolean isDocker = false;
+   private boolean bypassSystemCalls = false;
+   private boolean bypassLogs = false;
+
    private List<String> dockerContainers = new ArrayList<>();
 
    private RestClient genericClient, esRestClient;
@@ -136,5 +139,21 @@ public class DiagnosticContext {
 
    public void setAuthorized(boolean isAuthorized) {
       this.isAuthorized = isAuthorized;
+   }
+
+   public boolean isBypassSystemCalls() {
+      return bypassSystemCalls;
+   }
+
+   public void setBypassSystemCalls(boolean bypassSystemCalls) {
+      this.bypassSystemCalls = bypassSystemCalls;
+   }
+
+   public boolean isBypassLogs() {
+      return bypassLogs;
+   }
+
+   public void setBypassLogs(boolean bypassLogs) {
+      this.bypassLogs = bypassLogs;
    }
 }

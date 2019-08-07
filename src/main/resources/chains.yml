@@ -29,7 +29,6 @@ elastic-threads:
   - com.elastic.support.diagnostics.commands.DiagVersionCheckCmd
   - com.elastic.support.diagnostics.commands.VersionCheckCmd
   - com.elastic.support.diagnostics.commands.RunClusterQueriesCmd
-  - com.elastic.support.diagnostics.commands.SystemDigestCmd
   - com.elastic.support.diagnostics.commands.HostIdentifierCmd
   - com.elastic.support.diagnostics.commands.SystemCallsCmd
 

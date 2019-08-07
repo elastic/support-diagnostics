@@ -26,6 +26,67 @@ public class SystemDigestCmd implements Command {
      */
     private final Logger logger = LogManager.getLogger(SystemDigestCmd.class);
 
+    public void execute(DiagnosticContext context) {
+
+        // Check for Docker, which usually shows up as a PID of 1 for Elasticsearch
+        // or from an incorrectly specified host
+        if(context.isBypassSystemCalls() || "1".equals(context.getPid())){
+            logger.log(SystemProperties.DIAG, "Identified Docker installations or could not locate local node - bypassing system digest.");
+            return;
+        }
+
+        try {
+            SystemInfo si = new SystemInfo();
+            HardwareAbstractionLayer hal = si.getHardware();
+            OperatingSystem os = si.getOperatingSystem();
+            File sysFileJson = new File(context.getTempDir() + SystemProperties.fileSeparator + "system-digest.json");
+            OutputStream outputStreamJson = new FileOutputStream(sysFileJson);
+            BufferedWriter jsonWriter = new BufferedWriter(new OutputStreamWriter(outputStreamJson));
+            String jsonInfo = si.toPrettyJSON();
+            context.setSystemDigest(jsonInfo);
+            jsonWriter.write(jsonInfo);
+            jsonWriter.close();
+
+            File sysFile = new File(context.getTempDir() + SystemProperties.fileSeparator + "system-digest.txt");
+            OutputStream outputStream = new FileOutputStream(sysFile);
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream));
+
+            printComputerSystem(writer, hal.getComputerSystem());
+            writer.newLine();
+
+            printProcessor(writer, hal.getProcessor());
+            writer.newLine();
+
+            printMemory(writer, hal.getMemory());
+            writer.newLine();
+
+            printCpu(writer, hal.getProcessor());
+            writer.newLine();
+
+            printProcesses(writer, os, hal.getMemory());
+            writer.newLine();
+
+            printDisks(writer, hal.getDiskStores());
+            writer.newLine();
+
+            printFileSystem(writer, os.getFileSystem());
+            writer.newLine();
+
+            printNetworkInterfaces(writer, hal.getNetworkIFs());
+            writer.newLine();
+
+            printNetworkParameters(writer, os.getNetworkParams());
+            writer.newLine();
+
+            writer.close();
+            logger.info("Finished querying SysInfo.");
+
+        } catch (final Exception e) {
+            logger.error("Failed saving system-digest.txt file.", e);
+        }
+
+    }
+
     private static void printComputerSystem(BufferedWriter writer, final ComputerSystem computerSystem) throws Exception {
 
         writer.write("Computer System");
@@ -280,69 +341,6 @@ public class SystemDigestCmd implements Command {
 
         }
     }
-
-    public void execute(DiagnosticContext context) {
-
-        // Todo Try with resources...
-
-        try {
-            // Check for Docker, which usually shows up as a PID of 1 for Elasticsearch
-            String pid = context.getPid();
-            if (pid.equals("1")) {
-                return;
-            }
-
-            SystemInfo si = new SystemInfo();
-            HardwareAbstractionLayer hal = si.getHardware();
-            OperatingSystem os = si.getOperatingSystem();
-            File sysFileJson = new File(context.getTempDir() + SystemProperties.fileSeparator + "system-digest.json");
-            OutputStream outputStreamJson = new FileOutputStream(sysFileJson);
-            BufferedWriter jsonWriter = new BufferedWriter(new OutputStreamWriter(outputStreamJson));
-            String jsonInfo = si.toPrettyJSON();
-            context.setSystemDigest(jsonInfo);
-            jsonWriter.write(jsonInfo);
-            jsonWriter.close();
-
-            File sysFile = new File(context.getTempDir() + SystemProperties.fileSeparator + "system-digest.txt");
-            OutputStream outputStream = new FileOutputStream(sysFile);
-            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream));
-
-            printComputerSystem(writer, hal.getComputerSystem());
-            writer.newLine();
-
-            printProcessor(writer, hal.getProcessor());
-            writer.newLine();
-
-            printMemory(writer, hal.getMemory());
-            writer.newLine();
-
-            printCpu(writer, hal.getProcessor());
-            writer.newLine();
-
-            printProcesses(writer, os, hal.getMemory());
-            writer.newLine();
-
-            printDisks(writer, hal.getDiskStores());
-            writer.newLine();
-
-            printFileSystem(writer, os.getFileSystem());
-            writer.newLine();
-
-            printNetworkInterfaces(writer, hal.getNetworkIFs());
-            writer.newLine();
-
-            printNetworkParameters(writer, os.getNetworkParams());
-            writer.newLine();
-
-            writer.close();
-            logger.info("Finished querying SysInfo.");
-
-        } catch (final Exception e) {
-            logger.error("Failed saving system-digest.txt file.", e);
-        }
-
-    }
-
 
 }
 
