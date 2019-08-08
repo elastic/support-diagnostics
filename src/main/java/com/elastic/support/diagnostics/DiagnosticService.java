@@ -1,6 +1,7 @@
 package com.elastic.support.diagnostics;
 
 import com.elastic.support.BaseService;
+import com.elastic.support.config.Constants;
 import com.elastic.support.config.DiagConfig;
 import com.elastic.support.config.DiagnosticInputs;
 import com.elastic.support.diagnostics.chain.DiagnosticChainExec;
@@ -79,12 +80,10 @@ public class DiagnosticService extends BaseService {
 
             }
         } catch (DiagnosticException de) {
-            logger.info("Fatal error in diagnostic - could not continue. See diagnostics.log in archive or temp directory for more details.");
-            logger.log(SystemProperties.DIAG, "Fatal error in commands", de);
-
-        } catch (IOException e) {
-            logger.error("Access issue with temp directory", e);
-            throw new RuntimeException("Issue with creating temp directory - see logs for details.");
+            logger.warn(de.getMessage());
+        } catch (Throwable t) {
+            logger.log(SystemProperties.DIAG, "Temp directory error" , t);
+            logger.warn(String.format("Issue with creating temp directory. %s", Constants.CHECK_LOG));
         } finally {
             closeLogs();
             createArchive(ctx.getTempDir());

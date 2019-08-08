@@ -3,6 +3,7 @@ package com.elastic.support.rest;
 import com.elastic.support.config.Constants;
 import com.elastic.support.util.SystemProperties;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.utils.HttpClientUtils;
 import org.apache.http.util.EntityUtils;
@@ -21,6 +22,7 @@ public class RestResult implements Cloneable {
     String responseString = "Undetermined error = check logs";
     int status = -1;
     String reason;
+    boolean isRetryable;
 
     // Sending in a response object to be processed implicitly
     // closes the response as a result. The body is either streamed directly
@@ -61,10 +63,38 @@ public class RestResult implements Cloneable {
 
     private void processCodes(HttpResponse response){
         status = response.getStatusLine().getStatusCode();
-        reason = response.getStatusLine().getReasonPhrase();
-        if(status != 200){
-            logger.log(SystemProperties.DIAG, "Error occurred. Status: {}, Reason: {}", status, reason);
+        if (status == 400) {
+            reason = "Bad Request. Rejected";
+            isRetryable = true;
+        } else if (status == 401) {
+            reason = "Authentication failure. Invalid login credentials.";
+            isRetryable = false;
+        } else if (status == 403) {
+            reason = "Authorization failure or invalid license.";
+            isRetryable = false;
+        } else if (status == 404) {
+            reason = "Endpoint does not exist.";
+            isRetryable = true;
+        } else {
+            reason = response.getStatusLine().getReasonPhrase();
+            isRetryable = true;
         }
+    }
+
+    public String formatStatusMessage(){
+        return formatStatusMessage("");
+    }
+
+    public String formatStatusMessage(String msg){
+
+        if(StringUtils.isNotEmpty(msg)){
+            msg = msg + " ";
+        }
+
+        return String.format("%sStatus: %d  Reason: %s",
+                msg,
+                status,
+                reason);
     }
 
     public int getStatus(){
@@ -88,26 +118,17 @@ public class RestResult implements Cloneable {
         }
     }
 
-    public static boolean isRetryable(int statusCode) {
+    public boolean isRetryable() {
+        return isRetryable;
+    }
 
-        if (statusCode == 400) {
-            logger.info("No data retrieved.");
-            return true;
-        } else if (statusCode == 401) {
-            logger.info("Authentication failure: invalid login credentials.");
-            return false;
-        } else if (statusCode == 403) {
-            logger.info("Authorization failure or invalid license.");
-            return false;
-        } else if (statusCode == 404) {
-            logger.info("Endpoint does not exist.");
-            return true;
-        } else if (statusCode >= 500 && statusCode < 600) {
-            logger.info("Undetermined server error.");
+    public boolean isValid(){
+        if(status == 200){
             return true;
         }
-
         return false;
-
     }
+
+
+
 }

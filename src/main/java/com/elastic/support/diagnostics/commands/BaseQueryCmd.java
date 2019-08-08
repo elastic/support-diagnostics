@@ -79,7 +79,7 @@ public abstract class BaseQueryCmd implements Command {
                 }
 
                 // If it succeeded take it out of future work
-                if (restResult.getStatus() == 200) {
+                if (restResult.isValid()) {
                     iter.remove();
                     restCallManifest.setCallHistory(queryName, i, true);
                     logger.info("Results written to: {}", filename);
@@ -88,10 +88,10 @@ public abstract class BaseQueryCmd implements Command {
                     // error that's retryable such as an auth error remove it.
                     restCallManifest.setCallHistory(queryName, i, false);
 
-                    if (!requireRetry.contains(queryName) || ! RestResult.isRetryable(restResult.getStatus())) {
+                    if (!requireRetry.contains(queryName) || !restResult.isRetryable() ) {
                         iter.remove();
                         restResult.toFile(filename);
-                        logger.info("Call failed: {}  {}. Bypassing. See archived diagnostics.log for more detail.", restResult.getStatus(), restResult.getReason());
+                        logger.info(restResult.formatStatusMessage("Call failed: Bypassing. See archived diagnostics.log for more detail."));
 
                     } else {
                         // If it failed, it's in the list and it's last try, write it out
@@ -99,7 +99,7 @@ public abstract class BaseQueryCmd implements Command {
                             restResult.toFile(filename);
                         }
                         else {
-                            logger.info("Call failed: {}  {} - Flagged for retry.", restResult.getStatus(), restResult.getReason());
+                            logger.info(restResult.formatStatusMessage("Call failed: Flagged for retry."));
                         }
                     }
                 }
