@@ -1,8 +1,11 @@
 package com.elastic.support.diagnostics.commands;
 
+import com.elastic.support.config.Constants;
 import com.elastic.support.config.DiagConfig;
 import com.elastic.support.config.Version;
+import com.elastic.support.diagnostics.DiagnosticException;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
+import com.elastic.support.util.SystemProperties;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -21,14 +24,19 @@ public class RunClusterQueriesCmd extends BaseQueryCmd {
 
     public void execute(DiagnosticContext context) {
 
-        Version version = context.getVersion();
+        try {
+            Version version = context.getVersion();
 
-        DiagConfig diagConfig = context.getDiagsConfig();
-        Map restCalls = diagConfig.getRestCalls();
+            DiagConfig diagConfig = context.getDiagsConfig();
+            Map restCalls = diagConfig.getRestCalls();
 
-        Map<String, String> entries = buildStatementsByVersion(version, restCalls);
+            Map<String, String> entries = buildStatementsByVersion(version, restCalls);
 
-        runQueries(context.getEsRestClient(), entries, context.getTempDir(), diagConfig);
+            runQueries(context.getEsRestClient(), entries, context.getTempDir(), diagConfig);
+        } catch (Throwable t) {
+            logger.log(SystemProperties.DIAG, "Error executing REST queries", t);
+            throw new DiagnosticException(String.format("REST Query Execution error - exiting. %s", Constants.CHECK_LOG));
+        }
 
     }
 

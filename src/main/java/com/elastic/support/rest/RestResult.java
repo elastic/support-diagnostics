@@ -3,6 +3,7 @@ package com.elastic.support.rest;
 import com.elastic.support.config.Constants;
 import com.elastic.support.util.SystemProperties;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.utils.HttpClientUtils;
 import org.apache.http.util.EntityUtils;
@@ -21,14 +22,14 @@ public class RestResult implements Cloneable {
     String responseString = "Undetermined error = check logs";
     int status = -1;
     String reason;
+    boolean isRetryable;
 
     // Sending in a response object to be processed implicitly
     // closes the response as a result. The body is either streamed directly
     // to disk or the body is stored as a string and the status retained as well.
     public RestResult(HttpResponse response) {
         try{
-            this.status = response.getStatusLine().getStatusCode();
-            this.reason = response.getStatusLine().getReasonPhrase();
+            processCodes(response);
             responseString = EntityUtils.toString(response.getEntity());
         }
         catch (Exception e){
@@ -40,21 +41,16 @@ public class RestResult implements Cloneable {
         }
     }
 
-    public RestResult(String reason){
-        this.reason = reason;
-    }
-
     public RestResult(HttpResponse response, OutputStream out) {
 
         // If the query got a success status stream the result immediately to the target file.
         // If not, the result should be small and contain diagnostic info so stgre it in the response string.
         try{
-            this.status = response.getStatusLine().getStatusCode();
+            processCodes(response);
             if (status == 200) {
                 response.getEntity().writeTo(out);
             } else {
-                this.reason = response.getStatusLine().getReasonPhrase();
-                this.responseString = EntityUtils.toString(response.getEntity());
+                responseString = EntityUtils.toString(response.getEntity());
             }
         } catch (Exception e) {
             logger.log(SystemProperties.DIAG, "Error Streaming Response To OutputStream", e);
@@ -63,6 +59,42 @@ public class RestResult implements Cloneable {
         finally {
             HttpClientUtils.closeQuietly(response);
         }
+    }
+
+    private void processCodes(HttpResponse response){
+        status = response.getStatusLine().getStatusCode();
+        if (status == 400) {
+            reason = "Bad Request. Rejected";
+            isRetryable = true;
+        } else if (status == 401) {
+            reason = "Authentication failure. Invalid login credentials.";
+            isRetryable = false;
+        } else if (status == 403) {
+            reason = "Authorization failure or invalid license.";
+            isRetryable = false;
+        } else if (status == 404) {
+            reason = "Endpoint does not exist.";
+            isRetryable = true;
+        } else {
+            reason = response.getStatusLine().getReasonPhrase();
+            isRetryable = true;
+        }
+    }
+
+    public String formatStatusMessage(){
+        return formatStatusMessage("");
+    }
+
+    public String formatStatusMessage(String msg){
+
+        if(StringUtils.isNotEmpty(msg)){
+            msg = msg + " ";
+        }
+
+        return String.format("%sStatus: %d  Reason: %s",
+                msg,
+                status,
+                reason);
     }
 
     public int getStatus(){
@@ -85,4 +117,18 @@ public class RestResult implements Cloneable {
             logger.log(SystemProperties.DIAG, "Error writing Response To OutputStream", e);
         }
     }
+
+    public boolean isRetryable() {
+        return isRetryable;
+    }
+
+    public boolean isValid(){
+        if(status == 200){
+            return true;
+        }
+        return false;
+    }
+
+
+
 }

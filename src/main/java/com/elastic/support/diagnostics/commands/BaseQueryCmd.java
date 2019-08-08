@@ -67,9 +67,19 @@ public abstract class BaseQueryCmd implements Command {
                 String query = entry.getValue();
                 String filename = buildFileName(queryName, tempDir, textExtensions);
                 logger.info("Running query:{} -  {}", queryName, query);
-                RestResult restResult = runQuery(filename, query, restClient);
+
+                // At the end of this something should have been written to disk...
+                RestResult restResult = null;
+                try (FileOutputStream fs = new FileOutputStream(filename)) {
+                    restResult = restClient.execQuery(query, fs);
+                } catch (Exception e) {
+                    // Something happens just log it and go to the next query.
+                    logger.log(SystemProperties.DIAG, "Error occurred executing query {}", query, e);
+                    continue;
+                }
+
                 // If it succeeded take it out of future work
-                if (restResult.getStatus() == 200) {
+                if (restResult.isValid()) {
                     iter.remove();
                     restCallManifest.setCallHistory(queryName, i, true);
                     logger.info("Results written to: {}", filename);
@@ -78,10 +88,10 @@ public abstract class BaseQueryCmd implements Command {
                     // error that's retryable such as an auth error remove it.
                     restCallManifest.setCallHistory(queryName, i, false);
 
-                    if (!requireRetry.contains(queryName) || !isRetryable(restResult.getStatus())) {
+                    if (!requireRetry.contains(queryName) || !restResult.isRetryable() ) {
                         iter.remove();
                         restResult.toFile(filename);
-                        logger.info("Call failed. Bypassing.");
+                        logger.info(restResult.formatStatusMessage("Call failed: Bypassing. See archived diagnostics.log for more detail."));
 
                     } else {
                         // If it failed, it's in the list and it's last try, write it out
@@ -89,7 +99,7 @@ public abstract class BaseQueryCmd implements Command {
                             restResult.toFile(filename);
                         }
                         else {
-                            logger.info("Call failed: flagged for retry.");
+                            logger.info(restResult.formatStatusMessage("Call failed: Flagged for retry."));
                         }
                     }
                 }
@@ -99,18 +109,6 @@ public abstract class BaseQueryCmd implements Command {
         // Send back information on how many things didn't succeed and how many tries it took.
         // Not used except for unit tests currently
         return restCallManifest;
-    }
-
-    public RestResult runQuery(String filename, String url, RestClient restClient) {
-
-        // At the end of this something should have been written to disk...
-        try (FileOutputStream fs = new FileOutputStream(filename)) {
-            return restClient.execQuery(url, fs);
-        } catch (Exception e) {
-            // Something happens just log it and go to the next query.
-            logger.log(SystemProperties.DIAG, "Error occurred executing query {}", url, e);
-            return new RestResult(url + ";" + e.getMessage());
-        }
     }
 
     public String buildFileName(String queryName, String temp, List<String> extensions) {
@@ -126,28 +124,7 @@ public abstract class BaseQueryCmd implements Command {
         return fileName;
     }
 
-    public boolean isRetryable(int statusCode) {
 
-        if (statusCode == 400) {
-            logger.info("No data retrieved.");
-            return true;
-        } else if (statusCode == 401) {
-            logger.info("Authentication failure: invalid login credentials. Check logs for details.");
-            return false;
-        } else if (statusCode == 403) {
-            logger.info("Authorization failure or invalid license. Check logs for details.");
-            return false;
-        } else if (statusCode == 404) {
-            logger.info("Endpoint does not exist.");
-            return true;
-        } else if (statusCode >= 500 && statusCode < 600) {
-            logger.info("Unrecoverable server error.");
-            return true;
-        }
-
-        return false;
-
-    }
 
 
 }

@@ -1,5 +1,7 @@
 package com.elastic.support.diagnostics.chain;
 
+import com.elastic.support.config.Constants;
+import com.elastic.support.diagnostics.DiagnosticException;
 import com.elastic.support.util.SystemProperties;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -17,11 +19,13 @@ public class DiagnosticChainExec {
             Chain diagnostic = new Chain(chain);
             diagnostic.execute(context);
 
-        } catch (Exception e) {
-            logger.log(SystemProperties.DIAG, "Error encountered running diagnostic. See logs for additional information.  Exiting application.", e);
-            throw new RuntimeException("DiagnosticService runtime error");
+        } catch (DiagnosticException de) {
+            throw de;
         }
-
+        catch (Throwable t){
+            logger.log(SystemProperties.DIAG, "Unexpected error", t);
+            throw new DiagnosticException(String.format("Fatal error in diagnostic - could not continue. %s", Constants.CHECK_LOG));
+        }
     }
 
 }

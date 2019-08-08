@@ -5,6 +5,7 @@ public class Constants {
    public static final String ES_DIAG_DEFAULT = "standard";
    public static final String ES_DIAG = "diagnostics";
    public static final String NOT_FOUND = "not found";
+   public static final String CHECK_LOG = "Check diagnostics.log in the archive file for more detail.";
 
    public static final String DIAG_CONFIG = "diags.yml";
    public static final String CHAINS_CONFIG = "chains.yml";

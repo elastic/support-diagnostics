@@ -1,6 +1,7 @@
 package com.elastic.support.diagnostics;
 
 import com.elastic.support.BaseService;
+import com.elastic.support.config.Constants;
 import com.elastic.support.config.DiagConfig;
 import com.elastic.support.config.DiagnosticInputs;
 import com.elastic.support.diagnostics.chain.DiagnosticChainExec;
@@ -27,6 +28,7 @@ public class DiagnosticService extends BaseService {
         // Create two clients, one generic for Github or any other external site and one customized for this ES cluster
         RestClient genericClient = createGenericClient(diagConfig, diagnosticInputs);
         RestClient esRestClient = createEsRestClient(diagConfig, diagnosticInputs);
+        DiagnosticContext ctx = new DiagnosticContext();
 
         try {
 
@@ -48,8 +50,6 @@ public class DiagnosticService extends BaseService {
             List<String> chain = chains.get(diagnosticInputs.getDiagType());
 
             DiagnosticChainExec dc = new DiagnosticChainExec();
-            DiagnosticContext ctx = new DiagnosticContext();
-
             ctx.setEsRestClient(esRestClient);
             ctx.setGenericClient(genericClient);
             ctx.setDiagsConfig(diagConfig);
@@ -58,9 +58,13 @@ public class DiagnosticService extends BaseService {
 
             dc.runDiagnostic(ctx, chain);
 
+            if (ctx.isDocker()){
+                logger.warn("Identified Docker installations - bypassed log collection and system calls.");
+            }
+
             String user = ctx.getDiagnosticInputs().getUser();
 
-            if(StringUtils.isNotEmpty(user) && !ctx.isAuthorized()){
+            if (StringUtils.isNotEmpty(user) && !ctx.isAuthorized()) {
 
                 String border = SystemUtils.buildStringFromChar(60, '*');
                 logger.warn(SystemProperties.lineSeparator);
@@ -75,16 +79,15 @@ public class DiagnosticService extends BaseService {
                 logger.warn(border);
 
             }
-
-            closeLogs();
-            createArchive(ctx.getTempDir());
-            SystemUtils.nukeDirectory(tempDir);
-
-        } catch (IOException e) {
-            logger.error("Access issue with temp directory", e);
-            throw new RuntimeException("Issue with creating temp directory - see logs for details.");
+        } catch (DiagnosticException de) {
+            logger.warn(de.getMessage());
+        } catch (Throwable t) {
+            logger.log(SystemProperties.DIAG, "Temp directory error" , t);
+            logger.warn(String.format("Issue with creating temp directory. %s", Constants.CHECK_LOG));
         } finally {
             closeLogs();
+            createArchive(ctx.getTempDir());
+            SystemUtils.nukeDirectory(ctx.getTempDir());
             esRestClient.close();
             genericClient.close();
         }
