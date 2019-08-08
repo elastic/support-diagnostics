@@ -59,7 +59,7 @@ public class DiagnosticService extends BaseService {
             dc.runDiagnostic(ctx, chain);
 
             if (ctx.isDocker()){
-                logger.warn("Identified Docker installations - bypassing log collection and system calls.");
+                logger.warn("Identified Docker installations - bypassed log collection and system calls.");
             }
 
             String user = ctx.getDiagnosticInputs().getUser();
