@@ -158,7 +158,7 @@ public class ScrubProcessor implements PostProcessor {
 
    public String generateReplacementToken(String token, int len){
 
-      StringBuffer newToken = new StringBuffer();
+      StringBuilder newToken = new StringBuilder();
 
       int passes = 1;
       if(len > 32){
