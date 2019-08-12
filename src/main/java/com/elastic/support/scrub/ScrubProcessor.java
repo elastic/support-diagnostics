@@ -167,7 +167,7 @@ public class ScrubProcessor implements PostProcessor {
 
       for(int i = 0; i < passes; i++){
          newToken.append(
-                 ("" + (UUID.nameUUIDFromBytes(token.getBytes())).toString())
+                 UUID.nameUUIDFromBytes(token.getBytes()).toString()
                          .replaceAll("-", "")
          );
       }
