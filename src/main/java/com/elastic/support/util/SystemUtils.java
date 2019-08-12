@@ -55,9 +55,9 @@ public class SystemUtils {
             File tmp = new File(dir);
             tmp.setWritable(true, false);
             FileUtils.deleteDirectory(tmp);
-            logger.info("Deleted temp directory: {}.", dir);
+            logger.info("Deleted directory: {}.", dir);
         } catch (IOException e) {
-            logger.error("Access issue with temp directory", e);
+            logger.error("Access issue with target directory", e);
         }
     }
 

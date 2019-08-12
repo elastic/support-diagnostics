@@ -16,9 +16,12 @@ public class ScrubApp {
 
         ScrubInputs scrubInputs = new ScrubInputs();
         scrubInputs.parseInputs(args);
+        if (!scrubInputs.validate()) {
+            logger.info("Exiting...");
+            System.exit(0);
+        }
         ScrubService scrub = new ScrubService(scrubInputs);
         scrub.exec();
-
     }
 
 }

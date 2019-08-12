@@ -17,6 +17,7 @@ public abstract  class BaseService {
 
     protected Logger logger = LogManager.getLogger(BaseService.class);
     protected boolean isLogClosed = false;
+    protected String logPath;
 
     protected void closeLogs() {
 
@@ -35,7 +36,7 @@ public abstract  class BaseService {
 
     protected void createFileAppender(String logDir, String logFile) {
 
-        logDir = logDir + SystemProperties.fileSeparator + logFile;
+        logPath = logDir + SystemProperties.fileSeparator + logFile;
 
         LoggerContext context = (LoggerContext) LogManager.getContext(false);
         Configuration logConfig = context.getConfiguration();
@@ -46,7 +47,7 @@ public abstract  class BaseService {
 
         FileAppender.Builder builder = FileAppender.newBuilder();
         builder.setConfiguration(logConfig);
-        builder.withFileName(logDir);
+        builder.withFileName(logPath);
         builder.withAppend(false);
         builder.withLocking(false);
         builder.setName("File");
