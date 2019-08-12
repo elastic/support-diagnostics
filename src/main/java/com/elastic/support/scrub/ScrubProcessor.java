@@ -61,9 +61,6 @@ public class ScrubProcessor implements PostProcessor {
 
    public String process(String line){
 
-      if( line.contains("Apple") ){
-         boolean hit = true;
-      }
       line = processIpv4Addresses(line);
       line = processIpv6Addresses(line);
       line = processMacddresses(line);
@@ -161,10 +158,21 @@ public class ScrubProcessor implements PostProcessor {
 
    public String generateReplacementToken(String token, int len){
 
-      String replacement =
-         ("" + (UUID.nameUUIDFromBytes(token.getBytes())).toString())
-         .replaceAll("-", "")
-         .substring(0, len);
+      StringBuffer newToken = new StringBuffer();
+
+      int passes = 1;
+      if(len > 32){
+         passes = (len/32) + 1;
+      }
+
+      for(int i = 0; i < passes; i++){
+         newToken.append(
+                 ("" + (UUID.nameUUIDFromBytes(token.getBytes())).toString())
+                         .replaceAll("-", "")
+         );
+      }
+
+      String replacement = newToken.toString().substring(0, len);
 
       return replacement;
 

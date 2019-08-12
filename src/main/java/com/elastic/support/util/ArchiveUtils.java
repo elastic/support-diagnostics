@@ -92,9 +92,8 @@ public class ArchiveUtils {
 
    public void extractDiagnosticArchive(String sourceInput, String targetDir, boolean scrub) throws Exception {
 
-      Files.createDirectories(Paths.get(targetDir + SystemProperties.fileSeparator + "logs"));
+      boolean logsPresent = false;
       TarArchiveInputStream archive = readDiagArchive(sourceInput);
-
       String baseArchivePath = null;
       logger.info("Extracting archive...");
 
@@ -109,6 +108,13 @@ public class ArchiveUtils {
          while (tae != null) {
             String name = tae.getName();
             name = name.replace(baseArchivePath, "");
+
+            if(  name.contains("gc.log.") ||
+                    (name.contains(".log") && !name.equalsIgnoreCase("diagnostics.log") ) ||
+                    (!name.contains( "logs" + SystemProperties.fileSeparator ) && !name.contains( "log" + SystemProperties.fileSeparator ))
+            ){
+               Files.createDirectories(Paths.get(targetDir + SystemProperties.fileSeparator + "logs"));
+            }
 
             if(name.contains("gc.log.")){
                logger.info("Processing: {}", name);

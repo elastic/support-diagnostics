@@ -1,4 +1,5 @@
 package com.elastic.support.scrub;
+import com.elastic.support.config.Constants;
 import com.elastic.support.config.ScrubInputs;
 import com.elastic.support.BaseService;
 import com.elastic.support.util.ArchiveUtils;
@@ -8,8 +9,7 @@ import com.elastic.support.util.SystemUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 
 public class ScrubService extends BaseService {
 
@@ -21,36 +21,65 @@ public class ScrubService extends BaseService {
 
    public void exec(){
       try {
-         String archivePath = inputs.getArchive();
-         String targetDir = inputs.getTargetDir();
+         String filePath = inputs.getArchive();
+         String infilePath = inputs.getInfile();
+         String outputDir = inputs.getOutputDir();
+         String temp = inputs.getTempDir();
 
-         int pos = archivePath.lastIndexOf(SystemProperties.fileSeparator);
+         int pos;
+         boolean isArchive = true;
 
-         if(targetDir == null){
-            targetDir = archivePath.substring(0, pos) + SystemProperties.fileSeparator + "scrubbed";
+         if(StringUtils.isNotEmpty(filePath)){
+            pos = filePath.lastIndexOf(SystemProperties.fileSeparator);
          }
          else{
-            targetDir = targetDir +  SystemProperties.fileSeparator + "scrubbed";
+            isArchive = false;
+            pos = infilePath.lastIndexOf(SystemProperties.fileSeparator);
+            filePath = infilePath;
          }
 
-         createFileAppender(targetDir, "scrubber.log");
-         String scrubbedName = (archivePath.substring(pos + 1)).replace(".tar.gz", "");
+         if(StringUtils.isEmpty(outputDir)  ){
+            outputDir = filePath.substring(0, pos) + SystemProperties.fileSeparator;
+         }
 
-         ArchiveUtils archiveUtils = new ArchiveUtils(new ScrubProcessor(inputs.getScrubFile()));
-         archiveUtils.extractDiagnosticArchive(archivePath, targetDir );
+         // Start out clean
+         SystemUtils.nukeDirectory(outputDir);
+         createFileAppender(temp, "scrubber.log");
+
+         if(isArchive){
+            String scrubbedName = (filePath.substring(pos + 1)).replace(".tar.gz", "");
+            ArchiveUtils archiveUtils = new ArchiveUtils(new ScrubProcessor(inputs.getConfigFile()));
+            archiveUtils.extractDiagnosticArchive(filePath, temp );
+            archiveUtils.createArchive(temp, scrubbedName);
+         }
+         else{
+            String scrubbedName = infilePath.substring(pos+1);
+            ScrubProcessor scrubber = new ScrubProcessor(inputs.getConfigFile());
+            File targetFile = new File(infilePath);
+
+            BufferedReader br = null;
+            BufferedWriter writer = new BufferedWriter(new FileWriter(
+                    outputDir + SystemProperties.fileSeparator + scrubbedName));
+            br = new BufferedReader(new InputStreamReader(new FileInputStream(targetFile)));
+
+            String thisLine = null;
+            while ((thisLine = br.readLine()) != null) {
+               thisLine = scrubber.process(thisLine);
+               writer.write(thisLine);
+               writer.newLine();
+            }
+            writer.close();
+
+            pos = logPath.lastIndexOf(SystemProperties.fileSeparator);
+            FileUtils.copyFile(new File(logPath), new File(outputDir + SystemProperties.fileSeparator + logPath.substring(pos+1)));
+
+         }
          closeLogs();
-         archiveUtils.createArchive(targetDir, scrubbedName);
-         SystemUtils.nukeDirectory(targetDir);
+         SystemUtils.nukeDirectory(temp);
 
-         File tmp = new File(targetDir);
-         FileUtils.deleteDirectory(tmp);
-         logger.info("Deleted temp directory: {}.", targetDir);
-      } catch (IOException ioe) {
-         logger.error("Access issue with temp directory", ioe);
-         throw new RuntimeException("Issue with creating temp directory - see logs for details.");
-      }
-      catch(Exception e){
-         logger.error("Error extracting diagnostic archive", e);
+      } catch (Throwable t) {
+         logger.log(SystemProperties.DIAG, "Error occurred: ", t);
+         logger.error("Issue encountered during scrub processing. {}.", Constants.CHECK_LOG);
       }
 
    }
