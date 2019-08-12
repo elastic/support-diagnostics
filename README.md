@@ -56,7 +56,7 @@ As a first step the diagnostic will check the Github repo for the current releas
     ./diagnostics.sh --help
     .\diagnostics.bat --help
 
-## Using With Shield/Security
+## Using With Security
 * a truststore does not need to be specified - it's assumed you are running this against a node that you set up and if you didn't trust it you wouldn't be running this.
 * When using authentication, do not specify both a password and the `-p` option.  Using the `-p` option will bring up a prompt for you to type an obfuscated value that will not be displayed on the command history.
 * `--noVerify` will bypass hostname verification with SSL.
