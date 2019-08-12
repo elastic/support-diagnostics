@@ -58,7 +58,7 @@ As a first step the diagnostic will check the Github repo for the current releas
 
 ## Using With Shield/Security
 * a truststore does not need to be specified - it's assumed you are running this against a node that you set up and if you didn't trust it you wouldn't be running this.
-* When using security authentication, do not specify a password and the `-p` option.  Using the `-p` option will bring up a prompt for you to type an obfuscated value that will not be displayed on the command history.
+* When using authentication, do not specify both a password and the `-p` option.  Using the `-p` option will bring up a prompt for you to type an obfuscated value that will not be displayed on the command history.
 * `--noVerify` will bypass hostname verification with SSL.
 * `--keystore` and --keystorePass` allow you to specify client side certificates for authentication.
 * To script the utility when using Shield/Security, you may use the `--ptp` option to allow you to pass a plain text password to the command line rather than use `-p` and get a prompt.  Note that this is inherently insecure - use at your own risk.
