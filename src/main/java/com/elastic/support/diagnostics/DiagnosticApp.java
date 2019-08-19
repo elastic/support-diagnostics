@@ -1,11 +1,8 @@
 package com.elastic.support.diagnostics;
 
 import com.elastic.support.config.Constants;
-import com.elastic.support.config.DiagConfig;
-import com.elastic.support.config.DiagnosticInputs;
 import com.elastic.support.util.JsonYamlUtils;
 import com.elastic.support.util.SystemProperties;
-import com.elastic.support.util.SystemUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

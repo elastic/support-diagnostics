@@ -10,12 +10,6 @@ log-settings:
   maxLogs: 2
   maxGcLogs: 3
 
-password-keys:
-  - password
-  - secret
-  - access
-  - key
-
 text-file-extensions:
   - allocation
   - cat_allocation

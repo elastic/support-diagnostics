@@ -1,7 +1,7 @@
 package com.elastic.support.diagnostics.local;
 
 import com.elastic.support.BaseService;
-import com.elastic.support.config.DiagConfig;
+import com.elastic.support.diagnostics.DiagConfig;
 import com.elastic.support.config.LocalCollectionInputs;
 import com.elastic.support.diagnostics.commands.CollectLogsCmd;
 import com.elastic.support.diagnostics.commands.SystemCallsCmd;

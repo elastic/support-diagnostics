@@ -1,7 +1,7 @@
 package com.elastic.support.diagnostics.commands;
 
 import com.elastic.support.config.Constants;
-import com.elastic.support.config.DiagConfig;
+import com.elastic.support.diagnostics.DiagConfig;
 import com.elastic.support.diagnostics.DiagnosticException;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.util.JsonYamlUtils;
@@ -11,7 +11,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Map;
-import java.util.Set;
 
 public class RunLogstashQueriesCmd extends BaseQueryCmd {
 

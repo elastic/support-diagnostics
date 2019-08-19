@@ -1,40 +1,32 @@
 package com.elastic.support.util;
 
 
-import org.apache.commons.beanutils.ConvertUtils;
-import org.apache.commons.beanutils.PropertyUtils;
-import org.apache.commons.beanutils.converters.BooleanConverter;
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
-import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
+import com.elastic.support.config.Constants;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
-import org.apache.logging.log4j.Level;
+import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.Appender;
-import org.apache.logging.log4j.core.Layout;
-import org.apache.logging.log4j.core.LoggerContext;
-import org.apache.logging.log4j.core.appender.FileAppender;
-import org.apache.logging.log4j.core.config.AppenderRef;
-import org.apache.logging.log4j.core.config.Configuration;
-import org.apache.logging.log4j.core.layout.PatternLayout;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
-import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Set;
+
 
 public class SystemUtils {
 
-    private static final Logger logger = LoggerFactory.getLogger(SystemUtils.class);
+    private static final Logger logger = LogManager.getLogger(SystemUtils.class);
 
+    public static void toFile(String path, String content) {
+        try (FileOutputStream fs = new FileOutputStream(path)) {
+            IOUtils.write(content, fs, Constants.UTF8);
+        } catch (Exception e) {
+            logger.log(SystemProperties.DIAG, "Error writing Response To OutputStream", e);
+        }
+    }
 
     public static void streamClose(String path, InputStream instream) {
 
