@@ -1,11 +1,7 @@
 package com.elastic.support.scrub;
 
-import com.elastic.support.config.ScrubInputs;
-import com.elastic.support.util.JsonYamlUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.util.Map;
 
 
 public class ScrubApp {

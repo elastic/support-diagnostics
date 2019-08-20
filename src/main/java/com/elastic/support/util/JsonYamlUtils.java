@@ -2,6 +2,7 @@ package com.elastic.support.util;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -21,6 +22,12 @@ import java.util.*;
 public class JsonYamlUtils {
 
    private static final Logger logger = LoggerFactory.getLogger(JsonYamlUtils.class);
+
+   public static ObjectMapper formatMapper;
+   static {
+      formatMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
+   }
+
 
    public static JsonNode createJsonNodeFromFileName(String fileName) {
       File jsonFile = FileUtils.getFile(fileName);

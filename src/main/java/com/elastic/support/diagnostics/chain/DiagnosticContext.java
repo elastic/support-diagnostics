@@ -1,7 +1,7 @@
 package com.elastic.support.diagnostics.chain;
 
-import com.elastic.support.config.DiagConfig;
-import com.elastic.support.config.DiagnosticInputs;
+import com.elastic.support.diagnostics.DiagConfig;
+import com.elastic.support.diagnostics.DiagnosticInputs;
 import com.elastic.support.config.Version;
 import com.elastic.support.rest.RestClient;
 import com.fasterxml.jackson.databind.JsonNode;

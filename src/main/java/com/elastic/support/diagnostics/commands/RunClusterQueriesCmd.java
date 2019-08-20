@@ -1,7 +1,7 @@
 package com.elastic.support.diagnostics.commands;
 
 import com.elastic.support.config.Constants;
-import com.elastic.support.config.DiagConfig;
+import com.elastic.support.diagnostics.DiagConfig;
 import com.elastic.support.config.Version;
 import com.elastic.support.diagnostics.DiagnosticException;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;

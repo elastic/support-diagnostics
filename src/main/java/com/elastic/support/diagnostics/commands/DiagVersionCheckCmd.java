@@ -1,8 +1,8 @@
 package com.elastic.support.diagnostics.commands;
 
 import com.elastic.support.config.Constants;
-import com.elastic.support.config.DiagConfig;
-import com.elastic.support.config.DiagnosticInputs;
+import com.elastic.support.diagnostics.DiagConfig;
+import com.elastic.support.diagnostics.DiagnosticInputs;
 import com.elastic.support.diagnostics.chain.Command;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.rest.RestClient;

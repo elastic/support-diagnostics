@@ -1,6 +1,6 @@
 package com.elastic.support.test;
 
-import com.elastic.support.config.DiagConfig;
+import com.elastic.support.diagnostics.DiagConfig;
 import com.elastic.support.diagnostics.commands.RunClusterQueriesCmd;
 import com.elastic.support.rest.RestCallManifest;
 import com.elastic.support.rest.RestClient;

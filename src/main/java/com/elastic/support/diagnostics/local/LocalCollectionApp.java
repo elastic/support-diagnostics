@@ -1,7 +1,7 @@
 package com.elastic.support.diagnostics.local;
 
 import com.elastic.support.config.Constants;
-import com.elastic.support.config.DiagConfig;
+import com.elastic.support.diagnostics.DiagConfig;
 import com.elastic.support.config.LocalCollectionInputs;
 import com.elastic.support.util.JsonYamlUtils;
 import org.apache.logging.log4j.LogManager;
