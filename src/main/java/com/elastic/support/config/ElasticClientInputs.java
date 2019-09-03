@@ -7,7 +7,6 @@ import org.apache.logging.log4j.Logger;
 
 public class ElasticClientInputs extends BaseInputs {
 
-
     Logger logger = LogManager.getLogger(ElasticClientInputs.class);
 
     @Parameter(names = {"-h", "--host"}, required = true, description = "Required field.  Hostname, IP Address, or localhost.  HTTP access must be enabled.")
@@ -140,22 +139,6 @@ public class ElasticClientInputs extends BaseInputs {
         this.bypassDiagVerify = bypassDiagVerify;
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     public boolean isSecured() {
         return (StringUtils.isNotEmpty(this.user) && StringUtils.isNotEmpty(this.password));
     }
@@ -177,7 +160,7 @@ public class ElasticClientInputs extends BaseInputs {
             this.password = plainTextPassword;
         }
 
-        if (isIncompleteAuth(user, password)) {
+        if (! isCompleteAuth(user, password)) {
             logger.info("Input error: If authenticating both user and password are required.");
             this.jCommander.usage();
             return false;
@@ -187,12 +170,12 @@ public class ElasticClientInputs extends BaseInputs {
 
     }
 
-    protected boolean isIncompleteAuth(String user, String password) {
-
+    protected boolean isCompleteAuth(String user, String password) {
+        
         if ( (StringUtils.isNotEmpty(user) && StringUtils.isEmpty(password)) ||
                 (StringUtils.isNotEmpty(password) && StringUtils.isEmpty(user)) ){
-            return true;
+            return false;
         }
-        return false;
+        return true;
     }
 }
