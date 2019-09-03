@@ -176,11 +176,11 @@ linuxOS:
   limits: "cat /etc/security/limits.conf"
   proc-limit: "cat /proc/PID/limits"
   es-process: "ps -ef | grep 'es.distribution'"
+  jps: "JAVA_HOME/bin/jps -l -m -v"
+  jstack: "JAVA_HOME/bin/jstack PID"
 
 linuxOS-Java:
   home: "ps ax | grep elastiscearch"
-  jps: "JAVA_HOME/bin/jps -l -m -v"
-  jstack: "JAVA_HOME/bin/jstack PID"
 
 macOS:
   top: "top -l 1"
@@ -188,21 +188,21 @@ macOS:
   process-list: "ps -ef"
   ulimit: "ulimit -a"
   es-process: "ps -ef | grep 'es.distribution'"
+  jps: "JAVA_HOME/bin/jps -l -m -v"
+  jstack: "JAVA_HOME/bin/jstack PID"
 
 macOS-Java:
   home: "ps ax | grep elastiscearch"
-  jps: "JAVA_HOME/bin/jps -l -m -v"
-  jstack: "JAVA_HOME/bin/jstack PID"
 
 winOS:
   process-list: "tasklist /v"
   netstat: "netstat -ano"
   cpu: "wmic CPU"
+  jps: "JAVA_HOME\\bin\\jps -l -m -v"
+  jstack: "JAVA_HOME\\bin\\jstack PID"
 
 winOS-Java:
   home: "wmic process where name='java.exe'"
-  jps: "JAVA_HOME\\bin\\jps -l -m -v"
-  jstack: "JAVA_HOME\\bin\\jstack PID"
 
 docker-global:
   docker-info: "docker info"
