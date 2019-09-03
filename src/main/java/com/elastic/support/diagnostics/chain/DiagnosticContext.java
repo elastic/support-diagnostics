@@ -15,6 +15,7 @@ public class DiagnosticContext {
    private String tempDir = "";
    private String pid = "0";
    private String logDir = "";
+   private String home = "";
    private String systemDigest;
    private String diagVersion;
    private  JsonNode nodeManifest;
@@ -59,6 +60,14 @@ public class DiagnosticContext {
 
    public void setLogDir(String logDir) {
       this.logDir = logDir;
+   }
+
+   public String getHome() {
+      return home;
+   }
+
+   public void setHome(String home) {
+      this.home = home;
    }
 
    public String getSystemDigest() {

@@ -175,6 +175,10 @@ linuxOS:
   cpu_governor: "cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"
   limits: "cat /etc/security/limits.conf"
   proc-limit: "cat /proc/PID/limits"
+  es-process: "ps -ef | grep 'es.distribution'"
+
+linuxOS-Java:
+  home: "ps ax | grep elastiscearch"
   jps: "JAVA_HOME/bin/jps -l -m -v"
   jstack: "JAVA_HOME/bin/jstack PID"
 
@@ -183,6 +187,10 @@ macOS:
   netstat: "netstat -an"
   process-list: "ps -ef"
   ulimit: "ulimit -a"
+  es-process: "ps -ef | grep 'es.distribution'"
+
+macOS-Java:
+  home: "ps ax | grep elastiscearch"
   jps: "JAVA_HOME/bin/jps -l -m -v"
   jstack: "JAVA_HOME/bin/jstack PID"
 
@@ -190,6 +198,9 @@ winOS:
   process-list: "tasklist /v"
   netstat: "netstat -ano"
   cpu: "wmic CPU"
+
+winOS-Java:
+  home: "wmic process where name='java.exe'"
   jps: "JAVA_HOME\\bin\\jps -l -m -v"
   jstack: "JAVA_HOME\\bin\\jstack PID"
 
@@ -212,4 +223,28 @@ docker-containers:
   docker-logs: "docker logs CONTAINER_ID"
   docker-top: "docker top CONTAINER_ID"
 
+monitoring-stats:
+  - cluster_stats
+  - node_stats
+  - indices_stats
+  - index_stats
+  - shards
+  - job_stats
+  - ccr_stats
+  - ccr_auto_follow_stats
 
+monitoring-queryfiles:
+  general: "general.json"
+  index_stats: "index_stats.json"
+  index_all: "index_all.json"
+  cluster_id_check: "cluster_id_check.json"
+  cluster_ids: "cluster_ids.json"
+
+monitoring-uri: "/.monitoring-es*/_search"
+monitoring-scroll-ttl: "?scroll=2m"
+monitoring-scroll-size: 200
+monitoring-scroll-uri: "/_search/scroll"
+
+default-monitoring-index: ".monitoring-es-7"
+
+bulk-import-size: 250

@@ -23,11 +23,8 @@ public class JsonYamlUtils {
 
    private static final Logger logger = LoggerFactory.getLogger(JsonYamlUtils.class);
 
-   public static ObjectMapper formatMapper;
-   static {
-      formatMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
-   }
-
+   public static ObjectMapper mapper = new ObjectMapper();
+   public static ObjectMapper formatMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
 
    public static JsonNode createJsonNodeFromFileName(String fileName) {
       File jsonFile = FileUtils.getFile(fileName);

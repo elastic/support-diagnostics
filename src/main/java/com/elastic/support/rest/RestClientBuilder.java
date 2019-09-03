@@ -39,7 +39,6 @@ public class RestClientBuilder {
 
     private final Logger logger = LogManager.getLogger(RestClientBuilder.class);
 
-    private  PoolingHttpClientConnectionManager connectionManager;
     HttpClientBuilder clientBuilder = HttpClients.custom();
 
     private int connectionRequestTimeout = 10 * 1000;
@@ -51,12 +50,8 @@ public class RestClientBuilder {
     private String pkiKeystore, pkiKeystorePass;
     private boolean bypassVerify = false;
     private File pkiKeystoreFile;
-    private boolean poolConnections = false;
+    private boolean poolConnections = true;
     private int maxTotal = 100, defaultMaxPerRoute = 10;
-
-    public PoolingHttpClientConnectionManager getConnectionManager(PoolingHttpClientConnectionManager connectionManager) {
-        return this.connectionManager;
-    }
 
     public RestClientBuilder setRequestTimeout(int requestTimeout) {
         this.connectionRequestTimeout = requestTimeout;
@@ -195,7 +190,7 @@ public class RestClientBuilder {
             clientBuilder.setSSLSocketFactory(new SSLConnectionSocketFactory(sslCtx));
 
             // If and when we start making connections to multinple nodes this will
-            // need to be turned on. Note that we need to create a regsistry for socket factories
+            // need to be turned on. Note that we need to create a registry for socket factories
             // for both http and https or pooling will not work.
             if(poolConnections) {
                 Registry registry = RegistryBuilder.create()
@@ -263,7 +258,6 @@ public class RestClientBuilder {
         return restClient;
 
     }
-
 
 }
 
