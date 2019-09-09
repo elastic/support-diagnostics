@@ -10,6 +10,8 @@ import org.apache.logging.log4j.Logger;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -49,7 +51,7 @@ public class SystemUtils {
             FileUtils.deleteDirectory(tmp);
             logger.info("Deleted directory: {}.", dir);
         } catch (IOException e) {
-            logger.error("Access issue with target directory", e);
+            logger.error("Delete of directory:{} failed. Usually this indicates a permission issue", dir, e);
         }
     }
 
@@ -130,6 +132,15 @@ public class SystemUtils {
 
     }
 
+    public static String getCurrentDate() {
+        //DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        return dtf.format(ZonedDateTime.now());
+    }
 
+    public static String getCurrentTime() {
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm");
+        return dtf.format(ZonedDateTime.now());
+    }
 
 }

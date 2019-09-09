@@ -1,19 +1,23 @@
 package com.elastic.support.scrub;
 
-import com.elastic.support.PostProcessor;
+import com.elastic.support.util.ArchiveEntryProcessor;
 import com.elastic.support.config.Constants;
 import com.elastic.support.util.JsonYamlUtils;
-import com.elastic.support.util.SystemUtils;
+import com.elastic.support.util.SystemProperties;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.IntStream;
+import java.util.zip.GZIPInputStream;
 
-public class ScrubProcessor implements PostProcessor {
+public class ScrubProcessor implements ArchiveEntryProcessor {
 
    private static final Logger logger = LogManager.getLogger();
 
@@ -22,8 +26,11 @@ public class ScrubProcessor implements PostProcessor {
    LinkedHashMap<String, String> usedTokenMatches = new LinkedHashMap<>();
    List<String> configuredTokens = new ArrayList<>();
    List<String> tokens = new ArrayList<>();
+   String targetDir;
 
-   public ScrubProcessor(String config){
+   public ScrubProcessor(String config, String targetDir){
+
+      this.targetDir = targetDir;
 
       try {
          Map<String, Object> scrubConfig;
@@ -58,8 +65,7 @@ public class ScrubProcessor implements PostProcessor {
 
    }
 
-
-   public String process(String line){
+   public String processLine(String line){
 
       line = processIpv4Addresses(line);
       line = processIpv6Addresses(line);
@@ -67,9 +73,52 @@ public class ScrubProcessor implements PostProcessor {
       line = processTokens(line);
 
       return line;
+
    }
 
-   public String processTokens(String line){
+   public void process(InputStream ais, String name){
+
+      try {
+
+         String dir = targetDir;
+         InputStream processedStream = ais;
+
+         logger.info("Processing: {}", name);
+
+         // It's a directory, so we don't process the file. but we do need to create a target subdirectory for subsequent files.
+         if(name.endsWith("/")){
+            name = name.replace("/", "");
+            Files.createDirectories(Paths.get(targetDir + SystemProperties.fileSeparator + name));
+            return;
+         }
+         else if (name.endsWith(".gz")) {
+            name = name.replace(".gz", "");
+            processedStream = new GZIPInputStream(ais);
+         }
+         else  {
+            dir = targetDir;
+         }
+
+         BufferedReader br = null;
+         BufferedWriter writer = new BufferedWriter(new FileWriter(
+                 dir + SystemProperties.fileSeparator + name));
+         br = new BufferedReader(new InputStreamReader(processedStream));
+
+         String thisLine = null;
+
+         while ((thisLine = br.readLine()) != null) {
+            thisLine = processLine(thisLine);
+            writer.write(thisLine);
+            writer.newLine();
+         }
+
+         writer.close();
+      } catch (Throwable t) {
+         logger.error("Error processing entry,", t);
+      }
+   }
+
+   private String processTokens(String line){
 
       for(String token: tokens){
 
@@ -95,7 +144,7 @@ public class ScrubProcessor implements PostProcessor {
       return line;
    }
 
-   public String processMacddresses(String input){
+   private String processMacddresses(String input){
 
       Pattern pattern = Pattern.compile(Constants.MacAddrRegex);
       Matcher matcher = pattern.matcher(input);
@@ -107,7 +156,7 @@ public class ScrubProcessor implements PostProcessor {
 
    }
 
-   public String processIpv4Addresses(String input){
+   private String processIpv4Addresses(String input){
 
       Pattern pattern = Pattern.compile(Constants.IPv4Regex);
       Matcher matcher = pattern.matcher(input);
@@ -137,7 +186,7 @@ public class ScrubProcessor implements PostProcessor {
 
    }
 
-   public String processIpv6Addresses(String input){
+   private String processIpv6Addresses(String input){
 
       Pattern pattern = Pattern.compile(Constants.IPv6Regex);
       Matcher matcher = pattern.matcher(input);
@@ -150,13 +199,13 @@ public class ScrubProcessor implements PostProcessor {
       return input;
    }
 
-   public String[] splitIpSegments(String address, String sep){
+   private String[] splitIpSegments(String address, String sep){
       String[] ipSegments = address.split(sep);
       return ipSegments;
    }
 
 
-   public String generateReplacementToken(String token, int len){
+   private String generateReplacementToken(String token, int len){
 
       StringBuilder newToken = new StringBuilder();
 
@@ -165,16 +214,14 @@ public class ScrubProcessor implements PostProcessor {
          passes = (len/32) + 1;
       }
 
-      for(int i = 0; i < passes; i++){
+      for(int i = 0; i < passes; i++) {
          newToken.append(
                  UUID.nameUUIDFromBytes(token.getBytes()).toString()
                          .replaceAll("-", "")
          );
       }
 
-      String replacement = newToken.toString().substring(0, len);
-
-      return replacement;
+      return newToken.toString().substring(0, len);
 
    }
 

@@ -1,0 +1,15 @@
+{
+  "query": {
+    "bool": {
+      "filter": [ { "term": { "type": "cluster_stats" } } ]
+    }
+  },
+  "collapse": {
+    "field": "cluster_uuid"
+  },
+  "sort": {
+    "timestamp": "asc"
+  },
+  "size": 100,
+  "_source": ["cluster_uuid", "cluster_name"]
+}

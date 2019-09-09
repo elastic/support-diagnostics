@@ -16,11 +16,12 @@ It will execute a series of REST API calls to the running cluster, run a number 
 * `cd` to the top level repo directory and type `mvn package`.
 
 ## Run Requirements
-* JDK - Oracle or OpenJDK, 1.8-10
-  * **Important Note:** The 1.7 version of the JDK is no longer supported. If you are running a 1.7 JRE/JDK you must upgrade or run the 6.3 version of the diagnostic.
-* A JRE may be used, however certain functionality such as jstack generated thread dumps will not be available.
+* JDK - Oracle or OpenJDK, 1.8-10 +
+  * The IBM JDK is not supported due to JSSE related issues that cause TLS errors.
+  * **Important Note For Version 7:** Elasticsearch now includes a bundled JVM that is used by default. For the diagnostic to be able to retrieve thread dumps via Jstack it must be executed with the same JVM that was used to run Elasticsearch. Therefore you must:
+    * Set the Elasticsearch supplied JVM as as the default to be executed. On Linux distributions this would be the one returned by `which java`.
+    * Set JAVA_HOME to the directory containing the /bin directory for the included JDK. For example, <path to Elasticsearch 7 deployment>/jdk/Contents/Home.
 * If you are running a package installation under Linux you MUST run the command with elevated sudo privileges. Otherwise the utility will not be able to run the system queries.
-* It is recommended that you set the `JAVA_HOME` environment variable.  It should point to the Java installation directory.  If `JAVA_HOME` is not found, the utility will attempt to locate a distribution but if errors occur it may be necessary to set this manually.
 * The system account running the utility must have read access to the Elasticsearch files and write access to the output location.
 * If you are using Shield/Security the supplied user id must have permission to execute the diagnostic URL's.
 * Linux, Windows, and Mac OSX are supported.
@@ -60,7 +61,7 @@ As a first step the diagnostic will check the Github repo for the current releas
 * a truststore does not need to be specified - it's assumed you are running this against a node that you set up and if you didn't trust it you wouldn't be running this.
 * When using authentication, do not specify both a password and the `-p` option.  Using the `-p` option will bring up a prompt for you to type an obfuscated value that will not be displayed on the command history.
 * `--noVerify` will bypass hostname verification with SSL.
-* `--keystore` and --keystorePass` allow you to specify client side certificates for authentication.
+* `--keystore` and `--keystorePass` allow you to specify client side certificates for authentication.
 * To script the utility when using Shield/Security, you may use the `--ptp` option to allow you to pass a plain text password to the command line rather than use `-p` and get a prompt.  Note that this is inherently insecure - use at your own risk.
 
 #### Examples - Without SSL
@@ -132,10 +133,10 @@ $ sudo .diagnostics.sh --host 10.0.0.20 --dockerId 4577fe120750
 * Run the diagnostic utility to get an archive.
 * Add any tokens for text you wish to conceal to a config file. By default the utility will look for scrub.yml in the working directory.
 * Run the utility with the necessary and optional diagnosticInputs. It is a different script execution than the diagnostic with different arguments.
-  * *-a*, *--archive* &nbsp;&nbsp;&nbsp; An absolute path to the archive file you wish to sanitize(required if single file not specified).
-  * *-i*, *--infile* &nbsp;&nbsp;&nbsp; An absolute path to the individual file you wish to sanitize(required if diagnostic archive file not specified).
-  * *-o*, *--out*, *--output*, *--outputDir* &nbsp;&nbsp;&nbsp; A target directory where you want the revised archive written. If not supplied it will be written to the same folder as the diagnostic archive it processed.
-  * *-c*, *--config* &nbsp;&nbsp;&nbsp; The configuration file containing any text tokens you wish to conceal. These can be literals or regex's. The default is the scrub.yml contained in the jar distribution.
+  * `-a, --archive` &nbsp;&nbsp;&nbsp; An absolute path to the archive file you wish to sanitize(required if single file not specified).
+  * `-i, --infile` &nbsp;&nbsp;&nbsp; An absolute path to the individual file you wish to sanitize(required if diagnostic archive file not specified).
+  * `-o, --out, --output, --outputDir` &nbsp;&nbsp;&nbsp; A target directory where you want the revised archive written. If not supplied it will be written to the same folder as the diagnostic archive it processed.
+  * `-c, --config` &nbsp;&nbsp;&nbsp; The configuration file containing any text tokens you wish to conceal. These can be literals or regex's. The default is the scrub.yml contained in the jar distribution.
 
 #### Examples
 #####With no tokens specified, writing the same directory as the diagnostic:
@@ -156,9 +157,70 @@ tokens:
   - node-[\d?]*
   - cluster-630
   - disk1
-  - Typhoid
-
+  - data-one
 ```
+# Experimental - Monitoring Data Extraction
+
+While the standard diagnostic is often useful in providing the background necessary to solve an issue, it is also limited in that it shows a strictly one dimensional view of the cluster's state. 
+The view is restricted to whatever was available at the time the diagnostic was run. So a diagnostic run subsequent to an issue will not always provide a clear indication of what caused it.
+
+If you have set up Elasticsearch monitoring there is time series data avaialble, but in order to view it anywhere other than locally you would need to snapshot the relevant monitoring indices or have the person wishing to view it do so via a screen sharing session. 
+Neither of these may be optimal if there is an urgent issue or multiple individuals need to be involved.
+
+You can now extract an interval of up to 12 hours of monitoring data at a time from your monitoring cluster. It will package this into a tar.gz file, much like the current diagnostic. 
+After it is uploaded, a support engineer can import that data into their own monitoring cluster so it can be investigated outside of a screen share, and be easily viewed by other engineers and developers.
+It has the advantage of providing a view of the cluster state prior to when an issue occurred so that a better idea of what led up to the issue can be gained.
+
+It does not need to be run on an Elasticsearch host. A local workstation with network access to the monitoring cluster is sufficient.
+
+Running it is similar to running a standard diagnostic with regard to the connection parameters such as host, authentication, etc. 
+Use the host name of the monitoring cluster and the same authentication necessary if you were to query for this data in the Dev Tools. A superuser account is suggested.
+You specify the cutoff date you wish statistics to stop at - this will default to the current date and time. Then specify the number of hours back from that date and time you wish to collect.
+Alteratively you may also specify a specific offset if you wish to work with local time zones.
+
+You can collect statistics for only one cluster at a time, and it is necessary to specify a cluster id when running the utility.
+If you are not sure of the cluster id, running with only the host, login, and --list parameter will display a listing
+of the clusters being monitored in the format: `cluster name`  &nbsp;&nbsp;&nbsp; `cluster id`.
+
+ 
+
+The additional parameters:
+  * `--id` _REQUIRED_ &nbsp;&nbsp;&nbsp;  The id of the cluster you wish to retrieve data for. Because multiple clusters may be monitored this is necessary to retrieve the correct subset of data. If you are not sure, see the list function example below to see which clusters are available.
+  * `--stopDate`  &nbsp;&nbsp;&nbsp;  Date for the earliest day to be extracted. Defaults to today's date. Must be in the format yyyy-MM-dd.
+  * `--stopTime` &nbsp;&nbsp;&nbsp;  The clock time you wish to start collection statistics from. Defaults to midnight of the start date . Must be in the format HH:mm.
+  * `--offset` &nbsp;&nbsp;&nbsp; The UTC offset for the time zone you wish to use. Defaults to `+00:00`. Must be in the format +HH:mm or -HH:mm
+  * `--interval` &nbsp;&nbsp;&nbsp; The amount of statistics you wish to collect. This will be the number of hours prior to the point you entered for the input stop date and time.
+  * `--list` &nbsp;&nbsp;&nbsp; Lists the clusters available data extraction on this montioring server. 
+
+#### Examples 
+#####Specifies a specific date, time and timezone offset:
+    sudo ./export-momitoring.sh --host 10.0.0.20 -u <your username> -p --ssl --id 37G473XV7843 --startDate 2019-08-25 --startTime 08:30 -- offset +05:00
+#####Specifies a 6 hour interval from time the extract was run.
+    sudo ./export-momitoring.sh --host 10.0.0.20 -u <your username> -p --ssl --id 37G473XV7843 --interval 4
+#####Lists the clusters availble in this monitoring cluster
+    sudo ./export-momitoring.sh --host 10.0.0.20 -u <your username> -p --ssl --list    
+    
+# Experimental - Monitoring Data Import
+
+Once you have an archive of exported monitoring data, you can import this into an ES 7 instance that has monitoring enabled. Only ES 7 is supported as a target cluster.
+* You will need an installed instance of the diagnostic utility installed. This does not need to be on the same 
+host as the ES monitoring instance, but it does need to be on the same host as the archive you wish to import.
+It's also implied that a recent Java runtime is installed.
+* This will only work with a monitoring export archive produced by the diagnostic utility. It will not work with a standard diagnostic bundle or something the customer puts together.
+* The only required parameters are the host/login information for the monitoring cluster and the fully qualified path to the archive you wish to import.
+  * `--input` _REQUIRED_ &nbsp;&nbsp;&nbsp;  Fully qualified path to the archive you wish to import. The name format will
+  be similar to a standard diagnostic: `monitoring-export-<Datestamp>-<Timestamp>`.
+  * `--clusterName` &nbsp;&nbsp;&nbsp; If you wish to change the name of the imported cluster to display something relevant to your purpose, you can use this parameter. Otherwise it will be added under the same cluster name
+  it had at export time. No spaces.
+  * `--indexName` &nbsp;&nbsp;&nbsp; If you wish to change the name of the imported monitoring index you can use this to modify it and 
+  maintain more partitioning control. if set, whatever value you use will be appended to `.monitoring-es-7-`. If you do not specify this, the imported data will be indexed into
+  the standard monitoring index name format with the current date appended. No spaces.
+* Once the data ins imported you should be able to view the newly imported data through monitoring. Make sure to set the date 
+range to reflect the period that was collected so that it displays and is in a usable format.  
+#### Examples 
+#####Specifies a specific date, time and timezone offset:
+    sudo ./import-momitoring.sh --host 10.0.0.20 -u <your username> -p --ssl -i /Users/myid/temp/export-20190801-150615.zip -clusterName test_cluster --indexName_test_client
+
 # Troubleshooting
   * The file: diagnostic.log file will be generated  and included in the archive. In all but the worst case an archive will be created. Some messages will be written to the console output but granualar errors and stack traces will only be written to this log.
   * If you get a message saying that it can't find a class file, you probably downloaded the src zip instead of the one with "-dist" in the name. Download that and try it again.

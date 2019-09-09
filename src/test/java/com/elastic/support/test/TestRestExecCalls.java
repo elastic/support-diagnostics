@@ -45,7 +45,7 @@ public class TestRestExecCalls {
     @BeforeAll
     public void globalSetup() {
 
-        mockServer = startClientAndServer(9200);
+        mockServer = startClientAndServer(9880);
 
     }
 
@@ -64,7 +64,7 @@ public class TestRestExecCalls {
                 .setConnectTimeout(30000)
                 .setRequestTimeout(30000)
                 .setHost("localhost")
-                .setPort(9200)
+                .setPort(9880)
                 .setScheme("http")
                 .setUser("elastic")
                 .setPassword("elastic")
@@ -76,7 +76,7 @@ public class TestRestExecCalls {
                 .setConnectTimeout(30000)
                 .setRequestTimeout(30000)
                 .setHost("localhost")
-                .setPort(9200)
+                .setPort(9880)
                 .setScheme("https")
                 .setUser("elastic")
                 .setPassword("elastic")

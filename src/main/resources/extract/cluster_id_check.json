@@ -1,0 +1,15 @@
+{
+  "query": {
+    "bool": {
+      "filter": [ { "term": { "cluster_uuid": "{{clusterId}}" } } ]
+    }
+  },
+  "collapse": {
+    "field": "cluster_uuid"
+  },
+  "sort": {
+    "timestamp": "asc"
+  },
+  "size": 100,
+  "_source": ["cluster_uuid", "cluster_name"]
+}

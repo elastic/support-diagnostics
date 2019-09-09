@@ -15,7 +15,7 @@ import org.apache.logging.log4j.core.layout.PatternLayout;
 
 public abstract  class BaseService {
 
-    protected Logger logger = LogManager.getLogger(BaseService.class);
+    private Logger logger = LogManager.getLogger(BaseService.class);
     protected boolean isLogClosed = false;
     protected String logPath;
 

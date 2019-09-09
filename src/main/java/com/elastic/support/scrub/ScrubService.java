@@ -1,17 +1,22 @@
 package com.elastic.support.scrub;
 import com.elastic.support.config.Constants;
 import com.elastic.support.BaseService;
+import com.elastic.support.config.ElasticClientInputs;
 import com.elastic.support.util.ArchiveUtils;
 import com.elastic.support.util.SystemProperties;
 import com.elastic.support.util.SystemUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 
 public class ScrubService extends BaseService {
 
    private ScrubInputs inputs;
+   private Logger logger = LogManager.getLogger(ScrubService.class);
+
 
    public ScrubService(ScrubInputs inputs){
       this.inputs = inputs;
@@ -46,13 +51,13 @@ public class ScrubService extends BaseService {
 
          if(isArchive){
             String scrubbedName = (filePath.substring(pos + 1)).replace(".tar.gz", "");
-            ArchiveUtils archiveUtils = new ArchiveUtils(new ScrubProcessor(inputs.getConfigFile()));
-            archiveUtils.extractDiagnosticArchive(filePath, temp );
+            ArchiveUtils archiveUtils = new ArchiveUtils(new ScrubProcessor(inputs.getConfigFile(), temp));
+            archiveUtils.extractDiagnosticArchive(filePath);
             archiveUtils.createArchive(temp, scrubbedName);
          }
          else{
             String scrubbedName = infilePath.substring(pos+1);
-            ScrubProcessor scrubber = new ScrubProcessor(inputs.getConfigFile());
+            ScrubProcessor scrubber = new ScrubProcessor(inputs.getConfigFile(), temp);
             File targetFile = new File(infilePath);
 
             BufferedReader br = null;
@@ -62,7 +67,7 @@ public class ScrubService extends BaseService {
 
             String thisLine = null;
             while ((thisLine = br.readLine()) != null) {
-               thisLine = scrubber.process(thisLine);
+               thisLine = scrubber.processLine(thisLine);
                writer.write(thisLine);
                writer.newLine();
             }

@@ -1,7 +1,5 @@
 package com.elastic.support.util;
 
-import com.elastic.support.PostProcessor;
-import com.elastic.support.PostProcessorBypass;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
@@ -13,19 +11,16 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.zip.GZIPInputStream;
 
 
 public class ArchiveUtils {
 
    private static final Logger logger = LogManager.getLogger(ArchiveUtils.class);
-   PostProcessor postProcessor = new PostProcessorBypass();
+   ArchiveEntryProcessor archiveProcessor;
 
-   public ArchiveUtils(PostProcessor scrubberService){
+   public ArchiveUtils(ArchiveEntryProcessor processor){
       super();
-      this.postProcessor = scrubberService;
+      this.archiveProcessor = processor;
    }
 
    public ArchiveUtils(){
@@ -86,58 +81,24 @@ public class ArchiveUtils {
       }
    }
 
-   public void extractDiagnosticArchive(String sourceInput, String targetDir) throws Exception {
-      extractDiagnosticArchive(sourceInput, targetDir, false);
-   }
+   public void extractDiagnosticArchive(String sourceInput) throws Exception {
 
-   public void extractDiagnosticArchive(String sourceInput, String targetDir, boolean scrub) throws Exception {
-
-      boolean logsPresent = false;
       TarArchiveInputStream archive = readDiagArchive(sourceInput);
-      String baseArchivePath = null;
       logger.info("Extracting archive...");
 
       try {
-         // Base archive name
+         // Base archive name - it's not redundant like Intellij is complaining...
          TarArchiveEntry tae = archive.getNextTarEntry();
-         baseArchivePath = tae.getName();
 
          // First actual archived entry
          tae = archive.getNextTarEntry();
 
          while (tae != null) {
             String name = tae.getName();
-            name = name.replace(baseArchivePath, "");
-
-            if(  name.contains("gc.log.") ||
-                    (name.contains(".log") && !name.equalsIgnoreCase("diagnostics.log") ) ||
-                    (!name.contains( "logs" + SystemProperties.fileSeparator ) && !name.contains( "log" + SystemProperties.fileSeparator ))
-            ){
-               Files.createDirectories(Paths.get(targetDir + SystemProperties.fileSeparator + "logs"));
-            }
-
-            if(name.contains("gc.log.")){
-               logger.info("Processing: {}", name);
-               name = name.replace("logs/", "");
-               processEntry(archive, name + ".log", targetDir + SystemProperties.fileSeparator + "logs", false);
-            }
-            else if (name.endsWith(".gz")) {
-               logger.info("Processing: {}", name);
-               name = name.replace(".gz", "");
-               name = name.replace("logs/", "");
-               GZIPInputStream zip = new GZIPInputStream(archive);
-               processEntry(zip, name, targetDir + SystemProperties.fileSeparator + "logs", false);
-            }
-            else if (name.contains(".log") && !name.equalsIgnoreCase("diagnostics.log")) {
-               logger.info("Processing: {}", name);
-               name = name.replace("logs/", "");
-               processEntry(archive, name, targetDir + SystemProperties.fileSeparator + "logs", true);
-             }
-             else if( ! (name.contains( "logs" + SystemProperties.fileSeparator )) && ! (name.contains( "log" + SystemProperties.fileSeparator ))) {
-               logger.info("Processing: {}", name);
-               processEntry(archive, name, targetDir, true);
-            }
-
+            int fileStart = name.indexOf("/");
+            name = name.substring(fileStart + 1);
+            logger.error(name);
+            archiveProcessor.process(archive, name);
             tae = archive.getNextTarEntry();
          }
       } catch (IOException e)      {
@@ -146,26 +107,6 @@ public class ArchiveUtils {
       }
    }
 
-   private void processEntry (InputStream ais, String name, String targetDir, boolean scrub) throws Exception {
-
-      try {
-         BufferedReader br = null;
-         BufferedWriter writer = new BufferedWriter(new FileWriter(
-            targetDir + SystemProperties.fileSeparator + name));
-         br = new BufferedReader(new InputStreamReader(ais));
-         String thisLine = null;
-         while ((thisLine = br.readLine()) != null) {
-            thisLine = postProcessor.process(thisLine);
-            writer.write(thisLine);
-            writer.newLine();
-         }
-
-         writer.close();
-      } catch (Throwable t) {
-         logger.error("Error processing entry,", t);
-      }
-
-   }
 
    private TarArchiveInputStream readDiagArchive(String archivePath) throws Exception {
 

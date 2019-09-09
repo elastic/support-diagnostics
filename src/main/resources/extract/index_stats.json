@@ -1,0 +1,39 @@
+{
+  "size": {{size}},
+  "query":{
+    "bool": {
+      "must_not": [
+        {"wildcard": {
+          "index_stats.index": {
+            "value": ".*"
+          }
+        }}
+      ],
+      "filter": [
+        {"term": {"type": "{{type}}"} },
+        {"term": { "cluster_uuid" : "{{clusterId}}"} },
+        { "range":
+          { "timestamp":
+            {
+              "gte": "{{start}}",
+              "lte": "{{stop}}",
+              "time_zone": "{{timezone}}"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "sort": [
+    {
+      "index_stats.index": {
+        "order": "asc"
+      }
+    },
+    {
+      "timestamp": {
+        "order": "asc"
+      }
+    }
+  ]
+}
