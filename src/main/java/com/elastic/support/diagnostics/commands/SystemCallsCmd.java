@@ -4,6 +4,7 @@ import com.elastic.support.config.Constants;
 import com.elastic.support.diagnostics.chain.Command;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.util.SystemProperties;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,16 +16,12 @@ import java.util.*;
 
 public class SystemCallsCmd implements Command {
 
-    /**
-     * Executes the system specific calls for this host that
-     * the diagnostic is being run on. it will check the OS and pull the
-     * proper command map from the config.
-     */
     private static final Logger logger = LogManager.getLogger(SystemCallsCmd.class);
+    private String esProcessString;
 
     public void execute(DiagnosticContext context) {
 
-        if(context.isBypassSystemCalls()){
+        if (context.isBypassSystemCalls()) {
             logger.log(SystemProperties.DIAG, "Identified Docker installations or could not locate local node - bypassing system stats calls.");
             return;
         }
@@ -33,10 +30,7 @@ public class SystemCallsCmd implements Command {
         String pid = context.getPid();
         ProcessBuilder pb = getProcessBuilder();
 
-        if (Constants.NOT_FOUND.equals(pid)) {
-            logger.info("The host this utility is running on could not be found in the cluster - Bypassing system calls");
-            return;
-        } else if (context.isDocker()) {
+        if (context.isDocker()) {
             // If docker is running and we got an id passed in check to see if it's
             // in the list of container id's we obtained in the host check. If it is
             // just get that one. If it's not there or there was no id go get all the containers in the list.
@@ -66,26 +60,61 @@ public class SystemCallsCmd implements Command {
                 } catch (IOException e) {
                     logger.log(SystemProperties.DIAG, e);
                     logger.info("Error creating container directory - bypassing Docker container calls.");
-                }
-                catch (Exception e){
+                } catch (Exception e) {
                     logger.log(SystemProperties.DIAG, e);
                     logger.info("Unexpected error - bypassing Docker container calls.");
                 }
             }
         } else {
-            try{
-                String calls = checkOS();
-                Map<String, String> osCmds = context.getDiagsConfig().getCommandMap(calls);
-                osCmds = preProcessOsCmds(osCmds, pid, SystemProperties.javaHome);
-                processCalls(tempDir, osCmds, pb);
-            }
-            catch (Exception e){
+            try {
+                // Will tell us if we're on Linux, Win or OSX
+                String platform = checkOS();
+
+                // Get the configurations for that platoform's sys calls.
+                Map<String, Map<String, String>> osCmds = context.getDiagsConfig().getSysCalls(platform);
+                Map<String, String> sysCalls = osCmds.get("sys");
+
+                processCalls(tempDir, sysCalls, pb);
+
+                // Figure out where the Java runtime exists and whether it's a JDK or not?
+                //osCmds = preProcessOsCmds(sysCalls, pid, SystemProperties.javaHome);
+                Map<String, String> esProcess = osCmds.get("es");
+                processCalls(tempDir, esProcess, pb);
+
+                File output = FileUtils.getFile(tempDir, "elastic-process.txt");
+                String  esJDKCmdOutput = null;
+                // Output from wmic in Win outputs as a different character set.
+                if(platform.equals("winOS")){
+                    esJDKCmdOutput = FileUtils.readFileToString(output, "UTF-16");
+                }
+                else{
+                    esJDKCmdOutput = FileUtils.readFileToString(output, "UTF-8");
+                }
+
+                // For the JDK based commoands we need to execute them using the same
+                // JVM that's running ES. Given that it could be the bundled one or some
+                // previously installed version we need to shell out and check before we run them.
+                String esJavaHome = parseEsProcessString(esJDKCmdOutput, SystemProperties.fileSeparator, platform);
+                logger.info("Using Java installation at: {}", esJavaHome);
+                if (isJdkPresent(esJavaHome, platform)) {
+                    Map<String, String> javaCalls = osCmds.get("java");
+
+                    String jstack = javaCalls.get("jstack");
+                    jstack = jstack.replace("JAVA_HOME", esJavaHome);
+                    jstack = jstack.replace("PID", pid);
+
+                    String jps = javaCalls.get("jps");
+                    jps = jps.replace("JAVA_HOME", esJavaHome);
+
+                    javaCalls.put("jstack", jstack);
+                    javaCalls.put("jps", jps);
+                    processCalls(tempDir, javaCalls, pb);
+                }
+            } catch (Exception e) {
                 logger.log(SystemProperties.DIAG, e);
-                logger.info("Unexpected error - bypassing System calls.");
+                logger.info("Unexpected error - bypassing System calls. {}", Constants.CHECK_LOG);
             }
-
         }
-
     }
 
     public void processCalls(String targetDir, Map<String, String> commandMap, ProcessBuilder pb) {
@@ -110,67 +139,14 @@ public class SystemCallsCmd implements Command {
         }
     }
 
-    public Map<String, String> preProcessOsCmds(Map<String, String> osCmds, String pid, String javaHome) {
-
-        // If this is a JRE rather than a JDK there are commands we won't be able to run
-        if (!isJdkPresent(SystemProperties.javaHome + SystemProperties.fileSeparator + "bin" + SystemProperties.fileSeparator + "javac")) {
-            logger.info("JDK was not present - bypassing jps and jstack");
-            osCmds.remove("jps");
-            osCmds.remove("jstack");
-        }
-
-        Map<String, String> revMap = new HashMap();
-        osCmds.forEach((k, v) -> {
-            // Looks weird but cmd may have java home and a pid, and either might be missing.
-            String cmdText = v;
-            if (cmdText.contains("JAVA_HOME")) {
-                cmdText = cmdText.replace("JAVA_HOME", javaHome);
-            }
-
-            if (cmdText.contains("PID")) {
-                cmdText = cmdText.replace("PID", pid);
-            }
-
-            revMap.put(k, cmdText);
-
-        });
-
-        return revMap;
-    }
-
-    public Map<String, String> preProcessDockerCommands(Map<String, String> cmds, String container){
+    public Map<String, String> preProcessDockerCommands(Map<String, String> cmds, String container) {
 
         Map<String, String> revMap = new HashMap<>();
-        cmds.forEach((k, v) ->{
+        cmds.forEach((k, v) -> {
             String cmdText = v.replace("CONTAINER_ID", container);
             revMap.put(k, cmdText);
         });
-
         return revMap;
-
-    }
-
-    public String runCommand(String command){
-        Runtime rt = Runtime.getRuntime();
-        command.replace("'", "");
-        try {
-            Process ps = rt.exec(command);
-            ps.waitFor();
-            InputStreamReader processReader = new InputStreamReader(ps.getErrorStream());
-            BufferedReader br = new BufferedReader(processReader);
-            String line, result = "";
-            while((line = br.readLine()) != null){
-                logger.info(line);
-            }
-
-            ps.destroy();
-            logger.info(result);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return "";
-
     }
 
     public void runCommand(String targetDir,
@@ -220,29 +196,70 @@ public class SystemCallsCmd implements Command {
 
         // If there was a quote delimited set of parameters to
         // pass it in add it now, sans quote.
-        if(args.length > 1){
+        if (args.length > 1) {
             cmds.add(args[1]);
         }
-
         return cmds;
-
     }
 
+    public String parseEsProcessString(String input, String fileSeparator, String platform) {
 
-    public boolean isJdkPresent(String pathToJavac) {
-        try {
-            File jdk = Paths.get(pathToJavac).toFile();
-            if (jdk.exists()) {
-                return true;
-            }
-        } catch (Exception e) {
-            logger.debug("Error checking for JDK", e);
+        String javaExePath = fileSeparator + "bin" + fileSeparator + "java";
+        // Check each line to see if it's an ES java process...
+        if (StringUtils.isEmpty(input)) {
+            return "";
+        }
+        // Windows output is enclosed in quotes
+        if(platform.equals("winOS")){
+            input = input.replace("\"", "");
         }
 
-        logger.info("JDK not found, assuming only JRE present.");
-        return false;
+        String line;
+        try (BufferedReader br = new BufferedReader(new StringReader(input))) {
+            String path;
+            while ((line = br.readLine()) != null) {
+                if (!line.contains(javaExePath)) {
+                    continue;
+                }
+                path = "";
+                String[] lineArray = line.split("\\s+");
+
+                for (String token : lineArray) {
+                    if (token.contains(javaExePath)) {
+                        path = token;
+                    }
+                    // If there are ES parameters on the tokenized command line we can probaby assume this is it.
+                    if (StringUtils.isNotEmpty(path) && token.contains("-Des.")) {
+                        int idx = path.lastIndexOf(fileSeparator + "bin");
+                        return path.substring(0, idx);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            logger.log(SystemProperties.DIAG, "Error obtaining the path for the JDK", e);
+        }
+        return "";
     }
 
+    public boolean isJdkPresent(String javaHome, String platform) {
+        if (StringUtils.isNotEmpty(javaHome)) {
+            try {
+                String javac = "javac";
+                if(platform.equals("winOS")){
+                    javac = "javac.exe";
+                }
 
+                String javacPath = javaHome + SystemProperties.fileSeparator + "bin" + SystemProperties.fileSeparator + javac;
+                File jdk = Paths.get(javacPath).toFile();
+                if (jdk.exists()) {
+                    return true;
+                }
+            } catch (Exception e) {
+                logger.debug("Error checking for JDK", e);
+            }
+        }
+        logger.info("JDK not found - bypassing jstack and jps commands.");
+        return false;
+    }
 }
 

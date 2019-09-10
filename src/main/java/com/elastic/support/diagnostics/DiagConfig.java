@@ -18,7 +18,6 @@ public class DiagConfig extends BaseConfig {
     private List<String> requireRetry;
     private Map restCalls;
 
-
     public DiagConfig(){
         super();
     }
@@ -44,6 +43,7 @@ public class DiagConfig extends BaseConfig {
 
         // The REST calls we execute
         restCalls = (Map) configuration.get("rest-calls");
+
 
     }
 
@@ -93,6 +93,10 @@ public class DiagConfig extends BaseConfig {
 
     public void setRestCalls(Map restCalls) {
         this.restCalls = restCalls;
+    }
+
+    public Map<String, Map<String, String>> getSysCalls(String key){
+        return (Map<String, Map<String, String>>)configuration.get(key);
     }
 
     public Map<String, String> getCommandMap(String key){

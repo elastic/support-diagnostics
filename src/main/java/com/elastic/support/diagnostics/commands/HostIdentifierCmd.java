@@ -58,6 +58,7 @@ public class HostIdentifierCmd implements Command {
         try {
             targetNode = findTargetNode(localAddr, nodeAddrInfo, targetHost);
             context.setLogDir(targetNode.logDir);
+            context.setPid(targetNode.jvmPid);
         } catch (Exception e) {
             context.setBypassSystemCalls(true);
             logger.warn("Could not match target node or local address info to a node in the cluster. See archived logs for more details.");
