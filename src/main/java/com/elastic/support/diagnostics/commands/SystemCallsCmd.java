@@ -22,7 +22,7 @@ public class SystemCallsCmd implements Command {
     public void execute(DiagnosticContext context) {
 
         if (context.isBypassSystemCalls()) {
-            logger.log(SystemProperties.DIAG, "Identified Docker installations or could not locate local node - bypassing system stats calls.");
+            logger.log(SystemProperties.DIAG, "Could not locate local node - bypassing system stats calls.");
             return;
         }
 

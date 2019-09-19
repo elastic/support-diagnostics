@@ -50,7 +50,6 @@ public class HostIdentifierCmd implements Command {
             }
             logger.info("Docker containers detected, bypassing host checks.");
             context.setDocker(true);
-            context.setBypassSystemCalls(true);;
             return;
         }
 
@@ -61,7 +60,7 @@ public class HostIdentifierCmd implements Command {
             context.setPid(targetNode.jvmPid);
         } catch (Exception e) {
             context.setBypassSystemCalls(true);
-            logger.warn("Could not match target node or local address info to a node in the cluster. See archived logs for more details.");
+            logger.warn("Could not match target node or local address info to a node in the cluster. {}", Constants.CHECK_LOG );
             logger.warn("System calls and log collection will be disabled.");
         }
 
