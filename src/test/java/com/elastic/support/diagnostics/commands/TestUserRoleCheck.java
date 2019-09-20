@@ -1,4 +1,4 @@
-package com.elastic.support.test;
+package com.elastic.support.diagnostics.commands;
 
 
 import com.elastic.support.diagnostics.commands.UserRoleCheckCmd;

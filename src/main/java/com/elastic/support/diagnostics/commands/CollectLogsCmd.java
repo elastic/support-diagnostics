@@ -33,7 +33,7 @@ public class CollectLogsCmd implements Command {
     public void execute(DiagnosticContext context) {
 
         if(context.isDocker() || context.isBypassSystemCalls()){
-            logger.log(SystemProperties.DIAG, "Identified Docker installations or could not locate local node - bypassing collection.");
+            logger.log(SystemProperties.DIAG, "Identified Docker installations or could not locate local node - bypassing logs collection.");
             return;
         }
 

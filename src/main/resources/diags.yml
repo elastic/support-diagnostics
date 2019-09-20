@@ -160,49 +160,50 @@ logstash:
   logstash_plugins: "/_node/plugins?pretty"
 
 linuxOS:
-  top: "top -b -n1"
-  netstat: "netstat -an"
-  ss: "ss -an"
-  process-list: "ps -ef"
-  top_threads: "top -b -n1 -H"
-  uname: "uname -a -r"
-  cpu: "cat /proc/cpuinfo"
-  iostat: "iostat -c -d -x -t -m 1 5"
-  sar: "sar -A"
-  sysctl: "sysctl -a"
-  dmesg: "dmesg"
-  huge_pages: "cat /sys/kernel/mm/transparent_hugepage/enabled"
-  cpu_governor: "cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"
-  limits: "cat /etc/security/limits.conf"
-  proc-limit: "cat /proc/PID/limits"
-  es-process: "ps -ef | grep 'es.distribution'"
-  jps: "JAVA_HOME/bin/jps -l -m -v"
-  jstack: "JAVA_HOME/bin/jstack PID"
-
-linuxOS-Java:
-  home: "ps ax | grep elastiscearch"
+  sys:
+    top: "top -b -n1"
+    netstat: "netstat -an"
+    ss: "ss -an"
+    process-list: "ps -ef"
+    top_threads: "top -b -n1 -H"
+    uname: "uname -a -r"
+    cpu: "cat /proc/cpuinfo"
+    iostat: "iostat -c -d -x -t -m 1 5"
+    sar: "sar -A"
+    sysctl: "sysctl -a"
+    dmesg: "dmesg"
+    huge_pages: "cat /sys/kernel/mm/transparent_hugepage/enabled"
+    cpu_governor: "cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"
+    limits: "cat /etc/security/limits.conf"
+    proc-limit: "cat /proc/PID/limits"
+  es:
+    elastic-process: "ps ax"
+  java:
+    jps: "JAVA_HOME/bin/jps -l -m -v"
+    jstack: "JAVA_HOME/bin/jstack PID"
 
 macOS:
-  top: "top -l 1"
-  netstat: "netstat -an"
-  process-list: "ps -ef"
-  ulimit: "ulimit -a"
-  es-process: "ps -ef | grep 'es.distribution'"
-  jps: "JAVA_HOME/bin/jps -l -m -v"
-  jstack: "JAVA_HOME/bin/jstack PID"
-
-macOS-Java:
-  home: "ps ax | grep elastiscearch"
+  sys:
+    top: "top -l 1"
+    netstat: "netstat -an"
+    process-list: "ps ax"
+    ulimit: "ulimit -a"
+  es:
+    elastic-process: "ps ax"
+  java:
+    jps: "JAVA_HOME/bin/jps -l -m -v"
+    jstack: "JAVA_HOME/bin/jstack PID"
 
 winOS:
-  process-list: "tasklist /v"
-  netstat: "netstat -ano"
-  cpu: "wmic CPU"
-  jps: "JAVA_HOME\\bin\\jps -l -m -v"
-  jstack: "JAVA_HOME\\bin\\jstack PID"
-
-winOS-Java:
-  home: "wmic process where name='java.exe'"
+  sys:
+    process-list: "tasklist /v"
+    netstat: "netstat -ano"
+    cpu: "wmic CPU"
+  es:
+    process: "wmic process where name='java.exe'"
+  java:
+    jps: "JAVA_HOME\\bin\\jps -l -m -v"
+    jstack: "JAVA_HOME\\bin\\jstack PID"
 
 docker-global:
   docker-info: "docker info"

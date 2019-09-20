@@ -30,4 +30,8 @@ public class Constants {
    public static final String MacAddrRegex = "([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})?";
    public static final String timeZoneRegex = "^([+-](?:2[0-3]|[01][0-9]):[0-5][0-9])$";
 
+   public static final String winPlatform = "winOS";
+   public static final String linuxPlatform = "linuxOs";
+   public static final String macPlatform = "macOS";
+
 }

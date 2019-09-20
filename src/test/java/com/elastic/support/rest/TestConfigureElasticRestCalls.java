@@ -1,4 +1,4 @@
-package com.elastic.support.test;
+package com.elastic.support.rest;
 
 import com.elastic.support.config.Version;
 import com.elastic.support.diagnostics.commands.RunClusterQueriesCmd;

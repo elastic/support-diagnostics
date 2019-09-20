@@ -30,7 +30,7 @@ public class SystemDigestCmd implements Command {
 
         // Check for Docker, which usually shows up as a PID of 1 for Elasticsearch
         // or from an incorrectly specified host
-        if(context.isBypassSystemCalls() || "1".equals(context.getPid())){
+        if(context.isBypassSystemCalls() || context.isDocker()){
             logger.log(SystemProperties.DIAG, "Identified Docker installations or could not locate local node - bypassing system digest.");
             return;
         }
