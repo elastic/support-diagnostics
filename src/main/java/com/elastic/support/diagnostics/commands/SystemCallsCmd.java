@@ -1,6 +1,7 @@
 package com.elastic.support.diagnostics.commands;
 
 import com.elastic.support.config.Constants;
+import com.elastic.support.diagnostics.DiagnosticException;
 import com.elastic.support.diagnostics.chain.Command;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.util.SystemProperties;
@@ -13,11 +14,12 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class SystemCallsCmd implements Command {
 
     private static final Logger logger = LogManager.getLogger(SystemCallsCmd.class);
-    private String esProcessString;
 
     public void execute(DiagnosticContext context) {
 
@@ -68,35 +70,27 @@ public class SystemCallsCmd implements Command {
         } else {
             try {
                 // Will tell us if we're on Linux, Win or OSX
-                String platform = checkOS();
+                JavaPlatform javaPlatform = checkOS( SystemProperties.osName.toLowerCase());
 
                 // Get the configurations for that platoform's sys calls.
-                Map<String, Map<String, String>> osCmds = context.getDiagsConfig().getSysCalls(platform);
+                Map<String, Map<String, String>> osCmds = context.getDiagsConfig().getSysCalls(javaPlatform.platform);
                 Map<String, String> sysCalls = osCmds.get("sys");
 
                 processCalls(tempDir, sysCalls, pb);
 
-                // Figure out where the Java runtime exists and whether it's a JDK or not?
-                //osCmds = preProcessOsCmds(sysCalls, pid, SystemProperties.javaHome);
                 Map<String, String> esProcess = osCmds.get("es");
                 processCalls(tempDir, esProcess, pb);
 
+                // Execute platform specific search for Java/Elastic process(es)
                 File output = FileUtils.getFile(tempDir, "elastic-process.txt");
-                String  esJDKCmdOutput = null;
-                // Output from wmic in Win outputs as a different character set.
-                if(platform.equals("winOS")){
-                    esJDKCmdOutput = FileUtils.readFileToString(output, "UTF-16");
-                }
-                else{
-                    esJDKCmdOutput = FileUtils.readFileToString(output, "UTF-8");
-                }
+                String  esJDKCmdOutput = FileUtils.readFileToString(output, javaPlatform.cmdEndcoding);
 
                 // For the JDK based commoands we need to execute them using the same
                 // JVM that's running ES. Given that it could be the bundled one or some
                 // previously installed version we need to shell out and check before we run them.
-                String esJavaHome = parseEsProcessString(esJDKCmdOutput, SystemProperties.fileSeparator, platform);
+                String esJavaHome = parseEsProcessString(esJDKCmdOutput, javaPlatform);
                 logger.info("Using Java installation at: {}", esJavaHome);
-                if (isJdkPresent(esJavaHome, platform)) {
+                if (isJdkPresent(esJavaHome, javaPlatform)) {
                     Map<String, String> javaCalls = osCmds.get("java");
 
                     String jstack = javaCalls.get("jstack");
@@ -112,7 +106,7 @@ public class SystemCallsCmd implements Command {
                 }
             } catch (Exception e) {
                 logger.log(SystemProperties.DIAG, e);
-                logger.info("Unexpected error - bypassing System calls. {}", Constants.CHECK_LOG);
+                logger.info("Unexpected error - bypassing some or all system calls. {}", Constants.CHECK_LOG);
             }
         }
     }
@@ -125,14 +119,13 @@ public class SystemCallsCmd implements Command {
         );
     }
 
-    public String checkOS() {
-        String osName = SystemProperties.osName.toLowerCase();
+    public JavaPlatform checkOS(String osName) {
         if (osName.contains("windows")) {
-            return "winOS";
+            return new JavaPlatform(Constants.winPlatform);
         } else if (osName.contains("linux")) {
-            return "linuxOS";
+            return new JavaPlatform(Constants.linuxPlatform);
         } else if (osName.contains("darwin") || osName.contains("mac os x")) {
-            return "macOS";
+            return new JavaPlatform(Constants.macPlatform);
         } else {
             logger.error("Failed to detect operating system!");
             throw new RuntimeException("Unsupported OS - " + osName);
@@ -202,64 +195,102 @@ public class SystemCallsCmd implements Command {
         return cmds;
     }
 
-    public String parseEsProcessString(String input, String fileSeparator, String platform) {
-
-        String javaExePath = fileSeparator + "bin" + fileSeparator + "java";
-        // Check each line to see if it's an ES java process...
-        if (StringUtils.isEmpty(input)) {
-            return "";
-        }
-        // Windows output is enclosed in quotes
-        if(platform.equals("winOS")){
-            input = input.replace("\"", "");
-        }
+    public String parseEsProcessString(String input, JavaPlatform javaPlatform) {
 
         String line;
         try (BufferedReader br = new BufferedReader(new StringReader(input))) {
-            String path;
             while ((line = br.readLine()) != null) {
-                if (!line.contains(javaExePath)) {
-                    continue;
+                if (line.contains(javaPlatform.javaExecutable) && line.contains("-Des.")) {
+                    String javaHome =  extractJavaHome(line, javaPlatform);
+                    return javaPlatform.extraProcess(javaHome);
                 }
-                path = "";
-                String[] lineArray = line.split("\\s+");
-
-                for (String token : lineArray) {
-                    if (token.contains(javaExePath)) {
-                        path = token;
-                    }
-                    // If there are ES parameters on the tokenized command line we can probaby assume this is it.
-                    if (StringUtils.isNotEmpty(path) && token.contains("-Des.")) {
-                        int idx = path.lastIndexOf(fileSeparator + "bin");
-                        return path.substring(0, idx);
-                    }
+                else {
+                    continue;
                 }
             }
         } catch (Exception e) {
             logger.log(SystemProperties.DIAG, "Error obtaining the path for the JDK", e);
         }
-        return "";
+
+        // If we got this far we couldn't find a JDK
+        logger.info("Could not locate the location of the java executable used to launch Elasticsearch");
+        throw new DiagnosticException("JDK not found.");
     }
 
-    public boolean isJdkPresent(String javaHome, String platform) {
-        if (StringUtils.isNotEmpty(javaHome)) {
-            try {
-                String javac = "javac";
-                if(platform.equals("winOS")){
-                    javac = "javac.exe";
-                }
+    String extractJavaHome(String processString, JavaPlatform javaPlatform){
+        String wsRegex = "\\s";
+        for(int i=0; i < javaPlatform.whitespaceCount; i++){
+            // There will be a variable number of whitespace occurences in from of the java path
+            // dependent on platform. Strip off the preceding column and then the whitespace that was found
+            // after it until you get to the magic index.
+            int wsIndex =  regexIndexOf(processString, wsRegex);
+            processString = processString.substring(wsIndex);
+            processString = processString.trim();
 
-                String javacPath = javaHome + SystemProperties.fileSeparator + "bin" + SystemProperties.fileSeparator + javac;
-                File jdk = Paths.get(javacPath).toFile();
-                if (jdk.exists()) {
-                    return true;
-                }
-            } catch (Exception e) {
-                logger.debug("Error checking for JDK", e);
-            }
         }
+
+        // After the preceding cols are stripped, truncate the output behind the path to the executable.
+        int jpathIndex = processString.indexOf(javaPlatform.javaExecutable);
+        processString = processString.substring(0, jpathIndex);
+
+        return processString;
+    }
+
+    private int regexIndexOf(String input, String regex){
+        Pattern pat = Pattern.compile(regex);
+        Matcher m = pat.matcher(input);
+        if ( m.find() ) {
+            return m.start();
+        }
+        return -1;
+    }
+
+    public boolean isJdkPresent(String javaHome, JavaPlatform javaPlatform) {
+
+        try {
+            String javacPath = javaHome + SystemProperties.fileSeparator + javaPlatform.javaCompiler;
+            File jdk = Paths.get(javacPath).toFile();
+            if (jdk.exists()) {
+                return true;
+            }
+        } catch (Exception e) {
+            logger.debug("Error checking for JDK", e);
+        }
+
         logger.info("JDK not found - bypassing jstack and jps commands.");
         return false;
+    }
+
+    class JavaPlatform {
+
+        public String platform;
+        String javaExecutable ="/bin/java";
+        String javaCompiler = "/bin/javac";
+        String cmdEndcoding = "UTF-8";
+        int whitespaceCount = 7;
+
+        JavaPlatform(String platform){
+            this.platform = platform;
+            if(platform.equalsIgnoreCase(Constants.winPlatform)){
+                javaExecutable = "\\bin\\java.exe";
+                javaCompiler = "\\bin\\javac.exe";
+                // Output from wmic in Win outputs as a different character set.
+                cmdEndcoding = "UTF-16";
+                whitespaceCount = 1;
+            }
+            else if(platform.equals(Constants.macPlatform)){
+                whitespaceCount = 8;
+            }
+        }
+
+        String extraProcess(String input){
+            // Get rid of the whitespace in front
+            if (platform.equals(Constants.winPlatform)){
+                input = input.replace("\"", "");
+            }
+
+            return input;
+        }
     }
 }
 

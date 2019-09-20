@@ -1,11 +1,7 @@
-package com.elastic.support.test;
+package com.elastic.support.rest;
 
 import com.elastic.support.diagnostics.DiagConfig;
 import com.elastic.support.diagnostics.commands.RunClusterQueriesCmd;
-import com.elastic.support.rest.RestCallManifest;
-import com.elastic.support.rest.RestClient;
-import com.elastic.support.rest.RestClientBuilder;
-import com.elastic.support.rest.RestResult;
 import com.elastic.support.util.SystemProperties;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
