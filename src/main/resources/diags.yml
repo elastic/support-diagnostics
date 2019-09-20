@@ -200,7 +200,7 @@ winOS:
     netstat: "netstat -ano"
     cpu: "wmic CPU"
   es:
-    elastic-process: "wmic process"
+    process: "wmic process where name='java.exe'"
   java:
     jps: "JAVA_HOME\\bin\\jps -l -m -v"
     jstack: "JAVA_HOME\\bin\\jstack PID"
