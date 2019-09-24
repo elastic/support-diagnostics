@@ -148,6 +148,12 @@ rest-calls:
         ilm_status: "/_ilm/status?pretty"
       minor-7:
         ccr_follower_info: "/_all/_ccr/info?pretty"
+    
+    major-7:
+      minor-4:
+        slm_policies: "/_slm/policy?pretty&human"
+      minor-5:
+        slm_stats: "/_slm/stats?pretty"
 
 thread-dump:
   jstack: "jstack PID"
