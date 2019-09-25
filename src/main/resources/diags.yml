@@ -243,7 +243,7 @@ monitoring-queryfiles:
 
 monitoring-uri: "/.monitoring-es*/_search"
 monitoring-scroll-ttl: "?scroll=2m"
-monitoring-scroll-size: 200
+monitoring-scroll-size: 500
 monitoring-scroll-uri: "/_search/scroll"
 
 default-monitoring-index: ".monitoring-es-7"

@@ -97,7 +97,6 @@ public class ArchiveUtils {
             String name = tae.getName();
             int fileStart = name.indexOf("/");
             name = name.substring(fileStart + 1);
-            logger.error(name);
             archiveProcessor.process(archive, name);
             tae = archive.getNextTarEntry();
          }

@@ -29,14 +29,14 @@ public class MonitoringExportService extends ElasticClientService {
     private Logger logger = LogManager.getLogger(MonitoringExportService.class);
     private static final String SCROLL_ID = "{ \"scroll_id\" : \"{{scrollId}}\" }";
     private RestClient client;
-    private MonitoringExtractConfig config;
+    private MonitoringExportConfig config;
     private MonitoringExportInputs inputs;
     private String tempDir = SystemProperties.userDir + SystemProperties.fileSeparator + Constants.MONITORING_DIR;
 
     public MonitoringExportService(MonitoringExportInputs inputs) {
         this.inputs =  inputs;
         Map configMap = JsonYamlUtils.readYamlFromClasspath(Constants.DIAG_CONFIG, true);
-        config = new MonitoringExtractConfig(configMap);
+        config = new MonitoringExportConfig(configMap);
         client = createEsRestClient(config, inputs);
         if(StringUtils.isNotEmpty(inputs.getOutputDir())){
             tempDir = inputs.getOutputDir() + SystemProperties.fileSeparator + Constants.MONITORING_DIR;;
@@ -52,7 +52,7 @@ public class MonitoringExportService extends ElasticClientService {
             FileUtils.deleteDirectory(new File(tempDir));
             Files.createDirectories(Paths.get(tempDir));
 
-            logger.error("Sucessfully created temp directory.");
+            logger.info("Sucessfully created temp directory.");
 
             // Set up the log file manually since we're going to package it with the diagnostic.
             // It will go to wherever we have the temp dir set up.
@@ -64,12 +64,13 @@ public class MonitoringExportService extends ElasticClientService {
                 List<Map<String, String>> clusters = getMonitoredClusters();
                 displayAvailableClusters(clusters);
             }
-
-            // Run service logic here
-            validateClusterId();
-            runExportQueries();
-            closeLogs();
-            createArchive(tempDir);
+            else{
+                // Run service logic here
+                validateClusterId();
+                runExportQueries();
+                closeLogs();
+                createArchive(tempDir);
+            }
             SystemUtils.nukeDirectory(tempDir);
         }catch (DiagnosticException de){
             if(de.getMessage().equalsIgnoreCase("clusterQueryError")){
@@ -143,6 +144,11 @@ public class MonitoringExportService extends ElasticClientService {
                 Map<String, String> display = new HashMap<>();
                 display.put("id", hit.path("_source").path("cluster_uuid").asText());
                 display.put("name", hit.path("_source").path("cluster_name").asText());
+                String displayName = hit.path("_source").path("cluster_settings").path("cluster").path("metadata").path("display_name").asText();
+                if(StringUtils.isEmpty(displayName)){
+                    displayName = "none";
+                }
+                display.put("display name", displayName);
                 clusterIds.add(display);
             }
         }
@@ -158,7 +164,7 @@ public class MonitoringExportService extends ElasticClientService {
         else{
             logger.info("Monitored Clusters:");
             for(Map<String, String> cluster: clusters){
-                logger.info("name: {}   id: {}", cluster.get("name"), cluster.get("id"));
+                logger.info("name: {}   id: {}   display name: {}", cluster.get("name"), cluster.get("id"), cluster.get("display name"));
             }
         }
     }
@@ -189,7 +195,6 @@ public class MonitoringExportService extends ElasticClientService {
             query = query.replace("{{size}}", monitoringScroll);
             query = query.replace("{{start}}", inputs.queryStartDate);
             query = query.replace("{{stop}}", inputs.queryEndDate);
-            query = query.replace("{{timezone}}", inputs.offset);
             query = query.replace("{{clusterId}}", inputs.clusterId);
 
 
@@ -219,10 +224,13 @@ public class MonitoringExportService extends ElasticClientService {
 
                 ArrayNode hitsNode = getHitsArray(resultNode);
                 long hitsCount = hitsNode.size();
+                long processedHits = 0;
 
                 do {
                     // We may have multiple scrolls coming back so process the first one.
                     processHits(hitsNode, pw);
+                    processedHits += hitsNode.size();
+                    logger.info("{} of {} processed.", processedHits, totalHits);
 
                     scrollId = resultNode.path("_scroll_id").asText();
                     String scrollQuery = SCROLL_ID.replace("{{scrollId}}", scrollId);
@@ -271,6 +279,4 @@ public class MonitoringExportService extends ElasticClientService {
             pw.println(JsonYamlUtils.mapper.writeValueAsString(src));
         }
     }
-
-
 }

@@ -11,5 +11,5 @@
     "timestamp": "asc"
   },
   "size": 100,
-  "_source": ["cluster_uuid", "cluster_name"]
+  "_source": ["cluster_uuid", "cluster_name", "cluster_settings.cluster.metadata.display_name"]
 }

@@ -6,37 +6,27 @@ import com.elastic.support.rest.RestResult;
 import com.elastic.support.util.ArchiveEntryProcessor;
 import com.elastic.support.util.JsonYamlUtils;
 import com.elastic.support.util.SystemProperties;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.json.JsonObject;
 import java.io.*;
-import java.lang.reflect.Array;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
 
 public class MonitoringImportProcessor implements ArchiveEntryProcessor {
 
     private static final Logger logger = LogManager.getLogger(MonitoringImportProcessor.class);
 
     RestClient client;
-    MonitoringExtractConfig config;
+    MonitoringExportConfig config;
     MonitoringImportInputs inputs;
     String newClusterName;
     String index;
     boolean updateClusterName = false;
 
-    public MonitoringImportProcessor(MonitoringExtractConfig config, MonitoringImportInputs inputs, RestClient client) {
+    public MonitoringImportProcessor(MonitoringExportConfig config, MonitoringImportInputs inputs, RestClient client) {
         this.config = config;
         this.inputs = inputs;
         this.client = client;
@@ -93,6 +83,8 @@ public class MonitoringImportProcessor implements ArchiveEntryProcessor {
 
                     // See if we need to
                     if(batch >= config.bulkSize){
+                        logger.info("Indexing document batch {} to {}",  eventsWritten, eventsWritten+batch);
+
                         long docsWritten = writeBatch(batchBuilder.toString(), batch);
                         eventsWritten += docsWritten;
                         batch = 0;
@@ -105,6 +97,7 @@ public class MonitoringImportProcessor implements ArchiveEntryProcessor {
 
                 // if there's anything left do the cleanup
                 if(batch > 0){
+                    logger.info("Indexing document batch {} to {}",  eventsWritten, eventsWritten+batch);
                     long docsWritten = writeBatch(batchBuilder.toString(), batch);
                     eventsWritten  += docsWritten;
                 }
@@ -123,7 +116,6 @@ public class MonitoringImportProcessor implements ArchiveEntryProcessor {
     }
 
     private long writeBatch(String query, int size){
-        logger.info("Indexing batch of {}",  size);
         RestResult res = new RestResult( client.execPost("_bulk", query));
         if( res.getStatus() != 200){
             logger.error("Batch update had errors: {}  {}", res.getStatus(), res.getReason());

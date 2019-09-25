@@ -138,26 +138,27 @@ $ sudo .diagnostics.sh --host 10.0.0.20 --dockerId 4577fe120750
   * `-o, --out, --output, --outputDir` &nbsp;&nbsp;&nbsp; A target directory where you want the revised archive written. If not supplied it will be written to the same folder as the diagnostic archive it processed.
   * `-c, --config` &nbsp;&nbsp;&nbsp; The configuration file containing any text tokens you wish to conceal. These can be literals or regex's. The default is the scrub.yml contained in the jar distribution.
 
-#### Examples
-#####With no tokens specified, writing the same directory as the diagnostic:
+#### Examples:
+
+#### With no tokens specified, writing the same directory as the diagnostic:
 ```$xslt
 ./scrub.sh -a /home/adminuser/diagoutput/diagnostics-20180621-161231.tar.gz
 ```
-#####With a token file writing to a specific output directory:
+#### With a token file writing to a specific output directory:
 ```$xslt
 ./scrub.sh -a /Users/rdavies/diagoutput/diagnostics-20180621-161231.tar.gz -o /home/adminuser/sanitized-diags -c /home/adminuser/sanitized-diags/scrub.yml
 ```
-#####With a token file processing a single log file:
+#### With a token file processing a single log file:
 ```$xslt
 ./scrub.sh -i /home/adminuser/elasticsearch.log -o /home/adminuser/sanitized-diags -c /home/adminuser/sanitized-diags/scrub.yml
 ```
-#####Sample token scrub file entries:
+#### Sample token scrub file entries:
 ```$xslt
 tokens:
-  - node-[\d?]*
-  - cluster-630
-  - disk1
-  - data-one
+  - 'node-[\d?]*'
+  - 'cluster-630'
+  - 'disk1'
+  - 'data-one'
 ```
 # Experimental - Monitoring Data Extraction
 
@@ -173,55 +174,95 @@ It has the advantage of providing a view of the cluster state prior to when an i
 
 It does not need to be run on an Elasticsearch host. A local workstation with network access to the monitoring cluster is sufficient.
 
-Running it is similar to running a standard diagnostic with regard to the connection parameters such as host, authentication, etc. 
-Use the host name of the monitoring cluster and the same authentication necessary if you were to query for this data in the Dev Tools. A superuser account is suggested.
-You specify the cutoff date you wish statistics to stop at - this will default to the current date and time. Then specify the number of hours back from that date and time you wish to collect.
-Alteratively you may also specify a specific offset if you wish to work with local time zones.
-
 You can collect statistics for only one cluster at a time, and it is necessary to specify a cluster id when running the utility.
 If you are not sure of the cluster id, running with only the host, login, and --list parameter will display a listing
-of the clusters being monitored in the format: `cluster name`  &nbsp;&nbsp;&nbsp; `cluster id`.
+of the clusters being monitored in the format: `cluster name`  &nbsp;&nbsp;&nbsp; `cluster id` &nbsp;&nbsp;&nbsp; `display name`.
 
- 
+#### Running the extraction:
+
+* The host or IP address of a monitoring cluster node is required, same as for the standard diagnostic. In addition, any
+authentication or encryption options( --ssl, --bypassHostNameVerify, etc.) necessary to log into that cluster are required. A superuser role is recommended.
+* The cluster_id of the cluster you are extracting monitoring data for is also required. If you are unsure of what this is
+you can obtain id's for all the monitored clusters by using the --list parameter along with the host and auth inputs.
+* To select the range of data extracted use the --startDate and --startTime parameters to set the point from which statistics
+will be displayed, along with the --interval paremeter that specifies how many hours of data will be included.
+* All extraction ranges should be in UTC. Make sure to adjust the start date to reflect the appropriate time zone for your system when choosing the range
+of data to view.
+* The date and interval parameters are not required - if a parameter is not supplied the utility will use defaults to generate one. If no date, time or interval
+are specified the collection will start 6 hours back from when the utility is run and cover up to the present.
+* The monitoring indices types being collected are as follows: cluster_stats, node_stats, indices_stats, index_stats, shards, job_stats, ccr_stats, 
+and ccr_auto_follow_stats.
+* Notice: not all the information contained in the standard diagnostic is going to be available in the monitoring extraction. That is because it 
+does not collect as much data. If you don't see what you want in the monitoring interface or via your own Dashboards, please file a Github issue
+with the Elasticsearch Monitoring team.
+* Metricbeat information is not available yet: possibly next release.
+* For now, stats will not be collected for system indices. That may be added in the future as an option if shows up as needed.
 
 The additional parameters:
-  * `--id` _REQUIRED_ &nbsp;&nbsp;&nbsp;  The id of the cluster you wish to retrieve data for. Because multiple clusters may be monitored this is necessary to retrieve the correct subset of data. If you are not sure, see the list function example below to see which clusters are available.
-  * `--stopDate`  &nbsp;&nbsp;&nbsp;  Date for the earliest day to be extracted. Defaults to today's date. Must be in the format yyyy-MM-dd.
-  * `--stopTime` &nbsp;&nbsp;&nbsp;  The clock time you wish to start collection statistics from. Defaults to midnight of the start date . Must be in the format HH:mm.
-  * `--offset` &nbsp;&nbsp;&nbsp; The UTC offset for the time zone you wish to use. Defaults to `+00:00`. Must be in the format +HH:mm or -HH:mm
-  * `--interval` &nbsp;&nbsp;&nbsp; The amount of statistics you wish to collect. This will be the number of hours prior to the point you entered for the input stop date and time.
-  * `--list` &nbsp;&nbsp;&nbsp; Lists the clusters available data extraction on this montioring server. 
+  * `--id` _REQUIRED_ &nbsp;&nbsp;&nbsp;  The cluster_id of the cluster you wish to retrieve data for. Because multiple clusters may be monitored this is necessary to retrieve the correct subset of data. If you are not sure, see the --list option example below to see which clusters are available.
+  * `--startDate`  &nbsp;&nbsp;&nbsp;  Date for the earliest day to be extracted. Defaults to the date the utility was run, in UTC, minus the current interval value. Must be in the format yyyy-MM-dd.
+  * `--startTime` &nbsp;&nbsp;&nbsp;  The clock time of that date when the requested statistics begin. Defaults to the time the utility was run in UTC. Must be in the format HH:mm 24 hour format.
+  * `--interval` &nbsp;&nbsp;&nbsp; The number of hours of statistics you wish to collect, starting from the stop date/time you specified and moving backward. 
+  Default value of 6. Minimum value of 1, maximum value of 12.
+  * `--list` &nbsp;&nbsp;&nbsp; Lists the clusters available data extraction on this montioring server. It will provide the cluster_name, the cluster_id. If this is
+   a cloud cluster and the metadata.display_name was setn it will be displayed as well.
 
 #### Examples 
-#####Specifies a specific date, time and timezone offset:
-    sudo ./export-momitoring.sh --host 10.0.0.20 -u <your username> -p --ssl --id 37G473XV7843 --startDate 2019-08-25 --startTime 08:30 -- offset +05:00
-#####Specifies a 6 hour interval from time the extract was run.
-    sudo ./export-momitoring.sh --host 10.0.0.20 -u <your username> -p --ssl --id 37G473XV7843 --interval 4
-#####Lists the clusters availble in this monitoring cluster
-    sudo ./export-momitoring.sh --host 10.0.0.20 -u <your username> -p --ssl --list    
+
+##### Simple case using defaults - data from the last 6 hours will be collected:
+```$xslt
+    sudo ./export-momitoring.sh --host 10.0.0.20 -u elastic -p --ssl --id 37G473XV7843
+```
+##### Specifies a specific date, time and uses default interval 6 hours:
+```$xslt
+    sudo ./export-momitoring.sh --host 10.0.0.20 -u elastic -p --ssl --id 37G473XV7843 --startDate 2019-08-25 --startTime 08:30
+```
+##### Specifies an 8 hour interval from time the extract was run.
+```$xslt
+    sudo ./export-momitoring.sh --host 10.0.0.20 -u elastic -p --ssl --id 37G473XV7843 --interval 8
+```
+##### Specifies a specific date, time and interval:
+```$xslt
+        sudo ./export-momitoring.sh --host 10.0.0.20 -u elastic -p --ssl --id 37G473XV7843 --startDate 2019-08-25 --startTime 08:30 --interval 10
+```
+##### Lists the clusters availble in this monitoring cluster
+```$xslt
+    sudo ./export-momitoring.sh --host 10.0.0.20 -u elastic -p --ssl --list    
+```
     
 # Experimental - Monitoring Data Import
 
 Once you have an archive of exported monitoring data, you can import this into an ES 7 instance that has monitoring enabled. Only ES 7 is supported as a target cluster.
 * You will need an installed instance of the diagnostic utility installed. This does not need to be on the same 
-host as the ES monitoring instance, but it does need to be on the same host as the archive you wish to import.
-It's also implied that a recent Java runtime is installed.
+host as the ES monitoring instance, but it does need to be on the same host as the archive you wish to import since it will need to read the archive file.
+As with all other diag functions, a recent Java runtime must be installed.
 * This will only work with a monitoring export archive produced by the diagnostic utility. It will not work with a standard diagnostic bundle or something the customer puts together.
-* The only required parameters are the host/login information for the monitoring cluster and the fully qualified path to the archive you wish to import.
-  * `--input` _REQUIRED_ &nbsp;&nbsp;&nbsp;  Fully qualified path to the archive you wish to import. The name format will
+* The only required parameters are the host/login information for the monitoring cluster and the absolute path to the archive you wish to import.
+  * `--input` _REQUIRED_ &nbsp;&nbsp;&nbsp;  Absolute path to the archive you wish to import. No symlinks, please. The name format will
   be similar to a standard diagnostic: `monitoring-export-<Datestamp>-<Timestamp>`.
   * `--clusterName` &nbsp;&nbsp;&nbsp; If you wish to change the name of the imported cluster to display something relevant to your purpose, you can use this parameter. Otherwise it will be added under the same cluster name
-  it had at export time. No spaces.
-  * `--indexName` &nbsp;&nbsp;&nbsp; If you wish to change the name of the imported monitoring index you can use this to modify it and 
-  maintain more partitioning control. if set, whatever value you use will be appended to `.monitoring-es-7-`. If you do not specify this, the imported data will be indexed into
-  the standard monitoring index name format with the current date appended. No spaces.
-* Once the data ins imported you should be able to view the newly imported data through monitoring. Make sure to set the date 
-range to reflect the period that was collected so that it displays and is in a usable format.  
+  it had at export time. No spaces allowed.
+  * `--indexName` &nbsp;&nbsp;&nbsp; If you wish to change the name of the imported monitoring index you can use this parameter and 
+  maintain more partitioning and maintenance control. if set, whatever value you use will be appended to `.monitoring-es-7-`. If you do not specify this, the imported data will be indexed into
+  the standard monitoring index name format with the current date appended. No spaces allowed.
+* Once the data is imported you should be able to view the newly imported data via monitoring pages right away. IMPORTANT: Make sure to set the date 
+range to reflect the period that was collected so that it displays and is in a usable format. If you don't see your cluster or data is missing/truncated, try expanding the range.
+ 
 #### Examples 
-#####Specifies a specific date, time and timezone offset:
-    sudo ./import-momitoring.sh --host 10.0.0.20 -u <your username> -p --ssl -i /Users/myid/temp/export-20190801-150615.zip -clusterName test_cluster --indexName_test_client
 
-# Troubleshooting
+##### Uses the default cluster_id, index_name:
+```$xslt
+    sudo ./import-momitoring.sh --host 10.0.0.20 -u elastic -p --ssl -i /Users/joe_user/temp/export-20190801-150615.zip 
+```
+##### Uses the generated index name but gives the cluster a different name:
+```$xslt
+    sudo ./import-momitoring.sh --host 10.0.0.20 -u elastic -p --ssl -i /Users/joe_user/temp/export-20190801-150615.zip -clusterName messed_up_cluster
+```
+##### Uses a custom index and cluster name:
+```$xslt
+    sudo ./import-momitoring.sh --host 10.0.0.20 -u elastic -p --ssl -i /Users/joe_user/temp/export-20190801-150615.zip  -clusterName big_cluster --indexName big_cluster_2019_10_01    
+```
+# Standard Diagnostic Troubleshooting
   * The file: diagnostic.log file will be generated  and included in the archive. In all but the worst case an archive will be created. Some messages will be written to the console output but granualar errors and stack traces will only be written to this log.
   * If you get a message saying that it can't find a class file, you probably downloaded the src zip instead of the one with "-dist" in the name. Download that and try it again.
   * If you get a message saying that it can't locate the diagnostic node, it usually means you are running the diagnostic on a host containing a different node than the one you are pointing to. Try running in remote node or changing the host you are executing on.
@@ -231,3 +272,4 @@ range to reflect the period that was collected so that it displays and is in a u
   * If you are not in the installation directory CD in and run it from there.
   * If you encounter OutOfMemoryExceptions, use the `DIAG_JAVA_OPTS` environment variable to set an `-Xmx` value greater than the standard `2g`.  Start with `-Xmx4g` and move up from there if necessary.
   * If reporting an issue make sure to include that.
+  * And if the message tells you that you are running an outdated diagnostic, do not ignore it. Upgrade and see if the issue persists.
