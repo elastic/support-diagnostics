@@ -64,15 +64,15 @@ public class TestJdkPathParsing {
     public void checkMacPathParse(){
 
         SystemCallsCmd.JavaPlatform javaPlatform = calls.checkOS("darwin");
-        String path = "  502 37582 37576   0 11:20AM ttys000    0:32.65 /Library/Java/JavaVirtualMachines/jdk-12.jdk/Contents/Home/bin/java  -Des.networkaddress.cache.ttl=60 ";
+        String path = "17049 s000  S+    15:45.88 /Library/Java/JavaVirtualMachines/jdk-12.jdk/Contents/Home/bin/java -Xms1g -Xmx1g -XX:+UseConcMarkSweepGC -XX:CMSInitiatingOccupancyFraction=75 -XX:+UseCMSInitiatingOccupancyOnly -Des.networkaddress.cache.ttl=60 -Des.networkaddress.cache.negative.ttl=10 -XX:+AlwaysPreTouch -Xss1m -Djava.awt.headless=true -Dfile.encoding=UTF-8 -Djna.nosys=true -XX:-OmitStackTraceInFastThrow -Dio.netty.noUnsafe=true -Dio.netty.noKeySetOptimization=true -Dio.netty.recycler.maxCapacityPerThread=0 -Dlog4j.shutdownHookEnabled=false -Dlog4j2.disable.jmx=true -Djava.io.tmpdir=/var/folders/w7/wldkmsfs6nvdzkd53nk1w7rc0000gp/T/elasticsearch-2713839990115777019 -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=data -XX:ErrorFile=logs/hs_err_pid%p.log -Xlog:gc*,gc+age=trace,safepoint:file=logs/gc.log:utctime,pid,tags:filecount=32,filesize=64m -Djava.locale.providers=COMPAT -Dio.netty.allocator.type=unpooled -Des.path.home=/Users/gnieman/Servers/elasticsearch-7.0.1 -Des.path.conf=/Users/gnieman/Servers/elasticsearch-7.0.1/config -Des.distribution.flavor=default -Des.distribution.type=tar -Des.bundled_jdk=true -cp /Users/gnieman/Servers/elasticsearch-7.0.1/lib/* org.elasticsearch.bootstrap.Elasticsearch";
         String javaHome = calls.extractJavaHome(path, javaPlatform);
         javaHome = javaPlatform.extraProcess(javaHome);
         assertEquals("/Library/Java/JavaVirtualMachines/jdk-12.jdk/Contents/Home", javaHome);
 
-        path = "  502 37582 37576   0 11:20AM ttys000    0:32.65 /Some Path/jdk-12.jdk/Contents/Home/bin/java  -Des.networkaddress.cache.ttl=60 ";
+        path = "17049 s000  S+    15:45.88 /Library/Java/JavaVirtualMachines/jdk 12.jdk/Contents/Home/bin/java -Xms1g -Xmx1g -XX:+UseConcMarkSweepGC -XX:CMSInitiatingOccupancyFraction=75 -XX:+UseCMSInitiatingOccupancyOnly -Des.networkaddress.cache.ttl=60 -Des.networkaddress.cache.negative.ttl=10 -XX:+AlwaysPreTouch -Xss1m -Djava.awt.headless=true -Dfile.encoding=UTF-8 -Djna.nosys=true -XX:-OmitStackTraceInFastThrow -Dio.netty.noUnsafe=true -Dio.netty.noKeySetOptimization=true -Dio.netty.recycler.maxCapacityPerThread=0 -Dlog4j.shutdownHookEnabled=false -Dlog4j2.disable.jmx=true -Djava.io.tmpdir=/var/folders/w7/wldkmsfs6nvdzkd53nk1w7rc0000gp/T/elasticsearch-2713839990115777019 -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=data -XX:ErrorFile=logs/hs_err_pid%p.log -Xlog:gc*,gc+age=trace,safepoint:file=logs/gc.log:utctime,pid,tags:filecount=32,filesize=64m -Djava.locale.providers=COMPAT -Dio.netty.allocator.type=unpooled -Des.path.home=/Users/gnieman/Servers/elasticsearch-7.0.1 -Des.path.conf=/Users/gnieman/Servers/elasticsearch-7.0.1/config -Des.distribution.flavor=default -Des.distribution.type=tar -Des.bundled_jdk=true -cp /Users/gnieman/Servers/elasticsearch-7.0.1/lib/* org.elasticsearch.bootstrap.Elasticsearch";
         javaHome = calls.extractJavaHome(path, javaPlatform);
         javaHome = javaPlatform.extraProcess(javaHome);
-        assertEquals("/Some Path/jdk-12.jdk/Contents/Home", javaHome);
+        assertEquals("/Library/Java/JavaVirtualMachines/jdk 12.jdk/Contents/Home", javaHome);
 
     }
 

@@ -279,7 +279,7 @@ public class SystemCallsCmd implements Command {
                 whitespaceCount = 1;
             }
             else if(platform.equals(Constants.macPlatform)){
-                whitespaceCount = 8;
+                whitespaceCount = 4;
             }
         }
 
