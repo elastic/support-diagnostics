@@ -16,7 +16,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MonitoringExtractConfig extends BaseConfig {
+public class MonitoringExportConfig extends BaseConfig {
 
     protected List<String> monitoringStats = new ArrayList<>();
     protected Map<String, String> queries = new LinkedHashMap<>();
@@ -28,9 +28,9 @@ public class MonitoringExtractConfig extends BaseConfig {
     protected String bulkUri;
     protected String bulkIndexLine;
 
-    Logger logger = LogManager.getLogger(MonitoringExtractConfig.class);
+    Logger logger = LogManager.getLogger(MonitoringExportConfig.class);
 
-    public MonitoringExtractConfig(Map configuration) {
+    public MonitoringExportConfig(Map configuration) {
         super(configuration);
         monitoringUri = (String)configuration.get("monitoring-uri");
         monitoringScrollUri = (String)configuration.get("monitoring-scroll-uri");

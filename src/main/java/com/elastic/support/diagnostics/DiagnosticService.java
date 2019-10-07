@@ -25,7 +25,6 @@ public class DiagnosticService extends ElasticClientService {
 
     private Logger logger = LogManager.getLogger(DiagnosticService.class);
 
-
     public void exec(DiagnosticInputs diagnosticInputs, DiagConfig diagConfig, Map<String, List<String>> chains) {
 
         // Create two clients, one generic for Github or any other external site and one customized for this ES cluster
@@ -40,7 +39,6 @@ public class DiagnosticService extends ElasticClientService {
             String tempDir;
             if (diagnosticInputs.getDiagType().equals(Constants.ES_DIAG_DEFAULT)) {
                 tempDir = outputDir + SystemProperties.fileSeparator + Constants.ES_DIAG;
-
             } else {
                 tempDir = outputDir + SystemProperties.fileSeparator + diagnosticInputs.getDiagType() + "-" + Constants.ES_DIAG;
             }
@@ -49,9 +47,6 @@ public class DiagnosticService extends ElasticClientService {
 
             FileUtils.deleteDirectory(new File(tempDir));
             Files.createDirectories(Paths.get(tempDir));
-
-            logger.info("Created temp directory: {}", tempDir);
-            logger.error("Test");
 
             // Set up the log file manually since we're going to package it with the diagnostic.
             // It will go to wherever we have the temp dir set up.

@@ -9,8 +9,7 @@
             { "timestamp":
               {
                 "gte": "{{start}}",
-                "lte": "{{stop}}",
-                "time_zone": "{{timezone}}"
+                "lte": "{{stop}}"
               }
             }
           }
