@@ -188,8 +188,9 @@ you can obtain id's for all the monitored clusters by using the --list parameter
 will be displayed, along with the --interval paremeter that specifies how many hours of data will be included.
 * All extraction ranges should be in UTC. Make sure to adjust the start date to reflect the appropriate time zone for your system when choosing the range
 of data to view.
-* The date and interval parameters are not required - if a parameter is not supplied the utility will use defaults to generate one. If no date, time or interval
-are specified the collection will start 6 hours back from when the utility is run and cover up to the present.
+* The date, time and interval parameters are not required - if a parameter is not supplied the utility will use defaults to generate one. If no date, time or interval
+are specified the collection will start 6 hours back from when the utility is run and cover up to the present. When setting the start, both 
+parameters are required = you cannot set just a date or a time. If you do, the utility will fall back to the default: the last 6 hours of data.
 * The monitoring indices types being collected are as follows: cluster_stats, node_stats, indices_stats, index_stats, shards, job_stats, ccr_stats, 
 and ccr_auto_follow_stats.
 * Notice: not all the information contained in the standard diagnostic is going to be available in the monitoring extraction. That is because it 
@@ -200,8 +201,8 @@ with the Elasticsearch Monitoring team.
 
 The additional parameters:
   * `--id` _REQUIRED_ &nbsp;&nbsp;&nbsp;  The cluster_id of the cluster you wish to retrieve data for. Because multiple clusters may be monitored this is necessary to retrieve the correct subset of data. If you are not sure, see the --list option example below to see which clusters are available.
-  * `--startDate`  &nbsp;&nbsp;&nbsp;  Date for the earliest day to be extracted. Defaults to the date the utility was run, in UTC, minus the current interval value. Must be in the format yyyy-MM-dd.
-  * `--startTime` &nbsp;&nbsp;&nbsp;  The clock time of that date when the requested statistics begin. Defaults to the time the utility was run in UTC. Must be in the format HH:mm 24 hour format.
+  * `--startDate`  &nbsp;&nbsp;&nbsp;  Date for the earliest day to be extracted. Defaults to the current date minus the default interval in UTC. Must be in the format yyyy-MM-dd.
+  * `--startTime` &nbsp;&nbsp;&nbsp;  The clock time of that date when the requested statistics begin. Defaults to current time in UTC. Must be in the format HH:mm 24 hour format.
   * `--interval` &nbsp;&nbsp;&nbsp; The number of hours of statistics you wish to collect, starting from the stop date/time you specified and moving backward. 
   Default value of 6. Minimum value of 1, maximum value of 12.
   * `--list` &nbsp;&nbsp;&nbsp; Lists the clusters available data extraction on this montioring server. It will provide the cluster_name, the cluster_id. If this is
@@ -217,7 +218,7 @@ The additional parameters:
 ```$xslt
     sudo ./export-momitoring.sh --host 10.0.0.20 -u elastic -p --ssl --id 37G473XV7843 --startDate 2019-08-25 --startTime 08:30
 ```
-##### Specifies an 8 hour interval from time the extract was run.
+##### Specifies the last 8 hours of data.
 ```$xslt
     sudo ./export-momitoring.sh --host 10.0.0.20 -u elastic -p --ssl --id 37G473XV7843 --interval 8
 ```

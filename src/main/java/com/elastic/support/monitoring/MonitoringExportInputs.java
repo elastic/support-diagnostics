@@ -27,7 +27,7 @@ public class MonitoringExportInputs extends ElasticClientInputs {
     }
 
     @Parameter(names = {"--startDate"}, description = "Date for the ending day of the extraction. Defaults to today's date. Must be in the format yyyy-MM-dd.")
-    protected String startDate = "";
+    protected String startDate = DateTimeFormatter.ofPattern("yyyy-MM-dd").format(ZonedDateTime.now() );
     public String getStartDate() {
         return startDate;
     }
@@ -36,7 +36,7 @@ public class MonitoringExportInputs extends ElasticClientInputs {
     }
 
     @Parameter(names = {"--startTime"}, description = "The clock time you wish to cut off collection statistics. Defaults to 6 the current time. Must be in the format HH:mm.")
-    public String startTime = "";
+    public String startTime = DateTimeFormatter.ofPattern("HH:mm").format(ZonedDateTime.now().minusHours(6));
     public String getStartTime() {
         return startTime;
     }
@@ -95,7 +95,7 @@ public class MonitoringExportInputs extends ElasticClientInputs {
             // Set up the start and stop dates.
             // Adjust for the offset by adding the reversed value given
             // that when you reindex it everything will go in as UTC.
-            if(StringUtils.isEmpty(startDate)){
+            if(StringUtils.isEmpty(startDate) || StringUtils.isEmpty(startTime)){
                 // Default the stop point to the current datetime, UTC. If the specified an offset so they don't have to manually
                 // calculate the UTC diff apply that.
                 queryEndDate =  DateTimeFormatter.ofPattern("yyyy-MM-ddTHH:mm").format(ZonedDateTime.now() ) + ":00+00:00";
