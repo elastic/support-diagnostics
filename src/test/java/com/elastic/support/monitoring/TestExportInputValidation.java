@@ -23,15 +23,13 @@ public class TestExportInputValidation {
 
         mei = new MonitoringExportInputs();
         mei.setClusterId("test");
-        mei.setStartDate("08-29-2019");
-        mei.setStartTime("02:25");
+        mei.setStart("08-29-2019 02:25");
         valid = mei.validate();
         assertEquals(false, valid);
 
         mei = new MonitoringExportInputs();
         mei.setClusterId("test");
-        mei.setStartDate("2019-08-29");
-        mei.setStartTime("2:25:20");
+        mei.setStart("2019-08-29 22:22:22");
         valid = mei.validate();
         assertEquals(false, valid);
 
@@ -42,8 +40,7 @@ public class TestExportInputValidation {
 
         mei = new MonitoringExportInputs();
         mei.setClusterId("test");
-        mei.setStartDate("2019-08-29");
-        mei.setStartTime("02:25");
+        mei.setStart("2019-08-29 02:25");
         valid = mei.validate();
         assertEquals(true, valid);
 

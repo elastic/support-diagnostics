@@ -184,13 +184,11 @@ of the clusters being monitored in the format: `cluster name`  &nbsp;&nbsp;&nbsp
 authentication or encryption options( --ssl, --bypassHostNameVerify, etc.) necessary to log into that cluster are required. A superuser role is recommended.
 * The cluster_id of the cluster you are extracting monitoring data for is also required. If you are unsure of what this is
 you can obtain id's for all the monitored clusters by using the --list parameter along with the host and auth inputs.
-* To select the range of data extracted use the --startDate and --startTime parameters to set the point from which statistics
-will be displayed, along with the --interval paremeter that specifies how many hours of data will be included.
-* All extraction ranges should be in UTC. Make sure to adjust the start date to reflect the appropriate time zone for your system when choosing the range
-of data to view.
+* To select the range of data extracted use the --start and --interval parameters to set the point at which to start collecting events and how 
+many hours of events to collect.
+* The start date/time will be converted from the current machine's time zone to UTC before querying.
 * The date, time and interval parameters are not required - if a parameter is not supplied the utility will use defaults to generate one. If no date, time or interval
-are specified the collection will start 6 hours back from when the utility is run and cover up to the present. When setting the start, both 
-parameters are required = you cannot set just a date or a time. If you do, the utility will fall back to the default: the last 6 hours of data.
+are specified the collection will start 6 hours back from when the utility is run and cover up to the present. 
 * The monitoring indices types being collected are as follows: cluster_stats, node_stats, indices_stats, index_stats, shards, job_stats, ccr_stats, 
 and ccr_auto_follow_stats.
 * Notice: not all the information contained in the standard diagnostic is going to be available in the monitoring extraction. That is because it 
@@ -201,12 +199,11 @@ with the Elasticsearch Monitoring team.
 
 The additional parameters:
   * `--id` _REQUIRED_ &nbsp;&nbsp;&nbsp;  The cluster_id of the cluster you wish to retrieve data for. Because multiple clusters may be monitored this is necessary to retrieve the correct subset of data. If you are not sure, see the --list option example below to see which clusters are available.
-  * `--startDate`  &nbsp;&nbsp;&nbsp;  Date for the earliest day to be extracted. Defaults to the current date minus the default interval in UTC. Must be in the format yyyy-MM-dd.
-  * `--startTime` &nbsp;&nbsp;&nbsp;  The clock time of that date when the requested statistics begin. Defaults to current time in UTC. Must be in the format HH:mm 24 hour format.
-  * `--interval` &nbsp;&nbsp;&nbsp; The number of hours of statistics you wish to collect, starting from the stop date/time you specified and moving backward. 
-  Default value of 6. Minimum value of 1, maximum value of 12.
+  * `--interval` &nbsp;&nbsp;&nbsp; The number of hours of statistics you wish to collect. Defaults to the current date and time minus the default interval. Default value of 6. Minimum value of 1, maximum value of 12.
+  * `--start`  &nbsp;&nbsp;&nbsp;  Required format: 'yyyy-MM-dd HH:mm'&nbsp;&nbsp;&nbsp;  The combined date and time for the earliest point to be extracted. Must be enclosed in quotes due to the space. Time should be in 24 hour format. 
+  Defaults to the current date and time, minus the default interval.
   * `--list` &nbsp;&nbsp;&nbsp; Lists the clusters available data extraction on this montioring server. It will provide the cluster_name, the cluster_id. If this is
-   a cloud cluster and the metadata.display_name was setn it will be displayed as well.
+   a cloud cluster and the metadata.display_name was set it will be displayed as well.
 
 #### Examples 
 
@@ -216,7 +213,7 @@ The additional parameters:
 ```
 ##### Specifies a specific date, time and uses default interval 6 hours:
 ```$xslt
-    sudo ./export-momitoring.sh --host 10.0.0.20 -u elastic -p --ssl --id 37G473XV7843 --startDate 2019-08-25 --startTime 08:30
+    sudo ./export-momitoring.sh --host 10.0.0.20 -u elastic -p --ssl --id 37G473XV7843 --start '2019-08-25 08:30'
 ```
 ##### Specifies the last 8 hours of data.
 ```$xslt
@@ -224,7 +221,7 @@ The additional parameters:
 ```
 ##### Specifies a specific date, time and interval:
 ```$xslt
-        sudo ./export-momitoring.sh --host 10.0.0.20 -u elastic -p --ssl --id 37G473XV7843 --startDate 2019-08-25 --startTime 08:30 --interval 10
+        sudo ./export-momitoring.sh --host 10.0.0.20 -u elastic -p --ssl --id 37G473XV7843 --start '2019-08-25 17:45' --interval 10
 ```
 ##### Lists the clusters availble in this monitoring cluster
 ```$xslt
@@ -234,10 +231,10 @@ The additional parameters:
 # Experimental - Monitoring Data Import
 
 Once you have an archive of exported monitoring data, you can import this into an ES 7 instance that has monitoring enabled. Only ES 7 is supported as a target cluster.
-* You will need an installed instance of the diagnostic utility installed. This does not need to be on the same 
+* You will need an installed instance of the diagnostic utility. This does not need to be on the same 
 host as the ES monitoring instance, but it does need to be on the same host as the archive you wish to import since it will need to read the archive file.
 As with all other diag functions, a recent Java runtime must be installed.
-* This will only work with a monitoring export archive produced by the diagnostic utility. It will not work with a standard diagnostic bundle or something the customer puts together.
+* This will only work with a monitoring export archive produced by the diagnostic utility. It will not work with a standard diagnostic bundle or a custom archive.
 * The only required parameters are the host/login information for the monitoring cluster and the absolute path to the archive you wish to import.
   * `--input` _REQUIRED_ &nbsp;&nbsp;&nbsp;  Absolute path to the archive you wish to import. No symlinks, please. The name format will
   be similar to a standard diagnostic: `monitoring-export-<Datestamp>-<Timestamp>`.
