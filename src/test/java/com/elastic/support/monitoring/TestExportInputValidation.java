@@ -16,44 +16,59 @@ public class TestExportInputValidation {
     @Test
     public void testExportInputValidations(){
 
-        MonitoringExportInputs mei = new MonitoringExportInputs();
-
         // Check cluster id validation
+        MonitoringExportInputs mei = new MonitoringExportInputs();
         boolean valid = mei.validate();
         assertEquals(false, valid);
 
+        mei = new MonitoringExportInputs();
+        mei.setClusterId("test");
+        mei.setStart("08-29-2019 02:25");
+        valid = mei.validate();
+        assertEquals(false, valid);
+
+        mei = new MonitoringExportInputs();
+        mei.setClusterId("test");
+        mei.setStart("2019-08-29 22:22:22");
+        valid = mei.validate();
+        assertEquals(false, valid);
+
+        mei = new MonitoringExportInputs();
         mei.setClusterId("test");
         valid = mei.validate();
         assertEquals(true, valid);
 
-        mei.setStartDate("08-29-2019");
-        valid = mei.validate();
-        assertEquals(false, valid);
-
-        mei.setStartDate("2019-08-29");
+        mei = new MonitoringExportInputs();
+        mei.setClusterId("test");
+        mei.setStart("2019-08-29 02:25");
         valid = mei.validate();
         assertEquals(true, valid);
 
-        mei.setStartTime("2:25:2");
-        valid = mei.validate();
-        assertEquals(false, valid);
-
-        mei.setStartTime("02:25");
+        mei = new MonitoringExportInputs();
+        mei.setClusterId("test");
         valid = mei.validate();
         assertEquals(true, valid);
 
+        mei = new MonitoringExportInputs();
+        mei.setClusterId("test");
         mei.setInterval(0);
         valid = mei.validate();
         assertEquals(false, valid);
 
+        mei = new MonitoringExportInputs();
+        mei.setClusterId("test");
         mei.setInterval(13);
         valid = mei.validate();
         assertEquals(false, valid);
 
+        mei = new MonitoringExportInputs();
+        mei.setClusterId("test");
         mei.setInterval(1);
         valid = mei.validate();
         assertEquals(true, valid);
 
+        mei = new MonitoringExportInputs();
+        mei.setClusterId("test");
         mei.setInterval(12);
         valid = mei.validate();
         assertEquals(true, valid);
