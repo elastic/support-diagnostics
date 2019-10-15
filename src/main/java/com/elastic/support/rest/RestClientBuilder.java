@@ -29,7 +29,9 @@ import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
 import java.io.File;
 import java.io.FileInputStream;
 import java.security.KeyStore;
@@ -186,8 +188,18 @@ public class RestClientBuilder {
             }
 
             SSLContext sslCtx = sslContextBuilder.build();
-            SSLConnectionSocketFactory factory = new SSLConnectionSocketFactory(sslCtx);
+            //SSLConnectionSocketFactory factory = new SSLConnectionSocketFactory(sslCtx);
             clientBuilder.setSSLSocketFactory(new SSLConnectionSocketFactory(sslCtx));
+
+            SSLConnectionSocketFactory factory = null;
+            if (bypassVerify) {
+                factory = new SSLConnectionSocketFactory(sslCtx, NoopHostnameVerifier.INSTANCE);
+                clientBuilder.setSSLSocketFactory(factory);
+            }
+            else{
+                factory = new SSLConnectionSocketFactory(sslCtx);
+                clientBuilder.setSSLSocketFactory(factory);
+            }
 
             // If and when we start making connections to multinple nodes this will
             // need to be turned on. Note that we need to create a registry for socket factories
@@ -202,12 +214,7 @@ public class RestClientBuilder {
                 clientBuilder.setConnectionManager(mgr);
             }
 
-            if (bypassVerify) {
-                clientBuilder.setSSLSocketFactory(new SSLConnectionSocketFactory(sslCtx, new NoopHostnameVerifier()));
-            }
-            else{
-                clientBuilder.setSSLSocketFactory(new SSLConnectionSocketFactory(sslCtx));
-            }
+
         }
         catch (Exception e){
             logger.log(SystemProperties.DIAG, "Connection setup failed", e);
@@ -259,5 +266,18 @@ public class RestClientBuilder {
 
     }
 
+    /**
+     * This overrides any hostname mismatch in the certificate
+     */
+    private class BypassHostnameVerifier implements HostnameVerifier {
+
+        public boolean verify(String hostname, SSLSession session) {
+            return true;
+        }
+
+    }
+
 }
+
+
 

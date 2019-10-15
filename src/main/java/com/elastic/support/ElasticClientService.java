@@ -25,20 +25,14 @@ public class ElasticClientService extends BaseService {
         builder.setBypassVerify(inputs.isSkipVerification())
                 .setHost(inputs.getHost())
                 .setPort(inputs.getPort())
-                .setScheme(inputs.getScheme());
-
-
-
-        builder
+                .setScheme(inputs.getScheme())
                 .setConnectTimeout(config.getRestConfig().get("connectTimeout") * 1000)
                 .setRequestTimeout(config.getRestConfig().get("requestTimeout") * 1000)
                 .setSocketTimeout(config.getRestConfig().get("socketTimeout") * 1000)
                 .setProxyHost(inputs.getProxyUser())
                 .setProxPort(inputs.getProxyPort())
                 .setProxyUser(inputs.getUser())
-                .setProxyPass(inputs.getProxyPassword())
-                .setBypassVerify(inputs.isSkipVerification());
-
+                .setProxyPass(inputs.getProxyPassword());
 
         if (inputs.isSecured()) {
             builder.setUser(inputs.getUser())
@@ -60,11 +54,7 @@ public class ElasticClientService extends BaseService {
         return builder
                 .setConnectTimeout(config.getRestConfig().get("connectTimeout") * 1000)
                 .setRequestTimeout(config.getRestConfig().get("requestTimeout") * 1000)
-                .setSocketTimeout(config.getRestConfig().get("socketTimeout") * 1000)
-                .setProxyHost(inputs.getProxyUser())
-                .setProxPort(inputs.getProxyPort())
-                .setProxyUser(inputs.getUser())
-                .setProxyPass(inputs.getProxyPassword());
+                .setSocketTimeout(config.getRestConfig().get("socketTimeout") * 1000);
     }
 
 
