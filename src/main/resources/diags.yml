@@ -154,6 +154,8 @@ rest-calls:
         slm_policies: "/_slm/policy?pretty&human"
       minor-5:
         slm_stats: "/_slm/stats?pretty"
+        enrich_stats: "/_enrich/_stats?pretty"
+        enrich_policies: "/_enrich/policy?pretty"
 
 thread-dump:
   jstack: "jstack PID"
