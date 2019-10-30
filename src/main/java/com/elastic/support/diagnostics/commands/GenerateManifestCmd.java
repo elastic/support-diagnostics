@@ -41,7 +41,7 @@ public class GenerateManifestCmd  implements Command {
          manifest.put(Constants.DIAG_VERSION, diagVersion);
 
          context.setDiagVersion(diagVersion);
-         manifest.put("collectionDate", SystemProperties.getUtcDateString());
+         manifest.put("collectionDate", SystemProperties.getUtcDateTimeString());
 
          DiagnosticInputs params = context.getDiagnosticInputs();
          manifest.put("diagnosticInputs", params.toString());
