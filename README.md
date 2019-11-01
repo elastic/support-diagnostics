@@ -72,7 +72,6 @@ As a first step the diagnostic will check the Github repo for the current releas
 
 ## Additional Options
 * You can specify additional java options such as a higher `-Xmx` value by setting the environment variable `DIAG_JAVA_OPTS`.
-* To suppress all log file collection use the `--skipLogs` option.
 * Because of the potential size access logs are no longer collected by default. If you need these use the `--accessLogs` option to have them copied.
 
 ## Alternate Usages
