@@ -208,23 +208,23 @@ The additional parameters:
 
 ##### Simple case using defaults - data from the last 6 hours will be collected:
 ```$xslt
-    sudo ./export-momitoring.sh --host 10.0.0.20 -u elastic -p --ssl --id 37G473XV7843
+    sudo ./export-monitoring.sh --host 10.0.0.20 -u elastic -p --ssl --id 37G473XV7843
 ```
 ##### Specifies a specific date, time and uses default interval 6 hours:
 ```$xslt
-    sudo ./export-momitoring.sh --host 10.0.0.20 -u elastic -p --ssl --id 37G473XV7843 --start '2019-08-25 08:30'
+    sudo ./export-monitoring.sh --host 10.0.0.20 -u elastic -p --ssl --id 37G473XV7843 --start '2019-08-25 08:30'
 ```
 ##### Specifies the last 8 hours of data.
 ```$xslt
-    sudo ./export-momitoring.sh --host 10.0.0.20 -u elastic -p --ssl --id 37G473XV7843 --interval 8
+    sudo ./export-monitoring.sh --host 10.0.0.20 -u elastic -p --ssl --id 37G473XV7843 --interval 8
 ```
 ##### Specifies a specific date, time and interval:
 ```$xslt
-        sudo ./export-momitoring.sh --host 10.0.0.20 -u elastic -p --ssl --id 37G473XV7843 --start '2019-08-25 17:45' --interval 10
+        sudo ./export-monitoring.sh --host 10.0.0.20 -u elastic -p --ssl --id 37G473XV7843 --start '2019-08-25 17:45' --interval 10
 ```
 ##### Lists the clusters availble in this monitoring cluster
 ```$xslt
-    sudo ./export-momitoring.sh --host 10.0.0.20 -u elastic -p --ssl --list    
+    sudo ./export-monitoring.sh --host 10.0.0.20 -u elastic -p --ssl --list    
 ```
     
 # Experimental - Monitoring Data Import
@@ -249,15 +249,15 @@ range to reflect the period that was collected so that it displays and is in a u
 
 ##### Uses the default cluster_id, index_name:
 ```$xslt
-    sudo ./import-momitoring.sh --host 10.0.0.20 -u elastic -p --ssl -i /Users/joe_user/temp/export-20190801-150615.zip 
+    sudo ./import-monitoring.sh --host 10.0.0.20 -u elastic -p --ssl -i /Users/joe_user/temp/export-20190801-150615.zip 
 ```
 ##### Uses the generated index name but gives the cluster a different name:
 ```$xslt
-    sudo ./import-momitoring.sh --host 10.0.0.20 -u elastic -p --ssl -i /Users/joe_user/temp/export-20190801-150615.zip -clusterName messed_up_cluster
+    sudo ./import-monitoring.sh --host 10.0.0.20 -u elastic -p --ssl -i /Users/joe_user/temp/export-20190801-150615.zip -clusterName messed_up_cluster
 ```
 ##### Uses a custom index and cluster name:
 ```$xslt
-    sudo ./import-momitoring.sh --host 10.0.0.20 -u elastic -p --ssl -i /Users/joe_user/temp/export-20190801-150615.zip  -clusterName big_cluster --indexName big_cluster_2019_10_01    
+    sudo ./import-monitoring.sh --host 10.0.0.20 -u elastic -p --ssl -i /Users/joe_user/temp/export-20190801-150615.zip  -clusterName big_cluster --indexName big_cluster_2019_10_01    
 ```
 # Standard Diagnostic Troubleshooting
   * The file: diagnostic.log file will be generated  and included in the archive. In all but the worst case an archive will be created. Some messages will be written to the console output but granualar errors and stack traces will only be written to this log.
