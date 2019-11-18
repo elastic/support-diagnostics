@@ -1,0 +1,437 @@
+# The new settings format:
+# At the top level the label descring the query that will also be used as the
+#   file name for its output.
+#   Below the query label are the following attributes:
+#     * extension - the file extension to be used for output. Currently only .txt and .json are valid. Required
+#     * subdir - some api's are now grouped in a subdirectory of the output directory to lessen clutter. Optional, defaults to root dir.
+#     * retry - whenther if a query fails it will be retried for the configured number of attempts. Optional, defaults to false.
+#     * versions - one or more attributes of the format "version rule: "query string". Each set of version/query key pairs
+#       should evaluate to exactly one that is appropriate for the version of the server being queried. Therefor rules should
+#       be structured in such a way that only a valid query can be executed against a given version. Required.
+#   NPM mode is the only one used: https://github.com/vdurmont/semver4j
+#   NPM Versioning rules are documented here: https://github.com/npm/node-semver
+#
+
+## cat API's
+
+cat_aliases:
+  extension: ".txt"
+  subdir: "cat"
+  versions:
+    ">= 0.9.0": "/_cat/aliases?v"
+
+cat_allocation:
+  extension: ".txt"
+  subdir: "cat"
+  versions:
+    ">= 0.9.0": "/_cat/allocation?v"
+
+cat_count:
+  extension: ".txt"
+  subdir: "cat"
+  versions:
+    ">= 0.9.0": "/_cat/count"
+
+cat_fielddata:
+  extension: ".txt"
+  subdir: "cat"
+  versions:
+    ">= 0.9.0": "/_cat/fielddata?v"
+
+cat_health:
+  extension: ".txt"
+  subdir: "cat"
+  versions:
+    ">= 0.9.0": "/_cat/health?v"
+
+cat_indices:
+  extension: ".txt"
+  subdir: "cat"
+  versions:
+    ">= 0.9.0 < 5.1.1": "/_cat/indices?v"
+    ">= 5.1.1": "/_cat/indices?v&s=index"
+
+cat_master:
+  extension: ".txt"
+  subdir: "cat"
+  versions:
+    ">= 0.9.0": "/_cat/master?format=json"
+
+cat_nodeattrs:
+  extension: ".txt"
+  subdir: "cat"
+  versions:
+    ">= 2.0.0": "/_cat/nodeattrs?v&h=node,id,pid,host,ip,port,attr,value"
+
+cat_nodes:
+  extension: ".txt"
+  subdir: "cat"
+  versions:
+    ">= 0.9.0": "/_cat/nodes?v&h=n,m,i,r,d,hp,rp,cpu,load_1m,load_5m,load_15m,nodeId"
+
+cat_pending_tasks:
+  extension: ".txt"
+  subdir: "cat"
+  versions:
+    ">= 0.9.0": "/_cat/pending_tasks?v"
+
+cat_recovery:
+  extension: ".txt"
+  subdir: "cat"
+  versions:
+    ">= 0.9.0": "/_cat/recovery?v"
+
+cat_repositories:
+  extension: ".txt"
+  subdir: "cat"
+  versions:
+    ">= 2.0.0": "/_cat/repositories?v"
+
+cat_segments:
+  extension: ".txt"
+  subdir: "cat"
+  versions:
+    ">= 0.9.0 < 5.1.1": "/_cat/segments?v"
+    ">= 5.1.1": "/_cat/segments?v&s=index"
+
+cat_shards:
+  extension: ".txt"
+  subdir: "cat"
+  versions:
+    ">= 0.9.0 < 5.1.1": "/_cat/shards?v"
+    ">= 5.1.1": "/_cat/shards?v&s=index"
+
+cat_thread_pool:
+  extension: ".txt"
+  subdir: "cat"
+  versions:
+    ">= 0.9.0": "/_cat/thread_pool?v"
+
+## Non-cat .txt API
+nodes_hot_threads:
+  extension: ".txt"
+  versions:
+    "> 0.9.0": "/_nodes/hot_threads?threads=10000"
+
+## Common JSON API's
+alias:
+  extension: ".json"
+  versions:
+    ">= 0.9.0": "/_alias?pretty&human"
+
+allocation:
+  extension: ".json"
+  versions:
+    ">= 0.9.0": "/_cat/allocation?v&format=json"
+
+allocation_explain:
+  extension: ".json"
+  versions:
+    ">= 5.0.0": "/_cluster/allocation/explain?pretty"
+
+allocation_explain_disk:
+  extension: ".json"
+  versions:
+    ">= 5.0.0": "/_cluster/allocation/explain?include_disk_info=true&pretty"
+
+count:
+  extension: ".json"
+  versions:
+    ">= 2.0.0": "/_count"
+
+cluster_health:
+  extension: ".json"
+  versions:
+    ">= 0.9.0": "/_cluster/health?pretty"
+
+cluster_pending_tasks:
+  extension: ".json"
+  versions:
+    ">= 0.9.0": "/_cluster/pending_tasks?pretty&human"
+
+cluster_settings:
+  extension: ".json"
+  versions:
+    ">= 0.9.0": "/_cluster/settings?pretty&flat_settings"
+
+cluster_settings_defaults:
+  extension: ".json"
+  versions:
+    ">= 6.4.0": "/_cluster/settings?include_defaults&pretty&flat_settings"
+
+cluster_state:
+  extension: ".json"
+  retry: true
+  versions:
+    ">= 0.9.0": "/_cluster/state?pretty&human"
+
+cluster_stats:
+  extension: ".json"
+  versions:
+    ">= 0.9.0": "/_cluster/stats?pretty&human"
+
+fielddata:
+  extension: ".json"
+  versions:
+    ">= 0.9.0": "/_cat/fielddata?format=json&bytes&pretty"
+
+fielddata_stats:
+  extension: ".json"
+  versions:
+    ">= 0.9.0 < 5.0.0": "/_nodes/stats/indices/fielddata?pretty=true&fields=*"
+    ">= 5.0.0": "/_nodes/stats/indices/fielddata?level=shards&pretty=true&fields=*"
+
+indices_stats:
+  extension: ".json"
+  retry: true
+  versions:
+    ">= 0.9.0": "/_stats?level=shards&pretty&human"
+
+licenses:
+  extension: ".json"
+  versions:
+    ">= 1.0.0 < 2.0.0": "/_licenses"
+    ">= 2.0.0": "/_license?pretty"
+
+mapping:
+  extension: ".json"
+  versions:
+    ">= 0.9.0": "/_mapping?pretty"
+
+master:
+  extension: ".json"
+  versions:
+    ">= 0.9.0": "/_cat/master?format=json"
+
+nodes:
+  extension: ".json"
+  retry: true
+  versions:
+    ">= 0.9.0": "/_nodes?pretty&human"
+
+nodes_stats:
+  extension: ".json"
+  retry: true
+  versions:
+    ">= 0.9.0": "/_nodes/stats?pretty&human"
+
+nodes_usage:
+  extension: ".json"
+  versions:
+    ">= 6.0.0": "/_nodes/usage?pretty"
+
+pipelines:
+  extension: ".json"
+  versions:
+    ">= 5.0.0": "/_ingest/pipeline/*?pretty&human"
+
+plugins:
+  extension: ".json"
+  versions:
+    ">= 0.9.0": "/_cat/plugins?format=json"
+
+recovery:
+  extension: ".json"
+  versions:
+    ">= 0.9.0": "/_recovery?pretty&human&detailed=true"
+
+remote_cluster_info:
+  extension: ".json"
+  versions:
+    ">= 6.0.0": "/_remote/info"
+
+segments:
+  extension: ".json"
+  retry: true
+  versions:
+    ">= 0.9.0": "/_segments?pretty&human"
+
+settings:
+  extension: ".json"
+  retry: true
+  versions:
+    ">= 0.9.0": "/_settings?pretty&human"
+
+shard_stores:
+  extension: ".json"
+  versions:
+    ">=2.0.0": "/_shard_stores?pretty"
+
+shards:
+  extension: ".json"
+  retry: true
+  versions:
+    ">=0.9.0": "/_cat/shards?format=json&bytes=b&pretty"
+
+tasks:
+  extension: ".json"
+  versions:
+    ">=2.0.0": "/_tasks?pretty&human&detailed=true"
+
+templates:
+  extension: ".json"
+  versions:
+    ">= 0.9.0": "/_template?pretty"
+
+version:
+  extension: ".json"
+  retry: true
+  versions:
+    ">= 0.9.0": "/"
+
+## Commercial Features
+ccr_autofollow_patterns:
+  extension: ".json"
+  subdir: "commercial"
+  versions:
+    ">= 6.5.0": "/_ccr/auto_follow?pretty"
+
+ccr_follower_info:
+  extension: ".json"
+  subdir: "commercial"
+  versions:
+    ">= 6.7.0": "/_all/_ccr/info?pretty"
+
+ccr_stats:
+  extension: ".json"
+  subdir: "commercial"
+  versions:
+    ">= 6.5.0": "/_ccr/stats?pretty"
+
+enrich_policies:
+  extension: ".json"
+  subdir: "commercial"
+  versions:
+    ">= 7.5.0": "/_enrich/policy?pretty"
+
+enrich_stats:
+  extension: ".json"
+  subdir: "commercial"
+  versions:
+    ">= 7.5.0": "/_enrich/_stats?pretty"
+
+ilm_explain:
+  extension: ".json"
+  subdir: "commercial"
+  versions:
+    ">= 6.6.0": "/*/_ilm/explain?human&pretty"
+
+ilm_policies:
+  extension: ".json"
+  subdir: "commercial"
+  versions:
+    ">= 6.6.0": "/_ilm/policy?human&pretty"
+
+ilm_status:
+  extension: ".json"
+  subdir: "commercial"
+  versions:
+    ">= 6.6.0": "/_ilm/status?pretty"
+
+ml_anomaly_detectors:
+  extension: ".json"
+  subdir: "commercial"
+  versions:
+    ">= 5.0.0 < 7.0.0": "/_xpack/ml/anomaly_detectors?pretty"
+    ">= 7.0.0": "/_ml/anomaly_detectors?pretty"
+
+ml_datafeeds:
+  extension: ".json"
+  subdir: "commercial"
+  versions:
+    ">= 5.0.0 < 7.0.0": "/_xpack/ml/datafeeds?pretty"
+    ">= 7.0.0": "/_ml/datafeeds?pretty"
+
+ml_stats:
+  extension: ".json"
+  subdir: "commercial"
+  versions:
+    ">= 5.0.0 < 7.0.0": "/_xpack/ml/anomaly_detectors/_stats?pretty"
+    ">= 7.0.0": "/_ml/anomaly_detectors/_stats?pretty"
+
+rollup_jobs:
+  extension: ".json"
+  subdir: "commercial"
+  versions:
+    ">= 6.3.0 < 7.0.0": "/_xpack/rollup/job/_all"
+    ">= 7.0.0": "/_rollup/job/_all"
+
+rollup_caps:
+  extension: ".json"
+  subdir: "commercial"
+  versions:
+    ">= 6.3.0 < 7.0.0": "/_xpack/rollup/data/_all"
+    ">= 7.0.0": "/_rollup/data/_all"
+
+rollup_index_caps:
+  extension: ".json"
+  subdir: "commercial"
+  versions:
+    ">= 6.5.0 < 7.0.0": "/*/_xpack/rollup/data"
+    ">= 7.0.0": "/*/_rollup/data"
+
+security_priv:
+  extension: ".json"
+  subdir: "commercial"
+  versions:
+    ">= 6.5.0 < 7.0.0": "/_xpack/security/privilege?pretty"
+    ">= 7.0.0": "/_security/privilege?pretty"
+
+security_roles:
+  extension: ".json"
+  subdir: "commercial"
+  versions:
+    ">= 2.0.0 < 5.0.0": "/_shield/role?pretty"
+    ">= 5.0.0 < 7.0.0": "/_xpack/security/role?pretty"
+    ">= 7.0.0": "/_security/role?pretty"
+
+security_role_mappings:
+  extension: ".json"
+  subdir: "commercial"
+  versions:
+    ">= 5.0.0 < 7.0.0": "/_xpack/security/role_mapping?pretty"
+    ">= 7.0.0": "/_security/role_mapping?pretty"
+
+security_users:
+  extension: ".json"
+  subdir: "commercial"
+  versions:
+    ">= 2.0.0 < 5.0.0": "/_shield/user?pretty"
+    ">= 5.0.0 < 7.0.0": "/_xpack/security/user?pretty"
+    ">= 7.0.0": "/_security/user?pretty"
+
+slm_policies:
+  extension: ".json"
+  subdir: "commercial"
+  versions:
+    ">= 7.4.0": "/_slm/policy?pretty&human"
+
+slm_stats:
+  extension: ".json"
+  subdir: "commercial"
+  versions:
+    ">= 7.5.0": "/_slm/stats?pretty"
+
+watcher_stats:
+  extension: ".json"
+  subdir: "commercial"
+  versions:
+    ">= 1.6.0 < 5.0.0": "/_watcher/stats/_all"
+    ">= 5.0.0 < 7.0.0": "/_xpack/watcher/stats/_all"
+    ">= 7.0.0": "/_watcher/stats/_all"
+
+watcher_stack:
+  extension: ".json"
+  subdir: "commercial"
+  versions:
+    ">= 1.6.0 < 5.0.0": "/_watcher/stats?emit_stacktraces=true"
+    ">= 5.0.0 < 7.0.0": "/_xpack/watcher/stats?emit_stacktraces=true"
+    ">= 7.0.0": "/_watcher/stats?emit_stacktraces=true"
+
+xpack:
+  extension: ".json"
+  subdir: "commercial"
+  versions:
+    ">= 5.0.0": "/_xpack/usage?pretty&human"
+
+

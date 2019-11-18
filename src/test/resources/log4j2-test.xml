@@ -7,7 +7,7 @@
         <Console name="Console" target="SYSTEM_OUT">
             <PatternLayout pattern="%d{HH:mm:ss} %-5level %msg%n"/>
             <Filters>
-                <ThresholdFilter level="info" />
+                <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY"/>
                 <ThresholdFilter level="diag" onMatch="DENY" onMismatch="NEUTRAL" />
             </Filters>
         </Console>
@@ -18,3 +18,6 @@
         </Root>
     </Loggers>
 </Configuration>
+
+
+
