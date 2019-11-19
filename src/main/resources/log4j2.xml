@@ -5,10 +5,10 @@
     </CustomLevels>
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d{HH:mm:ss} %-5level %msg%n"/>
+            <PatternLayout pattern="%msg%n"/>
             <Filters>
                 <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY"/>
-                <ThresholdFilter level="diag" onMatch="DENY" onMismatch="NEUTRAL" />
+                <ThresholdFilter level="diag" onMatch="ACCEPT" onMismatch="NEUTRAL" />
             </Filters>
         </Console>
     </Appenders>
