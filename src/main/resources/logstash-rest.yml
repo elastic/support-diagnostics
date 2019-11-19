@@ -2,7 +2,7 @@
 # At the top level the label descring the query that will also be used as the
 #   file name for its output.
 #   Below the query label are the following attributes:
-#     * extension - the file extension to be used for output. Currently only .txt and .json are valid. Required
+#     * extension - the file extension to be used for output. Optional, defaults to .json.
 #     * subdir - some api's are now grouped in a subdirectory of the output directory to lessen clutter. Optional, defaults to root dir.
 #     * retry - whenther if a query fails it will be retried for the configured number of attempts. Optional, defaults to false.
 #     * versions - one or more attributes of the format "version rule: "query string". Each set of version/query key pairs
@@ -11,28 +11,25 @@
 #   NPM mode is the only one used: https://github.com/vdurmont/semver4j
 #   NPM Versioning rules are documented here: https://github.com/npm/node-semver
 #
+#   Note to those adding entries: within each group, cat API's, json API's, and commercial, they are in alphabetical order.
+#   Please adhere to this convention when submitting pull requests.
 
 logstash_version:
-  extension: ".json"
   versions:
     "> 0.0.0": "/?pretty"
 
 logstash_node:
-  extension: ".json"
   versions:
     "> 0.0.0": "/_node?pretty"
 
 logstash_node_stats:
-  extension: ".json"
   versions:
     "> 0.0.0": "/_node/stats?pretty"
 
 logstash_nodes_hot_threads:
-  extension: ".txt"
   versions:
     "> 0.0.0": "/_node/hot_threads?human=true&threads=10000"
 
 logstash_plugins:
-  extension: ".json"
   versions:
     "> 0.0.0": "/_node/plugins?pretty"

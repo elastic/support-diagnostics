@@ -13,6 +13,8 @@ public class RestEntry {
 
     private static final Logger logger = LogManager.getLogger(RestEntry.class);
 
+    public static final String MISSING = "missing";
+
     public RestEntry(String name, String subdir, String extension, boolean retry, String url){
         this.name = name;
         this.subdir = subdir;
@@ -49,14 +51,6 @@ public class RestEntry {
 
     public boolean isRetry() {
         return retry;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        RestEntry restEntry = (RestEntry) o;
-        return name.equals(restEntry.name);
     }
 
 }

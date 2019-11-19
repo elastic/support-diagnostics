@@ -1,3 +1,12 @@
+#
+#
+#
+#
+#  The REST call settings have been moved to elastic-rest.yml and logstash-rest.yml
+#
+#
+#
+#
 # REST timeout settings - note:values are in second
 
 github-settings:
@@ -9,26 +18,6 @@ github-settings:
 log-settings:
   maxLogs: 2
   maxGcLogs: 3
-
-text-file-extensions:
-  - allocation
-  - cat_allocation
-  - cat_aliases
-  - cat_count
-  - cat_fielddata
-  - cat_health
-  - cat_indices
-  - cat_master
-  - cat_nodeattrs
-  - cat_nodes
-  - cat_pending_tasks
-  - cat_recovery
-  - cat_repositories
-  - cat_segments
-  - cat_shards
-  - cat_thread_pool
-  - logstash_nodes_hot_threads
-  - nodes_hot_threads
 
 # Uncomment only if modifying defaults
 rest-config:
@@ -45,127 +34,8 @@ call-retries: 3
 # Time before re-attempts in milliseconnds
 pause-retries: 5000
 
-# Which calls to re-attempt
-require-retry:
-  - nodes
-  - nodes-stats
-  - shards
-  - cluster_state
-
-rest-calls:
-  common:
-    alias: "/_alias?pretty&human"
-    cat_aliases: "/_cat/aliases?v"
-    cat_allocation: "/_cat/allocation?v"
-    cat_count: "/_cat/count"
-    cat_fielddata: "/_cat/fielddata?v"
-    cat_health: "/_cat/health?v"
-    cat_indices: "/_cat/indices?v"
-    cat_master: "/_cat/master?format=json"
-    cat_nodes: "/_cat/nodes?v&h=n,m,i,r,d,hp,rp,cpu,load_1m,load_5m,load_15m,nodeId"
-    cat_pending_tasks: "/_cat/pending_tasks?v"
-    cat_segments: "/_cat/segments?v"
-    cat_recovery: "/_cat/recovery?v"
-    cat_shards: "/_cat/shards?v"
-    cat_thread_pool: "/_cat/thread_pool?v"
-    cluster_health: "/_cluster/health?pretty"
-    cluster_pending_tasks: "/_cluster/pending_tasks?pretty&human"
-    cluster_settings: "/_cluster/settings?pretty&flat_settings"
-    cluster_state: "/_cluster/state?pretty&human"
-    cluster_stats: "/_cluster/stats?pretty&human"
-    fielddata: "/_cat/fielddata?format=json&bytes&pretty"
-    fielddata_stats: "/_nodes/stats/indices/fielddata?pretty=true&fields=*"
-    indices_stats: "/_stats?level=shards&pretty&human"
-    mapping: "/_mapping?pretty"
-    master: "/_cat/master?format=json"
-    nodes_hot_threads: "/_nodes/hot_threads?threads=10000"
-    nodes_stats: "/_nodes/stats?pretty&human"
-    nodes: "/_nodes?pretty&human"
-    plugins: "/_cat/plugins?format=json"
-    recovery: "/_recovery?pretty&human&detailed=true"
-    segments: "/_segments?pretty&human"
-    settings: "/_settings?pretty&human"
-    shards: "/_cat/shards?format=json&bytes=b&pretty"
-    templates: "/_template?pretty"
-    version: "/"
-    watcher_stats: "/_watcher/stats/_all"
-    watcher_stack: "/_watcher/stats?emit_stacktraces=true"
-
-  versions:
-
-    major-1:
-      minor-0:
-        licenses: "/_licenses"
-
-    major-2:
-      minor-0:
-        cat_nodeattrs: "/_cat/nodeattrs?v&h=node,id,pid,host,ip,port,attr,value"
-        cat_repositories: "/_cat/repositories?v"
-        count: "/_count"
-        licenses: "/_license?pretty"  #override
-        security_users: "/_shield/user?pretty"
-        security_roles: "/_shield/role?pretty"
-        shard_stores: "/_shard_stores?pretty"
-        tasks: "/_tasks?pretty&human&detailed=true"
-
-    major-5:
-      minor-0:
-        allocation_explain: "/_cluster/allocation/explain?pretty"
-        allocation_explain_disk: "/_cluster/allocation/explain?include_disk_info=true&pretty"
-        fielddata_stats: "/_nodes/stats/indices/fielddata?level=shards&pretty=true&fields=*"
-        ml_anomaly_detectors: "/_xpack/ml/anomaly_detectors?pretty"
-        ml_datafeeds: "/_xpack/ml/datafeeds?pretty"
-        ml_stats: "/_xpack/ml/anomaly_detectors/_stats?pretty"
-        pipelines: "/_ingest/pipeline/*?pretty&human"
-        security_users: "/_xpack/security/user?pretty"
-        security_roles: "/_xpack/security/role?pretty"
-        security_role_mappings: "/_xpack/security/role_mapping?pretty"
-        xpack: "/_xpack/usage?pretty&human"
-      minor-2:
-        # sorting appeared in the REST API spec for these in 5.2, but the feature appeared in 5.1.1
-        # see elastic/elasticsearch/pull/20658
-        cat_indices: "/_cat/indices?v&s=index"
-        cat_segments: "/_cat/segments?v&s=index"
-        cat_shards: "/_cat/shards?v&s=index"
-
-    major-6:
-      minor-0:
-        nodes_usage: "/_nodes/usage?pretty"
-        remote_cluster_info: "/_remote/info"
-      minor-3:
-        rollup_jobs: "/_xpack/rollup/job/_all"
-        rollup_caps: "/_xpack/rollup/data/_all"
-      minor-4:
-        cluster_settings_defaults: "/_cluster/settings?include_defaults&pretty&flat_settings"
-      minor-5:
-        rollup_index_caps: "/*/_xpack/rollup/data"
-        security_priv: "/_xpack/security/privilege?pretty"
-        ccr_stats: "/_ccr/stats?pretty"
-        ccr_autofollow_patterns: "/_ccr/auto_follow?pretty"
-      minor-6:
-        ilm_explain: "/*/_ilm/explain?human&pretty"
-        ilm_policies: "/_ilm/policy?human&pretty"
-        ilm_status: "/_ilm/status?pretty"
-      minor-7:
-        ccr_follower_info: "/_all/_ccr/info?pretty"
-    
-    major-7:
-      minor-4:
-        slm_policies: "/_slm/policy?pretty&human"
-      minor-5:
-        slm_stats: "/_slm/stats?pretty"
-        enrich_stats: "/_enrich/_stats?pretty"
-        enrich_policies: "/_enrich/policy?pretty"
-
 thread-dump:
   jstack: "jstack PID"
-
-logstash:
-  logstash_version: "/?pretty"
-  logstash_node: "/_node?pretty"
-  logstash_node_stats: "/_node/stats?pretty"
-  logstash_nodes_hot_threads: "/_node/hot_threads?human=true&threads=10000"
-  logstash_plugins: "/_node/plugins?pretty"
 
 linuxOS:
   sys:
