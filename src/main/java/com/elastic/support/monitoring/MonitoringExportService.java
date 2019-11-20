@@ -110,7 +110,7 @@ public class MonitoringExportService extends ElasticClientService {
         String clusterIdQuery = config.queries.get("cluster_id_check");
         clusterIdQuery = clusterIdQuery.replace("{{clusterId}}", inputs.clusterId);
 
-        RestResult restResult = new RestResult(client.execPost(config.monitoringUri , clusterIdQuery));
+        RestResult restResult = new RestResult(client.execPost(config.monitoringUri , clusterIdQuery), config.monitoringUri);
         if (restResult.getStatus() != 200) {
             logger.info("Cluster Id validation failed with status: {}, reason: {}.", restResult.getStatus(), restResult.getReason());
             throw new DiagnosticException("clusterQueryError");
@@ -130,7 +130,7 @@ public class MonitoringExportService extends ElasticClientService {
         String clusterIdQuery = config.queries.get("cluster_ids");
 
         List<Map<String, String>> clusterIds = new ArrayList<>();
-        RestResult restResult = new RestResult(client.execPost(config.monitoringUri , clusterIdQuery));
+        RestResult restResult = new RestResult(client.execPost(config.monitoringUri , clusterIdQuery), config.monitoringUri);
         if (restResult.getStatus() != 200) {
             logger.error("Cluster Id listing failed with status: {}, reason: {}.", restResult.getStatus(), restResult.getReason());
             return clusterIds;
@@ -203,7 +203,7 @@ public class MonitoringExportService extends ElasticClientService {
 
                 String scrollId = "";
 
-                RestResult restResult = new RestResult(client.execPost(uri, query));
+                RestResult restResult = new RestResult(client.execPost(uri, query), uri);
                 if (restResult.getStatus() != 200) {
                     logger.error("Initial retrieve for stat: {} failed with status: {}, reason: {}, bypassing and going to next call.", stat, restResult.getStatus(), restResult.getReason());
                     logger.error("Bypassing.");
@@ -234,7 +234,7 @@ public class MonitoringExportService extends ElasticClientService {
 
                     scrollId = resultNode.path("_scroll_id").asText();
                     String scrollQuery = SCROLL_ID.replace("{{scrollId}}", scrollId);
-                    RestResult scrollResult = new RestResult(client.execPost(scrollUri, scrollQuery));
+                    RestResult scrollResult = new RestResult(client.execPost(scrollUri, scrollQuery), scrollUri);
                     if (restResult.getStatus() == 200) {
                         resultNode = JsonYamlUtils.createJsonNodeFromString(scrollResult.toString());
                         hitsNode = getHitsArray(resultNode);

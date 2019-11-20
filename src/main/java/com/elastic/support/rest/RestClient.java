@@ -32,11 +32,11 @@ public class RestClient implements Closeable {
     }
 
     public RestResult execQuery(String url) {
-        return new RestResult(execGet(url, httpHost, httpContext));
+        return new RestResult(execGet(url, httpHost, httpContext), url);
     }
 
-    public RestResult execQuery(String url, OutputStream out) {
-        return new RestResult(execGet(url, httpHost, httpContext), out);
+    public RestResult execQuery(String url, String fileName) {
+        return new RestResult(execGet(url, httpHost, httpContext), fileName, url);
     }
 
     public HttpHost getHost(String host, int port, String scheme) {

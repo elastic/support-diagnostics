@@ -2,16 +2,18 @@ package com.elastic.support.diagnostics.chain;
 
 import com.elastic.support.diagnostics.DiagConfig;
 import com.elastic.support.diagnostics.DiagnosticInputs;
-import com.elastic.support.config.Version;
 import com.elastic.support.rest.RestClient;
+import com.elastic.support.rest.RestEntry;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.vdurmont.semver4j.Semver;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ServiceConfigurationError;
 
 public class DiagnosticContext {
 
-   private Version version;
+   private Semver version;
    private String tempDir = "";
    private String pid = "0";
    private String logDir = "";
@@ -26,16 +28,33 @@ public class DiagnosticContext {
    private List<String> dockerContainers = new ArrayList<>();
 
    private RestClient genericClient, esRestClient;
+   private List<RestEntry> elasticRestCalls, logstashRestCalls;
    private  DiagConfig diagsConfig;
    private  DiagnosticInputs diagnosticInputs;
    private boolean isAuthorized;
 
-   public Version getVersion() {
+   public Semver getVersion() {
       return version;
    }
 
-   public void setVersion(Version version) {
+   public void setVersion(Semver version) {
       this.version = version;
+   }
+
+   public List<RestEntry> getElasticRestCalls() {
+      return elasticRestCalls;
+   }
+
+   public void setElasticRestCalls(List<RestEntry> elasticRestCalls) {
+      this.elasticRestCalls = elasticRestCalls;
+   }
+
+   public List<RestEntry> getLogstashRestCalls() {
+      return logstashRestCalls;
+   }
+
+   public void setLogstashRestCalls(List<RestEntry> logstashRestCalls) {
+      this.logstashRestCalls = logstashRestCalls;
    }
 
    public String getTempDir() {

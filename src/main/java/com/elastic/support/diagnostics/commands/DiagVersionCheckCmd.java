@@ -63,7 +63,7 @@ public class DiagVersionCheckCmd implements Command {
             RestResult restResult = new RestResult(restClient.execGet(
                     ghEndpoint,
                     restClient.getHost(ghHost, Constants.DEEFAULT_HTTPS_PORT, ghScheme),
-                    restClient.getContext()));
+                    restClient.getContext()), ghEndpoint);
             JsonNode rootNode = JsonYamlUtils.createJsonNodeFromString(restResult.toString());
             String ver = rootNode.path("tag_name").asText();
             List<JsonNode> assests = rootNode.findValues("assets");

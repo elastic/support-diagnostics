@@ -116,7 +116,7 @@ public class MonitoringImportProcessor implements ArchiveEntryProcessor {
     }
 
     private long writeBatch(String query, int size){
-        RestResult res = new RestResult( client.execPost("_bulk", query));
+        RestResult res = new RestResult( client.execPost("_bulk", query), "_bulk");
         if( res.getStatus() != 200){
             logger.error("Batch update had errors: {}  {}", res.getStatus(), res.getReason());
             logger.error(Constants.CHECK_LOG);

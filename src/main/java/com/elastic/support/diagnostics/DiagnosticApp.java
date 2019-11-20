@@ -24,7 +24,8 @@ public class DiagnosticApp {
                 System.exit(0);
             }
 
-            Map diagMap =JsonYamlUtils.readYamlFromClasspath(Constants.DIAG_CONFIG, true);
+            Map diagMap = JsonYamlUtils.readYamlFromClasspath(Constants.DIAG_CONFIG, true);
+
             DiagConfig diagConfig = new DiagConfig(diagMap);
             Map<String, List<String>> chains = JsonYamlUtils.readYamlFromClasspath(Constants.CHAINS_CONFIG, true);
 
