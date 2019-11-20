@@ -40,14 +40,11 @@ public class TestRestExecCalls {
 
     @BeforeAll
     public void globalSetup() {
-
         mockServer = startClientAndServer(9880);
-
     }
 
     @AfterAll
     public void globalTeardoown() {
-
         mockServer.stop();
     }
 
@@ -162,48 +159,11 @@ public class TestRestExecCalls {
     }
 
     @Test
-    public void testMultipleFailures() {
+    public void testFailThenSucceed() {
 
         RunClusterQueriesCmd cmd = new RunClusterQueriesCmd();
-
-        DiagConfig diagConfig = new DiagConfig();
-
-        diagConfig.setTextFileExtensions(new ArrayList<>());
-        diagConfig.setCallRetries(3);
-        diagConfig.setPauseRetries(5000);
-        List<String> requireRetry = new ArrayList<>();
-        requireRetry.add("nodes");
-        diagConfig.setRequireRetry(requireRetry);
-
-        Map<String, String> calls = new LinkedHashMap<>();
-        calls.put("nodes", "/_nodes?pretty");
-        calls.put("version", "/");
-        mockServer
-                .when(
-                        request()
-                                .withMethod("GET")
-                                .withPath("/_nodes")
-                                .withQueryStringParameter(new Parameter("pretty")),
-                        Times.exactly(1)
-                )
-                .respond(
-                        response()
-                                .withBody("error_response_body")
-                                .withStatusCode(502)
-                );
-
-        mockServer
-                .when(
-                        request()
-                                .withMethod("GET")
-                                .withPath("/"),
-                        Times.exactly(1)
-                )
-                .respond(
-                        response()
-                                .withBody("version_response_body")
-                                .withStatusCode(200)
-                );
+        List<RestEntry> entries = new ArrayList<>();
+        entries.add(new RestEntry("nodes", "", ".json", true, "/_nodes?pretty"));
         mockServer
                 .when(
                         request()
@@ -218,76 +178,6 @@ public class TestRestExecCalls {
                                 .withStatusCode(502)
                 );
 
-        String targetFilename = temp + SystemProperties.fileSeparator + "nodes.json";
-        logger.error(targetFilename);
-
-        RestCallManifest restCallManifest = cmd.runQueries(httpRestClient, calls, temp, diagConfig);
-        assertEquals(3, restCallManifest.getAttempts("nodes"));
-        assertFalse(restCallManifest.getSuccess("nodes"));
-        assertEquals(1, restCallManifest.getAttempts("version"));
-        assertTrue(restCallManifest.getSuccess("version"));
-        assertTrue( fileExistsWithText(targetFilename, "error_response_body"));
-
-    }
-
-    @Test
-    public void testFailureThenSuccess() {
-
-        RunClusterQueriesCmd cmd = new RunClusterQueriesCmd();
-        DiagConfig diagConfig = new DiagConfig();
-
-        diagConfig.setTextFileExtensions(new ArrayList<>());
-        diagConfig.setCallRetries(3);
-        diagConfig.setPauseRetries(5000);
-        List<String> requireRetry = new ArrayList<>();
-        requireRetry.add("nodes");
-        diagConfig.setRequireRetry(requireRetry);
-
-        Map<String, String> calls = new LinkedHashMap<>();
-        calls.put("nodes", "/_nodes?pretty");
-        calls.put("version", "/");
-
-        mockServer
-                .when(
-                        request()
-                                .withMethod("GET")
-                                .withPath("/_nodes")
-                                .withQueryStringParameter(new Parameter("pretty")),
-                        Times.exactly(1)
-                )
-                .respond(
-                        response()
-                                .withBody("error_response_body")
-                                .withStatusCode(502)
-                );
-
-        mockServer
-                .when(
-                        request()
-                                .withMethod("GET")
-                                .withPath("/"),
-                        Times.exactly(1)
-                )
-                .respond(
-                        response()
-                                .withBody("version_response_body")
-                                .withStatusCode(200)
-                );
-
-        mockServer
-                .when(
-                        request()
-                                .withMethod("GET")
-                                .withPath("/_nodes")
-                                .withQueryStringParameter(new Parameter("pretty")),
-                        Times.exactly(1)
-                )
-                .respond(
-                        response()
-                                .withBody("error_response_body")
-                                .withStatusCode(502)
-                );
-
         mockServer
                 .when(
                         request()
@@ -303,14 +193,39 @@ public class TestRestExecCalls {
                 );
 
         String targetFilename = temp + SystemProperties.fileSeparator + "nodes.json";
-        logger.error(targetFilename);
-
-        RestCallManifest restCallManifest = cmd.runQueries(httpRestClient, calls, temp, diagConfig);
-        assertEquals(3, restCallManifest.getAttempts("nodes"));
-        assertTrue(restCallManifest.getSuccess("nodes"));
-        assertEquals(1, restCallManifest.getAttempts("version"));
-        assertTrue(restCallManifest.getSuccess("version"));
+        int totalRetries = cmd.runQueries(httpRestClient, entries, temp, 3, 500);
+        assertEquals(2, totalRetries);
         assertTrue( fileExistsWithText(targetFilename, "node_response_body"));
+
+
+    }
+
+    @Test
+    public void testRetryAllFail() {
+
+        RunClusterQueriesCmd cmd = new RunClusterQueriesCmd();
+        List<RestEntry> entries = new ArrayList<>();
+        entries.add(new RestEntry("nodes", "", ".json", true, "/_nodes?pretty"));
+        mockServer
+                .when(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/_nodes")
+                                .withQueryStringParameter(new Parameter("pretty")),
+                        Times.exactly(4)
+                )
+                .respond(
+                        response()
+                                .withBody("error_response_body")
+                                .withStatusCode(502)
+                );
+
+
+        String targetFilename = temp + SystemProperties.fileSeparator + "nodes.json";
+
+        int totalRetries = cmd.runQueries(httpRestClient, entries, temp, 3, 500);
+        assertEquals(4, totalRetries);
+        assertTrue( fileExistsWithText(targetFilename, "error_response_body"));
 
     }
 
@@ -318,19 +233,8 @@ public class TestRestExecCalls {
     public void testAuthFailure() {
 
         RunClusterQueriesCmd cmd = new RunClusterQueriesCmd();
-
-        DiagConfig diagConfig = new DiagConfig();
-
-        diagConfig.setTextFileExtensions(new ArrayList<>());
-        diagConfig.setCallRetries(3);
-        diagConfig.setPauseRetries(5000);
-        List<String> requireRetry = new ArrayList<>();
-        requireRetry.add("nodes");
-        diagConfig.setRequireRetry(requireRetry);
-
-        Map<String, String> calls = new LinkedHashMap<>();
-        calls.put("nodes", "/_nodes?pretty");
-        calls.put("version", "/");
+        List<RestEntry> entries = new ArrayList<>();
+        entries.add(new RestEntry("nodes", "", ".json", true, "/_nodes?pretty"));
 
         mockServer
                 .when(
@@ -346,56 +250,10 @@ public class TestRestExecCalls {
                                 .withStatusCode(401)
                 );
 
-        mockServer
-                .when(
-                        request()
-                                .withMethod("GET")
-                                .withPath("/"),
-                        Times.exactly(1)
-                )
-                .respond(
-                        response()
-                                .withBody("autherror_response_body")
-                                .withStatusCode(401)
-                );
-
-        mockServer
-                .when(
-                        request()
-                                .withMethod("GET")
-                                .withPath("/_nodes")
-                                .withQueryStringParameter(new Parameter("pretty")),
-                        Times.exactly(1)
-                )
-                .respond(
-                        response()
-                                .withBody("error_response_body")
-                                .withStatusCode(502)
-                );
-
-        mockServer
-                .when(
-                        request()
-                                .withMethod("GET")
-                                .withPath("/_nodes")
-                                .withQueryStringParameter(new Parameter("pretty")),
-                        Times.exactly(1)
-                )
-                .respond(
-                        response()
-                                .withBody("node_response_body")
-                                .withStatusCode(200)
-                );
-
+        int totalRetries = cmd.runQueries(httpRestClient, entries, temp, 3, 500);
+        assertEquals(0, totalRetries);
 
         String targetFilename = temp + SystemProperties.fileSeparator + "nodes.json";
-        logger.error(targetFilename);
-
-        RestCallManifest restCallManifest = cmd.runQueries(httpsRestClient, calls, temp, diagConfig);
-        assertEquals(1, restCallManifest.getAttempts("nodes"));
-        assertFalse(restCallManifest.getSuccess("nodes"));
-        assertEquals(1, restCallManifest.getAttempts("version"));
-        assertFalse(restCallManifest.getSuccess("version"));
         assertTrue( fileExistsWithText(targetFilename, "autherror_response_body"));
 
     }
