@@ -4,7 +4,7 @@
 #   Below the query label are the following attributes:
 #     * extension - the file extension to be used for output. Optional, defaults to .json.
 #     * subdir - some api's are now grouped in a subdirectory of the output directory to lessen clutter. Optional, defaults to root dir.
-#     * retry - whenther if a query fails it will be retried for the configured number of attempts. Optional, defaults to false.
+#     * retry - whether if a query fails it will be retried for the configured number of attempts. Optional, defaults to false.
 #     * versions - one or more attributes of the format "version rule: "query string". Each set of version/query key pairs
 #       should evaluate to exactly one that is appropriate for the version of the server being queried. Therefor rules should
 #       be structured in such a way that only a valid query can be executed against a given version. Required.
