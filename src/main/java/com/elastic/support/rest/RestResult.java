@@ -2,6 +2,7 @@ package com.elastic.support.rest;
 
 import com.elastic.support.config.Constants;
 import com.elastic.support.util.SystemProperties;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
@@ -10,6 +11,7 @@ import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
@@ -23,11 +25,13 @@ public class RestResult implements Cloneable {
     int status = -1;
     String reason;
     boolean isRetryable;
+    String url = "";
 
     // Sending in a response object to be processed implicitly
     // closes the response as a result. The body is either streamed directly
     // to disk or the body is stored as a string and the status retained as well.
-    public RestResult(HttpResponse response) {
+    public RestResult(HttpResponse response, String url) {
+        this.url = url;
         try{
             processCodes(response);
             responseString = EntityUtils.toString(response.getEntity());
@@ -41,16 +45,24 @@ public class RestResult implements Cloneable {
         }
     }
 
-    public RestResult(HttpResponse response, OutputStream out) {
+    public RestResult(HttpResponse response, String fileName, String url) {
+
+        this.url = url;
 
         // If the query got a success status stream the result immediately to the target file.
         // If not, the result should be small and contain diagnostic info so stgre it in the response string.
-        try{
+        File output = new File(fileName);
+        if(output.exists()){
+            FileUtils.deleteQuietly(output);
+        }
+
+        try(OutputStream out = new FileOutputStream(fileName)){
             processCodes(response);
             if (status == 200) {
                 response.getEntity().writeTo(out);
             } else {
                 responseString = EntityUtils.toString(response.getEntity());
+                IOUtils.write(reason + SystemProperties.lineSeparator + responseString, out, Constants.UTF8);
             }
         } catch (Exception e) {
             logger.log(SystemProperties.DIAG, "Error Streaming Response To OutputStream", e);
@@ -65,7 +77,7 @@ public class RestResult implements Cloneable {
         status = response.getStatusLine().getStatusCode();
         if (status == 400) {
             reason = "Bad Request. Rejected";
-            isRetryable = true;
+           isRetryable = true;
         } else if (status == 401) {
             reason = "Authentication failure. Invalid login credentials.";
             isRetryable = false;
@@ -79,10 +91,6 @@ public class RestResult implements Cloneable {
             reason = response.getStatusLine().getReasonPhrase();
             isRetryable = true;
         }
-    }
-
-    public String formatStatusMessage(){
-        return formatStatusMessage("");
     }
 
     public String formatStatusMessage(String msg){
@@ -110,8 +118,13 @@ public class RestResult implements Cloneable {
     }
 
     public void toFile(String fileName){
-        try(FileOutputStream fs = new FileOutputStream(fileName)){
-            IOUtils.write(reason + " - " + responseString, fs, Constants.UTF8);
+        File output = new File(fileName);
+        if(output.exists()){
+            FileUtils.deleteQuietly(output);
+        }
+
+        try(FileOutputStream fs = new FileOutputStream(output)){
+            IOUtils.write(reason + SystemProperties.lineSeparator + responseString, fs, Constants.UTF8);
         }
         catch (Exception e){
             logger.log(SystemProperties.DIAG, "Error writing Response To OutputStream", e);
@@ -128,7 +141,5 @@ public class RestResult implements Cloneable {
         }
         return false;
     }
-
-
 
 }

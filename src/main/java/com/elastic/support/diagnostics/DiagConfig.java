@@ -15,12 +15,6 @@ public class DiagConfig extends BaseConfig {
     private Map<String, Integer> logSettings;
     private List<String> textFileExtensions;
     private int callRetries, pauseRetries;
-    private List<String> requireRetry;
-    private Map restCalls;
-
-    public DiagConfig(){
-        super();
-    }
 
     public DiagConfig(Map configuration) {
 
@@ -31,19 +25,11 @@ public class DiagConfig extends BaseConfig {
         // How many rolled over logs do we get?
         logSettings = (Map<String, Integer>) configuration.get("log-settings");
 
-        // Differentiate between json and plain text results
-        textFileExtensions = (List<String>) configuration.get("text-file-extensions");
-
         // REST settings for HttpClient
 
-        // Whether we retry a failed call, how many times, and how long to wait before reattempting.
-        requireRetry = (List<String>)configuration.get("require-retry");
+        // When we retry a failed call how many times, and how long to wait before reattempting.
         callRetries = (Integer) configuration.get("call-retries");
         pauseRetries = (Integer)configuration.get("pause-retries");
-
-        // The REST calls we execute
-        restCalls = (Map) configuration.get("rest-calls");
-
 
     }
 
@@ -79,22 +65,6 @@ public class DiagConfig extends BaseConfig {
         this.pauseRetries = pauseRetries;
     }
 
-    public List<String> getRequireRetry() {
-        return requireRetry;
-    }
-
-    public void setRequireRetry(List<String> requireRetry) {
-        this.requireRetry = requireRetry;
-    }
-
-    public Map getRestCalls() {
-        return restCalls;
-    }
-
-    public void setRestCalls(Map restCalls) {
-        this.restCalls = restCalls;
-    }
-
     public Map<String, Map<String, String>> getSysCalls(String key){
         return (Map<String, Map<String, String>>)configuration.get(key);
     }
@@ -102,5 +72,6 @@ public class DiagConfig extends BaseConfig {
     public Map<String, String> getCommandMap(String key){
         return (Map<String, String>)configuration.get(key);
     }
+
 }
 

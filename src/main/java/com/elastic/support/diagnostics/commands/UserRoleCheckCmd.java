@@ -1,19 +1,20 @@
 package com.elastic.support.diagnostics.commands;
 
-import com.elastic.support.config.Version;
 import com.elastic.support.diagnostics.chain.Command;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.rest.RestClient;
+import com.elastic.support.rest.RestEntry;
 import com.elastic.support.rest.RestResult;
 import com.elastic.support.util.JsonYamlUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vdurmont.semver4j.Semver;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class UserRoleCheckCmd implements Command {
 
@@ -31,25 +32,21 @@ public class UserRoleCheckCmd implements Command {
 
         boolean hasAuthorization = false;
 
-        Version version = context.getVersion();
-        String url = null;
-        int major = version.getMajor();
-        int minor = version.getMinor();
+        Semver version = context.getVersion();
+        List<RestEntry> calls = context.getElasticRestCalls();
+        Optional<RestEntry> entry =  calls
+                .stream()
+                .filter(re -> re.getName().equals("security_users"))
+                .findFirst();
 
-        if (major <= 2) {
-            url = "/_shield/user/" + user;
-        } else if (major <= 6) {
-            url = "/_xpack/security/user/" + user;
-        } else {
-            url = "/_security/user/" + user;
-        }
+        String url = (entry.get().getUrl()).replace("?pretty", "/" + user);
 
         RestResult result = restClient.execQuery(url);
 
         if (result.getStatus() == 200) {
             String userJsonString = result.toString();
             JsonNode userNode = JsonYamlUtils.createJsonNodeFromString(userJsonString);
-            hasAuthorization = checkForAuth(major, user, userNode);
+            hasAuthorization = checkForAuth(version.getMajor(), user, userNode);
         }
 
         context.setAuthorized(hasAuthorization);
@@ -67,13 +64,9 @@ public class UserRoleCheckCmd implements Command {
             roles = mapper.convertValue(rolesNode, List.class);
 
             if (major <= 2) {
-                if (roles.contains("admin")) {
-                    hasAuthorization = true;
-                }
+                hasAuthorization = roles.contains("admin");
             } else {
-                if (roles.contains("superuser")) {
-                    hasAuthorization = true;
-                }
+                hasAuthorization = roles.contains("superuser");
             }
         }
 

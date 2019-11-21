@@ -1,14 +1,15 @@
 package com.elastic.support.diagnostics.commands;
 
-import com.elastic.support.diagnostics.DiagConfig;
 import com.elastic.support.diagnostics.chain.Command;
-import com.elastic.support.rest.RestCallManifest;
 import com.elastic.support.rest.RestClient;
+import com.elastic.support.rest.RestEntry;
 import com.elastic.support.rest.RestResult;
 import com.elastic.support.util.SystemProperties;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.util.*;
 
@@ -24,107 +25,76 @@ public abstract class BaseQueryCmd implements Command {
      * cases such as the node and shard calls, a failure will result in a reattempt
      * after the configured number of seconds.
      */
-    public RestCallManifest runQueries(RestClient restClient, Map<String, String> entries, String tempDir, DiagConfig diagConfig) {
+    public int runQueries(RestClient restClient, List<RestEntry> entries, String tempDir, int retries, int pause) {
 
-        List<String> textExtensions = diagConfig.getTextFileExtensions();
-        int attempts = diagConfig.getCallRetries();
-        int pause = diagConfig.getPauseRetries();
-        List<String> requireRetry = diagConfig.getRequireRetry();
-        RestCallManifest restCallManifest = new RestCallManifest();
-        Map<String, String> workEntries = new LinkedHashMap<>();
-        //workEntries.putAll(entries);
+        // Run through the query list, first pass. If anything that's retryable failed the
+        // RestEntry will be in the returned retry list.
+        List<RestEntry> retryList = execQueryList(restClient, entries, tempDir);
+        int totalRetries = retryList.size();
 
-        // We will go through a max of three tries attmmpting to get file output
-        // or until there are no more entries to get.
-        // If an attempt is succesful it's written to disk and removed from the work entries map
-        // If an attempt is unsuccessful and it's not in the retry list, remove it anyway.
-        // If an attempt is unsuccessful and it's in the retry list, it will be there for the
-        // next pass until you hit the limit or it succeeds. If we get to the last try and it
-        // still hasn't worked, write the error content in the result to the target file.
-        for (int i = 1; i <= attempts; i++) {
-            // If everything worked last pass, get out
-            if (entries.size() == 0) {
+        for (int i = 0; i < retries; i++) {
+            // If no failed entries are in the list, get out
+            if (retryList.size() == 0) {
                 break;
             }
 
-            // We've made the first pass through - wait a few
-            // seconds before trying again.
-            if (i > 1) {
-                try {
-                    logger.info("Some calls failed: retrying in {} seconds.", pause / 1000);
-                    Thread.sleep(pause);
-                } catch (Exception e) {
-                    logger.error("Failed pause on error.", e);
-                }
+            // Wait the configured pause time before trying again
+            try {
+                logger.info("Some calls failed but were flagged as recoverable: retrying in {} seconds.", pause / 1000);
+                Thread.sleep(pause);
+            } catch (Exception e) {
+                logger.error("Failed pause on error.", e);
             }
 
-            restCallManifest.setRuns(i);
-            Iterator<Map.Entry<String,String>> iter = entries.entrySet().iterator();
+            retryList = execQueryList(restClient, retryList, tempDir);
+            totalRetries += retryList.size();
 
-            while (iter.hasNext()) {
-                Map.Entry<String,String> entry = iter.next();
-                String queryName = entry.getKey();
-                String query = entry.getValue();
-                String filename = buildFileName(queryName, tempDir, textExtensions);
-                logger.info("Running query:{} -  {}", queryName, query);
+        }
+        return totalRetries;
+    }
 
-                // At the end of this something should have been written to disk...
-                RestResult restResult = null;
-                try (FileOutputStream fs = new FileOutputStream(filename)) {
-                    restResult = restClient.execQuery(query, fs);
-                } catch (Exception e) {
-                    // Something happens just log it and go to the next query.
-                    logger.log(SystemProperties.DIAG, "Error occurred executing query {}", query, e);
-                    continue;
+    List<RestEntry> execQueryList(RestClient restClient, List<RestEntry> calls, String tempdir){
+
+        List<RestEntry> retryFailed = new ArrayList<>();
+
+        for (RestEntry entry : calls) {
+            try {
+                String subdir = entry.getSubdir();
+                if(StringUtils.isEmpty(subdir)){
+                    subdir = tempdir;
                 }
-
-                // If it succeeded take it out of future work
-                if (restResult.isValid()) {
-                    iter.remove();
-                    restCallManifest.setCallHistory(queryName, i, true);
-                    logger.info("Results written to: {}", filename);
-                } else {
-                    // If it didn't succeed but it's not in the retry list or if it's not an
-                    // error that's retryable such as an auth error remove it.
-                    restCallManifest.setCallHistory(queryName, i, false);
-
-                    if (!requireRetry.contains(queryName) || !restResult.isRetryable() ) {
-                        iter.remove();
-                        restResult.toFile(filename);
-                        logger.info(restResult.formatStatusMessage("Call failed: Bypassing. See archived diagnostics.log for more detail."));
-
-                    } else {
-                        // If it failed, it's in the list and it's last try, write it out
-                        if (i == attempts) {
-                            restResult.toFile(filename);
-                        }
-                        else {
-                            logger.info(restResult.formatStatusMessage("Call failed: Flagged for retry."));
-                        }
+                else {
+                    subdir = tempdir + SystemProperties.fileSeparator + subdir;
+                    File nestedFolder = new File(subdir);
+                    if( ! nestedFolder.isDirectory() ){
+                        nestedFolder.mkdir();
                     }
                 }
+                String fileName = subdir + SystemProperties.fileSeparator + entry.getName() + entry.getExtension();
+                RestResult restResult = restClient.execQuery(entry.getUrl(), fileName);
+                if (restResult.isValid()) {
+                    logger.info("Results written to: {}", fileName);
+                }
+                else{
+                    if(entry.isRetry() && restResult.isRetryable()){
+                        retryFailed.add(entry);
+                        logger.info("{}   {}  failed.", entry.getName(), entry.getUrl());
+                        logger.info(restResult.formatStatusMessage("Flagged for retry."));
+                    }
+                    else{
+                        logger.info("{}   {}  failed. Bypassing", entry.getName(), entry.getUrl());
+                        logger.info(restResult.formatStatusMessage("See archived diagnostics.log for more detail."));
+                    }
+                }
+            } catch (Exception e) {
+                // Something happens just log it and go to the next query.
+                logger.log(SystemProperties.DIAG, "Error occurred executing query {}", entry.getName() + " - " + entry.getUrl(), e);
+                continue;
             }
+
         }
+        return retryFailed;
 
-        // Send back information on how many things didn't succeed and how many tries it took.
-        // Not used except for unit tests currently
-        return restCallManifest;
     }
-
-    public String buildFileName(String queryName, String temp, List<String> extensions) {
-
-        String ext;
-        if (extensions.contains(queryName)) {
-            ext = ".txt";
-        } else {
-            ext = ".json";
-        }
-        String fileName = temp + SystemProperties.fileSeparator + queryName + ext;
-
-        return fileName;
-    }
-
-
-
 
 }

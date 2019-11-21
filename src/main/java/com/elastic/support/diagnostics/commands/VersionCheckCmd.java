@@ -1,17 +1,23 @@
 package com.elastic.support.diagnostics.commands;
 
 import com.elastic.support.config.Constants;
-import com.elastic.support.config.Version;
+import com.elastic.support.diagnostics.DiagConfig;
 import com.elastic.support.diagnostics.DiagnosticException;
 import com.elastic.support.diagnostics.chain.Command;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.rest.RestClient;
+import com.elastic.support.rest.RestEntry;
+import com.elastic.support.rest.RestEntryFactory;
 import com.elastic.support.rest.RestResult;
 import com.elastic.support.util.JsonYamlUtils;
 import com.elastic.support.util.SystemProperties;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.vdurmont.semver4j.Semver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.List;
+import java.util.Map;
 
 
 public class VersionCheckCmd implements Command {
@@ -39,9 +45,19 @@ public class VersionCheckCmd implements Command {
             }
             String result = res.toString();
             JsonNode root = JsonYamlUtils.createJsonNodeFromString(result);
-            String versionNumber = root.path("version").path("number").asText();
-            Version version = new Version(versionNumber);
-            context.setVersion(version);
+            String version = root.path("version").path("number").asText();
+            context.setVersion(new Semver(version, Semver.SemverType.NPM));
+
+            RestEntryFactory builder = new RestEntryFactory(version);
+
+            Map restCalls = JsonYamlUtils.readYamlFromClasspath(Constants.ES_REST, true);
+            List<RestEntry> entries = builder.buildEntryList(restCalls);
+            context.setElasticRestCalls(entries);
+
+            restCalls = JsonYamlUtils.readYamlFromClasspath(Constants.LS_REST, true);
+            entries = builder.buildEntryList(restCalls);
+            context.setLogstashRestCalls(entries);
+
         } catch (DiagnosticException de) {
             throw de;
         } catch (Throwable t) {
