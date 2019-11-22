@@ -9,7 +9,9 @@ import com.elastic.support.util.SystemProperties;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class RunClusterQueriesCmd extends BaseQueryCmd {
 
@@ -24,7 +26,8 @@ public class RunClusterQueriesCmd extends BaseQueryCmd {
 
         try {
             DiagConfig diagConfig = context.getDiagsConfig();
-            List<RestEntry> entries = context.getElasticRestCalls();
+            List<RestEntry> entries = new ArrayList<>();
+            entries.addAll(context.getElasticRestCalls().values());
             runQueries(context.getEsRestClient(), entries, context.getTempDir(), diagConfig.getCallRetries(), diagConfig.getPauseRetries());
         } catch (Throwable t) {
             logger.log(SystemProperties.DIAG, "Error executing REST queries", t);

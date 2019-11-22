@@ -9,6 +9,7 @@ import com.vdurmont.semver4j.Semver;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.ServiceConfigurationError;
 
 public class DiagnosticContext {
@@ -28,7 +29,8 @@ public class DiagnosticContext {
    private List<String> dockerContainers = new ArrayList<>();
 
    private RestClient genericClient, esRestClient;
-   private List<RestEntry> elasticRestCalls, logstashRestCalls;
+   //private List<RestEntry> elasticRestCalls, logstashRestCalls;
+   private Map<String, RestEntry> elasticRestCalls, logstashRestCalls;
    private  DiagConfig diagsConfig;
    private  DiagnosticInputs diagnosticInputs;
    private boolean isAuthorized;
@@ -41,19 +43,19 @@ public class DiagnosticContext {
       this.version = version;
    }
 
-   public List<RestEntry> getElasticRestCalls() {
+   public Map<String, RestEntry> getElasticRestCalls() {
       return elasticRestCalls;
    }
 
-   public void setElasticRestCalls(List<RestEntry> elasticRestCalls) {
+   public void setElasticRestCalls(Map<String, RestEntry> elasticRestCalls) {
       this.elasticRestCalls = elasticRestCalls;
    }
 
-   public List<RestEntry> getLogstashRestCalls() {
+   public Map<String, RestEntry> getLogstashRestCalls() {
       return logstashRestCalls;
    }
 
-   public void setLogstashRestCalls(List<RestEntry> logstashRestCalls) {
+   public void setLogstashRestCalls(Map<String, RestEntry> logstashRestCalls) {
       this.logstashRestCalls = logstashRestCalls;
    }
 

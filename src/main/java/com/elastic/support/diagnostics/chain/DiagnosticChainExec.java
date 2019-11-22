@@ -18,7 +18,7 @@ public class DiagnosticChainExec {
             if("standard".equals(type) || "remote".equals(type)) {
                 new GenerateManifestCmd().execute(context);
                 new DiagVersionCheckCmd().execute(context);
-                new VersionCheckCmd().execute(context);
+                new ElasticsearchVersionCheckCmd().execute(context);
                 new UserRoleCheckCmd().execute(context);
                 new RunClusterQueriesCmd().execute(context);
             }

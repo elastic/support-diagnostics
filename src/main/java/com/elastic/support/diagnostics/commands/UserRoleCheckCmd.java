@@ -14,6 +14,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public class UserRoleCheckCmd implements Command {
@@ -33,13 +34,9 @@ public class UserRoleCheckCmd implements Command {
         boolean hasAuthorization = false;
 
         Semver version = context.getVersion();
-        List<RestEntry> calls = context.getElasticRestCalls();
-        Optional<RestEntry> entry =  calls
-                .stream()
-                .filter(re -> re.getName().equals("security_users"))
-                .findFirst();
-
-        String url = (entry.get().getUrl()).replace("?pretty", "/" + user);
+        Map<String, RestEntry> calls = context.getElasticRestCalls();
+        RestEntry entry =  calls.get("security_users");
+        String url = entry.getUrl().replace("?pretty", "/" + user);
 
         RestResult result = restClient.execQuery(url);
 

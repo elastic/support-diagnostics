@@ -1,7 +1,6 @@
 package com.elastic.support.diagnostics.commands;
 
 import com.elastic.support.config.Constants;
-import com.elastic.support.diagnostics.DiagConfig;
 import com.elastic.support.diagnostics.DiagnosticException;
 import com.elastic.support.diagnostics.chain.Command;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
@@ -16,11 +15,10 @@ import com.vdurmont.semver4j.Semver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.List;
 import java.util.Map;
 
 
-public class VersionCheckCmd implements Command {
+public class ElasticsearchVersionCheckCmd implements Command {
 
     /**
      * Gets the version of Elasticsearch that is running. This also
@@ -29,7 +27,7 @@ public class VersionCheckCmd implements Command {
      * that is should usually succeed. If we don't have a version we
      * won't be able to generate the correct call selection later on.
      */
-    private final Logger logger = LogManager.getLogger(VersionCheckCmd.class);
+    private final Logger logger = LogManager.getLogger(ElasticsearchVersionCheckCmd.class);
 
     public void execute(DiagnosticContext context) {
 
@@ -51,11 +49,11 @@ public class VersionCheckCmd implements Command {
             RestEntryFactory builder = new RestEntryFactory(version);
 
             Map restCalls = JsonYamlUtils.readYamlFromClasspath(Constants.ES_REST, true);
-            List<RestEntry> entries = builder.buildEntryList(restCalls);
+            Map<String, RestEntry> entries = builder.buildEntryMap(restCalls);
             context.setElasticRestCalls(entries);
 
             restCalls = JsonYamlUtils.readYamlFromClasspath(Constants.LS_REST, true);
-            entries = builder.buildEntryList(restCalls);
+            entries = builder.buildEntryMap(restCalls);
             context.setLogstashRestCalls(entries);
 
         } catch (DiagnosticException de) {
