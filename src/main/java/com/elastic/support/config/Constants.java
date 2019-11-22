@@ -11,7 +11,6 @@ public class Constants {
    public static final String ES_REST = "elastic-rest.yml";
    public static final String LS_REST = "logstash-rest.yml";
 
-   public static final String CHAINS_CONFIG = "chains.yml";
    public static final String QUERY_CONFIG_PACKAGE = "extract/";
    public static final String MONITORING_DIR = "monitoring-export";
    public static final String MONITORING_PREFIX= ".monitoring-es-7-import-";

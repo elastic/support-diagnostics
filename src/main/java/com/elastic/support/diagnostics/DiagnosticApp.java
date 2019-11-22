@@ -27,10 +27,9 @@ public class DiagnosticApp {
             Map diagMap = JsonYamlUtils.readYamlFromClasspath(Constants.DIAG_CONFIG, true);
 
             DiagConfig diagConfig = new DiagConfig(diagMap);
-            Map<String, List<String>> chains = JsonYamlUtils.readYamlFromClasspath(Constants.CHAINS_CONFIG, true);
 
             DiagnosticService diag = new DiagnosticService();
-            diag.exec(diagnosticInputs, diagConfig, chains);
+            diag.exec(diagnosticInputs, diagConfig);
         } catch (Throwable t) {
             logger.log(SystemProperties.DIAG, "Unanticipated error", t);
         }

@@ -25,7 +25,7 @@ public class DiagnosticService extends ElasticClientService {
 
     private Logger logger = LogManager.getLogger(DiagnosticService.class);
 
-    public void exec(DiagnosticInputs diagnosticInputs, DiagConfig diagConfig, Map<String, List<String>> chains) {
+    public void exec(DiagnosticInputs diagnosticInputs, DiagConfig diagConfig) {
 
         // Create two clients, one generic for Github or any other external site and one customized for this ES cluster
         RestClient genericClient = createGenericClient(diagConfig, diagnosticInputs);
@@ -53,17 +53,13 @@ public class DiagnosticService extends ElasticClientService {
             logger.info("Configuring log file.");
             createFileAppender(tempDir, "diagnostics.log");
 
-            // Get the type of diag we're running and use it to find the right chain
-            List<String> chain = chains.get(diagnosticInputs.getDiagType());
-
-            DiagnosticChainExec dc = new DiagnosticChainExec();
             ctx.setEsRestClient(createEsRestClient(diagConfig, diagnosticInputs));
             ctx.setGenericClient(createGenericClient(diagConfig, diagnosticInputs));
             ctx.setDiagsConfig(diagConfig);
             ctx.setDiagnosticInputs(diagnosticInputs);
             ctx.setTempDir(tempDir);
 
-            dc.runDiagnostic(ctx, chain);
+            DiagnosticChainExec.runDiagnostic(ctx, diagnosticInputs.getDiagType());
 
             if (ctx.isDocker()) {
                 logger.warn("Identified Docker installations - bypassed log collection and system calls.");
