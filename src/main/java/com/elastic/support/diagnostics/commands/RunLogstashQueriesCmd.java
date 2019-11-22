@@ -10,8 +10,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class RunLogstashQueriesCmd extends BaseQueryCmd {
 
@@ -24,7 +24,8 @@ public class RunLogstashQueriesCmd extends BaseQueryCmd {
    public void execute(DiagnosticContext context) {
 
       try {
-         List<RestEntry> entries = context.getLogstashRestCalls();
+         List<RestEntry> entries = new ArrayList();
+         entries.addAll(context.getLogstashRestCalls().values());
          runQueries(context.getEsRestClient(), entries, context.getTempDir(), 0, 0);
          String temp = context.getTempDir();
          JsonNode nodeData = JsonYamlUtils.createJsonNodeFromFileName(temp, "logstash_node.json");

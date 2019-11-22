@@ -7,6 +7,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -32,21 +33,18 @@ public class RestEntryFactory {
 
     }
 
-    public List<RestEntry> buildEntryList(Map<String, Object> config){
-
-        ArrayList<RestEntry> entries = new ArrayList<>();
+    public Map<String, RestEntry> buildEntryMap(Map<String, Object> config){
+        Map entries = new LinkedHashMap();
         for(Map.Entry<String, Object> entry: config.entrySet()){
             RestEntry re = build(entry);
             if(re.getUrl().equals(RestEntry.MISSING) ){
                 logger.log(SystemProperties.DIAG, "{} was bypassed due by version check.", re.getName());
             }
             else{
-                entries.add(re);
+                entries.put(re.getName(), re);
             }
         }
-
         return entries;
-
     }
 
     private String getVersionSpecificUrl(Map<String, String> versions){
