@@ -15,11 +15,10 @@ import com.vdurmont.semver4j.Semver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.List;
 import java.util.Map;
 
 
-public class ElasticVersionCheckCmd implements Command {
+public class ElasticsearchVersionCheckCmd implements Command {
 
     /**
      * Gets the version of Elasticsearch that is running. This also
@@ -28,7 +27,7 @@ public class ElasticVersionCheckCmd implements Command {
      * that is should usually succeed. If we don't have a version we
      * won't be able to generate the correct call selection later on.
      */
-    private final Logger logger = LogManager.getLogger(ElasticVersionCheckCmd.class);
+    private final Logger logger = LogManager.getLogger(ElasticsearchVersionCheckCmd.class);
 
     public void execute(DiagnosticContext context) {
 

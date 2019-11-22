@@ -24,7 +24,7 @@ public class RunLogstashQueriesCmd extends BaseQueryCmd {
    public void execute(DiagnosticContext context) {
 
       try {
-         List<RestEntry> entries = new ArrayList();
+         List<RestEntry> entries = new ArrayList<>();
          entries.addAll(context.getLogstashRestCalls().values());
          runQueries(context.getEsRestClient(), entries, context.getTempDir(), 0, 0);
          String temp = context.getTempDir();

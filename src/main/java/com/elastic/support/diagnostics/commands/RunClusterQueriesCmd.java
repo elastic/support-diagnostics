@@ -26,7 +26,7 @@ public class RunClusterQueriesCmd extends BaseQueryCmd {
 
         try {
             DiagConfig diagConfig = context.getDiagsConfig();
-            List<RestEntry> entries = new ArrayList();
+            List<RestEntry> entries = new ArrayList<>();
             entries.addAll(context.getElasticRestCalls().values());
             runQueries(context.getEsRestClient(), entries, context.getTempDir(), diagConfig.getCallRetries(), diagConfig.getPauseRetries());
         } catch (Throwable t) {

@@ -34,7 +34,7 @@ public class RestEntryFactory {
     }
 
     public Map<String, RestEntry> buildEntryMap(Map<String, Object> config){
-        Map entries = new LinkedHashMap();
+        Map entries = new LinkedHashMap<>();
         for(Map.Entry<String, Object> entry: config.entrySet()){
             RestEntry re = build(entry);
             if(re.getUrl().equals(RestEntry.MISSING) ){
