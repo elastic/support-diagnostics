@@ -1,15 +1,21 @@
-package com.elastic.support.config;
+package com.elastic.support.rest;
 
 import com.beust.jcommander.Parameter;
+import com.elastic.support.Constants;
+import com.elastic.support.BaseInputs;
+import com.elastic.support.util.SystemProperties;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class ElasticClientInputs extends BaseInputs {
+import java.io.File;
 
-    Logger logger = LogManager.getLogger(ElasticClientInputs.class);
+public class ElasticRestClientInputs extends BaseInputs {
 
-    @Parameter(names = {"-h", "--host"}, required = true, description = "Required field.  Hostname, IP Address, or localhost.  HTTP access must be enabled.")
+    Logger logger = LogManager.getLogger(ElasticRestClientInputs.class);
+
+    @Parameter(names = {"-h", "--host"}, description = "Required field.  Hostname, IP Address, or localhost.  HTTP access must be enabled.")
     protected String host = "";
     public String getHost() {
         return host;
@@ -121,7 +127,7 @@ public class ElasticClientInputs extends BaseInputs {
         this.proxyUser = proxyUser;
     }
 
-    @Parameter (names = {"--proxyPassword"}, description = "Proxy server password.")
+    @Parameter (names = {"--proxyPassword"}, description = "Proxy server password.", password = true)
     protected String proxyPassword;
     public String getProxyPassword() {
         return proxyPassword;
@@ -156,14 +162,30 @@ public class ElasticClientInputs extends BaseInputs {
             return false;
         }
 
+        if(StringUtils.isEmpty(host)){
+            logger.info("A host name or IP Address configured as the HTTP endpoint of a cluster node is required.");
+            return false;
+        }
+
         if (StringUtils.isNotEmpty(this.plainTextPassword)) {
             this.password = plainTextPassword;
         }
 
         if (! isCompleteAuth(user, password)) {
-            logger.info("Input error: If authenticating both user and password are required.");
+            logger.info("If authenticating both user and password are required.");
             this.jCommander.usage();
             return false;
+        }
+
+        if (! isCompleteAuth(proxyUser, proxyPassword)) {
+            logger.info("Uwer was specified for proxy but no password. Failures may occur.");
+        }
+
+        if(StringUtils.isNotEmpty(pkiKeystore)){
+            File pki = new File(pkiKeystore);
+            if(! pki.exists()){
+                logger.info("A PKI Keystore was input but could not be located in the supplied location. Please check that the absolute path to the file is correct.");
+            }
         }
 
         return true;
@@ -177,5 +199,31 @@ public class ElasticClientInputs extends BaseInputs {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public String toString() {
+        StringBuffer sb = new StringBuffer(super.toString());
+        sb.append("Bypass Diag Verification: " + bypassDiagVerify + Constants.TAB);
+
+        sb.append("Host: " + host + Constants.TAB);
+        sb.append("Port: " + port + Constants.TAB );
+        sb.append("Elasticsearch Login User: " + user + Constants.TAB);
+
+        sb.append("Proxy Host: " + proxyHost + Constants.TAB );
+        sb.append("Proxy Host: " + proxyHost + Constants.TAB );
+        sb.append("Proxy User: " + proxyUser + Constants.TAB );
+
+        sb.append("SSL: " + isSsl + Constants.TAB);
+        sb.append("Skip hostname Verification: " + this.skipVerification + Constants.TAB);
+        sb.append("PKI Keystore: " + this.pkiKeystore + Constants.TAB);
+
+        if(StringUtils.isNotEmpty(plainTextPassword)){
+            sb.append("Password sent in plain text: " + true + Constants.TAB);
+        }
+
+        return sb.toString().trim();
+
+
     }
 }

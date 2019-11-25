@@ -1,7 +1,7 @@
 package com.elastic.support.scrub;
 
 import com.beust.jcommander.Parameter;
-import com.elastic.support.config.BaseInputs;
+import com.elastic.support.BaseInputs;
 import com.elastic.support.util.SystemProperties;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;

@@ -1,7 +1,6 @@
 package com.elastic.support.scrub;
-import com.elastic.support.config.Constants;
+import com.elastic.support.Constants;
 import com.elastic.support.BaseService;
-import com.elastic.support.config.ElasticClientInputs;
 import com.elastic.support.util.ArchiveUtils;
 import com.elastic.support.util.SystemProperties;
 import com.elastic.support.util.SystemUtils;

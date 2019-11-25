@@ -10,12 +10,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.util.*;
 
-public abstract class BaseQueryCmd implements Command {
+public abstract class BaseQuery implements Command {
 
-    private final Logger logger = LogManager.getLogger(BaseQueryCmd.class);
+    private final Logger logger = LogManager.getLogger(BaseQuery.class);
 
     /*
      * This class has shared functionality for both the Elasticsearch and

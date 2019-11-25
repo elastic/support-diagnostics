@@ -18,13 +18,13 @@ import java.io.*;
 import java.util.Arrays;
 import java.util.List;
 
-public class SystemDigestCmd implements Command {
+public class RetrieveSystemDigest implements Command {
 
     /**
      * Calls the OSHI librries to get system specific digest ouput in
      * JSON format.
      */
-    private final Logger logger = LogManager.getLogger(SystemDigestCmd.class);
+    private final Logger logger = LogManager.getLogger(RetrieveSystemDigest.class);
 
     public void execute(DiagnosticContext context) {
 

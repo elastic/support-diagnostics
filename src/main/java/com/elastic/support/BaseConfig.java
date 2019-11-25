@@ -1,4 +1,4 @@
-package com.elastic.support.config;
+package com.elastic.support;
 
 import java.util.Map;
 

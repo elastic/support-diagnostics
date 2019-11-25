@@ -1,7 +1,6 @@
 package com.elastic.support.diagnostics.commands;
 
-import com.elastic.support.config.Constants;
-import com.elastic.support.diagnostics.DiagnosticException;
+import com.elastic.support.Constants;
 import com.elastic.support.diagnostics.chain.Command;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.util.JsonYamlUtils;
@@ -21,7 +20,7 @@ import java.util.List;
 import java.util.Set;
 
 
-public class HostIdentifierCmd implements Command {
+public class VerifyHostType implements Command {
 
     /**
      * In this command the we look for the log location and pid. To do this we need
@@ -29,7 +28,7 @@ public class HostIdentifierCmd implements Command {
      * we use the input host hame if one was passed in. If it's a multi-node cluster and they used
      * localhost wee need to query the interfaces to see which one it was.
      */
-    private final Logger logger = LogManager.getLogger(HostIdentifierCmd.class);
+    private final Logger logger = LogManager.getLogger(VerifyHostType.class);
 
     public void execute(DiagnosticContext context) {
 
@@ -145,7 +144,6 @@ public class HostIdentifierCmd implements Command {
                         String addr = bnd.asText();
                         addr = addr.substring(0, addr.indexOf(":"));
                         nn.hostAndIp.add(addr);
-
                     }
                 }
 

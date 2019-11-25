@@ -1,6 +1,6 @@
 package com.elastic.support.diagnostics;
 
-import com.elastic.support.config.BaseConfig;
+import com.elastic.support.BaseConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

@@ -1,10 +1,13 @@
-package com.elastic.support.config;
+package com.elastic.support;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.elastic.support.util.SystemProperties;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class BaseInputs {
 
@@ -39,6 +42,7 @@ public abstract class BaseInputs {
 
 
     public boolean validate() {
+
         // If we're in help just shut down.
         if (isHelp()) {
             this.jCommander.usage();
@@ -46,4 +50,9 @@ public abstract class BaseInputs {
         }
         return true;
     }
+
+    public String toString(){
+        return "Output Directory: " + outputDir + SystemProperties.lineSeparator;
+    }
+
 }

@@ -1,6 +1,6 @@
 package com.elastic.support.diagnostics.commands;
 
-import com.elastic.support.config.Constants;
+import com.elastic.support.Constants;
 import com.elastic.support.diagnostics.DiagnosticException;
 import com.elastic.support.diagnostics.chain.Command;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
@@ -17,9 +17,9 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class SystemCallsCmd implements Command {
+public class CollectLocalSystemCalls extends BaseSystemCallCollection  implements Command {
 
-    private static final Logger logger = LogManager.getLogger(SystemCallsCmd.class);
+    private static final Logger logger = LogManager.getLogger(CollectLocalSystemCalls.class);
 
     public void execute(DiagnosticContext context) {
 

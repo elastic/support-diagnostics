@@ -1,4 +1,4 @@
-package com.elastic.support.config;
+package com.elastic.support;
 
 public class Constants {
 
@@ -11,7 +11,7 @@ public class Constants {
    public static final String ES_REST = "elastic-rest.yml";
    public static final String LS_REST = "logstash-rest.yml";
 
-   public static final String QUERY_CONFIG_PACKAGE = "extract/";
+   public static final String QUERY_CONFIG_PACKAGE = "monitoring-extract/";
    public static final String MONITORING_DIR = "monitoring-export";
    public static final String MONITORING_PREFIX= ".monitoring-es-7-import-";
 
@@ -35,5 +35,14 @@ public class Constants {
    public static final String winPlatform = "winOS";
    public static final String linuxPlatform = "linuxOs";
    public static final String macPlatform = "macOS";
+
+   public static final String TAB = "\t";
+
+   public final static String local =  "local";
+   public final static String localApi = "local-api";
+   public final static String logstash = "logstash";
+   public final static String logstashApi = "logstash-api";
+   public final static String docker = "docker";
+   public final static String dockerApi = "docker-api";
 
 }

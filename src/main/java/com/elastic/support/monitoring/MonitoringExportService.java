@@ -1,7 +1,7 @@
 package com.elastic.support.monitoring;
 
-import com.elastic.support.ElasticClientService;
-import com.elastic.support.config.Constants;
+import com.elastic.support.rest.ElasticRestClientService;
+import com.elastic.support.Constants;
 import com.elastic.support.diagnostics.DiagnosticException;
 import com.elastic.support.rest.RestClient;
 import com.elastic.support.rest.RestResult;
@@ -24,7 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MonitoringExportService extends ElasticClientService {
+public class MonitoringExportService extends ElasticRestClientService {
 
     private Logger logger = LogManager.getLogger(MonitoringExportService.class);
     private static final String SCROLL_ID = "{ \"scroll_id\" : \"{{scrollId}}\" }";

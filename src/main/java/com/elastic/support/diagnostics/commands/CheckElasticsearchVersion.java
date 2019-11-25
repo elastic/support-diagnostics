@@ -1,6 +1,6 @@
 package com.elastic.support.diagnostics.commands;
 
-import com.elastic.support.config.Constants;
+import com.elastic.support.Constants;
 import com.elastic.support.diagnostics.DiagnosticException;
 import com.elastic.support.diagnostics.chain.Command;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
@@ -18,7 +18,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.Map;
 
 
-public class ElasticsearchVersionCheckCmd implements Command {
+public class CheckElasticsearchVersion implements Command {
 
     /**
      * Gets the version of Elasticsearch that is running. This also
@@ -27,7 +27,7 @@ public class ElasticsearchVersionCheckCmd implements Command {
      * that is should usually succeed. If we don't have a version we
      * won't be able to generate the correct call selection later on.
      */
-    private final Logger logger = LogManager.getLogger(ElasticsearchVersionCheckCmd.class);
+    private final Logger logger = LogManager.getLogger(CheckElasticsearchVersion.class);
 
     public void execute(DiagnosticContext context) {
 

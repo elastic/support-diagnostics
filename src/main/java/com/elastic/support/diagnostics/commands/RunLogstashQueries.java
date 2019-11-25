@@ -1,6 +1,6 @@
 package com.elastic.support.diagnostics.commands;
 
-import com.elastic.support.config.Constants;
+import com.elastic.support.Constants;
 import com.elastic.support.diagnostics.DiagnosticException;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.rest.RestEntry;
@@ -13,13 +13,13 @@ import org.apache.logging.log4j.Logger;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RunLogstashQueriesCmd extends BaseQueryCmd {
+public class RunLogstashQueries extends BaseQuery {
 
    /**
     * Executes the REST calls for Logstash
     */
 
-   private static final Logger logger = LogManager.getLogger(BaseQueryCmd.class);
+   private static final Logger logger = LogManager.getLogger(BaseQuery.class);
 
    public void execute(DiagnosticContext context) {
 

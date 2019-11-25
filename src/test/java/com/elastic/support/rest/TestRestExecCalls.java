@@ -1,7 +1,6 @@
 package com.elastic.support.rest;
 
-import com.elastic.support.diagnostics.DiagConfig;
-import com.elastic.support.diagnostics.commands.RunClusterQueriesCmd;
+import com.elastic.support.diagnostics.commands.RunClusterQueries;
 import com.elastic.support.util.SystemProperties;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
@@ -16,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -161,7 +159,7 @@ public class TestRestExecCalls {
     @Test
     public void testFailThenSucceed() {
 
-        RunClusterQueriesCmd cmd = new RunClusterQueriesCmd();
+        RunClusterQueries cmd = new RunClusterQueries();
         List<RestEntry> entries = new ArrayList<>();
         entries.add(new RestEntry("nodes", "", ".json", true, "/_nodes?pretty"));
         mockServer
@@ -203,7 +201,7 @@ public class TestRestExecCalls {
     @Test
     public void testRetryAllFail() {
 
-        RunClusterQueriesCmd cmd = new RunClusterQueriesCmd();
+        RunClusterQueries cmd = new RunClusterQueries();
         List<RestEntry> entries = new ArrayList<>();
         entries.add(new RestEntry("nodes", "", ".json", true, "/_nodes?pretty"));
         mockServer
@@ -232,7 +230,7 @@ public class TestRestExecCalls {
     @Test
     public void testAuthFailure() {
 
-        RunClusterQueriesCmd cmd = new RunClusterQueriesCmd();
+        RunClusterQueries cmd = new RunClusterQueries();
         List<RestEntry> entries = new ArrayList<>();
         entries.add(new RestEntry("nodes", "", ".json", true, "/_nodes?pretty"));
 

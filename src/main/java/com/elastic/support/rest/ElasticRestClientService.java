@@ -1,26 +1,24 @@
-package com.elastic.support;
+package com.elastic.support.rest;
 
-import com.elastic.support.config.BaseConfig;
-import com.elastic.support.config.ElasticClientInputs;
-import com.elastic.support.rest.RestClient;
-import com.elastic.support.rest.RestClientBuilder;
+import com.elastic.support.BaseService;
+import com.elastic.support.BaseConfig;
 import com.elastic.support.util.SystemProperties;
 import com.elastic.support.util.SystemUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class ElasticClientService extends BaseService {
+public class ElasticRestClientService extends BaseService {
 
-    private Logger logger = LogManager.getLogger(ElasticClientInputs.class);
+    private Logger logger = LogManager.getLogger(ElasticRestClientInputs.class);
 
 
-    protected RestClient createGenericClient(BaseConfig config, ElasticClientInputs inputs) {
+    protected RestClient createGenericClient(BaseConfig config, ElasticRestClientInputs inputs) {
         RestClientBuilder builder = setupBuilder(config, inputs);
         return builder.build();
     }
 
-    protected RestClient createEsRestClient(BaseConfig config, ElasticClientInputs inputs) {
+    protected RestClient createEsRestClient(BaseConfig config, ElasticRestClientInputs inputs) {
         RestClientBuilder builder = setupBuilder(config, inputs);
         builder.setBypassVerify(inputs.isSkipVerification())
                 .setHost(inputs.getHost())
@@ -47,7 +45,7 @@ public class ElasticClientService extends BaseService {
         return builder.build();
     }
 
-    RestClientBuilder setupBuilder(BaseConfig config, ElasticClientInputs inputs){
+    RestClientBuilder setupBuilder(BaseConfig config, ElasticRestClientInputs inputs){
 
         RestClientBuilder builder = new RestClientBuilder();
 
