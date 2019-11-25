@@ -45,7 +45,7 @@ public class ScrubService extends BaseService {
          }
 
          // Start out clean
-         SystemUtils.nukeDirectory(outputDir);
+         SystemUtils.nukeDirectory(temp);
          createFileAppender(temp, "scrubber.log");
 
          if(isArchive){
