@@ -1,10 +1,8 @@
 package com.elastic.support.diagnostics.commands;
 
 
-import com.elastic.support.diagnostics.commands.UserRoleCheckCmd;
 import com.elastic.support.util.JsonYamlUtils;
 import com.fasterxml.jackson.databind.JsonNode;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
@@ -20,7 +18,7 @@ public class TestUserRoleCheck {
     JsonNode versionLaterValidUser = JsonYamlUtils.createJsonNodeFromString("{\"elastic\": { \"username\": \"elastic\", \"roles\": [\"superuser\"] }}");
     JsonNode versionLaterInvalidUser = JsonYamlUtils.createJsonNodeFromString("{\"elastic\": { \"username\": \"elastic\", \"roles\": [\"notsuperuser\"] }}");
 
-    UserRoleCheckCmd cmd = new UserRoleCheckCmd();
+    CheckUserAuthLevel cmd = new CheckUserAuthLevel();
 
     @Test
     public void testEarlierValidUser(){

@@ -15,11 +15,10 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
-public class UserRoleCheckCmd implements Command {
+public class CheckUserAuthLevel implements Command {
 
-    Logger logger = LogManager.getLogger(UserRoleCheckCmd.class);
+    Logger logger = LogManager.getLogger(CheckUserAuthLevel.class);
 
     @Override
     public void execute(DiagnosticContext context) {

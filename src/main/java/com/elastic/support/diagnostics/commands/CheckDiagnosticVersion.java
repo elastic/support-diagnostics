@@ -1,6 +1,6 @@
 package com.elastic.support.diagnostics.commands;
 
-import com.elastic.support.config.Constants;
+import com.elastic.support.Constants;
 import com.elastic.support.diagnostics.DiagConfig;
 import com.elastic.support.diagnostics.DiagnosticInputs;
 import com.elastic.support.diagnostics.chain.Command;
@@ -18,9 +18,9 @@ import java.util.Map;
 import java.util.Scanner;
 
 
-public class DiagVersionCheckCmd implements Command {
+public class CheckDiagnosticVersion implements Command {
 
-    private final Logger logger = LogManager.getLogger(DiagVersionCheckCmd.class);
+    private final Logger logger = LogManager.getLogger(CheckDiagnosticVersion.class);
 
     /**
      * Checks the embedded version of the current diagnostic created when the jar was built

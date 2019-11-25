@@ -1,12 +1,11 @@
 package com.elastic.support.diagnostics;
 
-import com.elastic.support.config.Constants;
+import com.elastic.support.Constants;
 import com.elastic.support.util.JsonYamlUtils;
 import com.elastic.support.util.SystemProperties;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.List;
 import java.util.Map;
 
 public class DiagnosticApp {

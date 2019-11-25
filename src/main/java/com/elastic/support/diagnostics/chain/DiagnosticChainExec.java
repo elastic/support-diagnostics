@@ -1,6 +1,6 @@
 package com.elastic.support.diagnostics.chain;
 
-import com.elastic.support.config.Constants;
+import com.elastic.support.Constants;
 import com.elastic.support.diagnostics.DiagnosticException;
 import com.elastic.support.diagnostics.commands.*;
 import com.elastic.support.util.SystemProperties;
@@ -15,30 +15,29 @@ public class DiagnosticChainExec {
     public static void runDiagnostic(DiagnosticContext context, String type) {
 
         try {
-            if("standard".equals(type) || "remote".equals(type)) {
-                new GenerateManifestCmd().execute(context);
-                new DiagVersionCheckCmd().execute(context);
-                new ElasticsearchVersionCheckCmd().execute(context);
-                new UserRoleCheckCmd().execute(context);
-                new RunClusterQueriesCmd().execute(context);
+            new CheckDiagnosticVersion().execute(context);
+
+            if(Constants.local.equals(type) || Constants.localApi.equals(type)) {
+                new CheckElasticsearchVersion().execute(context);
+                new CheckUserAuthLevel().execute(context);
+                new RunClusterQueries().execute(context);
             }
 
-            if("standard".equals(type)){
-                new HostIdentifierCmd().execute(context);
-                new CollectLogsCmd().execute(context);
-                new SystemCallsCmd().execute(context);
-                new SystemDigestCmd().execute(context);
+            if(Constants.local.equals(type)){
+                new VerifyHostType().execute(context);
+                new CollectLocalLogs().execute(context);
+                new CollectLocalSystemCalls().execute(context);
+                new RetrieveSystemDigest().execute(context);
             }
 
-            if("logstash".equals(type)){
-                new GenerateManifestCmd().execute(context);
-                new DiagVersionCheckCmd().execute(context);
-                new RunLogstashQueriesCmd().execute(context);
-                new SystemCallsCmd().execute(context);
-                new SystemDigestCmd().execute(context);
+            if(Constants.logstash.equals(type)){
+                new RunLogstashQueries().execute(context);
+                new CollectLocalSystemCalls().execute(context);
+                new RetrieveSystemDigest().execute(context);
             }
 
-
+            new GenerateManifest().execute(context);
+            
         } catch (DiagnosticException de) {
             throw de;
         }

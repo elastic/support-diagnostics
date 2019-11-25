@@ -1,6 +1,6 @@
 package com.elastic.support.monitoring;
 
-import com.elastic.support.config.Constants;
+import com.elastic.support.Constants;
 import com.elastic.support.rest.RestClient;
 import com.elastic.support.rest.RestResult;
 import com.elastic.support.util.ArchiveEntryProcessor;

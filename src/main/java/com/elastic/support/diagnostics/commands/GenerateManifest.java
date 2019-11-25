@@ -1,6 +1,6 @@
 package com.elastic.support.diagnostics.commands;
 
-import com.elastic.support.config.Constants;
+import com.elastic.support.Constants;
 import com.elastic.support.diagnostics.DiagnosticInputs;
 import com.elastic.support.diagnostics.chain.Command;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
@@ -18,14 +18,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
 
-public class GenerateManifestCmd  implements Command {
+public class GenerateManifest implements Command {
 
    /**
     * Generate a manifest containing the basic runtime info for the diagnostic runtime.
     * Some of the values we get, like the Diagnostic version will be used again
     * downstream.
     */
-   private final Logger logger = LogManager.getLogger(GenerateManifestCmd.class);
+   private final Logger logger = LogManager.getLogger(GenerateManifest.class);
 
    public void execute(DiagnosticContext context) {
 
@@ -54,7 +54,7 @@ public class GenerateManifestCmd  implements Command {
    }
 
    public String getToolVersion() {
-      String ver = GenerateManifestCmd.class.getPackage().getImplementationVersion();
+      String ver = GenerateManifest.class.getPackage().getImplementationVersion();
       return (ver != null) ? ver : "Debug";
    }
 

@@ -1,7 +1,7 @@
 package com.elastic.support.monitoring;
 
-import com.elastic.support.ElasticClientService;
-import com.elastic.support.config.Constants;
+import com.elastic.support.rest.ElasticRestClientService;
+import com.elastic.support.Constants;
 import com.elastic.support.rest.RestClient;
 import com.elastic.support.util.ArchiveUtils;
 import com.elastic.support.util.JsonYamlUtils;
@@ -15,7 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;
 
-public class MonitoringImportService extends ElasticClientService {
+public class MonitoringImportService extends ElasticRestClientService {
 
     private Logger logger = LogManager.getLogger(MonitoringImportService.class);
     private static final String SCROLL_ID = "{ \"scroll_id\" : \"{{scrollId}}\" }";

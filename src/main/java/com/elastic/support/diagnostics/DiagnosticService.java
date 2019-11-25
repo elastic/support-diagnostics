@@ -1,27 +1,21 @@
 package com.elastic.support.diagnostics;
 
-import com.elastic.support.BaseService;
-import com.elastic.support.ElasticClientService;
-import com.elastic.support.config.Constants;
-import com.elastic.support.config.ElasticClientInputs;
+import com.elastic.support.rest.ElasticRestClientService;
+import com.elastic.support.Constants;
 import com.elastic.support.diagnostics.chain.DiagnosticChainExec;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.rest.RestClient;
-import com.elastic.support.rest.RestClientBuilder;
 import com.elastic.support.util.SystemProperties;
 import com.elastic.support.util.SystemUtils;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.List;
-import java.util.Map;
 
-public class DiagnosticService extends ElasticClientService {
+public class DiagnosticService extends ElasticRestClientService {
 
     private Logger logger = LogManager.getLogger(DiagnosticService.class);
 

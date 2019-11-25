@@ -1,7 +1,7 @@
 package com.elastic.support.monitoring;
 
 import com.beust.jcommander.Parameter;
-import com.elastic.support.config.ElasticClientInputs;
+import com.elastic.support.rest.ElasticRestClientInputs;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -10,9 +10,9 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
-public class MonitoringExportInputs extends ElasticClientInputs {
+public class MonitoringExportInputs extends ElasticRestClientInputs {
 
-    private static final Logger logger = LogManager.getLogger(ElasticClientInputs.class);
+    private static final Logger logger = LogManager.getLogger(ElasticRestClientInputs.class);
     private static int defaultInterval = 6;
 
     @Parameter(names = {"--id"}, description = "Required except when the list command is used: The cluster_uuid of the monitored cluster you wish to extract data for. If you do not know this you can obtain it from that cluster using <protocol>://<host>:port/ .")

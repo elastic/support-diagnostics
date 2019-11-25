@@ -1,10 +1,8 @@
 package com.elastic.support.diagnostics.commands;
 
-import com.elastic.support.config.Constants;
 import com.elastic.support.diagnostics.chain.Command;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.util.SystemProperties;
-import com.elastic.support.util.SystemUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.comparator.LastModifiedFileComparator;
 import org.apache.commons.io.filefilter.RegexFileFilter;
@@ -20,7 +18,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-public class CollectLogsCmd implements Command {
+public class CollectLocalLogs extends BaseLogCollection implements Command {
 
     /**
      * Collects logs on the host the diagnostic is run on. It will collect
@@ -28,7 +26,7 @@ public class CollectLogsCmd implements Command {
      * from the nodes output previously. If that call did not succeed this won't
      * be possible however.
      */
-    private final Logger logger = LogManager.getLogger(CollectLogsCmd.class);
+    private final Logger logger = LogManager.getLogger(CollectLocalLogs.class);
 
     public void execute(DiagnosticContext context) {
 
@@ -39,17 +37,16 @@ public class CollectLogsCmd implements Command {
 
         String logs = context.getLogDir();
 
-        boolean getAccess = context.getDiagnosticInputs().isAccessLogs();
         int maxLogs = context.getDiagsConfig().getLogSettings().get("maxLogs");
         int maxGcLogs = context.getDiagsConfig().getLogSettings().get("maxGcLogs");
         String tempDir = context.getTempDir();
         logger.info("Processing log files.");
-        collectLogs(logs, tempDir, maxLogs, maxGcLogs, getAccess);
+        collectLogs(logs, tempDir, maxLogs, maxGcLogs);
         logger.info("Finished processing logs.");
 
     }
 
-    public void collectLogs(String logs, String tempDir, int maxLogs, int maxGcLogs, boolean getAccess){
+    public void collectLogs(String logs, String tempDir, int maxLogs, int maxGcLogs){
         try {
             // Create a directory for this node
             String nodeDir = tempDir + SystemProperties.fileSeparator + "logs";
@@ -66,11 +63,7 @@ public class CollectLogsCmd implements Command {
                     if (name.contains("deprecation")) {
                         continue;
                     }
-                    if (name.contains("access")) {
-                        if (!getAccess) {
-                            continue;
-                        }
-                    }
+
                     keepers.add(logfile);
                 }
 

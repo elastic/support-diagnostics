@@ -1,7 +1,7 @@
 package com.elastic.support.scrub;
 
 import com.elastic.support.util.ArchiveEntryProcessor;
-import com.elastic.support.config.Constants;
+import com.elastic.support.Constants;
 import com.elastic.support.util.JsonYamlUtils;
 import com.elastic.support.util.SystemProperties;
 import org.apache.commons.lang3.StringUtils;

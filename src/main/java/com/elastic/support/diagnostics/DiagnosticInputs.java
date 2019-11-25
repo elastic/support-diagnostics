@@ -1,25 +1,38 @@
 package com.elastic.support.diagnostics;
 
 import com.beust.jcommander.Parameter;
-import com.elastic.support.config.BaseInputs;
-import com.elastic.support.config.Constants;
-import com.elastic.support.config.ElasticClientInputs;
+import com.elastic.support.Constants;
+import com.elastic.support.rest.ElasticRestClientInputs;
 import com.elastic.support.util.SystemProperties;
+import com.sun.xml.bind.v2.runtime.reflect.opt.Const;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class DiagnosticInputs extends ElasticClientInputs {
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+public class DiagnosticInputs extends ElasticRestClientInputs {
 
     private static Logger logger = LogManager.getLogger(DiagnosticInputs.class);
 
+    public final static String[]
+            DiagnosticTypeValues = {
+            Constants.local,
+            Constants.local,
+            Constants.logstash,
+            Constants.logstashApi,
+            Constants.docker,
+            Constants.dockerApi};
 
-    @Parameter(names = {"--accessLogs"}, description = "Use this option to collect access logs as well.")
-    protected boolean accessLogs = false;
+    protected ArrayList<String> diagnosticTypes = new ArrayList<>(Arrays.asList(DiagnosticTypeValues));
+
     @Parameter (names = {"--dockerId"}, description = "ID of the docker container Elasticsearch is running in.")
     protected String dockerId;
 
-    @Parameter(names = {"--type"}, description = "DiagnosticService type to run. Enter standard, remote, logstash. Default is standard. Using remote will suppress retrieval of logs, configuration and system command info.")
+    @Parameter(names = {"--type"}, description = "Designates the type of service to run. Enter local, local-api, remote, remote-api, docker, remote-docker, logstash, remote-logstash. Required.")
     protected String diagType = "standard";
     public String getDiagType() {
         return diagType;
@@ -27,14 +40,6 @@ public class DiagnosticInputs extends ElasticClientInputs {
 
     public void setDiagType(String diagType) {
         this.diagType = diagType;
-    }
-
-    public boolean isAccessLogs() {
-        return accessLogs;
-    }
-
-    public void setAccessLogs(boolean accessLogs) {
-        this.accessLogs = accessLogs;
     }
 
     public String getDockerId() {
@@ -54,20 +59,36 @@ public class DiagnosticInputs extends ElasticClientInputs {
         return port;
     }
 
+    public boolean validate(){
+        if(! super.validate()){
+            return false;
+        }
 
+        if(! diagnosticTypes.contains(diagType)){
+            logger.info("Invalid diagnostic type entered. Please specify one of the following: {}", StringUtils.join(DiagnosticTypeValues));
+            return false;
+        }
+
+        if(diagType.equals(Constants.docker)){
+            if(StringUtils.isEmpty(dockerId)){
+                logger.info("When specifying a diagnostic type of Docker you must provide a docker id.");
+                return false;
+            }
+        }
+
+        return true;
+
+    }
 
 
     @Override
     public String toString() {
-        return "DiagnosticInputs{" +
-                ", outputDir='" + outputDir + '\'' +
-                ", host='" + host + '\'' +
-                ", port=" + port +
-                ", isSsl=" + isSsl +
-                ", diagType='" + diagType + '\'' +
-                ", skipVerification=" + skipVerification +
-                ", skipAccessLogs=" + accessLogs +
-                ", skip DiagVerify=" + bypassDiagVerify +
-                '}';
+        StringBuffer sb = new StringBuffer(super.toString());
+
+        sb.append("Diagnostic Type: " + this.diagType + Constants.TAB );
+        sb.append("Docker Id: "  + this.dockerId + Constants.TAB );
+
+        return sb.toString().trim();
+
     }
 }

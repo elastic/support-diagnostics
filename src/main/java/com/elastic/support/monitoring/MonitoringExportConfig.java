@@ -1,8 +1,8 @@
 package com.elastic.support.monitoring;
 
 
-import com.elastic.support.config.BaseConfig;
-import com.elastic.support.config.Constants;
+import com.elastic.support.BaseConfig;
+import com.elastic.support.Constants;
 import com.elastic.support.util.SystemProperties;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

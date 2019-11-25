@@ -1,7 +1,7 @@
 package com.elastic.support.util;
 
 
-import com.elastic.support.config.Constants;
+import com.elastic.support.Constants;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
