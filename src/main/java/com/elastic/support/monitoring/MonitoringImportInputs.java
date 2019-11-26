@@ -2,6 +2,7 @@ package com.elastic.support.monitoring;
 
 import com.beust.jcommander.Parameter;
 import com.elastic.support.rest.ElasticRestClientInputs;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -42,9 +43,11 @@ public class MonitoringImportInputs extends ElasticRestClientInputs {
             return false;
         }
 
-        if(clusterName.contains(" ")){
-            logger.warn("Spaces not permitted in cluster name");
-            return false;
+        if(StringUtils.isNotEmpty(clusterName)) {
+            if (clusterName.contains(" ")) {
+                logger.warn("Spaces not permitted in cluster name");
+                return false;
+            }
         }
 
         if(indexName.contains(" ")){

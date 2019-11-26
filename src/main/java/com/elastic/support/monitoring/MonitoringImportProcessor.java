@@ -73,7 +73,12 @@ public class MonitoringImportProcessor implements ArchiveEntryProcessor {
                     String clusterName = sourceObject.path("cluster_name").asText();
 
                     if(updateClusterName && StringUtils.isNotEmpty(clusterName)){
-                        sourceObject.put("clusterName", clusterName);
+                        sourceObject.put("cluster_name", newClusterName);
+                    }
+
+                    String altClusterName = sourceObject.path("cluster_settings").path("cluster").path("metadata").path("display_name").asText();
+                    if(StringUtils.isNotEmpty(altClusterName)){
+                        sourceObject.with("cluster_settings").with("cluster").with("metadata").put("display_name", newClusterName);
                     }
 
                     String sourceLine= JsonYamlUtils.mapper.writeValueAsString(sourceObject);

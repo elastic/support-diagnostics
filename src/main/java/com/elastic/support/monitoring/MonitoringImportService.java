@@ -3,10 +3,12 @@ package com.elastic.support.monitoring;
 import com.elastic.support.rest.ElasticRestClientService;
 import com.elastic.support.Constants;
 import com.elastic.support.rest.RestClient;
+import com.elastic.support.rest.RestEntry;
 import com.elastic.support.util.ArchiveUtils;
 import com.elastic.support.util.JsonYamlUtils;
 import com.elastic.support.util.SystemProperties;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -19,21 +21,17 @@ public class MonitoringImportService extends ElasticRestClientService {
 
     private Logger logger = LogManager.getLogger(MonitoringImportService.class);
     private static final String SCROLL_ID = "{ \"scroll_id\" : \"{{scrollId}}\" }";
-    private RestClient client;
-    private MonitoringExportConfig monitoringExtractConfig;
-    private MonitoringImportInputs monitoringImportInputs;
-    private String tempDir = SystemProperties.userDir + SystemProperties.fileSeparator + Constants.MONITORING_DIR;
 
-    public MonitoringImportService(MonitoringImportInputs inputs){
-        this.monitoringImportInputs = inputs;
-        Map configMap = JsonYamlUtils.readYamlFromClasspath(Constants.DIAG_CONFIG, true);
-        monitoringExtractConfig = new MonitoringExportConfig(configMap);
-        client = createEsRestClient(monitoringExtractConfig, inputs);
-    }
+    void execImport(MonitoringImportInputs inputs){
 
-    void execImport(){
-
+        RestClient client = null;
         try {
+            Map configMap = JsonYamlUtils.readYamlFromClasspath(Constants.DIAG_CONFIG, true);
+            MonitoringExportConfig monitoringExtractConfig = new MonitoringExportConfig(configMap);
+            client = createEsRestClient(monitoringExtractConfig, inputs);
+
+            String tempDir = SystemProperties.userDir + SystemProperties.fileSeparator + Constants.MONITORING_DIR;
+
             // Create the temp directory - delete if first if it exists from a previous run
             logger.info("Creating temp directory: {}", tempDir);
 
@@ -44,8 +42,8 @@ public class MonitoringImportService extends ElasticRestClientService {
             // It will go to wherever we have the temp dir set up.
             logger.info("Configuring log file.");
             createFileAppender(tempDir, "import.log");
-            ArchiveUtils archiveUtils = new ArchiveUtils(new MonitoringImportProcessor(monitoringExtractConfig, monitoringImportInputs, client));
-            archiveUtils.extractDiagnosticArchive(monitoringImportInputs.input);
+            ArchiveUtils archiveUtils = new ArchiveUtils(new MonitoringImportProcessor(monitoringExtractConfig, inputs, client));
+            archiveUtils.extractDiagnosticArchive(inputs.input);
 
 
         }catch (Throwable t){

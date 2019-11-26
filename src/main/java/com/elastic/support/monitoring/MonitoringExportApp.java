@@ -17,7 +17,6 @@ public class MonitoringExportApp {
             System.exit(0);
         }
 
-        MonitoringExportService service = new MonitoringExportService(monitoringExportInputs);
-        service.execExtract();
+        new MonitoringExportService().execExtract(monitoringExportInputs);
     }
 }
