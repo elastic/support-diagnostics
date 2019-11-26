@@ -18,8 +18,7 @@ public class MonitoringImportApp {
             System.exit(0);
         }
 
-        MonitoringImportService service = new MonitoringImportService(monitoringImportInputs);
-        service.execImport();
+        new MonitoringImportService().execImport(monitoringImportInputs);
     }
 
 

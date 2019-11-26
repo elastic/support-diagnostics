@@ -28,24 +28,24 @@ public class MonitoringExportService extends ElasticRestClientService {
 
     private Logger logger = LogManager.getLogger(MonitoringExportService.class);
     private static final String SCROLL_ID = "{ \"scroll_id\" : \"{{scrollId}}\" }";
-    private RestClient client;
-    private MonitoringExportConfig config;
-    private MonitoringExportInputs inputs;
-    private String tempDir = SystemProperties.userDir + SystemProperties.fileSeparator + Constants.MONITORING_DIR;
 
-    public MonitoringExportService(MonitoringExportInputs inputs) {
-        this.inputs =  inputs;
+    public void execExtract(MonitoringExportInputs inputs) {
+
+        RestClient client = null;
         Map configMap = JsonYamlUtils.readYamlFromClasspath(Constants.DIAG_CONFIG, true);
-        config = new MonitoringExportConfig(configMap);
-        client = createEsRestClient(config, inputs);
-        if(StringUtils.isNotEmpty(inputs.getOutputDir())){
-            tempDir = inputs.getOutputDir() + SystemProperties.fileSeparator + Constants.MONITORING_DIR;;
-        }
-    }
-
-    public void execExtract() {
+        MonitoringExportConfig config = new MonitoringExportConfig(configMap);
 
         try {
+            client = createEsRestClient(config, inputs);
+
+            String tempDir = "";
+            if(StringUtils.isNotEmpty(inputs.getOutputDir())){
+                tempDir = inputs.getOutputDir() + SystemProperties.fileSeparator + Constants.MONITORING_DIR;;
+            }
+            else{
+                tempDir = SystemProperties.userDir + SystemProperties.fileSeparator + Constants.MONITORING_DIR;
+            }
+
             // Create the temp directory - delete if first if it exists from a previous run
             logger.info("Creating temp directory: {}", tempDir);
 
@@ -61,13 +61,13 @@ public class MonitoringExportService extends ElasticRestClientService {
 
             // They may just want a list of available clusters
             if(inputs.listClusters){
-                List<Map<String, String>> clusters = getMonitoredClusters();
+                List<Map<String, String>> clusters = getMonitoredClusters(config, client);
                 displayAvailableClusters(clusters);
             }
             else{
                 // Run service logic here
-                validateClusterId();
-                runExportQueries();
+                validateClusterId(inputs.clusterId, config, client);
+                runExportQueries(tempDir, client, config, inputs.queryStartDate, inputs.queryEndDate, inputs.clusterId);
                 closeLogs();
                 createArchive(tempDir);
             }
@@ -79,7 +79,7 @@ public class MonitoringExportService extends ElasticRestClientService {
             else if(de.getMessage().equalsIgnoreCase("noClusterIdFound")){
                 logger.error("Entered cluster id not found. Please enure you have a valid cluster_uuid for the monitored clusters.");
                 logger.info("Listing available monitored clusters on this deployment:");
-                List<Map<String, String>> clusters = getMonitoredClusters();
+                List<Map<String, String>> clusters = getMonitoredClusters(config, client);
                 displayAvailableClusters(clusters);
             }
             logger.error("Cannot contiue processing. Exiting {}", Constants.CHECK_LOG);
@@ -98,17 +98,17 @@ public class MonitoringExportService extends ElasticRestClientService {
         }
     }
 
-    private void validateClusterId(){
+    private void validateClusterId(String clusterId, MonitoringExportConfig config, RestClient client){
 
-        if(StringUtils.isEmpty(inputs.clusterId)){
+        if(StringUtils.isEmpty(clusterId)){
             logger.error("Cluster id is required. Diaplaying a list of available clusters.");
-            List<Map<String, String>> clusters = getMonitoredClusters();
+            List<Map<String, String>> clusters = getMonitoredClusters(config, client );
             displayAvailableClusters(clusters);
             throw new DiagnosticException("missingClusterId");
         }
 
         String clusterIdQuery = config.queries.get("cluster_id_check");
-        clusterIdQuery = clusterIdQuery.replace("{{clusterId}}", inputs.clusterId);
+        clusterIdQuery = clusterIdQuery.replace("{{clusterId}}", clusterId);
 
         RestResult restResult = new RestResult(client.execPost(config.monitoringUri , clusterIdQuery), config.monitoringUri);
         if (restResult.getStatus() != 200) {
@@ -125,7 +125,7 @@ public class MonitoringExportService extends ElasticRestClientService {
 
     }
 
-    private List<Map<String, String>> getMonitoredClusters(){
+    private List<Map<String, String>> getMonitoredClusters(MonitoringExportConfig config, RestClient client){
 
         String clusterIdQuery = config.queries.get("cluster_ids");
 
@@ -169,7 +169,7 @@ public class MonitoringExportService extends ElasticRestClientService {
         }
     }
 
-    private void runExportQueries() {
+    private void runExportQueries(String tempDir, RestClient client, MonitoringExportConfig config, String queryStartDate, String queryEndDate, String clusterId) {
 
         //Get the monitoring stats labels and the general query.
         List<String> statsFields = config.monitoringStats;
@@ -193,16 +193,13 @@ public class MonitoringExportService extends ElasticRestClientService {
 
             query = query.replace("{{type}}", stat);
             query = query.replace("{{size}}", monitoringScroll);
-            query = query.replace("{{start}}", inputs.queryStartDate);
-            query = query.replace("{{stop}}", inputs.queryEndDate);
-            query = query.replace("{{clusterId}}", inputs.clusterId);
+            query = query.replace("{{start}}", queryStartDate);
+            query = query.replace("{{stop}}", queryEndDate);
+            query = query.replace("{{clusterId}}", clusterId);
 
 
             PrintWriter pw = null;
             try {
-
-                String scrollId = "";
-
                 RestResult restResult = new RestResult(client.execPost(uri, query), uri);
                 if (restResult.getStatus() != 200) {
                     logger.error("Initial retrieve for stat: {} failed with status: {}, reason: {}, bypassing and going to next call.", stat, restResult.getStatus(), restResult.getReason());
@@ -225,7 +222,7 @@ public class MonitoringExportService extends ElasticRestClientService {
                 ArrayNode hitsNode = getHitsArray(resultNode);
                 long hitsCount = hitsNode.size();
                 long processedHits = 0;
-
+                String scrollId;
                 do {
                     // We may have multiple scrolls coming back so process the first one.
                     processHits(hitsNode, pw);
