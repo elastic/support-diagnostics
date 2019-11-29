@@ -1,5 +1,6 @@
 package com.elastic.support.monitoring;
 
+import com.elastic.support.diagnostics.commands.CheckElasticsearchVersion;
 import com.elastic.support.rest.ElasticRestClientService;
 import com.elastic.support.Constants;
 import com.elastic.support.diagnostics.DiagnosticException;
@@ -11,6 +12,7 @@ import com.elastic.support.util.SystemUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.vdurmont.semver4j.Semver;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -31,59 +33,59 @@ public class MonitoringExportService extends ElasticRestClientService {
 
     public void execExtract(MonitoringExportInputs inputs) {
 
+        // Initialize outside the block for Exception handling
         RestClient client = null;
-        Map configMap = JsonYamlUtils.readYamlFromClasspath(Constants.DIAG_CONFIG, true);
-        MonitoringExportConfig config = new MonitoringExportConfig(configMap);
+        MonitoringExportConfig config = null;
+        String tempDir = SystemProperties.fileSeparator + Constants.MONITORING_DIR;
 
         try {
-            client = createEsRestClient(config, inputs);
-
-            String tempDir = "";
-            if(StringUtils.isNotEmpty(inputs.getOutputDir())){
-                tempDir = inputs.getOutputDir() + SystemProperties.fileSeparator + Constants.MONITORING_DIR;;
+            if(StringUtils.isEmpty(inputs.getOutputDir())){
+                tempDir = SystemProperties.userDir + tempDir;
             }
             else{
-                tempDir = SystemProperties.userDir + SystemProperties.fileSeparator + Constants.MONITORING_DIR;
+                tempDir = inputs.getOutputDir() + tempDir;
             }
 
-            // Create the temp directory - delete if first if it exists from a previous run
-            logger.info("Creating temp directory: {}", tempDir);
-
-            FileUtils.deleteDirectory(new File(tempDir));
-            Files.createDirectories(Paths.get(tempDir));
-
-            logger.info("Sucessfully created temp directory.");
-
+            // Initialize the temp directory first.
             // Set up the log file manually since we're going to package it with the diagnostic.
             // It will go to wherever we have the temp dir set up.
-            logger.info("Configuring log file.");
+            SystemUtils.nukeDirectory(tempDir);
+            Files.createDirectories(Paths.get(tempDir));
             createFileAppender(tempDir, "extract.log");
 
-            // They may just want a list of available clusters
+            Map configMap = JsonYamlUtils.readYamlFromClasspath(Constants.DIAG_CONFIG, true);
+            config = new MonitoringExportConfig(configMap);
+            client = createEsRestClient(config, inputs);
+            Semver version = CheckElasticsearchVersion.getElasticsearchVersion(client);
+            config.setVersion(version);
+
             if(inputs.listClusters){
-                List<Map<String, String>> clusters = getMonitoredClusters(config, client);
-                displayAvailableClusters(clusters);
+                logger.error("Diaplaying a list of available clusters.");
+                List<Map<String, String>> clusters = getMonitoredClusters(config, client );
+                showAvailableClusters(config, client);
+                return;
             }
-            else{
-                // Run service logic here
-                validateClusterId(inputs.clusterId, config, client);
-                runExportQueries(tempDir, client, config, inputs.queryStartDate, inputs.queryEndDate, inputs.clusterId);
-                closeLogs();
-                createArchive(tempDir);
+
+            if(StringUtils.isEmpty(inputs.clusterId)){
+                throw new DiagnosticException("missingClusterId");
             }
-            SystemUtils.nukeDirectory(tempDir);
+
+            // Run service logic here
+            validateClusterId(inputs.clusterId, config, client);
+            runExportQueries(tempDir, client, config, inputs.queryStartDate, inputs.queryEndDate, inputs.clusterId);
+
         }catch (DiagnosticException de){
-            if(de.getMessage().equalsIgnoreCase("clusterQueryError")){
-                logger.error("The cluster id could not be validated on this monitoring cluster due to errors. Stopping.");
-            }
-            else if(de.getMessage().equalsIgnoreCase("noClusterIdFound")){
-                logger.error("Entered cluster id not found. Please enure you have a valid cluster_uuid for the monitored clusters.");
-                logger.info("Listing available monitored clusters on this deployment:");
-                List<Map<String, String>> clusters = getMonitoredClusters(config, client);
-                displayAvailableClusters(clusters);
+            switch (de.getMessage()){
+                case "clusterQueryError" :
+                    logger.error("The cluster id could not be validated on this monitoring cluster due to retrieval errors.");
+                case "missingClusterId":
+                    logger.error("Cluster id is required. Diaplaying a list of available clusters.");
+                    showAvailableClusters(config, client);
+                case "noClusterIdFound" :
+                    logger.error("Entered cluster id not found. Please enure you have a valid cluster_uuid for the monitored clusters.");
+                    showAvailableClusters(config, client);
             }
             logger.error("Cannot contiue processing. Exiting {}", Constants.CHECK_LOG);
-
         } catch (IOException e) {
             logger.error("Access issue with temp directory", e);
             throw new RuntimeException("Issue with creating temp directory - see logs for details.");
@@ -91,22 +93,20 @@ public class MonitoringExportService extends ElasticRestClientService {
             logger.log(SystemProperties.DIAG, "Unexpected error occurred", t);
             logger.error("Unexpected error. {}", Constants.CHECK_LOG);
         }
-
         finally {
             closeLogs();
+            createArchive(tempDir);
             client.close();
+            SystemUtils.nukeDirectory(tempDir);
         }
     }
 
+    private void showAvailableClusters(MonitoringExportConfig config, RestClient client){
+        List<Map<String, String>> clusters = getMonitoredClusters(config, client);
+        outputAvailableClusters(clusters);
+    }
+
     private void validateClusterId(String clusterId, MonitoringExportConfig config, RestClient client){
-
-        if(StringUtils.isEmpty(clusterId)){
-            logger.error("Cluster id is required. Diaplaying a list of available clusters.");
-            List<Map<String, String>> clusters = getMonitoredClusters(config, client );
-            displayAvailableClusters(clusters);
-            throw new DiagnosticException("missingClusterId");
-        }
-
         String clusterIdQuery = config.queries.get("cluster_id_check");
         clusterIdQuery = clusterIdQuery.replace("{{clusterId}}", clusterId);
 
@@ -119,14 +119,13 @@ public class MonitoringExportService extends ElasticRestClientService {
         JsonNode nodeResult = JsonYamlUtils.createJsonNodeFromString(restResult.toString());
         JsonNode hitsNode = nodeResult.path("hits");
         long hitCount = hitsNode.path("total").asLong(0);
-        if (hitCount == 0){
+        if (hitCount <= 0){
             throw new DiagnosticException("noClusterIdFound");
         }
 
     }
 
     private List<Map<String, String>> getMonitoredClusters(MonitoringExportConfig config, RestClient client){
-
         String clusterIdQuery = config.queries.get("cluster_ids");
 
         List<Map<String, String>> clusterIds = new ArrayList<>();
@@ -157,7 +156,7 @@ public class MonitoringExportService extends ElasticRestClientService {
 
     }
 
-    private void displayAvailableClusters(List<Map<String, String>> clusters){
+    private void outputAvailableClusters(List<Map<String, String>> clusters){
         if(clusters.size() == 0 ){
             logger.info("No clusters identified. Please check your settings.");
         }
@@ -174,8 +173,6 @@ public class MonitoringExportService extends ElasticRestClientService {
         //Get the monitoring stats labels and the general query.
         List<String> statsFields = config.monitoringStats;
 
-        String uri = config.monitoringUri + config.monitoringScrollTtl;
-        String scrollUri = config.monitoringScrollUri + config.monitoringScrollTtl;
         String monitoringScroll = Long.toString(config.monitoringScrollSize);
         String general = config.queries.get("general");
         String indexStats = config.queries.get("index_stats");
@@ -200,7 +197,7 @@ public class MonitoringExportService extends ElasticRestClientService {
 
             PrintWriter pw = null;
             try {
-                RestResult restResult = new RestResult(client.execPost(uri, query), uri);
+                RestResult restResult = new RestResult(client.execPost(config.monitoringStartUri, query), config.monitoringStartUri);
                 if (restResult.getStatus() != 200) {
                     logger.error("Initial retrieve for stat: {} failed with status: {}, reason: {}, bypassing and going to next call.", stat, restResult.getStatus(), restResult.getReason());
                     logger.error("Bypassing.");
@@ -231,7 +228,7 @@ public class MonitoringExportService extends ElasticRestClientService {
 
                     scrollId = resultNode.path("_scroll_id").asText();
                     String scrollQuery = SCROLL_ID.replace("{{scrollId}}", scrollId);
-                    RestResult scrollResult = new RestResult(client.execPost(scrollUri, scrollQuery), scrollUri);
+                    RestResult scrollResult = new RestResult(client.execPost(config.monitoringScrollUri, scrollQuery), config.monitoringScrollUri);
                     if (restResult.getStatus() == 200) {
                         resultNode = JsonYamlUtils.createJsonNodeFromString(scrollResult.toString());
                         hitsNode = getHitsArray(resultNode);
