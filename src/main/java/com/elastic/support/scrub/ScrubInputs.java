@@ -62,6 +62,10 @@ public class ScrubInputs extends BaseInputs {
     }
 
     public String getTempDir() {
+        if(StringUtils.isEmpty(outputDir)){
+            return SystemProperties.userDir + SystemProperties.fileSeparator + "scrubbed";
+        }
+
         return outputDir + SystemProperties.fileSeparator + "scrubbed";
     }
 }

@@ -16,18 +16,14 @@ public class ScrubService extends BaseService {
    private ScrubInputs inputs;
    private Logger logger = LogManager.getLogger(ScrubService.class);
 
+   public void exec(ScrubInputs inputs){
 
-   public ScrubService(ScrubInputs inputs){
-      this.inputs = inputs;
-   }
+      String filePath = inputs.getArchive();
+      String infilePath = inputs.getInfile();
+      String outputDir = inputs.getOutputDir();
+      String temp = inputs.getTempDir();
 
-   public void exec(){
       try {
-         String filePath = inputs.getArchive();
-         String infilePath = inputs.getInfile();
-         String outputDir = inputs.getOutputDir();
-         String temp = inputs.getTempDir();
-
          int pos;
          boolean isArchive = true;
 
@@ -38,10 +34,6 @@ public class ScrubService extends BaseService {
             isArchive = false;
             pos = infilePath.lastIndexOf(SystemProperties.fileSeparator);
             filePath = infilePath;
-         }
-
-         if(StringUtils.isEmpty(outputDir)  ){
-            outputDir = filePath.substring(0, pos) + SystemProperties.fileSeparator;
          }
 
          // Start out clean
@@ -76,12 +68,14 @@ public class ScrubService extends BaseService {
             FileUtils.copyFile(new File(logPath), new File(outputDir + SystemProperties.fileSeparator + logPath.substring(pos+1)));
 
          }
-         closeLogs();
-         SystemUtils.nukeDirectory(temp);
 
       } catch (Throwable t) {
          logger.log(SystemProperties.DIAG, "Error occurred: ", t);
          logger.error("Issue encountered during scrub processing. {}.", Constants.CHECK_LOG);
+      }
+      finally{
+         closeLogs();
+         SystemUtils.nukeDirectory(temp);
       }
 
    }

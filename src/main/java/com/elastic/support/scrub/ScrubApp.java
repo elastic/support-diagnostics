@@ -16,8 +16,8 @@ public class ScrubApp {
             logger.info("Exiting...");
             System.exit(0);
         }
-        ScrubService scrub = new ScrubService(scrubInputs);
-        scrub.exec();
+        new ScrubService().exec(scrubInputs);
+
     }
 
 }
