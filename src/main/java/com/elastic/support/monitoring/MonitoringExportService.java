@@ -78,12 +78,18 @@ public class MonitoringExportService extends ElasticRestClientService {
             switch (de.getMessage()){
                 case "clusterQueryError" :
                     logger.error("The cluster id could not be validated on this monitoring cluster due to retrieval errors.");
+                    break;
                 case "missingClusterId":
                     logger.error("Cluster id is required. Diaplaying a list of available clusters.");
                     showAvailableClusters(config, client);
+                    break;
                 case "noClusterIdFound" :
                     logger.error("Entered cluster id not found. Please enure you have a valid cluster_uuid for the monitored clusters.");
                     showAvailableClusters(config, client);
+                    break;
+                default:
+                    logger.error("Entered cluster id not found - unexpected exception. Please enure you have a valid cluster_uuid for the monitored clusters. Check diagnostics.log for more details.");
+                    logger.log(SystemProperties.DIAG, de);
             }
             logger.error("Cannot contiue processing. Exiting {}", Constants.CHECK_LOG);
         } catch (IOException e) {
