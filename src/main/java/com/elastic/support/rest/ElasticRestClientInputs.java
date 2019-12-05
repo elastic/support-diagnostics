@@ -56,6 +56,11 @@ public class ElasticRestClientInputs extends BaseInputs {
     public boolean isSsl() {
         return isSsl;
     }
+
+    public void setSsl(boolean ssl) {
+        isSsl = ssl;
+    }
+
     public String getScheme() {
         if (this.isSsl) {
             return "https";
