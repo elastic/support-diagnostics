@@ -21,7 +21,7 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
     public final static String[]
             DiagnosticTypeValues = {
             Constants.local,
-            Constants.local,
+            Constants.localApi,
             Constants.logstash,
             Constants.logstashApi,
             Constants.docker,
@@ -33,7 +33,7 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
     protected String dockerId;
 
     @Parameter(names = {"--type"}, description = "Designates the type of service to run. Enter local, local-api, remote, remote-api, docker, remote-docker, logstash, remote-logstash. Required.")
-    protected String diagType = "standard";
+    protected String diagType = Constants.local;
     public String getDiagType() {
         return diagType;
     }

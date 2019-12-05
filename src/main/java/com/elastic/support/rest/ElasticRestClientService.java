@@ -10,16 +10,19 @@ import org.apache.logging.log4j.Logger;
 
 public class ElasticRestClientService extends BaseService {
 
-    private Logger logger = LogManager.getLogger(ElasticRestClientInputs.class);
+    private static final Logger logger = LogManager.getLogger(ElasticRestClientInputs.class);
 
 
     protected RestClient createGenericClient(BaseConfig config, ElasticRestClientInputs inputs) {
-        RestClientBuilder builder = setupBuilder(config, inputs);
+        RestClientBuilder builder = new RestClientBuilder();
+        builder.setConnectTimeout(config.getRestConfig().get("connectTimeout") * 1000)
+                .setRequestTimeout(config.getRestConfig().get("requestTimeout") * 1000)
+                .setSocketTimeout(config.getRestConfig().get("socketTimeout") * 1000);
         return builder.build();
     }
 
     protected RestClient createEsRestClient(BaseConfig config, ElasticRestClientInputs inputs) {
-        RestClientBuilder builder = setupBuilder(config, inputs);
+        RestClientBuilder builder = new RestClientBuilder();
         builder.setBypassVerify(inputs.isSkipVerification())
                 .setHost(inputs.getHost())
                 .setPort(inputs.getPort())
@@ -27,9 +30,9 @@ public class ElasticRestClientService extends BaseService {
                 .setConnectTimeout(config.getRestConfig().get("connectTimeout") * 1000)
                 .setRequestTimeout(config.getRestConfig().get("requestTimeout") * 1000)
                 .setSocketTimeout(config.getRestConfig().get("socketTimeout") * 1000)
-                .setProxyHost(inputs.getProxyUser())
+                .setProxyHost(inputs.getProxyHost())
                 .setProxPort(inputs.getProxyPort())
-                .setProxyUser(inputs.getUser())
+                .setProxyUser(inputs.getProxyUser())
                 .setProxyPass(inputs.getProxyPassword());
 
         if (inputs.isSecured()) {
@@ -44,17 +47,6 @@ public class ElasticRestClientService extends BaseService {
 
         return builder.build();
     }
-
-    RestClientBuilder setupBuilder(BaseConfig config, ElasticRestClientInputs inputs){
-
-        RestClientBuilder builder = new RestClientBuilder();
-
-        return builder
-                .setConnectTimeout(config.getRestConfig().get("connectTimeout") * 1000)
-                .setRequestTimeout(config.getRestConfig().get("requestTimeout") * 1000)
-                .setSocketTimeout(config.getRestConfig().get("socketTimeout") * 1000);
-    }
-
 
      protected void checkAuthLevel(String user, boolean isAuth){
 
@@ -75,6 +67,4 @@ public class ElasticRestClientService extends BaseService {
         }
 
     }
-
-
 }

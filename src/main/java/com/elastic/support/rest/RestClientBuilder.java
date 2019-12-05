@@ -84,11 +84,6 @@ public class RestClientBuilder {
         return this;
     }
 
-    public RestClientBuilder setProxyPassword(String proxyPassword) {
-        this.proxyPassword = proxyPassword;
-        return this;
-    }
-
     public RestClientBuilder setPort(int port) {
         this.port = port;
         return this;
