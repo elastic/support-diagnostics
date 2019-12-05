@@ -20,13 +20,13 @@ public class MonitoringImportProcessor implements ArchiveEntryProcessor {
     private static final Logger logger = LogManager.getLogger(MonitoringImportProcessor.class);
 
     RestClient client;
-    MonitoringExportConfig config;
+    MonitoringImportConfig config;
     MonitoringImportInputs inputs;
     String newClusterName;
     String index;
     boolean updateClusterName = false;
 
-    public MonitoringImportProcessor(MonitoringExportConfig config, MonitoringImportInputs inputs, RestClient client) {
+    public MonitoringImportProcessor(MonitoringImportConfig config, MonitoringImportInputs inputs, RestClient client) {
         this.config = config;
         this.inputs = inputs;
         this.client = client;

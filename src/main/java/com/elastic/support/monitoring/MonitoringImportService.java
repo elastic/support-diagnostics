@@ -7,6 +7,7 @@ import com.elastic.support.rest.RestEntry;
 import com.elastic.support.util.ArchiveUtils;
 import com.elastic.support.util.JsonYamlUtils;
 import com.elastic.support.util.SystemProperties;
+import com.elastic.support.util.SystemUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -25,24 +26,23 @@ public class MonitoringImportService extends ElasticRestClientService {
     void execImport(MonitoringImportInputs inputs){
 
         RestClient client = null;
+        String tempDir = null;
         try {
             Map configMap = JsonYamlUtils.readYamlFromClasspath(Constants.DIAG_CONFIG, true);
-            MonitoringExportConfig monitoringExtractConfig = new MonitoringExportConfig(configMap);
-            client = createEsRestClient(monitoringExtractConfig, inputs);
-
-            String tempDir = SystemProperties.userDir + SystemProperties.fileSeparator + Constants.MONITORING_DIR;
+            MonitoringImportConfig monitoringImportConfig = new MonitoringImportConfig(configMap);
+            client = createEsRestClient(monitoringImportConfig, inputs);
+            tempDir = SystemProperties.userDir + SystemProperties.fileSeparator + Constants.MONITORING_DIR;
 
             // Create the temp directory - delete if first if it exists from a previous run
+            SystemUtils.nukeDirectory(tempDir);
             logger.info("Creating temp directory: {}", tempDir);
-
-            FileUtils.deleteDirectory(new File(tempDir));
             Files.createDirectories(Paths.get(tempDir));
 
             // Set up the log file manually since we're going to package it with the diagnostic.
             // It will go to wherever we have the temp dir set up.
             logger.info("Configuring log file.");
             createFileAppender(tempDir, "import.log");
-            ArchiveUtils archiveUtils = new ArchiveUtils(new MonitoringImportProcessor(monitoringExtractConfig, inputs, client));
+            ArchiveUtils archiveUtils = new ArchiveUtils(new MonitoringImportProcessor(monitoringImportConfig, inputs, client));
             archiveUtils.extractDiagnosticArchive(inputs.input);
 
 

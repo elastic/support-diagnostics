@@ -4,6 +4,7 @@ package com.elastic.support.monitoring;
 import com.elastic.support.BaseConfig;
 import com.elastic.support.Constants;
 import com.elastic.support.util.SystemProperties;
+import com.vdurmont.semver4j.Semver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -20,6 +21,7 @@ public class MonitoringExportConfig extends BaseConfig {
 
     protected List<String> monitoringStats = new ArrayList<>();
     protected Map<String, String> queries = new LinkedHashMap<>();
+    protected String monitoringStartUri;
     protected String monitoringUri;
     protected String monitoringScrollUri;
     protected String monitoringScrollTtl;
@@ -27,24 +29,25 @@ public class MonitoringExportConfig extends BaseConfig {
     protected int bulkSize ;
     protected String bulkUri;
     protected String bulkIndexLine;
+    protected Semver semver;
 
     Logger logger = LogManager.getLogger(MonitoringExportConfig.class);
 
     public MonitoringExportConfig(Map configuration) {
         super(configuration);
-        monitoringUri = (String)configuration.get("monitoring-uri");
-        monitoringScrollUri = (String)configuration.get("monitoring-scroll-uri");
-        monitoringScrollSize = (Integer)configuration.get("monitoring-scroll-size");
-        monitoringScrollTtl = (String)configuration.get("monitoring-scroll-ttl");
         monitoringStats = (List<String>) configuration.get("monitoring-stats");
-        monitoringScrollSize = (Integer) configuration.get("monitoring-scroll-size");
-
-        bulkSize = (Integer) configuration.get("bulk-import-size");
-        bulkUri = (String)configuration.get("bulk-uri");
-        bulkIndexLine = (String)configuration.get("bulk-index-line");
+        monitoringScrollSize = (Integer)configuration.get("monitoring-scroll-size");
 
         Map<String, String> queryFiles =(Map<String, String>) configuration.get("monitoring-queryfiles");
         queries = getQueriesFromFiles(queryFiles);
+
+    }
+
+    public void setVersion(Semver semver){
+        this.semver = semver;
+        monitoringUri = getVersionedQuery("monitoring-uri");
+        monitoringStartUri = getVersionedQuery("monitoring-start-scroll-uri");
+        monitoringScrollUri = getVersionedQuery("monitoring-scroll-uri");
     }
 
     public String getMonitoringUri() {
@@ -95,6 +98,21 @@ public class MonitoringExportConfig extends BaseConfig {
         }
 
         return buildQueries;
+
+    }
+
+    private String getVersionedQuery(String query ){
+        Map<String, Map> urls  = (Map<String, Map>) configuration.get("monitoring-queries");
+        Map<String, Map<String, String>> querySet = urls.get(query);
+        Map<String, String> versions = querySet.get("versions");
+
+        for(Map.Entry<String, String> urlVersion: versions.entrySet()){
+            if(semver.satisfies(urlVersion.getKey())){
+                return urlVersion.getValue();
+            }
+        }
+
+        return "";
 
     }
 
