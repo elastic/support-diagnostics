@@ -52,10 +52,6 @@ public class CheckElasticsearchVersion implements Command {
             Map<String, RestEntry> entries = builder.buildEntryMap(restCalls);
             context.setElasticRestCalls(entries);
 
-            restCalls = JsonYamlUtils.readYamlFromClasspath(Constants.LS_REST, true);
-            entries = builder.buildEntryMap(restCalls);
-            context.setLogstashRestCalls(entries);
-
         } catch (DiagnosticException de) {
             throw de;
         } catch (Throwable t) {
