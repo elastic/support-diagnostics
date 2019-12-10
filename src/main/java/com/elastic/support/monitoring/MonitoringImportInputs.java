@@ -50,9 +50,11 @@ public class MonitoringImportInputs extends ElasticRestClientInputs {
             }
         }
 
-        if(indexName.contains(" ")){
-            logger.warn("Spaces not permitted in index name");
-            return false;
+        if(StringUtils.isNotEmpty(indexName)) {
+            if(indexName.contains(" ")){
+                logger.warn("Spaces not permitted in index name");
+                return false;
+            }
         }
 
         return true;
