@@ -15,6 +15,7 @@ public class DiagnosticChainExec {
     public static void runDiagnostic(DiagnosticContext context, String type) {
 
         try {
+            new GenerateManifest().execute(context);
             new CheckDiagnosticVersion().execute(context);
 
             if(Constants.local.equals(type) || Constants.localApi.equals(type)) {

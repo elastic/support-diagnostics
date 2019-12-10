@@ -39,7 +39,9 @@ public class Constants {
    public static final String TAB = "\t";
 
    public final static String local =  "local";
-   public final static String localApi = "local-api";
+   public final static String localApi = "remote";
+   public final static String remote =  "remote";
+   public final static String remoteApi = "remote-api";
    public final static String logstash = "logstash";
    public final static String logstashApi = "logstash-api";
    public final static String docker = "docker";
