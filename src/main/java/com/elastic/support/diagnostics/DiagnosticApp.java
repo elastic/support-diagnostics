@@ -2,6 +2,7 @@ package com.elastic.support.diagnostics;
 
 import com.elastic.support.Constants;
 import com.elastic.support.util.JsonYamlUtils;
+import com.elastic.support.util.ResourceCache;
 import com.elastic.support.util.SystemProperties;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,7 +14,6 @@ public class DiagnosticApp {
     private static final Logger logger = LogManager.getLogger(DiagnosticApp.class);
 
     public static void main(String[] args) {
-
 
         try {
             DiagnosticInputs diagnosticInputs = new DiagnosticInputs();
@@ -30,7 +30,9 @@ public class DiagnosticApp {
             DiagnosticService diag = new DiagnosticService();
             diag.exec(diagnosticInputs, diagConfig);
         } catch (Throwable t) {
-            logger.log(SystemProperties.DIAG, "Unanticipated error", t);
+            logger.error("Unanticipated error", t);
+        }
+        finally {
         }
     }
 

@@ -1,5 +1,9 @@
 package com.elastic.support;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class Constants {
 
    public static final String ES_DIAG_DEFAULT = "standard";
@@ -22,9 +26,10 @@ public class Constants {
    public static final int DEEFAULT_HTTPS_PORT = 443;
 
    public static final int LOGSTASH_PORT = 9600;
-   public static final String LOCAL_ADDRESSES = "127.0.0.1;localhost;::1";
-
-   public static final String UTF8 = "UTF8";
+   public static final String[] LOCAL_ADDRESSES = {"127.0.0.1","localhost", "[::1]"};
+   public static final List<String> localAddressList = Arrays.asList(LOCAL_ADDRESSES);
+   public static final String UTF_8 = "UTF-8";
+   public static final String UTF_16 = "UTF-16";
 
    public static final String IPv6Regex =
       "(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))";
@@ -33,18 +38,21 @@ public class Constants {
    public static final String timeZoneRegex = "^([+-](?:2[0-3]|[01][0-9]):[0-5][0-9])$";
 
    public static final String winPlatform = "winOS";
-   public static final String linuxPlatform = "linuxOs";
+   public static final String linuxPlatform = "linuxOS";
    public static final String macPlatform = "macOS";
 
    public static final String TAB = "\t";
 
    public final static String local =  "local";
-   public final static String localApi = "remote";
-   public final static String remote =  "remote";
-   public final static String remoteApi = "remote-api";
-   public final static String logstash = "logstash";
+   public final static String api = "api";
+   public final static String remote = "remote";
+
+   public final static String logstashLocal = "logstash-local";
+   public final static String logstashRemote = "logstash-remote";
    public final static String logstashApi = "logstash-api";
-   public final static String docker = "docker";
-   public final static String dockerApi = "docker-api";
+
+   public static final String restInputHost = "rest:InputHost";
+   public static final String restTargetHost = "resTtargetHost";
+   public static final String systemCommands = "ssh:SystemCommand";
 
 }

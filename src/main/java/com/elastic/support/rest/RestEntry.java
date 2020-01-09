@@ -15,42 +15,49 @@ public class RestEntry {
 
     public static final String MISSING = "missing";
 
-    public RestEntry(String name, String subdir, String extension, boolean retry, String url){
+    public RestEntry(String name, String subdir, String extension, boolean retry, String url, boolean showErrors){
         this.name = name;
         this.subdir = subdir;
         this.extension = extension;
         this.retry = retry;
         this.url = url;
+        this.showErrors = showErrors;
     }
 
-    private String name;
+    public String name;
 
     public String getName() {
         return name;
     }
 
-    private String  url;
+    public String  url;
 
     public String getUrl() {
         return url;
     }
 
-    private String subdir = SystemProperties.fileSeparator;
+    public String subdir = SystemProperties.fileSeparator;
 
     public String getSubdir() {
         return subdir;
     }
 
-    private String extension = "json";
+    public String extension = "json";
 
     public String getExtension() {
         return extension;
     }
 
-    private boolean retry = false;
+    public boolean retry = false;
 
     public boolean isRetry() {
         return retry;
     }
+
+    public boolean showErrors = true;
+
+
+
+
 
 }

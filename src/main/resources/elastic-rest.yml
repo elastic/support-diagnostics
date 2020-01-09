@@ -124,10 +124,12 @@ alias:
 allocation:
   versions:
     ">= 0.9.0": "/_cat/allocation?v&format=json"
+  showErrors: false
 
 allocation_explain:
   versions:
     ">= 5.0.0": "/_cluster/allocation/explain?pretty"
+  showErrors: false
 
 allocation_explain_disk:
   versions:
@@ -179,7 +181,9 @@ indices_stats:
 licenses:
   versions:
     ">= 1.0.0 < 2.0.0": "/_licenses"
-    ">= 2.0.0": "/_license?pretty"
+    ">= 2.0.0 < 7.6.0": "/_license?pretty"
+    ">= 7.6.0 < 8.0.0": "/_license?pretty&accept_enterprise=true"
+    ">= 8.0.0": "/_license?pretty"
 
 mapping:
   versions:
@@ -382,5 +386,3 @@ xpack:
   subdir: "commercial"
   versions:
     ">= 5.0.0": "/_xpack/usage?pretty&human"
-
-

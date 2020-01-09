@@ -60,7 +60,7 @@ public class RestResult implements Cloneable {
                 response.getEntity().writeTo(out);
             } else {
                 responseString = EntityUtils.toString(response.getEntity());
-                IOUtils.write(reason + SystemProperties.lineSeparator + responseString, out, Constants.UTF8);
+                IOUtils.write(reason + SystemProperties.lineSeparator + responseString, out, Constants.UTF_8);
             }
         } catch (Exception e) {
             logger.log(SystemProperties.DIAG, "Error Streaming Response To OutputStream", e);
@@ -122,7 +122,7 @@ public class RestResult implements Cloneable {
         }
 
         try(FileOutputStream fs = new FileOutputStream(output)){
-            IOUtils.write(reason + SystemProperties.lineSeparator + responseString, fs, Constants.UTF8);
+            IOUtils.write(reason + SystemProperties.lineSeparator + responseString, fs, Constants.UTF_8);
         }
         catch (Exception e){
             logger.log(SystemProperties.DIAG, "Error writing Response To OutputStream", e);

@@ -1,11 +1,13 @@
 package com.elastic.support.diagnostics.commands;
 
+import com.elastic.support.Constants;
 import com.elastic.support.diagnostics.chain.Command;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.rest.RestClient;
 import com.elastic.support.rest.RestEntry;
 import com.elastic.support.rest.RestResult;
 import com.elastic.support.util.JsonYamlUtils;
+import com.elastic.support.util.ResourceCache;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vdurmont.semver4j.Semver;
@@ -23,29 +25,29 @@ public class CheckUserAuthLevel implements Command {
     @Override
     public void execute(DiagnosticContext context) {
 
-        RestClient restClient = context.getEsRestClient();
-        String user = context.getDiagnosticInputs().getUser();
-
-        if(StringUtils.isEmpty(user) ){
+        // No user, it's not secured so no auth level.
+        if(StringUtils.isEmpty(context.diagnosticInputs.user) ){
             return;
         }
 
-        boolean hasAuthorization = false;
+        // Should already be there.
+        RestClient restClient = ResourceCache.getRestClient(Constants.restInputHost);
 
-        Semver version = context.getVersion();
-        Map<String, RestEntry> calls = context.getElasticRestCalls();
+        boolean hasAuthorization = false;
+        Semver version = context.version;
+        Map<String, RestEntry> calls = context.elasticRestCalls;
         RestEntry entry =  calls.get("security_users");
-        String url = entry.getUrl().replace("?pretty", "/" + user);
+        String url = entry.getUrl().replace("?pretty", "/" + context.diagnosticInputs.user);
 
         RestResult result = restClient.execQuery(url);
 
         if (result.getStatus() == 200) {
             String userJsonString = result.toString();
             JsonNode userNode = JsonYamlUtils.createJsonNodeFromString(userJsonString);
-            hasAuthorization = checkForAuth(version.getMajor(), user, userNode);
+            hasAuthorization = checkForAuth(version.getMajor(), context.diagnosticInputs.user, userNode);
         }
 
-        context.setAuthorized(hasAuthorization);
+        context.isAuthorized = hasAuthorization;
 
     }
 

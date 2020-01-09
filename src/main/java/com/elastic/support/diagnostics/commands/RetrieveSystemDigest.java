@@ -28,26 +28,18 @@ public class RetrieveSystemDigest implements Command {
 
     public void execute(DiagnosticContext context) {
 
-        // Check for Docker, which usually shows up as a PID of 1 for Elasticsearch
-        // or from an incorrectly specified host
-        if(context.isBypassSystemCalls() || context.isDocker()){
-            logger.log(SystemProperties.DIAG, "Identified Docker installations or could not locate local node - bypassing system digest.");
-            return;
-        }
-
         try {
             SystemInfo si = new SystemInfo();
             HardwareAbstractionLayer hal = si.getHardware();
             OperatingSystem os = si.getOperatingSystem();
-            File sysFileJson = new File(context.getTempDir() + SystemProperties.fileSeparator + "system-digest.json");
+            File sysFileJson = new File(context.tempDir + SystemProperties.fileSeparator + "system-digest.json");
             OutputStream outputStreamJson = new FileOutputStream(sysFileJson);
             BufferedWriter jsonWriter = new BufferedWriter(new OutputStreamWriter(outputStreamJson));
             String jsonInfo = si.toPrettyJSON();
-            context.setSystemDigest(jsonInfo);
             jsonWriter.write(jsonInfo);
             jsonWriter.close();
 
-            File sysFile = new File(context.getTempDir() + SystemProperties.fileSeparator + "system-digest.txt");
+            File sysFile = new File(context.tempDir + SystemProperties.fileSeparator + "system-digest.txt");
             OutputStream outputStream = new FileOutputStream(sysFile);
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream));
 

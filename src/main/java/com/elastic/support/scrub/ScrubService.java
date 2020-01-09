@@ -20,7 +20,7 @@ public class ScrubService extends BaseService {
 
       String filePath = inputs.getArchive();
       String infilePath = inputs.getInfile();
-      String outputDir = inputs.getOutputDir();
+      String outputDir = inputs.outputDir;
       String temp = inputs.getTempDir();
 
       try {

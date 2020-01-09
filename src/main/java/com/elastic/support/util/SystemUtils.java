@@ -2,6 +2,8 @@ package com.elastic.support.util;
 
 
 import com.elastic.support.Constants;
+import com.elastic.support.diagnostics.DiagnosticException;
+import com.elastic.support.diagnostics.DiagnosticInputs;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
@@ -22,11 +24,14 @@ public class SystemUtils {
 
     private static final Logger logger = LogManager.getLogger(SystemUtils.class);
 
-    public static void toFile(String path, String content) {
-        try (FileOutputStream fs = new FileOutputStream(path)) {
-            IOUtils.write(content, fs, Constants.UTF8);
-        } catch (Exception e) {
-            logger.log(SystemProperties.DIAG, "Error writing Response To OutputStream", e);
+    public static void writeToFile(String content, String dest) {
+        try {
+            logger.info("Writing to {}", dest);
+            File outFile = new File(dest);
+            FileUtils.writeStringToFile(outFile, content, "UTF-8");
+        } catch (IOException e) {
+            logger.log(SystemProperties.DIAG, "Error writing content for {}", dest, e);
+            throw new DiagnosticException("Error writing " + dest + " See diagnostic.log for details.");
         }
     }
 
@@ -141,6 +146,26 @@ public class SystemUtils {
     public static String getCurrentTime() {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm");
         return dtf.format(ZonedDateTime.now());
+    }
+
+    public static String parseOperatingSystemName(String osName){
+
+        osName = osName.toLowerCase();
+
+        if (osName.contains("windows")) {
+            return Constants.winPlatform;
+
+        } else if (osName.contains("linux")) {
+            return Constants.linuxPlatform;
+
+        } else if (osName.contains("darwin") || osName.contains("mac")) {
+            return Constants.macPlatform;
+
+        } else {
+            // default it to Linux
+            logger.error("Unsupported OS -defaulting to Linux: {}", osName);
+            return  Constants.linuxPlatform;
+        }
     }
 
 }

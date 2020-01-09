@@ -6,31 +6,16 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
-public class RestEntryFactory {
+public class RestEntryConfig {
 
-    private static final Logger logger = LogManager.getLogger(RestEntryFactory.class);
+    private static final Logger logger = LogManager.getLogger(RestEntryConfig.class);
 
     Semver semver;
-    public RestEntryFactory(String version){
+    public RestEntryConfig(String version){
         semver = new Semver(version, Semver.SemverType.NPM);
-    }
-
-    public RestEntry build(Map.Entry<String, Object> entry){
-
-        String name = entry.getKey();
-        Map<String, Object> values = (Map)entry.getValue();
-        String subdir = (String) ObjectUtils.defaultIfNull(values.get("subdir"), "");
-        String extension = (String)ObjectUtils.defaultIfNull(values.get("extension"), ".json");
-        Boolean retry = (Boolean)ObjectUtils.defaultIfNull(values.get("retry"), false);
-        Map<String, String> versions = (Map)values.get("versions");
-        String url = getVersionSpecificUrl(versions);
-        return new RestEntry(name, subdir, extension, retry, url);
-
     }
 
     public Map<String, RestEntry> buildEntryMap(Map<String, Object> config){
@@ -46,6 +31,24 @@ public class RestEntryFactory {
         }
         return entries;
     }
+
+    public RestEntry build(Map.Entry<String, Object> entry){
+
+        String name = entry.getKey();
+        Map<String, Object> values = (Map)entry.getValue();
+
+        String subdir = (String) ObjectUtils.defaultIfNull(values.get("subdir"), "");
+        String extension = (String)ObjectUtils.defaultIfNull(values.get("extension"), ".json");
+        Boolean retry = (Boolean)ObjectUtils.defaultIfNull(values.get("retry"), false);
+        Boolean showErrors = (Boolean)ObjectUtils.defaultIfNull(values.get("showErrors"), true);
+        Map<String, String> versions = (Map)values.get("versions");
+
+        String url = getVersionSpecificUrl(versions);
+
+        return new RestEntry(name, subdir, extension, retry, url, showErrors);
+
+    }
+
 
     private String getVersionSpecificUrl(Map<String, String> versions){
         for(Map.Entry<String, String> urlVersion: versions.entrySet()){

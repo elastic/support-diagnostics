@@ -42,7 +42,7 @@ public class ScrubInputs extends BaseInputs {
 
     public boolean validate() {
         // If we're in help just shut down.
-        if (isHelp()) {
+        if (help) {
             this.jCommander.usage();
             return false;
         }

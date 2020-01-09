@@ -7,16 +7,17 @@
 #
 #
 #
-# REST timeout settings - note:values are in second
 
+## Should only need to change these if Github modifies something
 github-settings:
   diagReleaseHost: "api.github.com"
   diagReleaseDest: "/repos/elastic/support-diagnostics/releases/latest"
   diagReleaseScheme: "https"
   diagLatestRelease: "https://api.github.com/repos/elastic/support-diagnostics/releases/latest"
 
+# Maximum number of log files including zip archives
 log-settings:
-  maxLogs: 2
+  maxLogs: 3
   maxGcLogs: 3
 
 # Uncomment only if modifying defaults
@@ -35,7 +36,7 @@ call-retries: 3
 pause-retries: 5000
 
 thread-dump:
-  jstack: "jstack PID"
+  jstack: "jstack {{PID}}"
 
 linuxOS:
   sys:
@@ -53,54 +54,61 @@ linuxOS:
     huge_pages: "cat /sys/kernel/mm/transparent_hugepage/enabled"
     cpu_governor: "cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"
     limits: "cat /etc/security/limits.conf"
-    proc-limit: "cat /proc/PID/limits"
-  es:
-    elastic-process: "ps ax"
+    proc-limit: "cat /proc/{{PID}}/limits"
+
   java:
-    jps: "JAVA_HOME/bin/jps -l -m -v"
-    jstack: "JAVA_HOME/bin/jstack PID"
+    elastic-java: "ps -fp {{PID}} | awk '{ if (NR!=1) print $8}'"
+    jps: "{{JAVA_HOME}}/bin/jps -l -m -v"
+    jstack: "{{JAVA_HOME}}/bin/jstack {{PID}}"
+    javac: "{{JAVA_HOME}}/bin/javac -version"
+
+  logs:
+    elastic: "ls -alt {{LOGPATH}} | grep '{{CLUSTERNAME}}.log' | awk '{print $9}'"
+    elastic-arc: "ls -alt {{LOGPATH}} | grep '{{CLUSTERNAME}}-.*-1.log.gz' | awk '{print $9}'"
+    gc: "ls -alt {{LOGPATH}} |  awk '/gc/ {print $9}'"
 
 macOS:
   sys:
     top: "top -l 1"
     netstat: "netstat -an"
-    process-list: "ps ax"
+    process-list: "ps -ef"
     ulimit: "ulimit -a"
-  es:
-    elastic-process: "ps ax"
+
   java:
-    jps: "JAVA_HOME/bin/jps -l -m -v"
-    jstack: "JAVA_HOME/bin/jstack PID"
+    elastic-java: "ps -fp {{PID}} | awk '{ if (NR!=1) print $8}'"
+    jps: "{{JAVA_HOME}}/bin/jps -l -m -v"
+    jstack: "{{JAVA_HOME}}/bin/jstack {{PID}}"
+    javac: "{{JAVA_HOME}}/bin/javac -version"
+
+  logs:
+    elastic: "ls -alt {{LOGPATH}} | grep '{{CLUSTERNAME}}.log' | awk '{print $9}'"
+    elastic-arc: "ls -alt {{LOGPATH}} | grep '{{CLUSTERNAME}}-.*-1.log.gz' | awk '{print $9}'"
+    gc: "ls -alt {{LOGPATH}} |  awk '/gc/ {print $9}'"
 
 winOS:
   sys:
     process-list: "tasklist /v"
     netstat: "netstat -ano"
     cpu: "wmic CPU"
-  es:
-    process: "wmic process where name='java.exe'"
+
   java:
-    jps: "JAVA_HOME\\bin\\jps -l -m -v"
-    jstack: "JAVA_HOME\\bin\\jstack PID"
+    elastic-java: "wmic process where processId={{PID}} GET CommandLine"
+    jps: "{{JAVA_HOME}}\\bin\\jps -l -m -v"
+    jstack: "{{JAVA_HOME}}\\bin\\jstack {{PID}}"
+    javac: "{{JAVA_HOME}}\\bin\\javac -version"
+
+  logs:
+    elastic: "dir /b  /l /o:-d /a:-d {{LOGPATH}}\\{{CLUSTERNAME}}.log"
+    elastic-arc: "dir /b  /l /o:-d /a:-d {{LOGPATH}}\\{{CLUSTERNAME}}-*.log.gz"
+    gc: "dir /l /b /o:-d /a:-d {{LOGPATH}}\\gc.log.*"
 
 docker-global:
   docker-info: "docker info"
   docker-ps-all: "docker ps -a --no-trunc"
 
-# This looks a little weird, but we have to tokenize 2x, once for the
-# part that would normally be in single quotes and contains spaces and
-# once for the space separate first section. Due to quirks in how the
-# Java Processbuilder works.
-docker-containers:
-  docker-ulimit: "docker exec -i CONTAINER_ID bash -c ;; ulimit -a"
-  docker-internal-top: "docker exec -i CONTAINER_ID bash -c ;; top -b -n1"
-  docker-uname: "docker exec -i CONTAINER_ID bash -c ;; uname -a -r"
-  docker-top-threads: "docker exec -i CONTAINER_ID bash -c ;; top -b -n1 -H"
-  docker-process-list: "docker exec -i CONTAINER_ID bash -c ;; ps -ef"
-  docker-cpu-info: "docker exec -i CONTAINER_ID bash -c ;; cat /proc/cpuinfo"
-  docker-sysctl: "docker exec -i CONTAINER_ID bash -c ;; sysctl -a"
-  docker-logs: "docker logs CONTAINER_ID"
-  docker-top: "docker top CONTAINER_ID"
+docker-container:
+  docker-logs: "docker logs {{CONTAINER_ID}}"
+  docker-top: "docker top {{CONTAINER_ID}}"
 
 monitoring-stats:
   - cluster_stats
@@ -137,5 +145,4 @@ monitoring-queries:
 
 monitoring-scroll-size: 500
 default-monitoring-index: ".monitoring-es-7"
-
 bulk-import-size: 250
