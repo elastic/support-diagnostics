@@ -9,6 +9,9 @@ import org.apache.logging.log4j.Logger;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class MonitoringExportInputs extends ElasticRestClientInputs {
 
@@ -58,27 +61,23 @@ public class MonitoringExportInputs extends ElasticRestClientInputs {
     protected String queryStartDate;
     protected String queryEndDate;
 
+    public boolean runInteractive(){
+        return true;
+    }
 
-    public boolean validate() {
 
-        if (!super.validate()) {
-            return false;
-        }
+    public List<String> validate() {
 
-        boolean passed = true;
+        List<String> errors = new ArrayList<>();
+        errors.addAll(super.validate());
+
         if (!listClusters) {
             if (StringUtils.isEmpty(clusterId)) {
-                logger.warn("A cluster id is required to extract monitoring data.");
-                return false;
+                errors.add("A cluster id is required to extract monitoring data.");
             }
 
             if (interval < 1 || interval > 12) {
-                logger.warn("Interval must be between 1 and 12");
-                passed = false;
-            }
-
-            if (passed == false) {
-                return passed;
+                errors.add("Interval must be between 1 and 12");
             }
         }
 
@@ -99,10 +98,9 @@ public class MonitoringExportInputs extends ElasticRestClientInputs {
             queryEndDate = (DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").format(workingStop) + ":00.000Z").replace(" ", "T");
 
         } catch (Exception e) {
-            logger.warn("Invalid Date or Time format. Please enter the date in format YYYY-MM-dd HH:mm");
-            passed = false;
+            errors.add("Invalid Date or Time format. Please enter the date in format YYYY-MM-dd HH:mm");
         }
 
-        return passed;
+        return errors;
     }
 }

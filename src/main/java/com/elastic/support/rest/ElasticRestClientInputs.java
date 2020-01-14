@@ -3,255 +3,246 @@ package com.elastic.support.rest;
 import com.beust.jcommander.Parameter;
 import com.elastic.support.BaseInputs;
 import com.elastic.support.Constants;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.beryx.textio.BooleanInputReader;
+import org.beryx.textio.IntInputReader;
+import org.beryx.textio.StringInputReader;
+
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-public class ElasticRestClientInputs extends BaseInputs {
+public abstract class ElasticRestClientInputs extends BaseInputs {
 
-    Logger logger = LogManager.getLogger(ElasticRestClientInputs.class);
+    public static final String hostDescription = "Required field.  Hostname, IP Address, or localhost.  HTTP access for this node must be enabled.";
+    public static final String portDescription = "HTTP or HTTPS listening port. Defaults to 9200.";
+    public static final String userDescription = "Elasticsearch user account";
+    public static final String passwordDescription = "Elasticsearch user password";
+    public static final String pkiKeystoreDescription = "Path/filename for PKI keystore with client certificate.";
+    public static final String pkiKeystorePasswordDescription = "PKI keystore password if required.";
+    public static final String proxyHostDescription = "Proxy server host name or IP Address.";
+    public static final String proxyPortDescription = "Proxy server port number. Defaults to port 80.";
+    public static final String proxyUserDescription = "Proxy server login.";
+    public static final String proxyPasswordDescription = "Proxy server password if required.";
+    public static final String sslDescription = "TLS enabled, use HTTPS?";
+    public static final String skipHostnameVerificationDescription = "Bypass hostname verification for certificate? This is inherently unsafe and NOT recommended.";
 
+    public final static String  userLoginAuth = "Username/Password";
+    public final static String  pkiLoginAuth = "PKI";
+
+    public static final String useOptionOnly = " No value required, only the option.";
     // The basics - where's the cluster
-    @Parameter(names = {"-h", "--host"}, description = "Required field.  Hostname, IP Address, or localhost.  HTTP access must be enabled.")
-    public String host = "";
-    @Parameter(names = {"--port"}, description = "HTTP or HTTPS listening port. Defaults to 9200.")
+    @Parameter(names = {"-h", "--host"}, description = hostDescription)
+    public String host = "localhost";
+
+    // Start Input Fields
+    @Parameter(names = {"--port"}, description = portDescription)
     public int port = 9200;
-
     // Proxy Server settings
-    @Parameter(names = {"--proxyHost"}, description = "Proxy server hostname.")
+    @Parameter(names = {"--proxyHost"}, description = proxyHostDescription)
     public String proxyHost;
-    @Parameter(names = {"--proxyPort"}, description = "Proxy server port.")
-    public int proxyPort = Constants.DEEFAULT_HTTP_PORT;
-
+    @Parameter(names = {"--proxyPort"}, description = proxyPortDescription)
+    public int proxyPort = Constants.DEEFAULT_PROXY_PORT;
     // Secured authentication logins
     // Switch just turns on the prompt - they can still send it in as a parameter
     // but it won't show in the usage, just the readme.
     // Rest of the password fields follow the same convention.
-    @Parameter(names = {"-u", "--user"}, description = "User")
+    @Parameter(names = {"-u", "--user"}, description = userDescription)
     public String user;
-    @Parameter(names = {"-p", "--password"}, description = "Prompt for Elasticsearch password", password = true )
+    // Indicates we need to prompt for a masked input
+    @Parameter(names = {"-p", "--password"}, description = "Prompt for Elasticsearch password.  Do not enter a value.")
     public boolean passwordSwitch = false;
-    @Parameter(names = { "--pwdText"}, hidden = true)
+    // Not shown in the the help display due to security risks - allow input via command line arguments in plain text.
+    @Parameter(names = {"--pwdText"}, hidden = true)
     public String password;
-
     // PKI auth - same convention as user auth.
-    @Parameter(names = {"--keystore"}, description = "Path/filename for keystore with client certificate.")
+    @Parameter(names = {"--keystore"}, description = pkiKeystoreDescription)
     public String pkiKeystore;
-    @Parameter(names = {"--keystorePass"}, description = "Prompt for keystore password.")
+    // Indicates we need to prompt for a masked input
+    @Parameter(names = {"--keystorePass"}, description = "Prompt for keystore password. Do not enter a value.")
     public boolean keystorePasswordSwitch = false;
-    @Parameter(names = { "--ksPwdText"}, hidden = true)
+    // Not shown in the the help display due to security risks - allow input via command line arguments in plain text.
+    @Parameter(names = {"--ksPwdText"}, hidden = true)
     public String pkiKeystorePass;
-
-    // Authebnticated proxies
-    @Parameter(names = {"--proxyUser"}, description = "Proxy server user name.")
+    // Authenticated proxies
+    @Parameter(names = {"--proxyUser"}, description = proxyUserDescription)
     public String proxyUser;
-    @Parameter(names = {"--proxyPassword"})
+    // Indicates we need to prompt for a masked input
+    @Parameter(names = {"--proxyPassword"}, description = "Prompt for proxy password. Do not enter a value.")
     public boolean proxyPasswordSwitch = false;
-    @Parameter(names = { "--proxyPwdText"}, hidden = true)
+    // Not shown in the the help display due to security risks - allow input via command line arguments in plain text.
+    @Parameter(names = {"--proxyPwdText"}, hidden = true)
     public String proxyPassword;
-
     // SSL and hostname verification switches
-    @Parameter(names = {"-s", "--ssl"}, description = "Use SSL?  No value required, only the option.")
+    @Parameter(names = {"-s", "--ssl"}, description = sslDescription + useOptionOnly )
     public boolean isSsl = false;
-    @Parameter(names = {"--noVerify"}, description = "Use this option to bypass hostname verification for certificate. This is inherently unsafe and NOT recommended.")
+    @Parameter(names = {"--noVerify"}, description = bypassDiagVerifyDescription + useOptionOnly)
     public boolean skipVerification = false;
 
-    // Stop the diag from checking itself for latest version.
-    @Parameter(names = {"--bypassDiagVerify"}, description = "Bypass the diagnostic version check. Use when internet outbound HTTP access is blocked by a firewall.")
-    public boolean bypassDiagVerify = false;
+    // Other fields
+    public String scheme = "https";
 
-    public String getScheme() {
-        if (this.isSsl) {
-            return "https";
+    // End Input Fields
+
+    // Start Input Readers
+
+    // Generic - change the default values and the read label only
+    protected StringInputReader standardSteringReader = textIO.newStringInputReader()
+            .withInputTrimming(true);
+    protected BooleanInputReader standardBooleanReader = textIO.newBooleanInputReader();
+    protected StringInputReader  standardPasswordReader = textIO.newStringInputReader()
+            .withInputMasking(true)
+            .withInputTrimming(true);
+    protected StringInputReader standardFileReader = textIO.newStringInputReader()
+            .withInputTrimming(true)
+            .withValueChecker((String val, String propname) -> validateFile(val));
+    protected IntInputReader standardPortReader = textIO.newIntInputReader()
+            .withValueChecker((Integer val, String propname) -> validatePort(val));
+
+    protected StringInputReader hostReader = textIO.newStringInputReader()
+            .withDefaultValue(host)
+            .withIgnoreCase()
+            .withInputTrimming(true)
+            .withValueChecker((String val, String propname) -> validateHost(val));
+
+    protected IntInputReader portReader = textIO.newIntInputReader()
+            .withDefaultValue(port)
+            .withMaxVal(65535)
+            .withMinVal(1);
+
+    protected BooleanInputReader schemeReader = textIO.newBooleanInputReader()
+            .withValueChecker((Boolean val, String propname) -> validateSsl(val));
+
+    protected StringInputReader userReader = textIO.newStringInputReader()
+            .withInputTrimming(true);
+
+    protected StringInputReader passwordReader = textIO.newStringInputReader()
+            .withMinLength(6)
+            .withInputMasking(true)
+            .withInputTrimming(true)
+            .withValueChecker((String val, String propname) -> validatePassword(val));
+
+    protected StringInputReader authTypeReader = textIO.newStringInputReader()
+            .withNumberedPossibleValues(userLoginAuth, pkiLoginAuth)
+            .withDefaultValue(userLoginAuth);
+
+    protected StringInputReader proxyHostReader = textIO.newStringInputReader()
+            .withIgnoreCase()
+            .withInputTrimming(true)
+            .withValueChecker((String val, String propname) -> validateProxyHost(val));
+
+
+    // End Input Readers
+    Logger logger = LogManager.getLogger(ElasticRestClientInputs.class);
+
+    public List<String> validate() {
+
+        List<String> errors = new ArrayList<>();
+        errors.addAll(ObjectUtils.defaultIfNull(super.validate(), emptyList));
+        errors.addAll(ObjectUtils.defaultIfNull(validateSsl(isSsl), emptyList));
+        errors.addAll(ObjectUtils.defaultIfNull(validateHost(host), emptyList));
+        errors.addAll(ObjectUtils.defaultIfNull(validateProxyHost(proxyHost), emptyList));
+        errors.addAll(ObjectUtils.defaultIfNull(validatePassword(password), emptyList));
+        errors.addAll(ObjectUtils.defaultIfNull(validateFile(pkiKeystore), emptyList));
+        errors.addAll(ObjectUtils.defaultIfNull(validatePort(port), emptyList));
+        errors.addAll(ObjectUtils.defaultIfNull(validatePort(proxyPort), emptyList));
+        if(StringUtils.isNotEmpty(pkiKeystore)){
+            errors.addAll(ObjectUtils.defaultIfNull(validateAuthType(pkiLoginAuth), emptyList));
+        }
+
+        if(errors.size() > 0){
+            return errors;
+        }
+
+        // If we got this far, get the passwords.
+        if(passwordSwitch){
+            password = passwordReader
+                    .read(passwordDescription);
+        }
+
+        if(keystorePasswordSwitch){
+            pkiKeystorePass = standardPasswordReader
+                    .read(pkiKeystorePasswordDescription);
+        }
+
+        if(proxyPasswordSwitch){
+            proxyPassword = standardPasswordReader
+                    .read(proxyPasswordDescription);
+        }
+
+        return errors;
+
+    }
+
+    public List<String> validateHost(String hostString) {
+
+        if (hostString.toLowerCase().matches("((http|https?)://)?.*:(\\d{4,5})")) {
+            return Collections.singletonList("Should only contain a host name or IP Address, not a full URL");
+        }
+        return null;
+    }
+
+    public List<String> validateProxyHost(String hostString) {
+
+        if (hostString.toLowerCase().matches("(://)?.*:(\\d{4,5})")) {
+            return Collections.singletonList("Enter port separately");
+        }
+        return null;
+    }
+
+    public List<String> validatePort(int val){
+        if (val < 1 || val > 65535){
+            return Collections.singletonList("Outside the valid range of port values. 1-65535 ");
+        }
+        return null;
+    }
+
+    public List<String> validatePassword(String val) {
+        if (StringUtils.isEmpty(user)) {
+            return Collections.singletonList("Password cannot be associated with an empty user id");
+        }
+        return null;
+    }
+
+    public List<String> validateFile(String val) {
+        if (StringUtils.isEmpty(val.trim())) {
+            return emptyList;
+        }
+
+        File file = new File(val);
+
+        if (!file.exists()) {
+            return Collections.singletonList("Specified file could not be located.");
+        }
+
+        return null;
+
+    }
+
+    public List<String> validateSsl(boolean ssl) {
+        // We're just setting the scheme here so it stays consistent with the legacy command line
+        if (ssl) {
+            scheme = "https";
         } else {
-            return "http";
-        }
-    }
-
-    public boolean validate() {
-
-        boolean noErrors = true;
-
-        if (!super.validate()) {
-            noErrors = false;
+            scheme = "http";
         }
 
-        if (! validateHost(host)) {
-            noErrors = false;
-            messages.add("A non-empty host in the proper format must be entered.");
+        // Never an error.
+        return null;
+    }
+
+    public List<String> validateAuthType(String val){
+        if( val.equals(pkiLoginAuth) && !isSsl){
+            return Collections.singletonList("TLS must be enabled to use PKI Authentication.");
         }
-
-        if ( StringUtils.isNotEmpty(user) && StringUtils.isEmpty(password) ) {
-            messages.add("Password is required and must be at least 6 characters when login is specified.");
-            noErrors =  false;
-        }
-
-        if (StringUtils.isNotEmpty(password) && StringUtils.isEmpty(user)) {
-            messages.add("User is required when a password is specified.");
-            noErrors = false;
-        }
-
-        if (StringUtils.isNotEmpty(proxyPassword) && StringUtils.isEmpty(proxyUser)) {
-            messages.add("Proxy user is required when a proxy password is specified.");
-            noErrors = false;
-        }
-
-        if (StringUtils.isNotEmpty(pkiKeystore)) {
-            File pki = new File(pkiKeystore);
-            if (!pki.exists()) {
-                messages.add("A PKI Keystore was input but could not be located in the supplied location. Please check that the absolute path to the file is correct.");
-                noErrors = false;
-            }
-        }
-
-        return noErrors;
-
+        return null;
     }
 
-    public void promptHost(){
-        boolean validHost = false;
-        while (! validHost) {
-            System.out.println("");
-            System.out.println("Enter a hostname or IP address for one of the nodes in the cluster.");
-            System.out.println("This node must be accessible via HTTP.");
-
-            String input = consoleInput("Enter a value or <Enter Key> to use localhost.");
-            validHost = validateHost(input);
-            if(validHost) {
-                host = input;
-            }
-            else{
-                System.out.println("Please enter a hostname rather than a full URL.");
-            }
-        }
-    }
-
-    public void promptPort(){
-        System.out.println("");
-        boolean validPort = false;
-        while (! validPort){
-            System.out.println("Default ports - Elasticsearch: 9200, Logstash: 9600");
-            String tempPort =  console.readLine("Enter HTTP port target or <Enter Key> for default: ");
-            if(StringUtils.isEmpty(tempPort)){
-                break;
-            }
-            if(! NumberUtils.isDigits(tempPort)){
-                System.out.println("Port value must be a 4-5 digit number.");
-                continue;
-            }
-            port = Integer.parseInt(tempPort);
-            validPort = true;
-        }
-    }
-
-    public String promptUser(){
-        System.out.println("");
-        return consoleInput("Enter Elasticsearch user login: ");
-    }
-    public void promptPassword(){
-        System.out.println("");
-        System.out.println("Authentication requires a password which must be at least 6 characters.");
-        password = consolePassword("Enter password: ");
-    }
-
-    public void promptSsl(){
-        System.out.println("");
-        while(true) {
-            String input = consoleInput("Use HTTPS? Y|N <Enter Key> for default N: ");
-            try {
-                isSsl = convertYesNoStringInput(input);
-                break;
-            } catch (IllegalArgumentException iae) {
-                System.out.println(BaseInputs.YesNoValidationMessage);
-            }
-        }
-    }
-    public void promptSkipVerification(){
-        System.out.println("");
-        System.out.println("Should the utility verify the host name for the certificate used in the HTTPS connection?");
-        System.out.println("Bypassing this check is unsafe and not recommended.");
-
-        boolean isValid = false;
-        while(! isValid) {
-            String input = consoleInput("Bypass verification? Y|N <Enter Key> for default N: ");
-            input = input.trim().toLowerCase();
-            if (input.equals("y") || input.equals("yes") || input.equals("t") || input.equals("true")) {
-                skipVerification = true;
-                isValid = true;
-            } else if (input.equals("n") || input.equals("no") || input.equals("f") || input.equals("false")) {
-                skipVerification = false;
-                isValid = true;
-            }
-            else if(input.equals("")){
-                skipVerification = false;
-                isValid = true;
-            }
-            else {
-                System.out.println("Valid responses: Y, N or hit <Enter Key> for N.");
-            }
-        }
-    }
-    
-    public void promptPkiStore(){
-        pkiKeystore = consoleInput("Enter the full path to a keystore to be used for PKI Authentication or <Enter Key> for none: ");
-    }
-    public void promptPkiPassword(){
-        pkiKeystorePass = consolePassword("Enter the password for the PKI Auth keytstore or <Enter Key> for none: ");
-    }
-    
-    public void promptProxyHost(){
-        proxyHost = consoleInput("Enter a proxy host name or IP or <Enter Key> to bypass");
-    }
-    public void promptProxyPort(){
-        if(StringUtils.isNotEmpty(proxyHost)){
-            String temp = "";
-            while(StringUtils.isEmpty(temp)) {
-                temp = consoleInput("Enter a proxy port number. Required if proxy host is set: ");
-                if (NumberUtils.isDigits(temp)) {
-                    proxyPort = Integer.parseInt(temp);
-                    break;
-                }
-                temp = "";
-            }
-        }
-    }
-    public void promptProxyUser(){
-        proxyUser = consoleInput("User login for the specified proxy server: ");
-    }
-    public void promptProxyPassword(){
-        proxyUser = consolePassword("Password for the specified proxy user: ");
-    }
-    public void promptBypassDiagVerification(){
-        boolean isValid = false;
-        while(! isValid) {
-            String input = consoleInput("Bypass verification? Y|N <Enter Key> for default N: ");
-            input = input.trim().toLowerCase();
-            if (input.equals("y") || input.equals("yes") || input.equals("t") || input.equals("true")) {
-                bypassDiagVerify = true;
-                isValid = true;
-            } else if (input.equals("n") || input.equals("no") || input.equals("f") || input.equals("false")) {
-                bypassDiagVerify = false;
-                isValid = true;
-            }
-            else if(input.equals("")){
-                bypassDiagVerify = false;
-                isValid = true;
-            }
-            else {
-                System.out.println("Valid responses: Y, N or hit <Enter Key> for N.");
-            }
-        }
-    }
-
-    public boolean validateHost(String hostString){
-        // Returns false if empty or a full url:port combination
-        if(StringUtils.isEmpty(hostString)){
-            return false;
-        }
-       return ! hostString.toLowerCase().matches("((http|https?)://)?.*:(\\d*)");
-    }
 
     @Override
     public String toString() {
@@ -269,7 +260,6 @@ public class ElasticRestClientInputs extends BaseInputs {
                 ", proxyHost='" + proxyHost + '\'' +
                 ", proxyPort=" + proxyPort +
                 ", proxyUser='" + proxyUser + '\'' +
-                ", bypassDiagVerify=" + bypassDiagVerify +
                 '}';
     }
 }

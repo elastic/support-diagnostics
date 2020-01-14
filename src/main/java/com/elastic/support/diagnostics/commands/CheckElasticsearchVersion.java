@@ -41,7 +41,7 @@ public class CheckElasticsearchVersion implements Command {
            RestClient restClient = RestClient.getClient(
                     context.diagnosticInputs.host,
                     context.diagnosticInputs.port,
-                    context.diagnosticInputs.getScheme(),
+                    context.diagnosticInputs.scheme,
                     context.diagnosticInputs.user,
                     context.diagnosticInputs.password,
                     context.diagnosticInputs.proxyHost,

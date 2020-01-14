@@ -2,9 +2,14 @@ package com.elastic.support.monitoring;
 
 import com.beust.jcommander.Parameter;
 import com.elastic.support.rest.ElasticRestClientInputs;
+import com.elastic.support.util.SystemProperties;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class MonitoringImportInputs extends ElasticRestClientInputs {
 
@@ -20,7 +25,7 @@ public class MonitoringImportInputs extends ElasticRestClientInputs {
     }
 
     @Parameter(names = {"--indexName"}, description = "Overrides the name of the imported index from the date, appending it to .monitoring-es-7- .")
-    protected String indexName;
+    protected String indexName = "diag-import" + SystemProperties.getUtcDateString();
     public String getIndexName() {
         return indexName;
     }
@@ -37,26 +42,27 @@ public class MonitoringImportInputs extends ElasticRestClientInputs {
         this.input = input;
     }
 
-    public boolean validate(){
+    public boolean runInteractive(){
+        return true;
+    }
 
-        if (! super.validate()){
-            return false;
-        }
+    public List<String> validate(){
+
+        List<String> errors = new ArrayList<>();
+        errors.addAll(super.validate());
 
         if(StringUtils.isNotEmpty(clusterName)) {
             if (clusterName.contains(" ")) {
-                logger.warn("Spaces not permitted in cluster name");
-                return false;
+                errors.add("Spaces not permitted in cluster name");
             }
         }
 
         if(StringUtils.isNotEmpty(indexName)) {
             if(indexName.contains(" ")){
-                logger.warn("Spaces not permitted in index name");
-                return false;
+                errors.add("Spaces not permitted in index name");
             }
         }
 
-        return true;
+        return errors;
     }
 }

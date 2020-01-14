@@ -3,6 +3,8 @@ package com.elastic.support.monitoring;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.List;
+
 public class MonitoringExportApp {
 
     private static final Logger logger = LogManager.getLogger(MonitoringExportApp.class);
@@ -12,7 +14,11 @@ public class MonitoringExportApp {
         MonitoringExportInputs monitoringExportInputs = new MonitoringExportInputs();
         monitoringExportInputs.parseInputs(args);
 
-        if (!monitoringExportInputs.validate()) {
+        List<String> errors = monitoringExportInputs.validate();
+        if (errors.size() > 0) {
+            for(String err: errors){
+                logger.info(err);
+            }
             logger.info("Exiting...");
             System.exit(0);
         }

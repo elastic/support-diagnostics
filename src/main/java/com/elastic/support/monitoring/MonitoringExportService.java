@@ -2,6 +2,7 @@ package com.elastic.support.monitoring;
 
 import com.elastic.support.Constants;
 import com.elastic.support.diagnostics.DiagnosticException;
+import com.elastic.support.diagnostics.DiagnosticInputs;
 import com.elastic.support.diagnostics.commands.CheckElasticsearchVersion;
 import com.elastic.support.rest.ElasticRestClientService;
 import com.elastic.support.rest.RestClient;
@@ -57,7 +58,7 @@ public class MonitoringExportService extends ElasticRestClientService {
             client = RestClient.getClient(
                     inputs.host,
                     inputs.port,
-                    inputs.getScheme(),
+                    inputs.scheme,
                     inputs.user,
                     inputs.password,
                     inputs.proxyHost,
@@ -114,6 +115,7 @@ public class MonitoringExportService extends ElasticRestClientService {
             logger.log(SystemProperties.DIAG, "Unexpected error occurred", t);
             logger.error("Unexpected error. {}", Constants.CHECK_LOG);
         } finally {
+            DiagnosticInputs.textIO.dispose();
             closeLogs();
             createArchive(tempDir);
             client.close();

@@ -28,7 +28,7 @@ public class DiagnosticService extends ElasticRestClientService {
                 RestClient esRestClient = RestClient.getClient(
                     inputs.host,
                     inputs.port,
-                    inputs.getScheme(),
+                    inputs.scheme,
                     inputs.user,
                     inputs.password,
                     inputs.proxyHost,

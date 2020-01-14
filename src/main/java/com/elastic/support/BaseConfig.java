@@ -6,6 +6,7 @@ import java.util.Map;
 
 public class BaseConfig {
 
+    public String diagnosticVersion;
     public int connectionTimeout;
     public int connectionRequestTimeout;
     public int socketTimeout;
@@ -25,6 +26,8 @@ public class BaseConfig {
     public BaseConfig(Map configuration) {
 
         this.configuration = configuration;
+
+        diagnosticVersion = (String)configuration.get("diagnosticVersion");
 
         Map<String, String> githubSettings = (Map<String, String>) configuration.get("github-settings");
 

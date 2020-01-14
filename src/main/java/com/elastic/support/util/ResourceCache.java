@@ -3,6 +3,8 @@ package com.elastic.support.util;
 import com.elastic.support.rest.RestClient;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.beryx.textio.TextIO;
+import org.beryx.textio.TextIoFactory;
 
 import java.io.Closeable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -41,7 +43,7 @@ public class ResourceCache{
         throw new IllegalStateException("RestClient instance does not exist");
     }
 
-    // Centralized method for cleaning up ssh and http clients
+    // Centralized method for cleaning up console, ssh and http clients
     public static void closeAll() {
         resources.forEach((name, resource)->{
                 try{

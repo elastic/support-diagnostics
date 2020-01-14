@@ -3,10 +3,8 @@ package com.elastic.support.monitoring;
 import com.elastic.support.rest.ElasticRestClientService;
 import com.elastic.support.Constants;
 import com.elastic.support.rest.RestClient;
-import com.elastic.support.util.ArchiveUtils;
-import com.elastic.support.util.JsonYamlUtils;
-import com.elastic.support.util.SystemProperties;
-import com.elastic.support.util.SystemUtils;
+import com.elastic.support.rest.RestEntry;
+import com.elastic.support.util.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -29,7 +27,7 @@ public class MonitoringImportService extends ElasticRestClientService {
             client = RestClient.getClient(
                     inputs.host,
                     inputs.port,
-                    inputs.getScheme(),
+                    inputs.scheme,
                     inputs.user,
                     inputs.password,
                     inputs.proxyHost,

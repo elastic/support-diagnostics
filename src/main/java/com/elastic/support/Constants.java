@@ -6,7 +6,6 @@ import java.util.List;
 
 public class Constants {
 
-   public static final String ES_DIAG_DEFAULT = "standard";
    public static final String ES_DIAG = "diagnostics";
    public static final String NOT_FOUND = "not found";
    public static final String CHECK_LOG = "Check diagnostics.log in the archive file for more detail.";
@@ -24,6 +23,8 @@ public class Constants {
 
    public static final int DEEFAULT_HTTP_PORT = 80;
    public static final int DEEFAULT_HTTPS_PORT = 443;
+   public static final int DEEFAULT_PROXY_PORT = 8080;
+
 
    public static final int LOGSTASH_PORT = 9600;
    public static final String[] LOCAL_ADDRESSES = {"127.0.0.1","localhost", "[::1]"};
@@ -54,5 +55,7 @@ public class Constants {
    public static final String restInputHost = "rest:InputHost";
    public static final String restTargetHost = "resTtargetHost";
    public static final String systemCommands = "ssh:SystemCommand";
+
+   public static final String runningInIde = "runningInIde";
 
 }

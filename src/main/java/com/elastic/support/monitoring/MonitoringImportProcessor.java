@@ -37,12 +37,7 @@ public class MonitoringImportProcessor implements ArchiveEntryProcessor {
             updateClusterName = true;
         }
 
-        if(StringUtils.isEmpty(inputs.indexName )){
-            index = Constants.MONITORING_PREFIX  + SystemProperties.getUtcDateString();
-        }
-        else{
-            index = Constants.MONITORING_PREFIX   + inputs.indexName;
-        }
+        index = Constants.MONITORING_PREFIX   + inputs.indexName;
 
     }
 

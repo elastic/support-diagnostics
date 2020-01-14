@@ -10,6 +10,7 @@ import com.elastic.support.rest.RestResult;
 import com.elastic.support.util.JsonYamlUtils;
 import com.elastic.support.util.SystemProperties;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.vdurmont.semver4j.Semver;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -64,8 +65,9 @@ public class CheckDiagnosticVersion implements Command {
                 throw new RuntimeException("Empty diagnostic version.");
             }
 
-            if (context.diagVersion.equalsIgnoreCase("debug")) {
-                logger.info("Running in debugger - bypassing check");
+            if (context.diagVersion.equals(Constants.runningInIde)) {
+                logger.info("Running in IDE");
+                context.diagVersion = context.diagsConfig.diagnosticVersion;
                 return;
             }
 
@@ -76,8 +78,10 @@ public class CheckDiagnosticVersion implements Command {
             List<JsonNode> assests = rootNode.findValues("assets");
             JsonNode asset = assests.get(0);
             String downloadUrl = asset.path("browser_download_url").asText();
+            Semver diagVer = new Semver(context.diagVersion, Semver.SemverType.NPM);
+            String rule = ">= " + ver;
 
-            if (!context.diagVersion.equals(ver)) {
+            if (!diagVer.satisfies(rule)) {
                 logger.info("Warning: DiagnosticService version:{} is not the current recommended release", context.diagVersion);
                 logger.info("The current release is {}", ver);
                 logger.info("The latest version can be downloaded at {}", downloadUrl);
@@ -97,7 +101,7 @@ public class CheckDiagnosticVersion implements Command {
 
     public String getToolVersion() {
         String ver = GenerateManifest.class.getPackage().getImplementationVersion();
-        return (ver != null) ? ver : "Debug";
+        return (ver != null) ? ver : Constants.runningInIde;
     }
 
 

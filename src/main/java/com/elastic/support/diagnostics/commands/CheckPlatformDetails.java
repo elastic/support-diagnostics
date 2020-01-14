@@ -73,7 +73,7 @@ public class CheckPlatformDetails implements Command {
                     RestClient masterRestClient = RestClient.getClient(
                             masterNode.host,
                             masterNode.httpPort,
-                            context.diagnosticInputs.getScheme(),
+                            context.diagnosticInputs.scheme,
                             context.diagnosticInputs.user,
                             context.diagnosticInputs.password,
                             context.diagnosticInputs.proxyHost,
