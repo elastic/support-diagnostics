@@ -51,20 +51,20 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
     public String diagType = Constants.local;
     @Parameter(names = {"--remoteUser"}, description = remoteUserDescription)
     public String remoteUser;
-    @Parameter(names = {"--remotePassword"}, description = "Show password prompt for the remote user account.")
+    @Parameter(names = {"--remotePass"}, description = "Show password prompt for the remote user account.", hidden = true)
     public boolean remotePasswordSwitch = false;
     @Parameter(names = {"--remotePwdText"}, hidden = true)
     public String remotePassword = "";
-    @Parameter(names = {"--sshKeyFile"}, description = sshKeyFileDescription)
-    public String keyfile = "~/.ssh/id_rsa";
-    @Parameter(names = {"--keyFilePassphrase"}, description = "Show prompt for keyfile passphrase for the keyfile if one exists.")
+    @Parameter(names = {"--keyFile"}, description = sshKeyFileDescription)
+    public String keyfile = "";
+    @Parameter(names = {"--keyPass" }, description = "Show prompt for keyfile passphrase for the keyfile if one exists.", hidden = true)
     public boolean keyFilePasswordSwitch = false;
     @Parameter(names = {"--keyFilePwdText"}, hidden = true)
     public String keyfilePassword = "";
     @Parameter(names = {"--trustRemote"}, description = trustRemoteDescription)
     public boolean trustRemote = false;
     @Parameter(names = {"--knownHostsFile"}, description = knownHostsDescription)
-    public String knownHostsFile = "~/.ssh/known_hosts";
+    public String knownHostsFile = "";
     @Parameter(names = {"--sudo"}, description = sudoDescription)
     public boolean sudo = false;
     @Parameter(names = {"--remotePort"}, description = remotePortDescription)
@@ -107,69 +107,9 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
 
         diagType = diagnosticTypeReader
                 .read(SystemProperties.lineSeparator + typeDescription);
-        checkDefaultPortForDiagType(diagType);
+        setDefaultPortForDiagType(diagType);
 
-        host = hostReader
-                .read(SystemProperties.lineSeparator + hostDescription);
-
-        port = portReader
-                .read(SystemProperties.lineSeparator + portDescription);
-
-        isSsl = schemeReader
-                .withDefaultValue(true)
-                .read(SystemProperties.lineSeparator + sslDescription);
-
-        if(isSsl){
-            skipVerification = standardBooleanReader
-                    .withDefaultValue(skipVerification)
-                    .read(SystemProperties.lineSeparator + skipHostnameVerificationDescription);
-        }
-
-        boolean isSecured = standardBooleanReader
-                .withDefaultValue(true)
-                .read(SystemProperties.lineSeparator + "Cluster secured?");
-
-        if(isSecured){
-
-            user = userReader
-                    .read(SystemProperties.lineSeparator + userDescription);
-
-            String authType = authTypeReader
-                    .read(SystemProperties.lineSeparator + "Type of authentication to use:");
-
-            // SSL needs to be in place for PKI
-            if(authType.equals(pkiLoginAuth) && !isSsl){
-               terminal.println("TLS must be enabled to use PKI - using user/password instead.");
-               authType = userLoginAuth;
-            }
-
-            if(authType.equals(userLoginAuth)){
-                password = passwordReader
-                        .read(SystemProperties.lineSeparator + passwordDescription);
-            }
-            else{
-                pkiKeystore = standardFileReader
-                        .read(SystemProperties.lineSeparator + pkiKeystoreDescription);
-                pkiKeystorePass = standardPasswordReader
-                        .read(SystemProperties.lineSeparator + pkiKeystorePasswordDescription);
-            }
-        }
-
-        boolean httpProxy = standardBooleanReader
-                .withDefaultValue(false)
-                .read(SystemProperties.lineSeparator + "Http Proxy Server present?");
-
-        if(httpProxy){
-            proxyHost = proxyHostReader
-                    .read(SystemProperties.lineSeparator + proxyHostDescription);
-
-            proxyPort = standardPortReader
-                    .withDefaultValue(proxyPort)
-                    .read(SystemProperties.lineSeparator + proxyPortDescription);
-
-            proxyPassword = standardPasswordReader
-                    .read(SystemProperties.lineSeparator + proxyPasswordDescription);
-        }
+        runHttpInteractive();
 
         if(diagType.contains("remote")) {
             remoteUser = remoteUserReader
@@ -177,11 +117,10 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
 
             boolean useKeyfile = standardBooleanReader
                     .withDefaultValue(false)
-                    .read(SystemProperties.lineSeparator + "User a keyfile instead of user/password identification?");
+                    .read(SystemProperties.lineSeparator + "Use a keyfile instead of user/password identification?");
 
             if (useKeyfile) {
                 keyfile = standardFileReader
-                        .withDefaultValue(keyfile)
                         .read(SystemProperties.lineSeparator + sshKeyFileDescription);
                 keyfilePassword = standardPasswordReader
                         .read(SystemProperties.lineSeparator + sshKeyFIlePassphraseDescription);
@@ -200,7 +139,6 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
 
             if (!trustRemote){
                 knownHostsFile = standardFileReader
-                        .withDefaultValue(knownHostsFile)
                         .read(SystemProperties.lineSeparator + knownHostsDescription);
             }
 
@@ -209,42 +147,42 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
                     .read(SystemProperties.lineSeparator + sudoDescription);
         }
 
-        outputDir = outputDirectoryReader
-                .withDefaultValue(outputDir)
-                .read(outputDirDescription);
+        runOutputDirInteractive();
 
         textIO.dispose();
         return true;
     }
 
-    public List<String> validate() {
-        List<String> errors = new ArrayList<>();
-        errors.addAll(ObjectUtils.defaultIfNull(super.validate(), emptyList));
+    public List<String> parseInputs(String[] args){
+        List<String> errors = super.parseInputs(args);
+
+        // If we're in interactive mode don't bother validating anything
+        if(interactive){
+            return emptyList;
+        }
+
         errors.addAll(ObjectUtils.defaultIfNull(validateDiagType(diagType), emptyList));
-        errors.addAll(ObjectUtils.defaultIfNull(checkDefaultPortForDiagType(diagType), emptyList));
+        errors.addAll(ObjectUtils.defaultIfNull(setDefaultPortForDiagType(diagType), emptyList));
         errors.addAll(ObjectUtils.defaultIfNull(validateRemoteUser(remoteUser), emptyList));
         errors.addAll(ObjectUtils.defaultIfNull(validatePort(remotePort), emptyList));
         errors.addAll(ObjectUtils.defaultIfNull(validateFile(keyfile), emptyList));
         errors.addAll(ObjectUtils.defaultIfNull(validateFile(knownHostsFile), emptyList));
 
-        if(errors.size() > 0){
-            return errors;
-        }
-
-        if(remotePasswordSwitch){
+        if(StringUtils.isEmpty(keyfile) && StringUtils.isEmpty(remotePassword)){
             remotePassword = standardPasswordReader
                     .read(remotePasswordDescription);
         }
 
-        if(keyFilePasswordSwitch){
+        if(StringUtils.isNotEmpty(keyfile) && StringUtils.isEmpty(keyfilePassword)){
             keyfilePassword = standardPasswordReader
                     .read(sshKeyFIlePassphraseDescription);
         }
 
-        return emptyList;
+        return errors;
+
     }
 
-    public List<String> checkDefaultPortForDiagType(String val) {
+    public List<String> setDefaultPortForDiagType(String val) {
         // Check the diag type and reset the default port value if
         // it is a Logstash diag.
         if (val.toLowerCase().contains("logstash")) {
@@ -256,8 +194,6 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
     }
 
     public List<String> validateDiagType(String val) {
-        // Check the diag type and reset the default port value if
-        // it is a Logstash diag.
         List<String> types = Arrays.asList(diagnosticTypeValues);
         if (!types.contains(val)) {
             return Collections.singletonList(val + " was not a valid diagnostype type. Enter --help to see valid choices");

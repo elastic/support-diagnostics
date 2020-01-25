@@ -2,14 +2,17 @@ package com.elastic.support.monitoring;
 
 import com.beust.jcommander.Parameter;
 import com.elastic.support.rest.ElasticRestClientInputs;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.beryx.textio.StringInputReader;
+import org.beryx.textio.TerminalProperties;
+import org.beryx.textio.TextTerminal;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -19,71 +22,75 @@ public class MonitoringExportInputs extends ElasticRestClientInputs {
     private static int defaultInterval = 6;
 
     @Parameter(names = {"--id"}, description = "Required except when the list command is used: The cluster_uuid of the monitored cluster you wish to extract data for. If you do not know this you can obtain it from that cluster using <protocol>://<host>:port/ .")
-    protected String clusterId;
-    public String getClusterId() {
-        return clusterId;
-    }
-
-    public void setClusterId(String clusterId) {
-        this.clusterId = clusterId;
-    }
-
-    @Parameter(names = {"--interval"}, description = "Number of hours back to collect statistics. Defaults to 6 hours, but but can be set as high as 12.")
-    int interval = defaultInterval;
-    public void setInterval(int interval) {
-        this.interval = interval;
-    }
-
-    public int getInterval() {
-        return interval;
-    }
+    public String clusterId;
 
     @Parameter(names = {"--start"}, description = "Date and time for the starting point of the extraction. Defaults to today's date and time, minus the 6 hour default interval in UTC. Must be in the 24 hour format yyyy-MM-dd HH:mm.")
-    protected String start = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").format(ZonedDateTime.now(ZoneId.of("+0")).minusHours(defaultInterval));
-    public void setStart(String start) {
-        this.start = start;
-    }
-    public String getStart() {
-        return start;
-    }
+    public String start = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").format(ZonedDateTime.now(ZoneId.of("+0")).minusHours(defaultInterval));
+
+    @Parameter(names = {"--interval"}, description = "Number of hours back to collect statistics. Defaults to 6 hours, but but can be set as high as 12.")
+    public int interval = defaultInterval;
 
     @Parameter(names = {"--list"}, description = "List the clusters available on the monitoring cluster.")
     boolean listClusters = false;
-    public boolean isListClusters() {
-        return listClusters;
-    }
-
-    public void setListClusters(boolean listClusters) {
-        this.listClusters = listClusters;
-    }
 
     // Generated during the validate method for use by the query.
-    protected String queryStartDate;
-    protected String queryEndDate;
+    public String queryStartDate;
+    public String queryEndDate;
 
-    public boolean runInteractive(){
+    public boolean runInteractive() {
+
+        String operation = standardStringReader
+                .withNumberedPossibleValues("List", "Extract.")
+                .withIgnoreCase()
+                .read("List monitored clusters available or extract data from a cluster.");
+
+        if(operation.equals("extract")){
+            clusterId = textIO.newStringInputReader()
+                    .withInputTrimming(true)
+                    .withValueChecker((String val, String propname) -> validateCluster(val))
+                    .read("Enter the cluster id to for the cluster you wish to extract.");
+
+            interval = textIO.newIntInputReader()
+                    .withInputTrimming(true)
+                    .withDefaultValue(interval)
+                    .withValueChecker((Integer val, String propname) -> validateInterval(val))
+                    .read("Enter the cluster id to for the cluster you wish to extract.");
+
+            terminal.println("\"Date and time for the earliest point of the extraction.");
+            terminal.println("Defaults to today's date and time, minus the 6 hour default interval in UTC.");
+            terminal.println("Must be in the 24 hour format yyyy-MM-dd HH:mm.");
+
+            start = textIO.newStringInputReader()
+                    .withInputTrimming(true)
+                    .withDefaultValue(start)
+                    .withValueChecker((String val, String propname) -> validateStart(val))
+                    .read("Enter the cluster id to for the cluster you wish to extract.");
+        }
+
+        runHttpInteractive();
+        runOutputDirInteractive();
+
         return true;
     }
 
-
-    public List<String> validate() {
-
-        List<String> errors = new ArrayList<>();
-        errors.addAll(super.validate());
+    public List<String> parseInputs(String[] args) {
+        List<String> errors = parseInputs(args);
 
         if (!listClusters) {
-            if (StringUtils.isEmpty(clusterId)) {
-                errors.add("A cluster id is required to extract monitoring data.");
-            }
-
-            if (interval < 1 || interval > 12) {
-                errors.add("Interval must be between 1 and 12");
-            }
+            errors.addAll(ObjectUtils.defaultIfNull(validateCluster(clusterId), emptyList));
+            errors.addAll(ObjectUtils.defaultIfNull(validateInterval(interval), emptyList));
+            errors.addAll(ObjectUtils.defaultIfNull(validateStart(start), emptyList));
         }
+
+        return errors;
+
+    }
+
+    public List<String> validateStart(String val){
 
         try {
             ZonedDateTime workingStart = null, workingStop = null;
-            start = start.replace(" ", "T");
+            start = val.replace(" ", "T");
             workingStart = ZonedDateTime.parse(start + ":00+00:00", DateTimeFormatter.ISO_OFFSET_DATE_TIME);
             workingStop = workingStart.plusHours(interval);
 
@@ -98,9 +105,27 @@ public class MonitoringExportInputs extends ElasticRestClientInputs {
             queryEndDate = (DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").format(workingStop) + ":00.000Z").replace(" ", "T");
 
         } catch (Exception e) {
-            errors.add("Invalid Date or Time format. Please enter the date in format YYYY-MM-dd HH:mm");
+            return Collections.singletonList("Invalid Date or Time format. Please enter the date in format YYYY-MM-dd HH:mm");
         }
 
-        return errors;
+        return emptyList;
+
     }
+
+    public List<String> validateCluster(String val){
+        if(StringUtils.isEmpty(val)){
+            return Collections.singletonList("Cluster id is required to extract monitoring data.");
+        }
+        return emptyList;
+    }
+
+    public List<String> validateInterval(int val){
+        if(val <1 || val > 12){
+            return Collections.singletonList("Interval must be 1-12.");
+        }
+        return emptyList;
+    }
+
+
+
 }

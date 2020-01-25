@@ -46,15 +46,13 @@ public class ScrubInputs extends BaseInputs {
         return true;
     }
 
-    public List<String> validate() {
-        // If we're in help just shut down.
+    public List<String> parseIinputs(String[] args){
+        List<String> errors = super.parseInputs(args);
+
         if (help) {
             this.jCommander.usage();
             return emptyList;
         }
-
-        List<String> errors = new ArrayList<>();
-        errors.addAll(super.validate());
 
         if(StringUtils.isEmpty(infile) && StringUtils.isEmpty(archive) ){
             errors.add("You must specify either an archive or individual file to process.");
@@ -65,14 +63,5 @@ public class ScrubInputs extends BaseInputs {
         }
 
         return errors;
-
-    }
-
-    public String getTempDir() {
-        if(StringUtils.isEmpty(outputDir)){
-            return SystemProperties.userDir + SystemProperties.fileSeparator + "scrubbed";
-        }
-
-        return outputDir + SystemProperties.fileSeparator + "scrubbed";
     }
 }

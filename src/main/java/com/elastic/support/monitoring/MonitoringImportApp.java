@@ -13,17 +13,28 @@ public class MonitoringImportApp {
     public static void main(String[] args) {
 
         MonitoringImportInputs monitoringImportInputs = new MonitoringImportInputs();
-        monitoringImportInputs.parseInputs(args);
+        List<String> errors = monitoringImportInputs.parseInputs(args);
 
-        List<String> errors = monitoringImportInputs.validate();
-        if(errors.size() > 0){
-            for(String err: errors){
-                logger.warn(err);
-            }
-            logger.info("Exiting...");
-            System.exit(0);
+        if(args.length == 0){
+            monitoringImportInputs.interactive = true;
         }
-
+        if( args.length == 0 || monitoringImportInputs.interactive){
+            // Create a new input object so we out clean since
+            // parameters other than interactive might have been sent in.
+            monitoringImportInputs = new MonitoringImportInputs();
+            monitoringImportInputs.interactive = true;
+            monitoringImportInputs.runInteractive();
+        }
+        else {
+            if (errors.size() > 0) {
+                for(String err: errors){
+                    logger.info(err);
+                }
+                monitoringImportInputs.usage();
+                logger.info("Exiting...");
+                System.exit(0);
+            }
+        }
         new MonitoringImportService().execImport(monitoringImportInputs);
     }
 

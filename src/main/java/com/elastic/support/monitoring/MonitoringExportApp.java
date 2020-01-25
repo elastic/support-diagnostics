@@ -12,15 +12,27 @@ public class MonitoringExportApp {
     public static void main(String[] args) {
 
         MonitoringExportInputs monitoringExportInputs = new MonitoringExportInputs();
-        monitoringExportInputs.parseInputs(args);
+        List<String> errors = monitoringExportInputs.parseInputs(args);
 
-        List<String> errors = monitoringExportInputs.validate();
-        if (errors.size() > 0) {
-            for(String err: errors){
-                logger.info(err);
+        if(args.length == 0){
+            monitoringExportInputs.interactive = true;
+        }
+        if( args.length == 0 || monitoringExportInputs.interactive){
+            // Create a new input object so we out clean since
+            // parameters other than interactive might have been sent in.
+            monitoringExportInputs = new MonitoringExportInputs();
+            monitoringExportInputs.interactive = true;
+            monitoringExportInputs.runInteractive();
+        }
+        else {
+            if (errors.size() > 0) {
+                for(String err: errors){
+                    logger.info(err);
+                }
+                monitoringExportInputs.usage();
+                logger.info("Exiting...");
+                System.exit(0);
             }
-            logger.info("Exiting...");
-            System.exit(0);
         }
 
         new MonitoringExportService().execExtract(monitoringExportInputs);

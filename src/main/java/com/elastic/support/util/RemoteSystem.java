@@ -3,6 +3,7 @@ package com.elastic.support.util;
 import com.elastic.support.Constants;
 import com.elastic.support.diagnostics.DiagnosticException;
 import com.jcraft.jsch.*;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -41,8 +42,14 @@ public class RemoteSystem extends SystemCommand {
             }
 
             JSch jsch; jsch = new JSch();
-            jsch.addIdentity(keyFile);
-            jsch.setKnownHosts(knownHostsFile);
+            if(StringUtils.isNotEmpty(keyFile)){
+                isSudo = false;
+                logger.warn("Keyfile was specified - cannot use sudo to copy logs. ")
+                jsch.addIdentity(keyFile);
+            }
+            if(StringUtils.isNotEmpty(knownHostsFile)){
+                jsch.setKnownHosts(knownHostsFile);
+            }
 
             String hostKeyChecking = "yes";
             if (trustRemote) {

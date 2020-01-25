@@ -3,9 +3,11 @@ package com.elastic.support.monitoring;
 import com.beust.jcommander.Parameter;
 import com.elastic.support.rest.ElasticRestClientInputs;
 import com.elastic.support.util.SystemProperties;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.beryx.textio.StringInputReader;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,52 +19,55 @@ public class MonitoringImportInputs extends ElasticRestClientInputs {
 
     @Parameter(names = {"--clusterName"}, description = "Overrides the name of the imported cluster.")
     protected String clusterName;
-    public String getClusterName() {
-        return clusterName;
-    }
-    public void setClusterName(String clusterName) {
-        this.clusterName = clusterName;
-    }
 
     @Parameter(names = {"--indexName"}, description = "Overrides the name of the imported index from the date, appending it to .monitoring-es-7- .")
     protected String indexName = "diag-import" + SystemProperties.getUtcDateString();
-    public String getIndexName() {
-        return indexName;
-    }
-    public void setIndexName(String indexName) {
-        this.indexName = indexName;
-    }
 
     @Parameter(names = {"-i", "--input"}, required = true, description = "Required: The archive that you wish to import into Elastic Monitoring. This must be in the format produced by the diagnostic export utility.")
     protected String input;
-    public String getInput() {
-        return input;
-    }
-    public void setInput(String input) {
-        this.input = input;
-    }
+
+    protected StringInputReader proxyHostReader = textIO.newStringInputReader()
+            .withInputTrimming(true)
+            .withValueChecker((String val, String propname) -> validateId(val));
 
     public boolean runInteractive(){
+
+        clusterName = textIO.newStringInputReader()
+                .read("Overrides the name of the imported cluster.");
+
+        indexName = textIO.newStringInputReader()
+                .read("Overrides the name of the imported index from the date, appending it to .monitoring-es-7- .");
+
+        input = textIO.newStringInputReader()
+                .withInputTrimming(true)
+                .withValueChecker((String val, String propname) -> validateRequiredFile(val))
+                .read("Enter the full path of the archvive you wish to import.");
+
+        runHttpInteractive();
+
         return true;
     }
 
-    public List<String> validate(){
+    public List<String> parseInputs(String[] args){
 
-        List<String> errors = new ArrayList<>();
-        errors.addAll(super.validate());
+        List<String> errors = super.parseInputs(args);
 
-        if(StringUtils.isNotEmpty(clusterName)) {
-            if (clusterName.contains(" ")) {
-                errors.add("Spaces not permitted in cluster name");
-            }
-        }
-
-        if(StringUtils.isNotEmpty(indexName)) {
-            if(indexName.contains(" ")){
-                errors.add("Spaces not permitted in index name");
-            }
-        }
+        errors.addAll(ObjectUtils.defaultIfNull(validateId(clusterName), emptyList));
+        errors.addAll(ObjectUtils.defaultIfNull(validateId(indexName), emptyList));
+        errors.addAll(ObjectUtils.defaultIfNull(validateRequiredFile(input), emptyList));
 
         return errors;
+
     }
+
+    public List<String> validateId(String val){
+        if(val.contains(" ")){
+            return Collections.singletonList("Spaces not permitted in name.");
+        }
+        return null;
+    }
+
+
+
+
 }

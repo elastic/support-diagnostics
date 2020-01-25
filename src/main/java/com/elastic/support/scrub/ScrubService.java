@@ -21,7 +21,7 @@ public class ScrubService extends BaseService {
       String filePath = inputs.getArchive();
       String infilePath = inputs.getInfile();
       String outputDir = inputs.outputDir;
-      String temp = inputs.getTempDir();
+      String temp = inputs.outputDir + SystemProperties.fileSeparator + "scrubbed";
 
       try {
          int pos;

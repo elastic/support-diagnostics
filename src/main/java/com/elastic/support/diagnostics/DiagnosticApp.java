@@ -7,6 +7,7 @@ import com.elastic.support.util.SystemProperties;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -18,19 +19,23 @@ public class DiagnosticApp {
 
         try {
             DiagnosticInputs diagnosticInputs = new DiagnosticInputs();
-            diagnosticInputs.parseInputs(args);
-            if(diagnosticInputs.interactive){
-                // Start out clean
+            if(args.length == 0){
+                diagnosticInputs.interactive = true;
+            }
+            List<String> errors = diagnosticInputs.parseInputs(args);
+
+            if( args.length == 0 || diagnosticInputs.interactive){
+                // Create a new input object so we out clean
                 diagnosticInputs = new DiagnosticInputs();
                 diagnosticInputs.interactive = true;
                 diagnosticInputs.runInteractive();
             }
             else {
-                List<String> errors = diagnosticInputs.validate();
                 if (errors.size() > 0) {
                     for(String err: errors){
                         logger.info(err);
                     }
+                    diagnosticInputs.usage();
                     logger.info("Exiting...");
                     System.exit(0);
                 }
@@ -46,6 +51,8 @@ public class DiagnosticApp {
             logger.error("Unanticipated error", t);
         }
         finally {
+            DiagnosticInputs.terminal.dispose();
+            DiagnosticInputs.textIO.dispose();
         }
     }
 
