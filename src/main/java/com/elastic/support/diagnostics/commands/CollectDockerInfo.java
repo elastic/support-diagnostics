@@ -1,12 +1,10 @@
 package com.elastic.support.diagnostics.commands;
 
 import com.elastic.support.Constants;
+import com.elastic.support.diagnostics.DiagConfig;
 import com.elastic.support.diagnostics.chain.Command;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
-import com.elastic.support.util.ResourceCache;
-import com.elastic.support.util.SystemCommand;
-import com.elastic.support.util.SystemProperties;
-import com.elastic.support.util.SystemUtils;
+import com.elastic.support.util.*;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -29,19 +27,23 @@ public class CollectDockerInfo implements Command {
       String targetDir = context.tempDir + SystemProperties.fileSeparator + "docker";
 
       // Run the global calls. It's a single pass
-      runDockerCalls(targetDir, context.diagsConfig.dockerGlobal, systemCommand, "");
+      runDockerCalls(targetDir, context.diagsConfig.dockerGlobal, systemCommand, "", context.diagsConfig.dockerExecutablePath);
 
-      List<String> containerIds = getDockerContainerIds(systemCommand);
+      String idsCmd = context.diagsConfig.dockerContainerIds;
+      if(systemCommand instanceof RemoteSystem){
+          idsCmd = context.diagsConfig.dockerExecutablePath + idsCmd;
+      }
+      List<String> containerIds = getDockerContainerIds(systemCommand, idsCmd);
       for(String container: containerIds){
-          runDockerCalls(targetDir, context.diagsConfig.dockerContainer, systemCommand, container);
+          runDockerCalls(targetDir, context.diagsConfig.dockerContainer, systemCommand, container, context.diagsConfig.dockerExecutablePath);
       }
 
   }
 
-    public List<String> getDockerContainerIds(SystemCommand systemCommand) {
+    public List<String> getDockerContainerIds(SystemCommand systemCommand, String idsCmd) {
 
         try {
-            String output = systemCommand.runCommand("docker ps -q");
+            String output = systemCommand.runCommand(idsCmd);
 
             // If there's content add it to the file list
             if (StringUtils.isNotEmpty(output.trim())) {
@@ -63,7 +65,7 @@ public class CollectDockerInfo implements Command {
 
     }
 
-    private void runDockerCalls(String targetDir, Map<String, String> commandMap, SystemCommand sysCmd, String token) {
+    private void runDockerCalls(String targetDir, Map<String, String> commandMap, SystemCommand sysCmd, String token, String dockerExecutablePath) {
         String suffix = "";
         if (StringUtils.isNotEmpty(token)) {
             suffix = "-" + token;
@@ -72,6 +74,9 @@ public class CollectDockerInfo implements Command {
         for (Map.Entry<String, String> entry : commandMap.entrySet()) {
             try {
                 String cmd = entry.getValue().replace("{{CONTAINER_ID}}", token);
+                if(sysCmd instanceof RemoteSystem){
+                    cmd = dockerExecutablePath + cmd;
+                }
                 String output = sysCmd.runCommand(cmd);
                 SystemUtils.writeToFile(output, targetDir + SystemProperties.fileSeparator + entry.getKey() + suffix + ".txt");
             } catch (Exception e) {

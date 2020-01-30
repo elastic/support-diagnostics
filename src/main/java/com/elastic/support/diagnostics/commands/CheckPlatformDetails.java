@@ -95,16 +95,25 @@ public class CheckPlatformDetails implements Command {
             switch (context.diagnosticInputs.diagType) {
                 case Constants.remote:
                     // If Docker containers flag it for no syscalls or logs
+                    String targetOS;
                     if (context.dockerPresent) {
                         context.runSystemCalls = false;
-                        break;
+                        // We really don't have any way of really knowing
+                        // what the enclosing platform is. So this may fail...
+                        logger.info("Docker containers detected on remote platform - unable to determine host OS. Linux will be used but if another operating system is present the Docker diagnostic calls may fail.");
+                        targetOS = Constants.linuxPlatform;
+                        //break;
                     }
-                    // check for input host in bound addresses
-                    context.targetNode = findRemoteTargetNode(
-                            context.diagnosticInputs.host, nodeProfiles);
+                    else{
+                        // check for input host in bound addresses
+                        context.targetNode = findRemoteTargetNode(
+                                context.diagnosticInputs.host, nodeProfiles);
+                        targetOS = context.targetNode.os;
+                    }
+
 
                     syscmd = new RemoteSystem(
-                            context.targetNode.os,
+                            targetOS,
                             context.diagnosticInputs.remoteUser,
                             context.diagnosticInputs.remotePassword,
                             context.diagnosticInputs.host,

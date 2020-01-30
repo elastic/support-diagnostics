@@ -9,13 +9,6 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.beryx.textio.BooleanInputReader;
-import org.beryx.textio.IntInputReader;
-import org.beryx.textio.StringInputReader;
-import org.beryx.textio.TextTerminal;
-
-import java.io.File;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -31,7 +24,7 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
     public static final String proxyPortDescription = "Proxy server port number. Defaults to port 80:";
     public static final String proxyUserDescription = "Proxy server login:";
     public static final String proxyPasswordDescription = "Proxy server password if required:";
-    public static final String sslDescription = "TLS enabled, use HTTPS?";
+    public static final String sslDescription = "Use https to access the cluster?";
     public static final String skipHostnameVerificationDescription = "Bypass hostname verification for certificate? This is unsafe and NOT recommended.";
 
     public final static String  userLoginAuth = "Username/Password:";
@@ -91,25 +84,6 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
 
     // End Input Fields
 
-    // Start Input Readers
-
-    protected StringInputReader hostReader = ResourceCache.textIO.newStringInputReader()
-            .withDefaultValue(host)
-            .withIgnoreCase()
-            .withInputTrimming(true)
-            .withValueChecker((String val, String propname) -> validateHost(val));
-
-    protected StringInputReader authTypeReader = ResourceCache.textIO.newStringInputReader()
-            .withNumberedPossibleValues(userLoginAuth, pkiLoginAuth)
-            .withDefaultValue(userLoginAuth);
-
-    protected StringInputReader proxyHostReader = ResourceCache.textIO.newStringInputReader()
-            .withIgnoreCase()
-            .withInputTrimming(true)
-            .withValueChecker((String val, String propname) -> validateProxyHost(val));
-
-
-    // End Input Readers
     Logger logger = LogManager.getLogger(ElasticRestClientInputs.class);
 
     public List<String> parseInputs(String args[]){
@@ -151,13 +125,17 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
 
     protected void runHttpInteractive(){
 
-        host = hostReader
+        host = ResourceCache.textIO.newStringInputReader()
+                .withDefaultValue(host)
+                .withIgnoreCase()
+                .withInputTrimming(true)
+                .withValueChecker((String val, String propname) -> validateHost(val))
                 .read(SystemProperties.lineSeparator + hostDescription);
 
         port = ResourceCache.textIO.newIntInputReader()
                 .withDefaultValue(port)
                 .withValueChecker((Integer val, String propname) -> validatePort(val))
-                .read(SystemProperties.lineSeparator + portDescription);
+                .read(SystemProperties.lineSeparator + "Listening port. Defaults to " + port + ":");
 
         isSsl = ResourceCache.textIO.newBooleanInputReader()
                 .withDefaultValue(true)
@@ -180,7 +158,9 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
             user = standardStringReader
                     .read(SystemProperties.lineSeparator + userDescription);
 
-            String authType = authTypeReader
+            String authType = ResourceCache.textIO.newStringInputReader()
+                    .withNumberedPossibleValues(userLoginAuth, pkiLoginAuth)
+                    .withDefaultValue(userLoginAuth)
                     .read(SystemProperties.lineSeparator + "Type of authentication to use:");
 
             // SSL needs to be in place for PKI
@@ -206,7 +186,10 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
                 .read(SystemProperties.lineSeparator + "Http Proxy Server present?");
 
         if(httpProxy){
-            proxyHost = proxyHostReader
+            proxyHost = ResourceCache.textIO.newStringInputReader()
+                    .withIgnoreCase()
+                    .withInputTrimming(true)
+                    .withValueChecker((String val, String propname) -> validateProxyHost(val))
                     .read(SystemProperties.lineSeparator + proxyHostDescription);
 
             proxyPort = ResourceCache.textIO.newIntInputReader()

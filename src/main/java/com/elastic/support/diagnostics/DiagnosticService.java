@@ -48,7 +48,7 @@ public class DiagnosticService extends ElasticRestClientService {
             // Create the temp directory - delete if first if it exists from a previous run
             String outputDir = inputs.outputDir;
             ctx.tempDir = outputDir + SystemProperties.fileSeparator + inputs.diagType + "-" + Constants.ES_DIAG;
-            logger.info("Creating temp directory: {}", ctx.tempDir);
+            logger.info("{}Creating temp directory: {}", SystemProperties.lineSeparator, ctx.tempDir);
 
             FileUtils.deleteDirectory(new File(ctx.tempDir));
             Files.createDirectories(Paths.get(ctx.tempDir));

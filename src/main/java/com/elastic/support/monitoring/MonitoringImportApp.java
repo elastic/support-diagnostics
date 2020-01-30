@@ -17,21 +17,17 @@ public class MonitoringImportApp {
 
         try {
             MonitoringImportInputs monitoringImportInputs = new MonitoringImportInputs();
-            if(args.length == 0){
-                monitoringImportInputs.interactive = true;
-            }
-            List<String> errors = monitoringImportInputs.parseInputs(args);
-
-            if( args.length == 0 || monitoringImportInputs.interactive){
-                // Create a new input object so we out clean since
-                // parameters other than interactive might have been sent in.
-                monitoringImportInputs = new MonitoringImportInputs();
+            if (args.length == 0) {
+                logger.info("{}{}{}",
+                        "Command line options can be displayed with the --help arguemnt.",
+                        SystemProperties.lineSeparator,
+                        "Entering interactive mode.");
                 monitoringImportInputs.interactive = true;
                 monitoringImportInputs.runInteractive();
-            }
-            else {
+            } else {
+                List<String> errors = monitoringImportInputs.parseInputs(args);
                 if (errors.size() > 0) {
-                    for(String err: errors){
+                    for (String err : errors) {
                         logger.info(err);
                     }
                     monitoringImportInputs.usage();

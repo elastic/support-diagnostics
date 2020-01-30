@@ -1,0 +1,37 @@
+{
+  "xpack_monitoring_2" : {
+    "description" : "This pipeline upgrades documents from the older version of the Monitoring API to the newer version (6) by fixing breaking changes in those older documents before they are indexed from the older version (2).",
+    "version" : 6050399,
+    "processors" : [
+      {
+        "script" : {
+          "source" : "boolean legacyIndex = ctx._index == '.monitoring-data-2';if (legacyIndex || ctx._index.startsWith('.monitoring-es-2')) {if (ctx._type == 'cluster_info') {ctx._type = 'cluster_stats';ctx._id = null;} else if (legacyIndex || ctx._type == 'cluster_stats' || ctx._type == 'node') {String index = ctx._index;Object clusterUuid = ctx.cluster_uuid;Object timestamp = ctx.timestamp;ctx.clear();ctx._id = 'xpack_monitoring_2_drop_bucket';ctx._index = index;ctx._type = 'legacy_data';ctx.timestamp = timestamp;ctx.cluster_uuid = clusterUuid;}if (legacyIndex) {ctx._index = '<.monitoring-es-6-{now}>';}}"
+        }
+      },
+      {
+        "rename" : {
+          "field" : "_type",
+          "target_field" : "type"
+        }
+      },
+      {
+        "set" : {
+          "field" : "_type",
+          "value" : "doc"
+        }
+      },
+      {
+        "gsub" : {
+          "field" : "_index",
+          "pattern" : "(.monitoring-\\w+-)2(-.+)",
+          "replacement" : "$16$2"
+        }
+      }
+    ]
+  },
+  "xpack_monitoring_6" : {
+    "description" : "This is a placeholder pipeline for Monitoring API version 6 so that future versions may fix breaking changes.",
+    "version" : 6050399,
+    "processors" : [ ]
+  }
+}

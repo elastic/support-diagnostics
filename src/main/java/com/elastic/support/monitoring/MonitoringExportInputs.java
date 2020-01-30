@@ -83,10 +83,7 @@ public class MonitoringExportInputs extends ElasticRestClientInputs {
     }
 
     public List<String> parseInputs(String[] args) {
-        // If we're in interactive mode don't bother validating anything
-        if(interactive){
-            return emptyList;
-        }
+
         List<String> errors = super.parseInputs(args);
 
         if (!listClusters) {

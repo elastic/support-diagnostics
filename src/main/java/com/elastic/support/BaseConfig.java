@@ -20,6 +20,8 @@ public class BaseConfig {
 
     public Map<String, String> dockerGlobal;
     public Map<String, String> dockerContainer;
+    public String dockerContainerIds;
+    public String dockerExecutablePath;
 
     protected Map configuration;
 
@@ -46,6 +48,9 @@ public class BaseConfig {
 
         dockerGlobal = (Map<String, String>)configuration.get("docker-global");
         dockerContainer = (Map<String, String> )configuration.get("docker-container");
+        dockerContainerIds = (String)configuration.get("docker-container-ids");
+        dockerExecutablePath = (String)configuration.get("docker-executable-location");
+
 
     }
 

@@ -49,6 +49,9 @@ public class DiagnosticChainExec {
                         new CollectSystemCalls().execute(context);
                         new CollectLogs().execute(context);
                     }
+                    if(context.dockerPresent){
+                        new CollectDockerInfo().execute(context);
+                    }
                     break;
 
                 case Constants.logstashLocal :
@@ -66,6 +69,9 @@ public class DiagnosticChainExec {
                     new RunLogstashQueries().execute(context);
                     if(context.runSystemCalls){
                         new CollectSystemCalls().execute(context);
+                    }
+                    if(context.dockerPresent){
+                        new CollectDockerInfo().execute(context);
                     }
                     break;
 

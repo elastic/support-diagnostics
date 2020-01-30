@@ -9,8 +9,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.beryx.textio.StringInputReader;
-
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -53,10 +51,7 @@ public class MonitoringImportInputs extends ElasticRestClientInputs {
     }
 
     public List<String> parseInputs(String[] args){
-        // If we're in interactive mode don't bother validating anything
-        if(interactive){
-            return emptyList;
-        }
+
         List<String> errors = super.parseInputs(args);
 
         errors.addAll(ObjectUtils.defaultIfNull(validateId(clusterName), emptyList));
@@ -76,8 +71,4 @@ public class MonitoringImportInputs extends ElasticRestClientInputs {
         }
         return null;
     }
-
-
-
-
 }

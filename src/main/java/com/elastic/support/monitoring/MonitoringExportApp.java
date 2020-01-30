@@ -2,6 +2,7 @@ package com.elastic.support.monitoring;
 
 import com.elastic.support.Constants;
 import com.elastic.support.util.ResourceCache;
+import com.elastic.support.util.SystemProperties;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -15,21 +16,17 @@ public class MonitoringExportApp {
 
         try {
             MonitoringExportInputs monitoringExportInputs = new MonitoringExportInputs();
-            if(args.length == 0){
-                monitoringExportInputs.interactive = true;
-            }
-            List<String> errors = monitoringExportInputs.parseInputs(args);
-
-            if( args.length == 0 || monitoringExportInputs.interactive){
-                // Create a new input object so we out clean since
-                // parameters other than interactive might have been sent in.
-                monitoringExportInputs = new MonitoringExportInputs();
+            if (args.length == 0) {
+                logger.info("{}{}{}",
+                        "Command line options can be displayed with the --help arguemnt.",
+                        SystemProperties.lineSeparator,
+                        "Entering interactive mode.");
                 monitoringExportInputs.interactive = true;
                 monitoringExportInputs.runInteractive();
-            }
-            else {
+            } else {
+                List<String> errors = monitoringExportInputs.parseInputs(args);
                 if (errors.size() > 0) {
-                    for(String err: errors){
+                    for (String err : errors) {
                         logger.info(err);
                     }
                     monitoringExportInputs.usage();
@@ -37,6 +34,8 @@ public class MonitoringExportApp {
                     System.exit(0);
                 }
             }
+            // Needs to be done for both because in command line it
+            // may be used for passwords.
             ResourceCache.terminal.dispose();
             new MonitoringExportService().execExtract(monitoringExportInputs);
         } catch (Exception e) {

@@ -1,0 +1,124 @@
+::: {4Kmf8EY}{4Kmf8EYORYas5rHMd7fTuw}{sjTVybI-Szad1lyh1ipg3A}{172.18.0.3}{172.18.0.3:9300}{ml.machine_memory=2095681536, ml.max_open_jobs=20, xpack.installed=true, ml.enabled=true}
+   Hot threads at 2020-01-30T14:23:04.735, interval=500ms, busiestThreads=10000, ignoreIdleThreads=true:
+   
+    0.0% (201.3micros out of 500ms) cpu usage by thread 'ticker-schedule-trigger-engine'
+     10/10 snapshots sharing following 2 elements
+       java.base@11.0.1/java.lang.Thread.sleep(Native Method)
+       org.elasticsearch.xpack.watcher.trigger.schedule.engine.TickerScheduleTriggerEngine$Ticker.run(TickerScheduleTriggerEngine.java:183)
+   
+    0.0% (0s out of 500ms) cpu usage by thread 'Connection evictor'
+     10/10 snapshots sharing following 3 elements
+       java.base@11.0.1/java.lang.Thread.sleep(Native Method)
+       org.apache.http.impl.client.IdleConnectionEvictor$1.run(IdleConnectionEvictor.java:66)
+       java.base@11.0.1/java.lang.Thread.run(Thread.java:834)
+   
+    0.0% (0s out of 500ms) cpu usage by thread 'ml-cpp-log-tail-thread'
+     10/10 snapshots sharing following 6 elements
+       java.base@11.0.1/java.io.FileInputStream.readBytes(Native Method)
+       java.base@11.0.1/java.io.FileInputStream.read(FileInputStream.java:257)
+       org.elasticsearch.xpack.ml.process.logging.CppLogMessageHandler.tailStream(CppLogMessageHandler.java:105)
+       org.elasticsearch.xpack.ml.process.NativeController.lambda$tailLogsInThread$0(NativeController.java:70)
+       org.elasticsearch.xpack.ml.process.NativeController$$Lambda$1878/0x00000001007e4840.run(Unknown Source)
+       java.base@11.0.1/java.lang.Thread.run(Thread.java:834)
+   
+    0.0% (0s out of 500ms) cpu usage by thread 'Common-Cleaner'
+     10/10 snapshots sharing following 5 elements
+       java.base@11.0.1/java.lang.Object.wait(Native Method)
+       java.base@11.0.1/java.lang.ref.ReferenceQueue.remove(ReferenceQueue.java:155)
+       java.base@11.0.1/jdk.internal.ref.CleanerImpl.run(CleanerImpl.java:148)
+       java.base@11.0.1/java.lang.Thread.run(Thread.java:834)
+       java.base@11.0.1/jdk.internal.misc.InnocuousThread.run(InnocuousThread.java:134)
+   
+    0.0% (0s out of 500ms) cpu usage by thread 'elasticsearch[keepAlive/6.6.2]'
+     10/10 snapshots sharing following 8 elements
+       java.base@11.0.1/jdk.internal.misc.Unsafe.park(Native Method)
+       java.base@11.0.1/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+       java.base@11.0.1/java.util.concurrent.locks.AbstractQueuedSynchronizer.parkAndCheckInterrupt(AbstractQueuedSynchronizer.java:885)
+       java.base@11.0.1/java.util.concurrent.locks.AbstractQueuedSynchronizer.doAcquireSharedInterruptibly(AbstractQueuedSynchronizer.java:1039)
+       java.base@11.0.1/java.util.concurrent.locks.AbstractQueuedSynchronizer.acquireSharedInterruptibly(AbstractQueuedSynchronizer.java:1345)
+       java.base@11.0.1/java.util.concurrent.CountDownLatch.await(CountDownLatch.java:232)
+       app//org.elasticsearch.bootstrap.Bootstrap$1.run(Bootstrap.java:81)
+       java.base@11.0.1/java.lang.Thread.run(Thread.java:834)
+   
+    0.0% (0s out of 500ms) cpu usage by thread 'process reaper'
+     10/10 snapshots sharing following 5 elements
+       java.base@11.0.1/java.lang.ProcessHandleImpl.waitForProcessExit0(Native Method)
+       java.base@11.0.1/java.lang.ProcessHandleImpl$1.run(ProcessHandleImpl.java:138)
+       java.base@11.0.1/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
+       java.base@11.0.1/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+       java.base@11.0.1/java.lang.Thread.run(Thread.java:834)
+   
+    0.0% (0s out of 500ms) cpu usage by thread 'DestroyJavaVM'
+     unique snapshot
+     unique snapshot
+     unique snapshot
+     unique snapshot
+     unique snapshot
+     unique snapshot
+     unique snapshot
+     unique snapshot
+     unique snapshot
+     unique snapshot
+
+::: {osy2sf1}{osy2sf1pRPO4AG6DQfeK_A}{bE2RNCzFSNW1_1xUOE9o1Q}{172.18.0.2}{172.18.0.2:9300}{ml.machine_memory=2095681536, xpack.installed=true, ml.max_open_jobs=20, ml.enabled=true}
+   Hot threads at 2020-01-30T14:23:04.735, interval=500ms, busiestThreads=10000, ignoreIdleThreads=true:
+   
+    0.0% (189.3micros out of 500ms) cpu usage by thread 'ticker-schedule-trigger-engine'
+     10/10 snapshots sharing following 2 elements
+       java.base@11.0.1/java.lang.Thread.sleep(Native Method)
+       org.elasticsearch.xpack.watcher.trigger.schedule.engine.TickerScheduleTriggerEngine$Ticker.run(TickerScheduleTriggerEngine.java:183)
+   
+    0.0% (170micros out of 500ms) cpu usage by thread 'Common-Cleaner'
+     10/10 snapshots sharing following 5 elements
+       java.base@11.0.1/java.lang.Object.wait(Native Method)
+       java.base@11.0.1/java.lang.ref.ReferenceQueue.remove(ReferenceQueue.java:155)
+       java.base@11.0.1/jdk.internal.ref.CleanerImpl.run(CleanerImpl.java:148)
+       java.base@11.0.1/java.lang.Thread.run(Thread.java:834)
+       java.base@11.0.1/jdk.internal.misc.InnocuousThread.run(InnocuousThread.java:134)
+   
+    0.0% (0s out of 500ms) cpu usage by thread 'elasticsearch[keepAlive/6.6.2]'
+     10/10 snapshots sharing following 8 elements
+       java.base@11.0.1/jdk.internal.misc.Unsafe.park(Native Method)
+       java.base@11.0.1/java.util.concurrent.locks.LockSupport.park(LockSupport.java:194)
+       java.base@11.0.1/java.util.concurrent.locks.AbstractQueuedSynchronizer.parkAndCheckInterrupt(AbstractQueuedSynchronizer.java:885)
+       java.base@11.0.1/java.util.concurrent.locks.AbstractQueuedSynchronizer.doAcquireSharedInterruptibly(AbstractQueuedSynchronizer.java:1039)
+       java.base@11.0.1/java.util.concurrent.locks.AbstractQueuedSynchronizer.acquireSharedInterruptibly(AbstractQueuedSynchronizer.java:1345)
+       java.base@11.0.1/java.util.concurrent.CountDownLatch.await(CountDownLatch.java:232)
+       app//org.elasticsearch.bootstrap.Bootstrap$1.run(Bootstrap.java:81)
+       java.base@11.0.1/java.lang.Thread.run(Thread.java:834)
+   
+    0.0% (0s out of 500ms) cpu usage by thread 'ml-cpp-log-tail-thread'
+     10/10 snapshots sharing following 6 elements
+       java.base@11.0.1/java.io.FileInputStream.readBytes(Native Method)
+       java.base@11.0.1/java.io.FileInputStream.read(FileInputStream.java:257)
+       org.elasticsearch.xpack.ml.process.logging.CppLogMessageHandler.tailStream(CppLogMessageHandler.java:105)
+       org.elasticsearch.xpack.ml.process.NativeController.lambda$tailLogsInThread$0(NativeController.java:70)
+       org.elasticsearch.xpack.ml.process.NativeController$$Lambda$1878/0x00000001007e4840.run(Unknown Source)
+       java.base@11.0.1/java.lang.Thread.run(Thread.java:834)
+   
+    0.0% (0s out of 500ms) cpu usage by thread 'Connection evictor'
+     10/10 snapshots sharing following 3 elements
+       java.base@11.0.1/java.lang.Thread.sleep(Native Method)
+       org.apache.http.impl.client.IdleConnectionEvictor$1.run(IdleConnectionEvictor.java:66)
+       java.base@11.0.1/java.lang.Thread.run(Thread.java:834)
+   
+    0.0% (0s out of 500ms) cpu usage by thread 'process reaper'
+     10/10 snapshots sharing following 5 elements
+       java.base@11.0.1/java.lang.ProcessHandleImpl.waitForProcessExit0(Native Method)
+       java.base@11.0.1/java.lang.ProcessHandleImpl$1.run(ProcessHandleImpl.java:138)
+       java.base@11.0.1/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
+       java.base@11.0.1/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+       java.base@11.0.1/java.lang.Thread.run(Thread.java:834)
+   
+    0.0% (0s out of 500ms) cpu usage by thread 'DestroyJavaVM'
+     unique snapshot
+     unique snapshot
+     unique snapshot
+     unique snapshot
+     unique snapshot
+     unique snapshot
+     unique snapshot
+     unique snapshot
+     unique snapshot
+     unique snapshot
+

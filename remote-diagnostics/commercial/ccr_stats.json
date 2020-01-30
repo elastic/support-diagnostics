@@ -1,0 +1,16 @@
+Authorization failure or invalid license.
+{
+  "error" : {
+    "root_cause" : [
+      {
+        "type" : "security_exception",
+        "reason" : "current license is non-compliant for [ccr]",
+        "license.expired.feature" : "ccr"
+      }
+    ],
+    "type" : "security_exception",
+    "reason" : "current license is non-compliant for [ccr]",
+    "license.expired.feature" : "ccr"
+  },
+  "status" : 403
+}

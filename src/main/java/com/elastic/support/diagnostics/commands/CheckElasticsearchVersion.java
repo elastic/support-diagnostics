@@ -67,19 +67,18 @@ public class CheckElasticsearchVersion implements Command {
             throw de;
         } catch (Exception e) {
             logger.log(SystemProperties.DIAG, "Unanticipated error:", e);
-            throw new DiagnosticException(String.format("Could not retrieve the Elasticsearch version due to a system or network error - unable to continue. %s", Constants.CHECK_LOG));
+            throw new DiagnosticException(String.format("Could not retrieve the Elasticsearch version due to a system or network error - unable to continue. %s%s%s", e.getMessage(), SystemProperties.lineSeparator, Constants.CHECK_LOG));
         }
     }
 
     public static Semver getElasticsearchVersion(RestClient client){
-        RestResult res = client.execQuery("/");
-        if (! res.isValid()) {
-            throw new DiagnosticException( res.formatStatusMessage( "Could not retrieve the Elasticsearch version - unable to continue."));
-        }
-        String result = res.toString();
-        JsonNode root = JsonYamlUtils.createJsonNodeFromString(result);
-        String version = root.path("version").path("number").asText();
-        return new Semver(version, Semver.SemverType.NPM);
-
+            RestResult res = client.execQuery("/");
+            if (! res.isValid()) {
+                throw new DiagnosticException( res.formatStatusMessage( "Could not retrieve the Elasticsearch version - unable to continue."));
+            }
+            String result = res.toString();
+            JsonNode root = JsonYamlUtils.createJsonNodeFromString(result);
+            String version = root.path("version").path("number").asText();
+            return new Semver(version, Semver.SemverType.NPM);
     }
 }

@@ -32,7 +32,6 @@ import org.apache.logging.log4j.Logger;
 import javax.net.ssl.SSLContext;
 import java.io.Closeable;
 import java.io.FileInputStream;
-import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.security.KeyStore;
 import java.util.concurrent.ConcurrentHashMap;
@@ -74,7 +73,7 @@ public class RestClient implements Closeable {
             throw new RuntimeException("Host connection");
         } catch (Exception e) {
             logger.log(SystemProperties.DIAG, "Unexpected Execution Error", e);
-            throw new RuntimeException("Unexpected exception");
+            throw new RuntimeException(e.getMessage());
         }
     }
 
@@ -128,7 +127,6 @@ public class RestClient implements Closeable {
             HttpClientBuilder clientBuilder = HttpClients.custom();
             HttpHost httpHost = new HttpHost(host, port, scheme);
             HttpHost httpProxyHost = null;
-            HttpClientContext httpContext = HttpClientContext.create();
 
             clientBuilder.setDefaultRequestConfig(RequestConfig.custom()
                     .setCookieSpec(CookieSpecs.STANDARD)

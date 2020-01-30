@@ -45,49 +45,55 @@ public class RunLogstashQueries extends BaseQuery {
 
             JsonNode nodeData = JsonYamlUtils.createJsonNodeFromFileName(context.tempDir, "logstash_node.json");
             nodeProfile.pid = nodeData.path("jvm").path("pid").asText();
-            ;
+
             nodeProfile.os = SystemUtils.parseOperatingSystemName(nodeData.path("os").path("name").asText());
             nodeProfile.javaPlatform = new JavaPlatform(nodeProfile.os);
-
             if (StringUtils.isEmpty(nodeProfile.pid) || nodeProfile.pid.equals("1")) {
                 context.dockerPresent = true;
                 context.runSystemCalls = false;
-               // We do need a system command local to run the docker calls
-               SystemCommand syscmd = new LocalSystem(SystemUtils.parseOperatingSystemName(SystemProperties.osName));
-               ResourceCache.addSystemCommand(Constants.systemCommands, syscmd);
-            } else {
-                // Create and cache the system command type we need, local or remote...
-                SystemCommand syscmd = null;
-                switch (context.diagnosticInputs.diagType) {
-                    case Constants.logstashRemote:
-
-                        syscmd = new RemoteSystem(
-                                context.targetNode.os,
-                                context.diagnosticInputs.remoteUser,
-                                context.diagnosticInputs.remotePassword,
-                                context.diagnosticInputs.host,
-                                context.diagnosticInputs.remotePort,
-                                context.diagnosticInputs.keyfile,
-                                context.diagnosticInputs.pkiKeystorePass,
-                                context.diagnosticInputs.knownHostsFile,
-                                context.diagnosticInputs.trustRemote,
-                                context.diagnosticInputs.isSudo
-                        );
-                        ResourceCache.addSystemCommand(Constants.systemCommands, syscmd);
-                        break;
-
-                    case Constants.logstashLocal:
-                        syscmd = new LocalSystem(nodeProfile.os);
-                        ResourceCache.addSystemCommand(Constants.systemCommands, syscmd);
-
-                        break;
-
-                    default:
-                        // If it's not one of the above types it shouldn't be here but try to keep going...
-                        context.runSystemCalls = false;
-                        throw new RuntimeException("Host/Platform check error.");
-                }
             }
+            // Create and cache the system command type we need, local or remote...
+            SystemCommand syscmd = null;
+            switch (context.diagnosticInputs.diagType) {
+                case Constants.logstashRemote:
+                    String targetOS;
+                    if(context.dockerPresent){
+                        targetOS = Constants.linuxPlatform;
+                    }
+                    else{
+                        targetOS = nodeProfile.os;
+                    }
+                    syscmd = new RemoteSystem(
+                            targetOS,
+                            context.diagnosticInputs.remoteUser,
+                            context.diagnosticInputs.remotePassword,
+                            context.diagnosticInputs.host,
+                            context.diagnosticInputs.remotePort,
+                            context.diagnosticInputs.keyfile,
+                            context.diagnosticInputs.pkiKeystorePass,
+                            context.diagnosticInputs.knownHostsFile,
+                            context.diagnosticInputs.trustRemote,
+                            context.diagnosticInputs.isSudo
+                    );
+                    ResourceCache.addSystemCommand(Constants.systemCommands, syscmd);
+                    break;
+
+                case Constants.logstashLocal:
+                    if (context.dockerPresent) {
+                        syscmd = new LocalSystem(SystemUtils.parseOperatingSystemName(SystemProperties.osName));
+                    } else {
+                        syscmd = new LocalSystem(nodeProfile.os);
+                    }
+                    ResourceCache.addSystemCommand(Constants.systemCommands, syscmd);
+
+                    break;
+
+                default:
+                    // If it's not one of the above types it shouldn't be here but try to keep going...
+                    context.runSystemCalls = false;
+                    throw new RuntimeException("Host/Platform check error.");
+            }
+
 
         } catch (Throwable t) {
             logger.log(SystemProperties.DIAG, "Logstash Query error:", t);

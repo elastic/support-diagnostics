@@ -7,7 +7,6 @@ import com.elastic.support.util.SystemProperties;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -19,20 +18,17 @@ public class DiagnosticApp {
 
         try {
             DiagnosticInputs diagnosticInputs = new DiagnosticInputs();
-            if(args.length == 0){
-                diagnosticInputs.interactive = true;
-            }
-            List<String> errors = diagnosticInputs.parseInputs(args);
-
-            if( args.length == 0 || diagnosticInputs.interactive){
-                // Create a new input object so we out clean
-                diagnosticInputs = new DiagnosticInputs();
+            if (args.length == 0) {
+                logger.info("{}{}{}",
+                        "Command line options can be displayed with the --help arguemnt.",
+                        SystemProperties.lineSeparator,
+                        "Entering interactive mode.");
                 diagnosticInputs.interactive = true;
                 diagnosticInputs.runInteractive();
-            }
-            else {
+            } else {
+                List<String> errors = diagnosticInputs.parseInputs(args);
                 if (errors.size() > 0) {
-                    for(String err: errors){
+                    for (String err : errors) {
                         logger.info(err);
                     }
                     diagnosticInputs.usage();

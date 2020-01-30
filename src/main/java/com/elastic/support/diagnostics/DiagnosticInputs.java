@@ -1,19 +1,15 @@
 package com.elastic.support.diagnostics;
 
 import com.beust.jcommander.Parameter;
-import com.elastic.support.BaseInputs;
 import com.elastic.support.Constants;
 import com.elastic.support.rest.ElasticRestClientInputs;
 import com.elastic.support.util.ResourceCache;
-import com.elastic.support.util.SystemCommand;
 import com.elastic.support.util.SystemProperties;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.beryx.textio.*;
-
-import java.awt.*;
 import java.util.*;
 import java.util.List;
 
@@ -38,7 +34,8 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
             "Run only Logstash REST calls. No system calls. \t\t"};
 
     public static final String remoteAccessMessage =
-            "You are running the diagnostic against a remote host."
+            SystemProperties.lineSeparator
+                    + "You are running the diagnostic against a remote host."
                     + SystemProperties.lineSeparator
                     + "You must authenticate either with a username/password combination"
                     + SystemProperties.lineSeparator
@@ -46,15 +43,18 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
                     + SystemProperties.lineSeparator
                     + "from the remote host one of the following MUST be true:"
                     + SystemProperties.lineSeparator
+                    + SystemProperties.lineSeparator
                     + "1. The account you are logging in as has read permissions for"
                     + SystemProperties.lineSeparator
                     + "   the log directory(usually /var/log/elasticsearch)."
                     + SystemProperties.lineSeparator
+                    + SystemProperties.lineSeparator
                     + "2. You select the sudo option and provide the password for "
                     + SystemProperties.lineSeparator
-                    + "   the sudo challenge. Note that public key acesss is probably"
+                    + "   the sudo challenge. Note that public key acesss is"
                     + SystemProperties.lineSeparator
-                    + "   irrelevant in this case."
+                    + "    probably unneeded if this is the case."
+                    + SystemProperties.lineSeparator
                     + SystemProperties.lineSeparator
                     + "3. You specify sudo, use a keyfile access with an empty password, and have"
                     + SystemProperties.lineSeparator
@@ -65,7 +65,8 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
                     + SystemProperties.lineSeparator
                     + "someone familiar with the system or consider running with --type api"
                     + SystemProperties.lineSeparator
-                    + "or locally from a host with a running instance.";
+                    + "or locally from a host with a running instance."
+                    + SystemProperties.lineSeparator;
 
     private static Logger logger = LogManager.getLogger(DiagnosticInputs.class);
 
@@ -102,40 +103,26 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
     public boolean isSudo = false;
     @Parameter(names = {"--remotePort"}, description = remotePortDescription)
     public int remotePort = 22;
-    // Input Fields
-
-    // Input Readers
-
-    protected StringInputReader diagnosticTypeReader = ResourceCache.textIO.newStringInputReader()
-            .withNumberedPossibleValues(diagnosticTypeValues)
-            .withDefaultValue(diagnosticTypeValues[0]);
-
-
-    protected StringInputReader remoteUserReader = ResourceCache.textIO.newStringInputReader()
-            .withInputTrimming(true)
-            .withValueChecker((String val, String propname) -> validateRemoteUser(val));
-    // Input Readers
+    // End Input Fields
 
     public boolean runInteractive() {
 
-        TextTerminal<?> terminal = ResourceCache.textIO.getTextTerminal();
-        terminal.println("Interactive Mode");
-        terminal.println("");
-
         bypassDiagVerify = standardBooleanReader
                 .withDefaultValue(bypassDiagVerify)
-                .read(bypassDiagVerifyDescription);
+                .read(SystemProperties.lineSeparator + bypassDiagVerifyDescription);
 
-        terminal.println("");
-        terminal.println("List of valid diagnostic choices:");
+        logger.info("{}List of valid diagnostic choices:", SystemProperties.lineSeparator);
 
         for(int i = 0; i < diagnosticTypeDescriptions.length; i++){
-            terminal.println( i+1 + ".  " + diagnosticTypeDescriptions[i] + "\t - " + diagnosticTypeValues[i]);
+            logger.info( i+1 + ".  " + diagnosticTypeDescriptions[i] + "\t - " + diagnosticTypeValues[i]);
         }
 
-        diagType = diagnosticTypeReader
+        diagType = ResourceCache.textIO.newStringInputReader()
+                .withNumberedPossibleValues(diagnosticTypeValues)
+                .withDefaultValue(diagnosticTypeValues[0])
                 .read(SystemProperties.lineSeparator + typeDescription)
                 .toLowerCase();
+
         setDefaultPortForDiagType(diagType);
 
         if(diagType.contains("logstash")){
@@ -147,10 +134,16 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
 
 
         if(diagType.contains("remote")) {
-            terminal.println(remoteAccessMessage);
+            logger.info(remoteAccessMessage);
 
-            remoteUser = remoteUserReader
-                    .read(SystemProperties.lineSeparator + remoteUserDescription);
+            String  remoteUserTxt = "User account to be used for running system commands and obtaining logs." +
+                    SystemProperties.lineSeparator
+                    + "This account must have sufficient authority to run the commands and access the logs.";
+
+            remoteUser = ResourceCache.textIO.newStringInputReader()
+                    .withInputTrimming(true)
+                    .withValueChecker((String val, String propname) -> validateRemoteUser(val))
+                    .read(SystemProperties.lineSeparator + remoteUserTxt);
 
             isSudo = ResourceCache.textIO.newBooleanInputReader()
                     .withDefaultValue(isSudo)
@@ -200,7 +193,6 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
             }
         }
 
-        ResourceCache.terminal.println("");
         runOutputDirInteractive();
 
         ResourceCache.textIO.dispose();
@@ -209,11 +201,6 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
 
     public List<String> parseInputs(String[] args){
         List<String> errors = super.parseInputs(args);
-
-        // If we're in interactive mode don't bother validating anything
-        if(interactive){
-            return emptyList;
-        }
 
         errors.addAll(ObjectUtils.defaultIfNull(validateDiagType(diagType), emptyList));
         errors.addAll(ObjectUtils.defaultIfNull(setDefaultPortForDiagType(diagType), emptyList));
@@ -281,6 +268,4 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
                 ", remotePort=" + remotePort +
                 '}';
     }
-
-
 }

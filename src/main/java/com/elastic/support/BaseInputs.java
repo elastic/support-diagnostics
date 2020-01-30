@@ -33,19 +33,17 @@ public abstract class BaseInputs {
     // If no output directory was specified default to the working directory
     @Parameter(names = {"-o", "--out", "--output", "--outputDir"}, description = outputDirDescription)
     public String outputDir = SystemProperties.userDir;
-
-    @Parameter(names = {"-i", "--interactive"}, description = interactiveModeDescription)
     public boolean interactive = false;
 
     // Stop the diag from checking itself for latest version.
     @Parameter(names = {"--bypassDiagVerify"}, description = bypassDiagVerifyDescription)
     public boolean bypassDiagVerify = false;
 
-    // Input Fields
+    // End Input Fields
 
     // Input Readers
-
-    // Generic - change the default values and the read label only
+    // Generic - change the read label only
+    // Warning: Setting default values may leak into later prompts if not reset. Better to use a new Reader.
     protected StringInputReader standardStringReader = ResourceCache.textIO.newStringInputReader()
             .withMinLength(0)
             .withInputTrimming(true);
@@ -54,13 +52,9 @@ public abstract class BaseInputs {
             .withInputMasking(true)
             .withInputTrimming(true)
             .withMinLength(0);
-    ;
     protected StringInputReader standardFileReader = ResourceCache.textIO.newStringInputReader()
             .withInputTrimming(true)
             .withValueChecker((String val, String propname) -> validateFile(val));
-    /*protected IntInputReader standardPortReader = ResourceCache.textIO.newIntInputReader()
-            .withValueChecker((Integer val, String propname) -> validatePort(val));*/
-
     // Input Readers
 
     public abstract boolean runInteractive();
@@ -85,7 +79,7 @@ public abstract class BaseInputs {
             jCommander.usage();
         }
         else{
-            logger.info("Please rerun with the --help option.");
+            logger.info("Please rerun with the --help option or with no arguments for interactive mode.");
         }
     }
 
