@@ -17,6 +17,8 @@ import java.util.concurrent.TimeUnit;
 public class RemoteSystem extends SystemCommand {
 
     public static final String sudoPrefix = "echo '{{PASSWORD}}' | sudo -S -p '' ";
+    public static final String sudoNoPasswordPrefix = "sudo -S -p '' ";
+
     private static final Logger logger = LogManager.getLogger(RemoteSystem.class);
 
     private     boolean disabledForPlatform = false;
@@ -24,8 +26,8 @@ public class RemoteSystem extends SystemCommand {
     private     String sudo = "";
 
     public RemoteSystem(String osName,
-                        String user,
-                        String password,
+                        String remoteUser,
+                        String remotePassword,
                         String host,
                         int port,
                         String keyFile,
@@ -36,17 +38,30 @@ public class RemoteSystem extends SystemCommand {
 
         try {
             if(osName.equals(Constants.winPlatform)){
-                logger.warn("Windows is not supported for remote calls at this time. Session not created.");
+                logger.info("Windows is not supported for remote calls at this time. Session not created.");
                 disabledForPlatform = true;
                 return;
             }
 
             JSch jsch; jsch = new JSch();
             if(StringUtils.isNotEmpty(keyFile)){
-                isSudo = false;
-                logger.warn("Keyfile was specified - cannot use sudo to copy logs. ")
                 jsch.addIdentity(keyFile);
+                if(StringUtils.isEmpty(keyFilePass)){
+                    keyFilePass = null;
+                }
             }
+            if(StringUtils.isNotEmpty(remotePassword)){
+                if(isSudo){
+                    sudo = sudoPrefix.replace("{{PASSWORD}}", remotePassword);
+                }
+            }
+            else{
+                remotePassword = null;
+                if(isSudo){
+                    sudo = sudoNoPasswordPrefix;
+                }
+            }
+
             if(StringUtils.isNotEmpty(knownHostsFile)){
                 jsch.setKnownHosts(knownHostsFile);
             }
@@ -56,9 +71,8 @@ public class RemoteSystem extends SystemCommand {
                 hostKeyChecking = "no";
             }
 
-            UserInfo userInfo = new RemoteUserInfo(user, password, keyFilePass);
-
-            session = jsch.getSession(user, host, port);
+            UserInfo userInfo = new RemoteUserInfo(remoteUser, remotePassword, keyFilePass);
+            session = jsch.getSession(remoteUser, host, port);
             final Hashtable config = new Hashtable();
 
             config.put("StrictHostKeyChecking", hostKeyChecking);
@@ -71,9 +85,6 @@ public class RemoteSystem extends SystemCommand {
             session.setServerAliveInterval(10000);
             session.connect();
 
-            if(isSudo){
-                sudo = sudoPrefix.replace("{{PASSWORD}}", password);
-            }
         } catch (JSchException e) {
             throw new DiagnosticException("Error obtaining session for remote server - try running with diagnostic type: api.");
         }
@@ -81,7 +92,7 @@ public class RemoteSystem extends SystemCommand {
 
     public String runCommand(String cmd) {
         if(disabledForPlatform){
-            logger.warn("Windows is not supported for remote calls at this time");
+            logger.info("Windows is not supported for remote calls at this time");
             return "No Content available: Incompatible platform.";
         }
 
@@ -120,7 +131,7 @@ public class RemoteSystem extends SystemCommand {
             }
         }
         catch(Exception e){
-            logger.warn("Failed remote command: {}. {}", cmd, Constants.CHECK_LOG) ;
+            logger.info("Failed remote command: {}. {}", cmd, Constants.CHECK_LOG) ;
             logger.log(SystemProperties.DIAG,"System command failed.", e);
         }
         finally {
@@ -163,7 +174,7 @@ public class RemoteSystem extends SystemCommand {
             runCommand(" rm -Rf templogs");
 
         } catch (Exception e) {
-            logger.warn("Error occurred copying remote logfiles. {}", Constants.CHECK_LOG);
+            logger.info("Error occurred copying remote logfiles. {}", Constants.CHECK_LOG);
             logger.log(SystemProperties.DIAG, e);
         } finally {
             if(channelSftp != null && channelSftp.isConnected()){

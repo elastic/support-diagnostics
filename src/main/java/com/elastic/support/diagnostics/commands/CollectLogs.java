@@ -61,7 +61,7 @@ public  class CollectLogs implements Command {
             logStatement = logStatement.replace("{{LOGPATH}}", logDir);
             String logListing = sysCmd.runCommand(logStatement).trim();
             if (StringUtils.isEmpty(logListing)) {
-                logger.warn("No Elasticsearch log could be located at the path configured for this node. The cause of this is usually insufficient read authority. Please be sure the account you are using to access the logs has the necessary permissions or use sudo. See the diagnostic README for more information. ");
+                logger.info("No Elasticsearch log could be located at the path configured for this node. The cause of this is usually insufficient read authority. Please be sure the account you are using to access the logs has the necessary permissions or use sudo. See the diagnostic README for more information. ");
                 return;
             }
 

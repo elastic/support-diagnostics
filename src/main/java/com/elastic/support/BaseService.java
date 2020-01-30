@@ -60,7 +60,7 @@ public abstract  class BaseService {
 
         appender.start();
         logConfig.addAppender(appender);
-        AppenderRef.createAppenderRef("File", null, null);
+        AppenderRef.createAppenderRef("File", SystemProperties.DIAG, null);
         logConfig.getRootLogger().addAppender(appender, Level.DEBUG, null);
         context.updateLoggers();
 
@@ -76,7 +76,7 @@ public abstract  class BaseService {
             archiveUtils.createArchive(tempDir, archiveFilename);
 
         } catch (Exception ioe) {
-            logger.error("Couldn't create archive. {}", ioe);
+            logger.info("Couldn't create archive. {}", ioe);
         }
     }
 

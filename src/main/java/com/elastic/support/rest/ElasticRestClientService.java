@@ -16,16 +16,16 @@ public class ElasticRestClientService extends BaseService {
 
         if(StringUtils.isNotEmpty(user) && !isAuth){
             String border = SystemUtils.buildStringFromChar(60, '*');
-            logger.warn(SystemProperties.lineSeparator);
-            logger.warn(border);
-            logger.warn(border);
-            logger.warn(border);
-            logger.warn("The elasticsearch user entered: {} does not appear to have sufficient authorization to access all collected information", user);
-            logger.warn("Some of the calls may not have completed successfully.");
-            logger.warn("If you are using a custom role please verify that it has the admin role for versions prior to 5.x or the superuser role for subsequent versions.");
-            logger.warn(border);
-            logger.warn(border);
-            logger.warn(border);
+            logger.info(SystemProperties.lineSeparator);
+            logger.info(border);
+            logger.info(border);
+            logger.info(border);
+            logger.info("The elasticsearch user entered: {} does not appear to have sufficient authorization to access all collected information", user);
+            logger.info("Some of the calls may not have completed successfully.");
+            logger.info("If you are using a custom role please verify that it has the admin role for versions prior to 5.x or the superuser role for subsequent versions.");
+            logger.info(border);
+            logger.info(border);
+            logger.info(border);
         }
 
     }

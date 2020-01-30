@@ -1,5 +1,8 @@
 package com.elastic.support.monitoring;
 
+import com.elastic.support.Constants;
+import com.elastic.support.util.ResourceCache;
+import com.elastic.support.util.SystemProperties;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -12,31 +15,37 @@ public class MonitoringImportApp {
 
     public static void main(String[] args) {
 
-        MonitoringImportInputs monitoringImportInputs = new MonitoringImportInputs();
-        List<String> errors = monitoringImportInputs.parseInputs(args);
-
-        if(args.length == 0){
-            monitoringImportInputs.interactive = true;
-        }
-        if( args.length == 0 || monitoringImportInputs.interactive){
-            // Create a new input object so we out clean since
-            // parameters other than interactive might have been sent in.
-            monitoringImportInputs = new MonitoringImportInputs();
-            monitoringImportInputs.interactive = true;
-            monitoringImportInputs.runInteractive();
-        }
-        else {
-            if (errors.size() > 0) {
-                for(String err: errors){
-                    logger.info(err);
-                }
-                monitoringImportInputs.usage();
-                logger.info("Exiting...");
-                System.exit(0);
+        try {
+            MonitoringImportInputs monitoringImportInputs = new MonitoringImportInputs();
+            if(args.length == 0){
+                monitoringImportInputs.interactive = true;
             }
-        }
-        new MonitoringImportService().execImport(monitoringImportInputs);
-    }
+            List<String> errors = monitoringImportInputs.parseInputs(args);
 
+            if( args.length == 0 || monitoringImportInputs.interactive){
+                // Create a new input object so we out clean since
+                // parameters other than interactive might have been sent in.
+                monitoringImportInputs = new MonitoringImportInputs();
+                monitoringImportInputs.interactive = true;
+                monitoringImportInputs.runInteractive();
+            }
+            else {
+                if (errors.size() > 0) {
+                    for(String err: errors){
+                        logger.info(err);
+                    }
+                    monitoringImportInputs.usage();
+                    logger.info("Exiting...");
+                    System.exit(0);
+                }
+            }
+            ResourceCache.terminal.dispose();
+            new MonitoringImportService().execImport(monitoringImportInputs);
+        } catch (Exception e) {
+            logger.info("Error occurred: {}. {}", e.getMessage(), Constants.CHECK_LOG);
+        } finally {
+            ResourceCache.closeAll();
+        }
+    }
 
 }

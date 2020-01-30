@@ -40,7 +40,7 @@ public class JavaPlatform {
 
             default:
                 // default it to Linux
-                logger.error("Failed to detect operating system for: {}", osName);
+                logger.info("Failed to detect operating system for: {}", osName);
                 this.platform = Constants.linuxPlatform;
         }
     }

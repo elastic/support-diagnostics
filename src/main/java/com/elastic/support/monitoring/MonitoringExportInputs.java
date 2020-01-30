@@ -2,6 +2,8 @@ package com.elastic.support.monitoring;
 
 import com.beust.jcommander.Parameter;
 import com.elastic.support.rest.ElasticRestClientInputs;
+import com.elastic.support.util.ResourceCache;
+import com.elastic.support.util.SystemProperties;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -24,8 +26,11 @@ public class MonitoringExportInputs extends ElasticRestClientInputs {
     @Parameter(names = {"--id"}, description = "Required except when the list command is used: The cluster_uuid of the monitored cluster you wish to extract data for. If you do not know this you can obtain it from that cluster using <protocol>://<host>:port/ .")
     public String clusterId;
 
-    @Parameter(names = {"--start"}, description = "Date and time for the starting point of the extraction. Defaults to today's date and time, minus the 6 hour default interval in UTC. Must be in the 24 hour format yyyy-MM-dd HH:mm.")
-    public String start = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").format(ZonedDateTime.now(ZoneId.of("+0")).minusHours(defaultInterval));
+    @Parameter(names = {"--cutoffDate"}, description = "Date for the cutoff point of the extraction. Defaults to today. Must be in the 24 hour format yyyy-MM-dd.")
+    public String cutoffDate = DateTimeFormatter.ofPattern("yyyy-MM-dd").format(ZonedDateTime.now(ZoneId.of("+0")));;
+
+    @Parameter(names = {"--cutoffTime"}, description = "Time for the cutoff point of the data extraction. Defaults to today's current UTC time, and the starting point will be calculated as that minus the configured interval. Must be in the 24 hour format HH:mm.")
+    public String cutoffTime = DateTimeFormatter.ofPattern("HH:mm").format(ZonedDateTime.now(ZoneId.of("+0")));;;
 
     @Parameter(names = {"--interval"}, description = "Number of hours back to collect statistics. Defaults to 6 hours, but but can be set as high as 12.")
     public int interval = defaultInterval;
@@ -39,70 +44,78 @@ public class MonitoringExportInputs extends ElasticRestClientInputs {
 
     public boolean runInteractive() {
 
-        String operation = standardStringReader
-                .withNumberedPossibleValues("List", "Extract.")
-                .withIgnoreCase()
-                .read("List monitored clusters available or extract data from a cluster.");
+        runHttpInteractive();
 
+        String operation = standardStringReader
+                .withNumberedPossibleValues("List", "Extract")
+                .withIgnoreCase()
+                .read(SystemProperties.lineSeparator + "List monitored clusters available or extract data from a cluster." );
+
+        operation = operation.toLowerCase();
         if(operation.equals("extract")){
-            clusterId = textIO.newStringInputReader()
+            clusterId = ResourceCache.textIO.newStringInputReader()
                     .withInputTrimming(true)
                     .withValueChecker((String val, String propname) -> validateCluster(val))
-                    .read("Enter the cluster id to for the cluster you wish to extract.");
+                    .read(SystemProperties.lineSeparator + "Enter the cluster id to for the cluster you wish to extract.");
 
-            interval = textIO.newIntInputReader()
+            cutoffDate = ResourceCache.textIO.newStringInputReader()
+                    .withInputTrimming(true)
+                    .withMinLength(0)
+                    .read(SystemProperties.lineSeparator + "Enter the date for the cutoff point of the extraction. Defaults to today's date. Must be in the format yyyy-MM-dd.");
+
+            cutoffTime = ResourceCache.textIO.newStringInputReader()
+                    .withInputTrimming(true)
+                    .withMinLength(0)
+                    .read(SystemProperties.lineSeparator + "Enter the time for the cutoff point of the extraction. Defaults to the current UTC time. Must be in the 24 hour format HH:mm.");
+
+            interval = ResourceCache.textIO.newIntInputReader()
                     .withInputTrimming(true)
                     .withDefaultValue(interval)
                     .withValueChecker((Integer val, String propname) -> validateInterval(val))
-                    .read("Enter the cluster id to for the cluster you wish to extract.");
+                    .read(SystemProperties.lineSeparator + "The number of hours you wish to extract. Whole integer values only. Defaults to 6 hours.");
 
-            terminal.println("\"Date and time for the earliest point of the extraction.");
-            terminal.println("Defaults to today's date and time, minus the 6 hour default interval in UTC.");
-            terminal.println("Must be in the 24 hour format yyyy-MM-dd HH:mm.");
-
-            start = textIO.newStringInputReader()
-                    .withInputTrimming(true)
-                    .withDefaultValue(start)
-                    .withValueChecker((String val, String propname) -> validateStart(val))
-                    .read("Enter the cluster id to for the cluster you wish to extract.");
+            validateTimeWindow();
         }
 
-        runHttpInteractive();
         runOutputDirInteractive();
 
         return true;
     }
 
     public List<String> parseInputs(String[] args) {
-        List<String> errors = parseInputs(args);
+        // If we're in interactive mode don't bother validating anything
+        if(interactive){
+            return emptyList;
+        }
+        List<String> errors = super.parseInputs(args);
 
         if (!listClusters) {
             errors.addAll(ObjectUtils.defaultIfNull(validateCluster(clusterId), emptyList));
             errors.addAll(ObjectUtils.defaultIfNull(validateInterval(interval), emptyList));
-            errors.addAll(ObjectUtils.defaultIfNull(validateStart(start), emptyList));
+            errors.addAll(ObjectUtils.defaultIfNull(validateTimeWindow(), emptyList));
         }
 
         return errors;
 
     }
 
-    public List<String> validateStart(String val){
+    public List<String> validateTimeWindow(){
 
+        ZonedDateTime start, end;
         try {
-            ZonedDateTime workingStart = null, workingStop = null;
-            start = val.replace(" ", "T");
-            workingStart = ZonedDateTime.parse(start + ":00+00:00", DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-            workingStop = workingStart.plusHours(interval);
-
+            String cutoff = cutoffDate + "T" + cutoffTime;
+            end = ZonedDateTime.parse(cutoff + ":00+00:00", DateTimeFormatter.ISO_OFFSET_DATE_TIME);
             ZonedDateTime current = ZonedDateTime.now(ZoneId.of("+0"));
-            if (workingStop.isAfter(current)) {
-                logger.info("Warning: The input collection interval designates a stopping point after the current date and time. This may result in less data than expected.");
-                workingStop = current;
+            if (end.isAfter(current)) {
+                logger.info("Warning: The input collection interval designates a stopping point after the current date and time. Resetting the start to the current date/time.");
+                end = current;
             }
 
             // Generate the string subs to be used in the query.
-            queryStartDate = (DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").format(workingStart) + ":00.000Z").replace(" ", "T");
-            queryEndDate = (DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").format(workingStop) + ":00.000Z").replace(" ", "T");
+            queryEndDate = cutoff +  ":00.000Z";
+
+            start = end.minusHours(interval);
+            queryStartDate = (DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").format(start) + ":00.000Z").replace(" ", "T");
 
         } catch (Exception e) {
             return Collections.singletonList("Invalid Date or Time format. Please enter the date in format YYYY-MM-dd HH:mm");
@@ -116,14 +129,14 @@ public class MonitoringExportInputs extends ElasticRestClientInputs {
         if(StringUtils.isEmpty(val)){
             return Collections.singletonList("Cluster id is required to extract monitoring data.");
         }
-        return emptyList;
+        return null;
     }
 
     public List<String> validateInterval(int val){
         if(val <1 || val > 12){
             return Collections.singletonList("Interval must be 1-12.");
         }
-        return emptyList;
+        return null;
     }
 
 

@@ -71,7 +71,7 @@ public class ScrubService extends BaseService {
 
       } catch (Throwable t) {
          logger.log(SystemProperties.DIAG, "Error occurred: ", t);
-         logger.error("Issue encountered during scrub processing. {}.", Constants.CHECK_LOG);
+         logger.info("Issue encountered during scrub processing. {}.", Constants.CHECK_LOG);
       }
       finally{
          closeLogs();

@@ -74,7 +74,7 @@ public class RetrieveSystemDigest implements Command {
             logger.info("Finished querying SysInfo.");
 
         } catch (final Exception e) {
-            logger.error("Failed saving system-digest.txt file.", e);
+            logger.info("Failed saving system-digest.txt file.", e);
         }
 
     }

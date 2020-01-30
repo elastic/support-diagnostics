@@ -4,6 +4,7 @@ import com.beust.jcommander.Parameter;
 import com.elastic.support.BaseInputs;
 import com.elastic.support.Constants;
 import com.elastic.support.rest.ElasticRestClientInputs;
+import com.elastic.support.util.ResourceCache;
 import com.elastic.support.util.SystemCommand;
 import com.elastic.support.util.SystemProperties;
 import org.apache.commons.lang3.ObjectUtils;
@@ -12,7 +13,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.beryx.textio.*;
 
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 
 public class DiagnosticInputs extends ElasticRestClientInputs {
 
@@ -32,14 +35,44 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
             "Run only the Elasticsearch REST API calls, no system calls or logs.",
             "Local Logstash process on the same host as the diagnostic utility.",
             "Remote Logstash on a different host than the diagnostic utility.",
-            "Run only Logstash REST calls. No system calls. \t"};
+            "Run only Logstash REST calls. No system calls. \t\t"};
+
+    public static final String remoteAccessMessage =
+            "You are running the diagnostic against a remote host."
+                    + SystemProperties.lineSeparator
+                    + "You must authenticate either with a username/password combination"
+                    + SystemProperties.lineSeparator
+                    + "or a public keyfile. Keep in mind that in order to collect the logs"
+                    + SystemProperties.lineSeparator
+                    + "from the remote host one of the following MUST be true:"
+                    + SystemProperties.lineSeparator
+                    + "1. The account you are logging in as has read permissions for"
+                    + SystemProperties.lineSeparator
+                    + "   the log directory(usually /var/log/elasticsearch)."
+                    + SystemProperties.lineSeparator
+                    + "2. You select the sudo option and provide the password for "
+                    + SystemProperties.lineSeparator
+                    + "   the sudo challenge. Note that public key acesss is probably"
+                    + SystemProperties.lineSeparator
+                    + "   irrelevant in this case."
+                    + SystemProperties.lineSeparator
+                    + "3. You specify sudo, use a keyfile access with an empty password, and have"
+                    + SystemProperties.lineSeparator
+                    + "   sudo configured with NOPASSWD."
+                    + SystemProperties.lineSeparator
+                    + SystemProperties.lineSeparator
+                    + "If you are unsure what situation you fall into, you should consult"
+                    + SystemProperties.lineSeparator
+                    + "someone familiar with the system or consider running with --type api"
+                    + SystemProperties.lineSeparator
+                    + "or locally from a host with a running instance.";
 
     private static Logger logger = LogManager.getLogger(DiagnosticInputs.class);
 
     public final static String  typeDescription = "Enter the number of the diagnostic type to run.";
     public final static String  remoteUserDescription = "User account to be used for running system commands and obtaining logs. This account must have sufficient authority to run the commands and access the logs.";
     public final static String  remotePasswordDescription = "Password for the remote login.";
-    public final static String  sshKeyFileDescription= "File containing keys for remote host authentication. Default is ~/.ssh/id_rsa for Mac/Linux. Windows users should always set this explicitly.";
+    public final static String  sshKeyFileDescription= "File containing keys for remote host authentication.";
     public final static String  sshKeyFIlePassphraseDescription= "Passphrase for the keyfile if required.";
     public final static String  trustRemoteDescription = "Bypass the known hosts file and trust the specified remote server. Defaults to false.";
     public final static String  knownHostsDescription = "Known hosts file to search for target server. Default is ~/.ssh/known_hosts for Linux/Mac. Windows users should always set this explicitly.";
@@ -51,48 +84,43 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
     public String diagType = Constants.local;
     @Parameter(names = {"--remoteUser"}, description = remoteUserDescription)
     public String remoteUser;
-    @Parameter(names = {"--remotePass"}, description = "Show password prompt for the remote user account.", hidden = true)
-    public boolean remotePasswordSwitch = false;
-    @Parameter(names = {"--remotePwdText"}, hidden = true)
+    @Parameter(names = {"--remotePass"}, description = "Show password prompt for the remote user account.")
+    public boolean isRemotePass = false;
+    @Parameter(names = {"--remotePassText"}, hidden = true)
     public String remotePassword = "";
     @Parameter(names = {"--keyFile"}, description = sshKeyFileDescription)
     public String keyfile = "";
-    @Parameter(names = {"--keyPass" }, description = "Show prompt for keyfile passphrase for the keyfile if one exists.", hidden = true)
-    public boolean keyFilePasswordSwitch = false;
-    @Parameter(names = {"--keyFilePwdText"}, hidden = true)
+    @Parameter(names = {"--keyFilePass" }, description = "Show prompt for keyfile passphrase for the keyfile if one exists.")
+    public boolean isKeyFilePass = false;
+    @Parameter(names = {"--keyFilePassText"}, hidden = true)
     public String keyfilePassword = "";
     @Parameter(names = {"--trustRemote"}, description = trustRemoteDescription)
     public boolean trustRemote = false;
     @Parameter(names = {"--knownHostsFile"}, description = knownHostsDescription)
     public String knownHostsFile = "";
     @Parameter(names = {"--sudo"}, description = sudoDescription)
-    public boolean sudo = false;
+    public boolean isSudo = false;
     @Parameter(names = {"--remotePort"}, description = remotePortDescription)
     public int remotePort = 22;
     // Input Fields
 
     // Input Readers
 
-    protected StringInputReader diagnosticTypeReader = textIO.newStringInputReader()
+    protected StringInputReader diagnosticTypeReader = ResourceCache.textIO.newStringInputReader()
             .withNumberedPossibleValues(diagnosticTypeValues)
             .withDefaultValue(diagnosticTypeValues[0]);
 
 
-    protected StringInputReader remoteUserReader = textIO.newStringInputReader()
+    protected StringInputReader remoteUserReader = ResourceCache.textIO.newStringInputReader()
             .withInputTrimming(true)
             .withValueChecker((String val, String propname) -> validateRemoteUser(val));
     // Input Readers
 
     public boolean runInteractive() {
 
-        TextTerminal<?> terminal = textIO.getTextTerminal();
+        TextTerminal<?> terminal = ResourceCache.textIO.getTextTerminal();
         terminal.println("Interactive Mode");
         terminal.println("");
-
-/*        boolean registeredAbort = terminal.registerHandler("ctrl Q",
-                t -> new ReadHandlerData(ReadInterruptionStrategy.Action.ABORT)
-                        .withPayload("Exiting now."));
-        terminal.println("Press ctrl Q to abort entry at any time." + SystemProperties.lineSeparator);*/
 
         bypassDiagVerify = standardBooleanReader
                 .withDefaultValue(bypassDiagVerify)
@@ -106,31 +134,60 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
         }
 
         diagType = diagnosticTypeReader
-                .read(SystemProperties.lineSeparator + typeDescription);
+                .read(SystemProperties.lineSeparator + typeDescription)
+                .toLowerCase();
         setDefaultPortForDiagType(diagType);
 
-        runHttpInteractive();
+        if(diagType.contains("logstash")){
+            runHttpInteractive();
+        }
+        else{
+            runHttpInteractive();
+        }
+
 
         if(diagType.contains("remote")) {
+            terminal.println(remoteAccessMessage);
+
             remoteUser = remoteUserReader
                     .read(SystemProperties.lineSeparator + remoteUserDescription);
 
-            boolean useKeyfile = standardBooleanReader
+            isSudo = ResourceCache.textIO.newBooleanInputReader()
+                    .withDefaultValue(isSudo)
+                    .read(SystemProperties.lineSeparator + sudoDescription);
+
+            boolean useKeyfile = ResourceCache.textIO.newBooleanInputReader()
                     .withDefaultValue(false)
-                    .read(SystemProperties.lineSeparator + "Use a keyfile instead of user/password identification?");
+                    .read(SystemProperties.lineSeparator + "Use a keyfile for authentication?");
 
             if (useKeyfile) {
                 keyfile = standardFileReader
                         .read(SystemProperties.lineSeparator + sshKeyFileDescription);
-                keyfilePassword = standardPasswordReader
-                        .read(SystemProperties.lineSeparator + sshKeyFIlePassphraseDescription);
+
+                boolean checkMe = standardBooleanReader
+                        .read("Is the keyfile password protected?");
+
+                if(checkMe){
+                    keyfilePassword = standardPasswordReader
+                            .read(SystemProperties.lineSeparator + sshKeyFIlePassphraseDescription);
+                }
+                if(isSudo){
+                    checkMe = standardBooleanReader
+                            .read("Password required for sudo challenge?");
+
+                    if(checkMe){
+                        remotePassword = standardPasswordReader
+                                .read(SystemProperties.lineSeparator + "Enter the password for remote sudo.");
+                    }
+                }
             } else {
                 remotePassword = standardPasswordReader
                         .read(SystemProperties.lineSeparator + remotePasswordDescription);
             }
 
-            remotePort = standardPortReader
+            remotePort = ResourceCache.textIO.newIntInputReader()
                     .withDefaultValue(remotePort)
+                    .withValueChecker((Integer val, String propname) -> validatePort(val))
                     .read(SystemProperties.lineSeparator + remotePortDescription);
 
             trustRemote = standardBooleanReader
@@ -141,15 +198,12 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
                 knownHostsFile = standardFileReader
                         .read(SystemProperties.lineSeparator + knownHostsDescription);
             }
-
-            sudo = standardBooleanReader
-                    .withDefaultValue(sudo)
-                    .read(SystemProperties.lineSeparator + sudoDescription);
         }
 
+        ResourceCache.terminal.println("");
         runOutputDirInteractive();
 
-        textIO.dispose();
+        ResourceCache.textIO.dispose();
         return true;
     }
 
@@ -168,12 +222,12 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
         errors.addAll(ObjectUtils.defaultIfNull(validateFile(keyfile), emptyList));
         errors.addAll(ObjectUtils.defaultIfNull(validateFile(knownHostsFile), emptyList));
 
-        if(StringUtils.isEmpty(keyfile) && StringUtils.isEmpty(remotePassword)){
+        if(isRemotePass){
             remotePassword = standardPasswordReader
                     .read(remotePasswordDescription);
         }
 
-        if(StringUtils.isNotEmpty(keyfile) && StringUtils.isEmpty(keyfilePassword)){
+        if(isKeyFilePass){
             keyfilePassword = standardPasswordReader
                     .read(sshKeyFIlePassphraseDescription);
         }
@@ -220,11 +274,13 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
                 ", diagType='" + diagType + '\'' +
                 ", remoteUser='" + remoteUser + '\'' +
                 ", keyfile='" + keyfile + '\'' +
-                ", keyFilePasswordSwitch=" + keyFilePasswordSwitch +
-                ", trustRemote=" + trustRemote +
+                ", isKeyFilePass=" +  isKeyFilePass + '\'' +
+                ", trustRemote=" + trustRemote + '\'' +
                 ", knownHostsFile='" + knownHostsFile + '\'' +
-                ", sudo=" + sudo +
+                ", sudo=" + isSudo + '\'' +
                 ", remotePort=" + remotePort +
                 '}';
     }
+
+
 }

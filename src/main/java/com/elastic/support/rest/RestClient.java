@@ -87,7 +87,7 @@ public class RestClient implements Closeable {
             httpPost.setHeader("Content-type", "application/json");
             return execRequest(httpPost);
         } catch (UnsupportedEncodingException e) {
-            logger.error("Error with json body.", e);
+            logger.info("Error with json body.", e);
             throw new RuntimeException("Could not complete post request.");
         }
     }

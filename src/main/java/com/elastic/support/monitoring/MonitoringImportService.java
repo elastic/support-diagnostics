@@ -1,10 +1,13 @@
 package com.elastic.support.monitoring;
 
+import com.elastic.support.diagnostics.DiagnosticException;
+import com.elastic.support.diagnostics.commands.CheckElasticsearchVersion;
 import com.elastic.support.rest.ElasticRestClientService;
 import com.elastic.support.Constants;
 import com.elastic.support.rest.RestClient;
 import com.elastic.support.rest.RestEntry;
 import com.elastic.support.util.*;
+import com.vdurmont.semver4j.Semver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -23,7 +26,7 @@ public class MonitoringImportService extends ElasticRestClientService {
         String tempDir = null;
         try {
             Map configMap = JsonYamlUtils.readYamlFromClasspath(Constants.DIAG_CONFIG, true);
-            MonitoringImportConfig config  = new MonitoringImportConfig(configMap);
+            MonitoringImportConfig config = new MonitoringImportConfig(configMap);
             client = RestClient.getClient(
                     inputs.host,
                     inputs.port,
@@ -53,13 +56,19 @@ public class MonitoringImportService extends ElasticRestClientService {
             // It will go to wherever we have the temp dir set up.
             logger.info("Configuring log file.");
             createFileAppender(tempDir, "import.log");
+
+            // Check the version.
+            Semver version = CheckElasticsearchVersion.getElasticsearchVersion(client);
+            if (version.getMajor() < 7) {
+                throw new DiagnosticException("Target cluster must be at least 7.x");
+            }
+
             ArchiveUtils archiveUtils = new ArchiveUtils(new MonitoringImportProcessor(config, inputs, client));
             archiveUtils.extractDiagnosticArchive(inputs.input);
 
-
-        }catch (Throwable t){
-            logger.log(SystemProperties.DIAG, "Error extracting archive or indexing results", t);
-            logger.error("Cannot contiue processing. Exiting {}", Constants.CHECK_LOG);
+        }catch (Exception e){
+            logger.log(SystemProperties.DIAG, "Error extracting archive or indexing results", e);
+            logger.info("Cannot contiue processing. {} \n {}", e.getMessage(), Constants.CHECK_LOG);
         }
         finally {
             closeLogs();

@@ -75,7 +75,7 @@ public class CollectDockerInfo implements Command {
                 String output = sysCmd.runCommand(cmd);
                 SystemUtils.writeToFile(output, targetDir + SystemProperties.fileSeparator + entry.getKey() + suffix + ".txt");
             } catch (Exception e) {
-                logger.warn(e.getMessage());
+                logger.info(e.getMessage());
             }
         }
 

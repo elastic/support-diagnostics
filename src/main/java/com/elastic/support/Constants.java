@@ -13,6 +13,8 @@ public class Constants {
    public static final String DIAG_CONFIG = "diags.yml";
    public static final String ES_REST = "elastic-rest.yml";
    public static final String LS_REST = "logstash-rest.yml";
+   public static final String MONITORING_REST = "monitoring-rest.yml";
+
 
    public static final String QUERY_CONFIG_PACKAGE = "monitoring-extract/";
    public static final String MONITORING_DIR = "monitoring-export";
@@ -57,5 +59,6 @@ public class Constants {
    public static final String systemCommands = "ssh:SystemCommand";
 
    public static final String runningInIde = "runningInIde";
+
 
 }

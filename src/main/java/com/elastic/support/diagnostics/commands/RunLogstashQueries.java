@@ -2,6 +2,7 @@ package com.elastic.support.diagnostics.commands;
 
 import com.elastic.support.Constants;
 import com.elastic.support.diagnostics.DiagnosticException;
+import com.elastic.support.diagnostics.JavaPlatform;
 import com.elastic.support.diagnostics.ProcessProfile;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.rest.RestClient;
@@ -46,6 +47,7 @@ public class RunLogstashQueries extends BaseQuery {
             nodeProfile.pid = nodeData.path("jvm").path("pid").asText();
             ;
             nodeProfile.os = SystemUtils.parseOperatingSystemName(nodeData.path("os").path("name").asText());
+            nodeProfile.javaPlatform = new JavaPlatform(nodeProfile.os);
 
             if (StringUtils.isEmpty(nodeProfile.pid) || nodeProfile.pid.equals("1")) {
                 context.dockerPresent = true;
@@ -69,7 +71,7 @@ public class RunLogstashQueries extends BaseQuery {
                                 context.diagnosticInputs.pkiKeystorePass,
                                 context.diagnosticInputs.knownHostsFile,
                                 context.diagnosticInputs.trustRemote,
-                                context.diagnosticInputs.sudo
+                                context.diagnosticInputs.isSudo
                         );
                         ResourceCache.addSystemCommand(Constants.systemCommands, syscmd);
                         break;
@@ -86,7 +88,6 @@ public class RunLogstashQueries extends BaseQuery {
                         throw new RuntimeException("Host/Platform check error.");
                 }
             }
-
 
         } catch (Throwable t) {
             logger.log(SystemProperties.DIAG, "Logstash Query error:", t);

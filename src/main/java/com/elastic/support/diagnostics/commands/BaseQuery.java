@@ -43,7 +43,7 @@ public abstract class BaseQuery implements Command {
                 logger.info("Some calls failed but were flagged as recoverable: retrying in {} seconds.", pause / 1000);
                 Thread.sleep(pause);
             } catch (Exception e) {
-                logger.error("Failed pause on error.", e);
+                logger.info("Failed pause on error.", e);
             }
 
             retryList = execQueryList(restClient, retryList, tempDir);

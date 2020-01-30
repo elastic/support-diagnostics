@@ -4,6 +4,8 @@ package com.elastic.support.util;
 import com.elastic.support.Constants;
 import com.elastic.support.diagnostics.DiagnosticException;
 import com.elastic.support.diagnostics.DiagnosticInputs;
+import com.elastic.support.rest.RestClient;
+import com.elastic.support.rest.RestResult;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
@@ -41,10 +43,10 @@ public class SystemUtils {
             try {
                 instream.close();
             } catch (Throwable t) {
-                logger.error("Error encountered when attempting to close file {}", path);
+                logger.info("Error encountered when attempting to close file {}", path);
             }
         } else {
-            logger.error("Error encountered when attempting to close file: null InputStream {}", path);
+            logger.info("Error encountered when attempting to close file: null InputStream {}", path);
         }
 
     }
@@ -56,7 +58,7 @@ public class SystemUtils {
             FileUtils.deleteDirectory(tmp);
             logger.info("Deleted directory: {}.", dir);
         } catch (IOException e) {
-            logger.error("Delete of directory:{} failed. Usually this indicates a permission issue", dir, e);
+            logger.info("Delete of directory:{} failed. Usually this indicates a permission issue", dir, e);
         }
     }
 
@@ -78,7 +80,7 @@ public class SystemUtils {
             s = stdInput.readLine();
 
         } catch (IOException e) {
-            logger.error("Error retrieving hostname.", e);
+            logger.info("Error retrieving hostname.", e);
         }
         finally {
             try {
@@ -86,14 +88,14 @@ public class SystemUtils {
                     stdError.close();
                 }
             } catch (IOException e) {
-                logger.error("Couldn't close stderror stream");
+                logger.info("Couldn't close stderror stream");
             }
             try {
                 if(stdInput != null){
                     stdInput.close();
                 }
             } catch (IOException e) {
-                logger.error("Couldn't close stdinput stream");
+                logger.info("Couldn't close stdinput stream");
             }
         }
 
@@ -122,7 +124,7 @@ public class SystemUtils {
                 }
             }
         } catch (Exception e) {
-            logger.error("Error occurred acquiring IP's and hostnames", e);
+            logger.info("Error occurred acquiring IP's and hostnames", e);
         }
 
         return ipAndHosts;
@@ -163,9 +165,8 @@ public class SystemUtils {
 
         } else {
             // default it to Linux
-            logger.error("Unsupported OS -defaulting to Linux: {}", osName);
+            logger.info("Unsupported OS -defaulting to Linux: {}", osName);
             return  Constants.linuxPlatform;
         }
     }
-
 }

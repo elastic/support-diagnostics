@@ -5,6 +5,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.beryx.textio.TextIO;
 import org.beryx.textio.TextIoFactory;
+import org.beryx.textio.TextTerminal;
 
 import java.io.Closeable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,6 +15,9 @@ public class ResourceCache{
 
     private static final Logger logger = LogManager.getLogger(ResourceCache.class);
     private static ConcurrentHashMap<String, Closeable> resources = new ConcurrentHashMap();
+
+    public static final TextIO textIO = TextIoFactory.getTextIO();
+    public static final TextTerminal terminal = textIO.getTextTerminal();
 
     public static boolean resourceExists(String name){
         return resources.containsKey(name);
@@ -53,5 +57,6 @@ public class ResourceCache{
                     logger.log(SystemProperties.DIAG, "Failed to close resource {}", name);
                 }
         });
+        textIO.dispose();
     }
 }

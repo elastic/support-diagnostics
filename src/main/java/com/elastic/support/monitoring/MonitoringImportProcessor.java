@@ -104,10 +104,10 @@ public class MonitoringImportProcessor implements ArchiveEntryProcessor {
 
             } catch (Throwable t) {
                 // If something goes wrong just log it and keep boing.
-                logger.error("Error processing JSON event for {}.", t);
+                logger.info("Error processing JSON event for {}.", t);
             }
         } catch (Throwable t) {
-            logger.error("Error processing entry - stream related error,", t);
+            logger.info("Error processing entry - stream related error,", t);
         }
         finally {
             logger.info("{} events written from {}", eventsWritten, name);
@@ -118,8 +118,8 @@ public class MonitoringImportProcessor implements ArchiveEntryProcessor {
     private long writeBatch(String query, int size){
         RestResult res = new RestResult( client.execPost("_bulk", query), "_bulk");
         if( res.getStatus() != 200){
-            logger.error("Batch update had errors: {}  {}", res.getStatus(), res.getReason());
-            logger.error(Constants.CHECK_LOG);
+            logger.info("Batch update had errors: {}  {}", res.getStatus(), res.getReason());
+            logger.info(Constants.CHECK_LOG);
             logger.log(SystemProperties.DIAG, res.toString());
             return 0;
         }

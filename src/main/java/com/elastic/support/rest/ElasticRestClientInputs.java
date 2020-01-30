@@ -3,6 +3,7 @@ package com.elastic.support.rest;
 import com.beust.jcommander.Parameter;
 import com.elastic.support.BaseInputs;
 import com.elastic.support.Constants;
+import com.elastic.support.util.ResourceCache;
 import com.elastic.support.util.SystemProperties;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -20,21 +21,21 @@ import java.util.List;
 
 public abstract class ElasticRestClientInputs extends BaseInputs {
 
-    public static final String hostDescription = "Required field.  Hostname, IP Address, or localhost.  HTTP access for this node must be enabled.";
-    public static final String portDescription = "HTTP or HTTPS listening port. Defaults to 9200.";
-    public static final String userDescription = "Elasticsearch user account";
-    public static final String passwordDescription = "Elasticsearch user password";
-    public static final String pkiKeystoreDescription = "Path/filename for PKI keystore with client certificate.";
-    public static final String pkiKeystorePasswordDescription = "PKI keystore password if required.";
-    public static final String proxyHostDescription = "Proxy server host name or IP Address.";
-    public static final String proxyPortDescription = "Proxy server port number. Defaults to port 80.";
-    public static final String proxyUserDescription = "Proxy server login.";
-    public static final String proxyPasswordDescription = "Proxy server password if required.";
+    public static final String hostDescription = "Required field.  Hostname, IP Address, or localhost.  HTTP access for this node must be enabled:";
+    public static final String portDescription = "Listening port. Defaults to 9200:";
+    public static final String userDescription = "Elasticsearch user account:";
+    public static final String passwordDescription = "Elasticsearch user password:";
+    public static final String pkiKeystoreDescription = "Path/filename for PKI keystore with client certificate:";
+    public static final String pkiKeystorePasswordDescription = "PKI keystore password if required:";
+    public static final String proxyHostDescription = "Proxy server host name or IP Address:";
+    public static final String proxyPortDescription = "Proxy server port number. Defaults to port 80:";
+    public static final String proxyUserDescription = "Proxy server login:";
+    public static final String proxyPasswordDescription = "Proxy server password if required:";
     public static final String sslDescription = "TLS enabled, use HTTPS?";
-    public static final String skipHostnameVerificationDescription = "Bypass hostname verification for certificate? This is inherently unsafe and NOT recommended.";
+    public static final String skipHostnameVerificationDescription = "Bypass hostname verification for certificate? This is unsafe and NOT recommended.";
 
-    public final static String  userLoginAuth = "Username/Password";
-    public final static String  pkiLoginAuth = "PKI";
+    public final static String  userLoginAuth = "Username/Password:";
+    public final static String  pkiLoginAuth = "PKI:";
 
     public static final String useOptionOnly = " No value required, only the option.";
     // The basics - where's the cluster
@@ -57,27 +58,27 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
     public String user = "";
     // Indicates we need to prompt for a masked input
     @Parameter(names = {"-p", "--password"}, description = "Prompt for Elasticsearch password.  Do not enter a value.")
-    public boolean passwordSwitch = false;
+    public boolean isPassword = false;
     // Not shown in the the help display due to security risks - allow input via command line arguments in plain text.
-    @Parameter(names = {"--pwdText"}, hidden = true)
+    @Parameter(names = {"--passwordText"}, hidden = true)
     public String password = "";
     // PKI auth - same convention as user auth.
-    @Parameter(names = {"--keystore"}, description = pkiKeystoreDescription)
+    @Parameter(names = {"--pkiKeystore"}, description = pkiKeystoreDescription)
     public String pkiKeystore = "";
     // Indicates we need to prompt for a masked input
-    //@Parameter(names = {"--pkiPass"}, description = "Prompt for keystore password. Do not enter a value.")
-    //public boolean keystorePasswordSwitch = false;*/
+    @Parameter(names = {"--pkiPass"}, description = "Prompt for keystore password. Do not enter a value.")
+    public boolean isPkiPass = false;
     // Not shown in the the help display due to security risks - allow input via command line arguments in plain text.
-    @Parameter(names = {"--ksPwdText"}, hidden = true)
+    @Parameter(names = {"--pkiPassText"}, hidden = true)
     public String pkiKeystorePass = "";
     // Authenticated proxies
     @Parameter(names = {"--proxyUser"}, description = proxyUserDescription)
     public String proxyUser = "";
     // Indicates we need to prompt for a masked input
     @Parameter(names = {"--proxyPass"}, description = "Prompt for proxy password. Do not enter a value.", hidden = true)
-    public boolean proxyPasswordSwitch = false;
+    public boolean isProxyPass = false;
     // Not shown in the the help display due to security risks - allow input via command line arguments in plain text.
-    @Parameter(names = {"--proxyPwdText"}, hidden = true)
+    @Parameter(names = {"--proxyPassText"}, hidden = true)
     public String proxyPassword = "";
     // SSL and hostname verification switches
     @Parameter(names = {"-s", "--ssl"}, description = sslDescription + useOptionOnly )
@@ -92,17 +93,17 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
 
     // Start Input Readers
 
-    protected StringInputReader hostReader = textIO.newStringInputReader()
+    protected StringInputReader hostReader = ResourceCache.textIO.newStringInputReader()
             .withDefaultValue(host)
             .withIgnoreCase()
             .withInputTrimming(true)
             .withValueChecker((String val, String propname) -> validateHost(val));
 
-    protected StringInputReader authTypeReader = textIO.newStringInputReader()
+    protected StringInputReader authTypeReader = ResourceCache.textIO.newStringInputReader()
             .withNumberedPossibleValues(userLoginAuth, pkiLoginAuth)
             .withDefaultValue(userLoginAuth);
 
-    protected StringInputReader proxyHostReader = textIO.newStringInputReader()
+    protected StringInputReader proxyHostReader = ResourceCache.textIO.newStringInputReader()
             .withIgnoreCase()
             .withInputTrimming(true)
             .withValueChecker((String val, String propname) -> validateProxyHost(val));
@@ -125,22 +126,20 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
         errors.addAll(ObjectUtils.defaultIfNull(validatePort(proxyPort), emptyList));
 
         // If we got this far, get the passwords.
-        if(passwordSwitch){
-            if(StringUtils.isEmpty(password)){
+        if(isPassword){
                 password = standardPasswordReader
                         .read(passwordDescription);
-            }
         }
 
         if(StringUtils.isNotEmpty(pkiKeystore)){
-            if(StringUtils.isEmpty(pkiKeystorePass)){
+            if(isPkiPass){
                 pkiKeystorePass = standardPasswordReader
                         .read(pkiKeystorePasswordDescription);
             }
         }
 
         if(StringUtils.isNotEmpty(proxyUser)){
-            if(StringUtils.isEmpty(proxyPassword)){
+            if(isProxyPass){
                 proxyPassword = standardPasswordReader
                         .read(proxyPasswordDescription);
             }
@@ -155,21 +154,25 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
         host = hostReader
                 .read(SystemProperties.lineSeparator + hostDescription);
 
-        port = standardPortReader
+        port = ResourceCache.textIO.newIntInputReader()
                 .withDefaultValue(port)
+                .withValueChecker((Integer val, String propname) -> validatePort(val))
                 .read(SystemProperties.lineSeparator + portDescription);
 
-        isSsl = standardBooleanReader
+        isSsl = ResourceCache.textIO.newBooleanInputReader()
                 .withDefaultValue(true)
                 .read(SystemProperties.lineSeparator + sslDescription);
 
         if(isSsl){
-            skipVerification = standardBooleanReader
+            skipVerification = ResourceCache.textIO.newBooleanInputReader()
                     .withDefaultValue(skipVerification)
                     .read(SystemProperties.lineSeparator + skipHostnameVerificationDescription);
         }
+        else {
+            scheme = "http";
+        }
 
-        boolean isSecured = standardBooleanReader
+        boolean isSecured = ResourceCache.textIO.newBooleanInputReader()
                 .withDefaultValue(true)
                 .read(SystemProperties.lineSeparator + "Cluster secured?");
 
@@ -182,7 +185,7 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
 
             // SSL needs to be in place for PKI
             if(authType.equals(pkiLoginAuth) && !isSsl){
-                terminal.println("TLS must be enabled to use PKI - defaulting to user/password authentication.");
+                ResourceCache.terminal.println("TLS must be enabled to use PKI - defaulting to user/password authentication.");
                 authType = userLoginAuth;
             }
 
@@ -206,8 +209,9 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
             proxyHost = proxyHostReader
                     .read(SystemProperties.lineSeparator + proxyHostDescription);
 
-            proxyPort = standardPortReader
+            proxyPort = ResourceCache.textIO.newIntInputReader()
                     .withDefaultValue(proxyPort)
+                    .withValueChecker((Integer val, String propname) -> validatePort(val))
                     .read(SystemProperties.lineSeparator + proxyPortDescription);
 
             proxyPassword = standardPasswordReader
@@ -246,23 +250,23 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
         return null;
     }
 
-
     @Override
     public String toString() {
-
-        String superString = super.toString();
-
-        return superString + "," + "ElasticRestClientInputs{" +
-                "logger=" + logger +
-                ", host='" + host + '\'' +
+        return "ElasticRestClientInputs{" +
+                "host='" + host + '\'' +
                 ", port=" + port +
-                ", user='" + user + '\'' +
-                ", isSsl=" + isSsl +
-                ", skipVerification=" + skipVerification +
-                ", pkiKeystore='" + pkiKeystore + '\'' +
                 ", proxyHost='" + proxyHost + '\'' +
                 ", proxyPort=" + proxyPort +
+                ", user='" + user + '\'' +
+                ", isPassword=" + isPassword +
+                ", pkiKeystore='" + pkiKeystore + '\'' +
+                ", isPkiPass=" + isPkiPass +
+                ", pkiKeystorePass='" + pkiKeystorePass + '\'' +
                 ", proxyUser='" + proxyUser + '\'' +
+                ", isProxyPass=" + isProxyPass +
+                ", isSsl=" + isSsl +
+                ", skipVerification=" + skipVerification +
+                ", scheme='" + scheme + '\'' +
                 '}';
     }
 }

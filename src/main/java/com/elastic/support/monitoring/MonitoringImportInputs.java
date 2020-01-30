@@ -2,6 +2,7 @@ package com.elastic.support.monitoring;
 
 import com.beust.jcommander.Parameter;
 import com.elastic.support.rest.ElasticRestClientInputs;
+import com.elastic.support.util.ResourceCache;
 import com.elastic.support.util.SystemProperties;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -21,24 +22,27 @@ public class MonitoringImportInputs extends ElasticRestClientInputs {
     protected String clusterName;
 
     @Parameter(names = {"--indexName"}, description = "Overrides the name of the imported index from the date, appending it to .monitoring-es-7- .")
-    protected String indexName = "diag-import" + SystemProperties.getUtcDateString();
+    protected String indexName = "diag-import-" + SystemProperties.getUtcDateString();
 
-    @Parameter(names = {"-i", "--input"}, required = true, description = "Required: The archive that you wish to import into Elastic Monitoring. This must be in the format produced by the diagnostic export utility.")
+    @Parameter(names = {"--input"}, description = "Required: The archive that you wish to import into Elastic Monitoring. This must be in the format produced by the diagnostic export utility.")
     protected String input;
 
-    protected StringInputReader proxyHostReader = textIO.newStringInputReader()
+    protected StringInputReader proxyHostReader = ResourceCache.textIO.newStringInputReader()
             .withInputTrimming(true)
             .withValueChecker((String val, String propname) -> validateId(val));
 
     public boolean runInteractive(){
 
-        clusterName = textIO.newStringInputReader()
-                .read("Overrides the name of the imported cluster.");
+        clusterName = ResourceCache.textIO.newStringInputReader()
+                .withMinLength(0)
+                .read("Specify an alternate name for the imported cluster or hit enter to use original cluster name:");
 
-        indexName = textIO.newStringInputReader()
-                .read("Overrides the name of the imported index from the date, appending it to .monitoring-es-7- .");
+        indexName = ResourceCache.textIO.newStringInputReader()
+                .withMinLength(8)
+                .withDefaultValue(indexName)
+                .read("Specify an alternate index name for the imported index or hit enter for the default generated name:");
 
-        input = textIO.newStringInputReader()
+        input = ResourceCache.textIO.newStringInputReader()
                 .withInputTrimming(true)
                 .withValueChecker((String val, String propname) -> validateRequiredFile(val))
                 .read("Enter the full path of the archvive you wish to import.");
@@ -49,7 +53,10 @@ public class MonitoringImportInputs extends ElasticRestClientInputs {
     }
 
     public List<String> parseInputs(String[] args){
-
+        // If we're in interactive mode don't bother validating anything
+        if(interactive){
+            return emptyList;
+        }
         List<String> errors = super.parseInputs(args);
 
         errors.addAll(ObjectUtils.defaultIfNull(validateId(clusterName), emptyList));
@@ -61,6 +68,9 @@ public class MonitoringImportInputs extends ElasticRestClientInputs {
     }
 
     public List<String> validateId(String val){
+        if(StringUtils.isEmpty(val)){
+            return null;
+        }
         if(val.contains(" ")){
             return Collections.singletonList("Spaces not permitted in name.");
         }

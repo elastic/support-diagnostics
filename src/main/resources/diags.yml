@@ -129,22 +129,6 @@ monitoring-queryfiles:
   cluster_id_check: "cluster_id_check.json"
   cluster_ids: "cluster_ids.json"
 
-monitoring-queries:
-  monitoring-uri:
-    versions:
-      "< 7.0.0": "/.monitoring-es*/_search"
-      ">= 7.0.0": "/.monitoring-es*/_search?rest_total_hits_as_int=true"
-
-  monitoring-start-scroll-uri:
-    versions:
-      "< 7.0.0":  "/.monitoring-es*/_search?scroll=2m"
-      ">= 7.0.0": "/.monitoring-es*/_search?scroll=2m&rest_total_hits_as_int=true"
-
-  monitoring-scroll-uri:
-    versions:
-      "< 7.0.0":  "/_search/scroll?scroll=2m"
-      ">= 7.0.0": "/_search/scroll?scroll=2m&rest_total_hits_as_int=true"
-
 monitoring-scroll-size: 500
 default-monitoring-index: ".monitoring-es-7"
 bulk-import-size: 250

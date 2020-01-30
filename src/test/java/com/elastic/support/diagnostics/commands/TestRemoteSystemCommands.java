@@ -89,11 +89,11 @@ public class TestRemoteSystemCommands {
                 executeCommand(session, cmd, output);
                 output.append("\n");
             } catch ( Exception e) {
-                logger.error("Caught exception: " + e.getMessage());
+                logger.info("Caught exception: " + e.getMessage());
             }
 
         } catch (Exception e) {
-            logger.error(e);
+            logger.info(e);
         } finally {
             if (session != null && session.isConnected()) {
                 session.disconnect();
@@ -129,7 +129,7 @@ public class TestRemoteSystemCommands {
                 try{
                     TimeUnit.SECONDS.sleep(1);}catch(Exception ee){}
             }
-            logger.error(sb.toString());
+            logger.info(sb.toString());
         }
         catch(Exception e){
             System.out.println(e);
@@ -160,15 +160,15 @@ public class TestRemoteSystemCommands {
             //channel.getOutputStream().flush();
             // wait for it to finish
             while(! channel.isClosed()) {
-                logger.error("Not done");
+                logger.info("Not done");
                 TimeUnit.SECONDS.sleep(1);
             }
-            logger.error("Done {}", channel.getExitStatus());
+            logger.info("Done {}", channel.getExitStatus());
 
         } catch ( Exception e) {
-            logger.error(e);
+            logger.info(e);
         } finally {
-            logger.error((out.toString()));
+            logger.info((out.toString()));
             channel.disconnect();
             //sb.append(out.toString());
             SystemUtils.streamClose("", istream);
@@ -246,7 +246,7 @@ public class TestRemoteSystemCommands {
             Integer result = future.get(500, TimeUnit.MILLISECONDS);
             System.out.println(result);
         } catch (Exception e) {
-            logger.error(e);
+            logger.info(e);
         }
 
     }
@@ -314,7 +314,7 @@ public class TestRemoteSystemCommands {
                 sb.append(line);
             }
             pr.waitFor();
-            logger.error(sb.toString());
+            logger.info(sb.toString());
 
         } catch (Exception e) {
             e.printStackTrace();

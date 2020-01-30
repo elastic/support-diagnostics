@@ -61,16 +61,16 @@ public class DiagnosticService extends ElasticRestClientService {
             DiagnosticChainExec.runDiagnostic(ctx, inputs.diagType);
 
             if (ctx.dockerPresent) {
-                logger.warn("Identified Docker installations - bypassed log collection and system calls.");
+                logger.info("Identified Docker installations - bypassed log collection and system calls.");
             }
 
            checkAuthLevel(ctx.diagnosticInputs.user, ctx.isAuthorized);
 
         } catch (DiagnosticException de) {
-            logger.warn(de.getMessage());
+            logger.info(de.getMessage());
         } catch (Throwable t) {
             logger.log(SystemProperties.DIAG, "Temp directory error", t);
-            logger.warn(String.format("Issue with creating temp directory. %s", Constants.CHECK_LOG));
+            logger.info(String.format("Issue with creating temp directory. %s", Constants.CHECK_LOG));
         } finally {
             closeLogs();
             createArchive(ctx.tempDir);

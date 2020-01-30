@@ -110,10 +110,10 @@ public class CheckPlatformDetails implements Command {
                             context.diagnosticInputs.host,
                             context.diagnosticInputs.remotePort,
                             context.diagnosticInputs.keyfile,
-                            context.diagnosticInputs.pkiKeystorePass,
+                            context.diagnosticInputs.keyfilePassword,
                             context.diagnosticInputs.knownHostsFile,
                             context.diagnosticInputs.trustRemote,
-                            context.diagnosticInputs.sudo
+                            context.diagnosticInputs.isSudo
                     );
                     ResourceCache.addSystemCommand(Constants.systemCommands, syscmd);
 
@@ -160,6 +160,7 @@ public class CheckPlatformDetails implements Command {
 
         } catch (Exception e) {
             // Try to keep going even if this didn't work.
+            logger.info("Error: {}", e.getMessage());
             logger.log(SystemProperties.DIAG, "Error checking node metadata and deployment info.", e);
             context.runSystemCalls = false;
         }
@@ -251,7 +252,7 @@ public class CheckPlatformDetails implements Command {
                 .orElse(null);
 
         if (targetNode == null) {
-            logger.error("Could not match node publish address to specified host. Bypassing system calls");
+            logger.info("Could not match node publish address to specified host. Bypassing system calls");
             throw new RuntimeException();
         }
 

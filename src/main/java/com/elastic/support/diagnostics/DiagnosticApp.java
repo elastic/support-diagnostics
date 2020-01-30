@@ -42,17 +42,16 @@ public class DiagnosticApp {
             }
 
             Map diagMap = JsonYamlUtils.readYamlFromClasspath(Constants.DIAG_CONFIG, true);
-
             DiagConfig diagConfig = new DiagConfig(diagMap);
-
             DiagnosticService diag = new DiagnosticService();
+
+            ResourceCache.terminal.dispose();
             diag.exec(diagnosticInputs, diagConfig);
-        } catch (Throwable t) {
-            logger.error("Unanticipated error", t);
-        }
-        finally {
-            DiagnosticInputs.terminal.dispose();
-            DiagnosticInputs.textIO.dispose();
+        } catch (Exception e) {
+            logger.info("Fatal error occurred: {}. {}", e.getMessage(), Constants.CHECK_LOG);
+            logger.log(SystemProperties.DIAG, e);
+        } finally {
+            ResourceCache.closeAll();
         }
     }
 

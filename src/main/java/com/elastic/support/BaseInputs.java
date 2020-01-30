@@ -2,6 +2,7 @@ package com.elastic.support;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
+import com.elastic.support.util.ResourceCache;
 import com.elastic.support.util.SystemProperties;
 
 import org.apache.commons.lang3.ObjectUtils;
@@ -18,10 +19,6 @@ import java.util.List;
 public abstract class BaseInputs {
 
     private static final Logger logger = LogManager.getLogger(BaseInputs.class);
-
-    public static final TextIO textIO = TextIoFactory.getTextIO();
-    public static final TextTerminal terminal = textIO.getTextTerminal();
-
     public static final String outputDirDescription = "Fully qualified path to an output directory. This directory must already exist. If not specified the diagnostic directory will be used.";
     public static final String interactiveModeDescription = "Interactive mode. Prompt for all values and validate as you go.";
     public static final String bypassDiagVerifyDescription = "Bypass the diagnostic version check. Use when internet outbound HTTP access is blocked by a firewall.";
@@ -49,21 +46,20 @@ public abstract class BaseInputs {
     // Input Readers
 
     // Generic - change the default values and the read label only
-    protected StringInputReader standardStringReader = textIO.newStringInputReader()
+    protected StringInputReader standardStringReader = ResourceCache.textIO.newStringInputReader()
+            .withMinLength(0)
             .withInputTrimming(true);
-    protected BooleanInputReader standardBooleanReader = textIO.newBooleanInputReader();
-    protected StringInputReader  standardPasswordReader = textIO.newStringInputReader()
+    protected BooleanInputReader standardBooleanReader = ResourceCache.textIO.newBooleanInputReader();
+    protected StringInputReader  standardPasswordReader = ResourceCache.textIO.newStringInputReader()
             .withInputMasking(true)
             .withInputTrimming(true)
             .withMinLength(0);
     ;
-    protected StringInputReader standardFileReader = textIO.newStringInputReader()
+    protected StringInputReader standardFileReader = ResourceCache.textIO.newStringInputReader()
             .withInputTrimming(true)
             .withValueChecker((String val, String propname) -> validateFile(val));
-    protected IntInputReader standardPortReader = textIO.newIntInputReader()
-            .withValueChecker((Integer val, String propname) -> validatePort(val));
-    protected StringInputReader outputDirectoryReader = textIO.newStringInputReader()
-            .withValueChecker(( String val, String propname) -> validateFile(val));
+    /*protected IntInputReader standardPortReader = ResourceCache.textIO.newIntInputReader()
+            .withValueChecker((Integer val, String propname) -> validatePort(val));*/
 
     // Input Readers
 
@@ -94,11 +90,10 @@ public abstract class BaseInputs {
     }
 
     protected void runOutputDirInteractive(){
-        outputDir = outputDirectoryReader
-                .withDefaultValue(outputDir)
-                .read(outputDirDescription);
+        outputDir = ResourceCache.textIO.newStringInputReader()
+                .withValueChecker(( String val, String propname) -> validateFile(val))
+                .read(SystemProperties.lineSeparator + outputDirDescription);
     }
-
 
     public List<String> validatePort(int val){
         if (val < 1 || val > 65535){

@@ -43,6 +43,8 @@ public class ScrubInputs extends BaseInputs {
     }
 
     public boolean runInteractive(){
+        logger.info("No interactive mode available at this time. Command line only.");
+        logger.info("Please consult the documentation for instructions.");
         return true;
     }
 

@@ -32,6 +32,7 @@ public class CheckDiagnosticVersion implements Command {
 
     public void execute(DiagnosticContext context) {
 
+        logger.log(SystemProperties.DIAG, "This is a test");
         // For airgapped environments allow them to bypass this check
         if (context.diagnosticInputs.bypassDiagVerify) {
             return;

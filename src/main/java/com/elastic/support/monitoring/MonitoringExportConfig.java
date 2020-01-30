@@ -37,7 +37,6 @@ public class MonitoringExportConfig extends BaseConfig {
         super(configuration);
         monitoringStats = (List<String>) configuration.get("monitoring-stats");
         monitoringScrollSize = (Integer)configuration.get("monitoring-scroll-size");
-
         Map<String, String> queryFiles =(Map<String, String>) configuration.get("monitoring-queryfiles");
         queries = getQueriesFromFiles(queryFiles);
 
@@ -90,7 +89,7 @@ public class MonitoringExportConfig extends BaseConfig {
                     }
                 }
             } catch (IOException e) {
-                logger.error("Failed to read query configuration file", e);
+                logger.info("Failed to read query configuration file", e);
             }
 
             buildQueries.put(entry.getKey(), resultStringBuilder.toString());

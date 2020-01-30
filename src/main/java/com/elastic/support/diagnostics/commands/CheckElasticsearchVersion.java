@@ -28,7 +28,7 @@ public class CheckElasticsearchVersion implements Command {
      * that is should usually succeed. If we don't have a version we
      * won't be able to generate the correct call selection later on.
      */
-    private final Logger logger = LogManager.getLogger(CheckElasticsearchVersion.class);
+    private static final Logger logger = LogManager.getLogger(CheckElasticsearchVersion.class);
 
     public void execute(DiagnosticContext context) {
 
@@ -57,26 +57,16 @@ public class CheckElasticsearchVersion implements Command {
 
            // Add it to the global cache - automatically closed on exit.
             ResourceCache.addRestClient(Constants.restInputHost, restClient);
-
-            RestResult res = restClient.execQuery("/");
-            if (! res.isValid()) {
-                throw new DiagnosticException( res.formatStatusMessage( "Could not retrieve the Elasticsearch version - unable to continue."));
-            }
-
-            String result = res.toString();
-            JsonNode root = JsonYamlUtils.createJsonNodeFromString(result);
-            String version = root.path("version").path("number").asText();
             context.version = getElasticsearchVersion(restClient);
-
+            String version = context.version.getValue();
             RestEntryConfig builder = new RestEntryConfig(version);
-
             Map restCalls = JsonYamlUtils.readYamlFromClasspath(Constants.ES_REST, true);
             context.elasticRestCalls = builder.buildEntryMap(restCalls);
 
         } catch (DiagnosticException de) {
             throw de;
-        } catch (Throwable t) {
-            logger.log(SystemProperties.DIAG, "Unanticipated error:", t);
+        } catch (Exception e) {
+            logger.log(SystemProperties.DIAG, "Unanticipated error:", e);
             throw new DiagnosticException(String.format("Could not retrieve the Elasticsearch version due to a system or network error - unable to continue. %s", Constants.CHECK_LOG));
         }
     }

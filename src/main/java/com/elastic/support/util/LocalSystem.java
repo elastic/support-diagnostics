@@ -32,7 +32,7 @@ public class LocalSystem extends SystemCommand {
                 break;
             default:
                 pb = new ProcessBuilder(nixcCdms);
-                logger.warn("Unrecognized OS: {} - using Linux as default.", osName);
+                logger.info("Unrecognized OS: {} - using Linux as default.", osName);
         }
         pb.redirectErrorStream(true);
 
@@ -78,7 +78,7 @@ public class LocalSystem extends SystemCommand {
                 String target = targetDir + SystemProperties.fileSeparator + entry;
                 FileUtils.copyFile(new File(source), new File(target));
             } catch (IOException e) {
-                logger.warn("Error retrieving log: {}. Bypassing.", entry);
+                logger.info("Error retrieving log: {}. Bypassing.", entry);
                 logger.log(SystemProperties.DIAG, e);
             }
         }
