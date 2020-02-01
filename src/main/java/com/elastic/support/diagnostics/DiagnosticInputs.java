@@ -15,6 +15,7 @@ import java.util.List;
 
 public class DiagnosticInputs extends ElasticRestClientInputs {
 
+    
     public final static String[]
             diagnosticTypeValues = {
             Constants.local,
@@ -26,12 +27,12 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
 
     public final static String[]
             diagnosticTypeDescriptions = {
-            "Local node running on the same host as the diagnostic utility.",
-            "Remote node running on a different host than the diagnostic utility",
-            "Run only the Elasticsearch REST API calls, no system calls or logs.",
-            "Local Logstash process on the same host as the diagnostic utility.",
-            "Remote Logstash on a different host than the diagnostic utility.",
-            "Run only Logstash REST calls. No system calls. \t\t"};
+            Constants.local + " - " + "Node on the same host as the diagnostic utility.",
+            Constants.remote + " - " + "Node on a different host than the diagnostic utility",
+            Constants.api + " - " + "Elasticsearch REST API calls, no system calls or logs.",
+            Constants.logstashLocal + " - " + "Logstash process on the same host as the diagnostic utility.",
+            Constants.logstashRemote + " - " + "Logstash on a different host than the diagnostic utility.",
+            Constants.logstashApi + " - " + "Logstash REST calls. No system calls. \t\t"};
 
     public static final String remoteAccessMessage =
             SystemProperties.lineSeparator
@@ -111,18 +112,13 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
                 .withDefaultValue(bypassDiagVerify)
                 .read(SystemProperties.lineSeparator + bypassDiagVerifyDescription);
 
-        logger.info("{}List of valid diagnostic choices:", SystemProperties.lineSeparator);
-
-        for(int i = 0; i < diagnosticTypeDescriptions.length; i++){
-            logger.info( i+1 + ".  " + diagnosticTypeDescriptions[i] + "\t - " + diagnosticTypeValues[i]);
-        }
-
         diagType = ResourceCache.textIO.newStringInputReader()
-                .withNumberedPossibleValues(diagnosticTypeValues)
-                .withDefaultValue(diagnosticTypeValues[0])
+                .withNumberedPossibleValues(diagnosticTypeDescriptions)
+                .withDefaultValue(diagnosticTypeDescriptions[0])
                 .read(SystemProperties.lineSeparator + typeDescription)
                 .toLowerCase();
 
+        diagType = diagType.substring(0, diagType.indexOf(" - "));
         setDefaultPortForDiagType(diagType);
 
         if(diagType.contains("logstash")){
