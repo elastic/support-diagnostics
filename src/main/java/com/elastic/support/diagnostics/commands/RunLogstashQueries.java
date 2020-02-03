@@ -100,6 +100,4 @@ public class RunLogstashQueries extends BaseQuery {
             throw new DiagnosticException(String.format("Error obtaining logstash output and/or process id - will bypass the rest of processing.. %s", Constants.CHECK_LOG));
         }
     }
-
-
 }
