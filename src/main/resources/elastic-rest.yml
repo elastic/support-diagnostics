@@ -57,7 +57,7 @@ cat_master:
   extension: ".txt"
   subdir: "cat"
   versions:
-    ">= 0.9.0": "/_cat/master?format=json"
+    ">= 0.9.0": "/_cat/master"
 
 cat_nodeattrs:
   extension: ".txt"

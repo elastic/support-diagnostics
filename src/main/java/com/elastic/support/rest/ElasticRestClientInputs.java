@@ -235,7 +235,10 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
 
     @Override
     public String toString() {
-        return "ElasticRestClientInputs{" +
+
+        String superString = super.toString();
+        return superString + "," +
+        "ElasticRestClientInputs: {" +
                 "host='" + host + '\'' +
                 ", port=" + port +
                 ", proxyHost='" + proxyHost + '\'' +

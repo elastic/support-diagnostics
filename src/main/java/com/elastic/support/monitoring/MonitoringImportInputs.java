@@ -16,6 +16,8 @@ public class MonitoringImportInputs extends ElasticRestClientInputs {
 
     private static final Logger logger = LogManager.getLogger(MonitoringImportInputs.class);
 
+    // Start Input Fields
+
     @Parameter(names = {"--clusterName"}, description = "Overrides the name of the imported cluster.")
     protected String clusterName;
 
@@ -25,9 +27,15 @@ public class MonitoringImportInputs extends ElasticRestClientInputs {
     @Parameter(names = {"--input"}, description = "Required: The archive that you wish to import into Elastic Monitoring. This must be in the format produced by the diagnostic export utility.")
     protected String input;
 
+    // End Input Fields
+
+    // Start Input Readers
+
     protected StringInputReader proxyHostReader = ResourceCache.textIO.newStringInputReader()
             .withInputTrimming(true)
             .withValueChecker((String val, String propname) -> validateId(val));
+
+    // End Input Readers
 
     public boolean runInteractive(){
 
@@ -70,5 +78,15 @@ public class MonitoringImportInputs extends ElasticRestClientInputs {
             return Collections.singletonList("Spaces not permitted in name.");
         }
         return null;
+    }
+
+    @Override
+    public String toString() {
+        return "MonitoringImportInputs{" +
+                "clusterName='" + clusterName + '\'' +
+                ", indexName='" + indexName + '\'' +
+                ", input='" + input + '\'' +
+                ", proxyHostReader=" + proxyHostReader +
+                '}';
     }
 }

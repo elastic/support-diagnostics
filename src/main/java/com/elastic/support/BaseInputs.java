@@ -55,7 +55,7 @@ public abstract class BaseInputs {
     protected StringInputReader standardFileReader = ResourceCache.textIO.newStringInputReader()
             .withInputTrimming(true)
             .withValueChecker((String val, String propname) -> validateFile(val));
-    // Input Readers
+    // End Input Readers
 
     public abstract boolean runInteractive();
 
@@ -141,8 +141,11 @@ public abstract class BaseInputs {
 
     }
 
-    public String toString(){
-       return "outputDir: " + outputDir + ",";
+    @Override
+    public String toString() {
+        return "BaseInputs{" +
+                "outputDir='" + outputDir + '\'' +
+                '}';
     }
 
 }

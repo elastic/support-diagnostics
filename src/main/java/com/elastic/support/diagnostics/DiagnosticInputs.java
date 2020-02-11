@@ -233,7 +233,7 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
     public List<String> validateDiagType(String val) {
         List<String> types = Arrays.asList(diagnosticTypeValues);
         if (!types.contains(val)) {
-            return Collections.singletonList(val + " was not a valid diagnostype type. Enter --help to see valid choices");
+            return Collections.singletonList(val + " was not a valid diagnostic type. Enter --help to see valid choices");
         }
         return null;
     }
@@ -253,7 +253,7 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
     public String toString() {
         String superString = super.toString();
 
-        return superString + "," + "DiagnosticInputs{" +
+        return superString + "," + "DiagnosticInputs: {" +
                 ", diagType='" + diagType + '\'' +
                 ", remoteUser='" + remoteUser + '\'' +
                 ", keyfile='" + keyfile + '\'' +
