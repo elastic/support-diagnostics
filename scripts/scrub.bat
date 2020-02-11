@@ -1,6 +1,9 @@
 @echo off
 setlocal enabledelayedexpansion
 
+SET scriptpath=%~dp0
+SET diagpath=%scriptpath:~0,-1%
+
 set JAVA_EXEC=java
 if not defined JAVA_HOME (
   set JAVA_EXEC=java
@@ -14,6 +17,6 @@ if not defined DIAG_JAVA_OPTIONS (
   set DIAG_JAVA_OPTIONS=-Xmx2000m
 )
 
-"%JAVA_EXEC%" %DIAG_JAVA_OPTIONS% -cp .\;.\lib\* com.elastic.support.scrub.ScrubApp %*
+"%JAVA_EXEC%" %DIAG_JAVA_OPTIONS% -cp %diagpath%;%diagpath%\lib\* com.elastic.support.scrub.ScrubApp %*
 
 endlocal
