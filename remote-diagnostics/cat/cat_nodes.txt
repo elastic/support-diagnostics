@@ -1,3 +1,0 @@
-n       m i          r        d hp rp cpu load_1m load_5m load_15m nodeId
-4Kmf8EY * 172.18.0.3 mdi 53.1gb 30 97   0    0.15    0.10     0.02 4Kmf
-osy2sf1 - 172.18.0.2 mdi 53.1gb 50 97   0    0.15    0.10     0.02 osy2
