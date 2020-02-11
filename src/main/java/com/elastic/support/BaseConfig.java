@@ -33,10 +33,21 @@ public class BaseConfig {
 
         Map<String, String> githubSettings = (Map<String, String>) configuration.get("github-settings");
 
-        diagReleaseHost = githubSettings.get("diagReleaseHost");
-        diagReleaseDest = githubSettings.get("diagReleaseDest");
-        diagReleaseScheme = githubSettings.get("diagReleaseScheme");
-        diagLatestRelease = githubSettings.get("diagLatestRelease");
+        if( StringUtils.isNotEmpty(githubSettings.get("diagReleaseHost")) ) {
+            diagReleaseHost = githubSettings.get("diagReleaseHost");
+        }
+
+        if(StringUtils.isNotEmpty( githubSettings.get("diagReleaseDest")) ){
+            diagReleaseDest = githubSettings.get("diagReleaseDest");
+        }
+
+        if(StringUtils.isNotEmpty(githubSettings.get("diagReleaseScheme")) ){
+            diagReleaseScheme = githubSettings.get("diagReleaseScheme");
+        }
+
+        if(StringUtils.isNotEmpty(githubSettings.get("diagLatestRelease")) ){
+            diagLatestRelease = githubSettings.get("diagLatestRelease");
+        }
 
         Map<String, Integer> restConfig = (Map<String, Integer>) configuration.get("rest-config");
 

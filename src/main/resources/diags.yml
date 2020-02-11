@@ -9,13 +9,12 @@
 #
 
 diagnosticVersion: 8.0.0
-
 ## Should only need to change these if Github modifies something
-github-settings:
-  diagReleaseHost: "api.github.com"
-  diagReleaseDest: "/repos/elastic/support-diagnostics/releases/latest"
-  diagReleaseScheme: "https"
-  diagLatestRelease: "https://api.github.com/repos/elastic/support-diagnostics/releases/latest"
+  ## github-settings:
+  ##   diagReleaseHost: "api.github.com"
+  ##   diagReleaseDest: "/repos/elastic/support-diagnostics/releases/latest"
+  ##   diagReleaseScheme: "https"
+  ## diagLatestRelease: "https://api.github.com/repos/elastic/support-diagnostics/releases/latest"
 
 # Maximum number of log files including zip archives
 log-settings:

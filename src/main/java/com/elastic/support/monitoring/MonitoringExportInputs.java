@@ -23,6 +23,7 @@ public class MonitoringExportInputs extends ElasticRestClientInputs {
     private static final Logger logger = LogManager.getLogger(ElasticRestClientInputs.class);
     private static int defaultInterval = 6;
 
+    // Start Input Fields
     @Parameter(names = {"--id"}, description = "Required except when the list command is used: The cluster_uuid of the monitored cluster you wish to extract data for. If you do not know this you can obtain it from that cluster using <protocol>://<host>:port/ .")
     public String clusterId;
 
@@ -37,6 +38,9 @@ public class MonitoringExportInputs extends ElasticRestClientInputs {
 
     @Parameter(names = {"--list"}, description = "List the clusters available on the monitoring cluster.")
     boolean listClusters = false;
+
+    // End Input Fields
+
 
     // Generated during the validate method for use by the query.
     public String queryStartDate;
@@ -136,6 +140,16 @@ public class MonitoringExportInputs extends ElasticRestClientInputs {
         return null;
     }
 
-
-
+    @Override
+    public String toString() {
+        return "MonitoringExportInputs{" +
+                "clusterId='" + clusterId + '\'' +
+                ", cutoffDate='" + cutoffDate + '\'' +
+                ", cutoffTime='" + cutoffTime + '\'' +
+                ", interval=" + interval +
+                ", listClusters=" + listClusters +
+                ", queryStartDate='" + queryStartDate + '\'' +
+                ", queryEndDate='" + queryEndDate + '\'' +
+                '}';
+    }
 }

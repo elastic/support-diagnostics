@@ -15,6 +15,7 @@ public class ScrubInputs extends BaseInputs {
 
     private static Logger logger = LogManager.getLogger(ScrubInputs.class);
 
+    // Start Input Fields
     @Parameter(names = {"-a", "--archive"}, description = "Required field if infile not specified.  Full path to the archive file to be scrubbed.")
     private String archive;
     public String getArchive() {
@@ -42,6 +43,9 @@ public class ScrubInputs extends BaseInputs {
         this.configFile = configFile;
     }
 
+    // End Input Fields
+
+
     public boolean runInteractive(){
         logger.info("No interactive mode available at this time. Command line only.");
         logger.info("Please consult the documentation for instructions.");
@@ -65,5 +69,14 @@ public class ScrubInputs extends BaseInputs {
         }
 
         return errors;
+    }
+
+    @Override
+    public String toString() {
+        return "ScrubInputs{" +
+                "archive='" + archive + '\'' +
+                ", infile='" + infile + '\'' +
+                ", configFile='" + configFile + '\'' +
+                '}';
     }
 }
