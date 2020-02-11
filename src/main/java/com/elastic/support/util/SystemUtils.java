@@ -2,6 +2,10 @@ package com.elastic.support.util;
 
 
 import com.elastic.support.Constants;
+import com.elastic.support.diagnostics.DiagnosticException;
+import com.elastic.support.diagnostics.DiagnosticInputs;
+import com.elastic.support.rest.RestClient;
+import com.elastic.support.rest.RestResult;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
@@ -22,11 +26,14 @@ public class SystemUtils {
 
     private static final Logger logger = LogManager.getLogger(SystemUtils.class);
 
-    public static void toFile(String path, String content) {
-        try (FileOutputStream fs = new FileOutputStream(path)) {
-            IOUtils.write(content, fs, Constants.UTF8);
-        } catch (Exception e) {
-            logger.log(SystemProperties.DIAG, "Error writing Response To OutputStream", e);
+    public static void writeToFile(String content, String dest) {
+        try {
+            logger.info("Writing to {}", dest);
+            File outFile = new File(dest);
+            FileUtils.writeStringToFile(outFile, content, "UTF-8");
+        } catch (IOException e) {
+            logger.log(SystemProperties.DIAG, "Error writing content for {}", dest, e);
+            throw new DiagnosticException("Error writing " + dest + " See diagnostic.log for details.");
         }
     }
 
@@ -36,10 +43,10 @@ public class SystemUtils {
             try {
                 instream.close();
             } catch (Throwable t) {
-                logger.error("Error encountered when attempting to close file {}", path);
+                logger.info("Error encountered when attempting to close file {}", path);
             }
         } else {
-            logger.error("Error encountered when attempting to close file: null InputStream {}", path);
+            logger.info("Error encountered when attempting to close file: null InputStream {}", path);
         }
 
     }
@@ -51,7 +58,7 @@ public class SystemUtils {
             FileUtils.deleteDirectory(tmp);
             logger.info("Deleted directory: {}.", dir);
         } catch (IOException e) {
-            logger.error("Delete of directory:{} failed. Usually this indicates a permission issue", dir, e);
+            logger.info("Delete of directory:{} failed. Usually this indicates a permission issue", dir, e);
         }
     }
 
@@ -73,7 +80,7 @@ public class SystemUtils {
             s = stdInput.readLine();
 
         } catch (IOException e) {
-            logger.error("Error retrieving hostname.", e);
+            logger.info("Error retrieving hostname.", e);
         }
         finally {
             try {
@@ -81,14 +88,14 @@ public class SystemUtils {
                     stdError.close();
                 }
             } catch (IOException e) {
-                logger.error("Couldn't close stderror stream");
+                logger.info("Couldn't close stderror stream");
             }
             try {
                 if(stdInput != null){
                     stdInput.close();
                 }
             } catch (IOException e) {
-                logger.error("Couldn't close stdinput stream");
+                logger.info("Couldn't close stdinput stream");
             }
         }
 
@@ -117,7 +124,7 @@ public class SystemUtils {
                 }
             }
         } catch (Exception e) {
-            logger.error("Error occurred acquiring IP's and hostnames", e);
+            logger.info("Error occurred acquiring IP's and hostnames", e);
         }
 
         return ipAndHosts;
@@ -143,4 +150,23 @@ public class SystemUtils {
         return dtf.format(ZonedDateTime.now());
     }
 
+    public static String parseOperatingSystemName(String osName){
+
+        osName = osName.toLowerCase();
+
+        if (osName.contains("windows")) {
+            return Constants.winPlatform;
+
+        } else if (osName.contains("linux")) {
+            return Constants.linuxPlatform;
+
+        } else if (osName.contains("darwin") || osName.contains("mac")) {
+            return Constants.macPlatform;
+
+        } else {
+            // default it to Linux
+            logger.info("Unsupported OS -defaulting to Linux: {}", osName);
+            return  Constants.linuxPlatform;
+        }
+    }
 }

@@ -37,25 +37,17 @@ public class GenerateManifest implements Command {
 
          Map<String, Object> manifest = new HashMap<>();
 
-         String diagVersion = getToolVersion();
+         String diagVersion = context.diagVersion;
          manifest.put(Constants.DIAG_VERSION, diagVersion);
-
-         context.setDiagVersion(diagVersion);
+         manifest.put("Product Version", context.version);
          manifest.put("collectionDate", SystemProperties.getUtcDateTimeString());
+         manifest.put("diagnosticInputs", context.diagnosticInputs.toString());
 
-         DiagnosticInputs params = context.getDiagnosticInputs();
-         manifest.put("diagnosticInputs", params.toString());
-
-         File manifestFile = new File(context.getTempDir() + SystemProperties.fileSeparator + "manifest.json");
+         File manifestFile = new File(context.tempDir + SystemProperties.fileSeparator + "manifest.json");
          mapper.writeValue(manifestFile, manifest);
       } catch (Exception e) {
-         logger.error("Error creating the manifest file", e);
+         logger.info("Error creating the manifest file", e);
       }
-   }
-
-   public String getToolVersion() {
-      String ver = GenerateManifest.class.getPackage().getImplementationVersion();
-      return (ver != null) ? ver : "Debug";
    }
 
    public String getIsoDate() {

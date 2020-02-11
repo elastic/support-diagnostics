@@ -1,234 +1,255 @@
 package com.elastic.support.rest;
 
 import com.beust.jcommander.Parameter;
-import com.elastic.support.Constants;
 import com.elastic.support.BaseInputs;
+import com.elastic.support.Constants;
+import com.elastic.support.util.ResourceCache;
 import com.elastic.support.util.SystemProperties;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import java.util.Collections;
+import java.util.List;
 
-import java.io.File;
+public abstract class ElasticRestClientInputs extends BaseInputs {
 
-public class ElasticRestClientInputs extends BaseInputs {
+    public static final String hostDescription = "Required field.  Hostname, IP Address, or localhost.  HTTP access for this node must be enabled:";
+    public static final String portDescription = "Listening port. Defaults to 9200:";
+    public static final String userDescription = "Elasticsearch user account:";
+    public static final String passwordDescription = "Elasticsearch user password:";
+    public static final String pkiKeystoreDescription = "Path/filename for PKI keystore with client certificate:";
+    public static final String pkiKeystorePasswordDescription = "PKI keystore password if required:";
+    public static final String proxyHostDescription = "Proxy server host name or IP Address:";
+    public static final String proxyPortDescription = "Proxy server port number. Defaults to port 80:";
+    public static final String proxyUserDescription = "Proxy server login:";
+    public static final String proxyPasswordDescription = "Proxy server password if required:";
+    public static final String sslDescription = "Use https to access the cluster?";
+    public static final String skipHostnameVerificationDescription = "Bypass hostname verification for certificate? This is unsafe and NOT recommended.";
+
+    public final static String  userLoginAuth = "Username/Password:";
+    public final static String  pkiLoginAuth = "PKI:";
+
+    public static final String useOptionOnly = " No value required, only the option.";
+    // The basics - where's the cluster
+    @Parameter(names = {"-h", "--host"}, description = hostDescription)
+    public String host = "localhost";
+
+    // Start Input Fields
+    @Parameter(names = {"--port"}, description = portDescription)
+    public int port = 9200;
+    // Proxy Server settings
+    @Parameter(names = {"--proxyHost"}, description = proxyHostDescription)
+    public String proxyHost = "";
+    @Parameter(names = {"--proxyPort"}, description = proxyPortDescription)
+    public int proxyPort = Constants.DEEFAULT_PROXY_PORT;
+    // Secured authentication logins
+    // Switch just turns on the prompt - they can still send it in as a parameter
+    // but it won't show in the usage, just the readme.
+    // Rest of the password fields follow the same convention.
+    @Parameter(names = {"-u", "--user"}, description = userDescription)
+    public String user = "";
+    // Indicates we need to prompt for a masked input
+    @Parameter(names = {"-p", "--password"}, description = "Prompt for Elasticsearch password.  Do not enter a value.")
+    public boolean isPassword = false;
+    // Not shown in the the help display due to security risks - allow input via command line arguments in plain text.
+    @Parameter(names = {"--passwordText"}, hidden = true)
+    public String password = "";
+    // PKI auth - same convention as user auth.
+    @Parameter(names = {"--pkiKeystore"}, description = pkiKeystoreDescription)
+    public String pkiKeystore = "";
+    // Indicates we need to prompt for a masked input
+    @Parameter(names = {"--pkiPass"}, description = "Prompt for keystore password. Do not enter a value.")
+    public boolean isPkiPass = false;
+    // Not shown in the the help display due to security risks - allow input via command line arguments in plain text.
+    @Parameter(names = {"--pkiPassText"}, hidden = true)
+    public String pkiKeystorePass = "";
+    // Authenticated proxies
+    @Parameter(names = {"--proxyUser"}, description = proxyUserDescription)
+    public String proxyUser = "";
+    // Indicates we need to prompt for a masked input
+    @Parameter(names = {"--proxyPass"}, description = "Prompt for proxy password. Do not enter a value.", hidden = true)
+    public boolean isProxyPass = false;
+    // Not shown in the the help display due to security risks - allow input via command line arguments in plain text.
+    @Parameter(names = {"--proxyPassText"}, hidden = true)
+    public String proxyPassword = "";
+    // SSL and hostname verification switches
+    @Parameter(names = {"-s", "--ssl"}, description = sslDescription + useOptionOnly )
+    public boolean isSsl = false;
+    @Parameter(names = {"--noVerify"}, description = bypassDiagVerifyDescription + useOptionOnly)
+    public boolean skipVerification = false;
+
+    // Other fields
+    public String scheme = "https";
+
+    // End Input Fields
 
     Logger logger = LogManager.getLogger(ElasticRestClientInputs.class);
 
-    @Parameter(names = {"-h", "--host"}, description = "Required field.  Hostname, IP Address, or localhost.  HTTP access must be enabled.")
-    protected String host = "";
-    public String getHost() {
-        return host;
-    }
-    public void setHost(String host) {
-        this.host = host;
-    }
+    public List<String> parseInputs(String args[]){
+        List<String> errors = super.parseInputs(args);
+        scheme = isSsl ? "https": "http";
 
-    @Parameter(names = {"--port"}, description = "HTTP or HTTPS listening port. Defaults to 9200.")
-    protected int port = 9200;
-    public int getPort() {
-        return port;
-    }
-    public void setPort(int port) {
-        this.port = port;
-    }
-
-    @Parameter(names = {"-u", "--user"}, description = "User")
-    protected String user;
-    public String getUser() {
-        return user;
-    }
-    public void setUser(String username) {
-        this.user = user;
-    }
-
-    @Parameter(names = {"-p", "--password"}, description = "Password", password = true)
-    protected String password;
-    public String getPassword() {
-        return password;
-    }
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    @Parameter(names = {"-s", "--ssl"}, description = "Use SSL?  No value required, only the option.")
-    protected boolean isSsl = false;
-    public boolean isSsl() {
-        return isSsl;
-    }
-
-    public void setSsl(boolean ssl) {
-        isSsl = ssl;
-    }
-
-    public String getScheme() {
-        if (this.isSsl) {
-            return "https";
-        } else {
-            return "http";
+        errors.addAll(ObjectUtils.defaultIfNull(validateHost(host), emptyList));
+        errors.addAll(ObjectUtils.defaultIfNull(validateProxyHost(proxyHost), emptyList));
+        errors.addAll(ObjectUtils.defaultIfNull(validateFile(pkiKeystore), emptyList));
+        if(StringUtils.isNotEmpty(pkiKeystore)){
+            errors.addAll(ObjectUtils.defaultIfNull(validateAuthType(pkiLoginAuth), emptyList));
         }
-    }
+        errors.addAll(ObjectUtils.defaultIfNull(validatePort(port), emptyList));
+        errors.addAll(ObjectUtils.defaultIfNull(validatePort(proxyPort), emptyList));
 
-    @Parameter(names = {"--ptp"}, description = "Insecure plain text password - allows you to input the password as a plain text argument for scripts. WARNING: Exposes passwords in clear text. Inherently insecure.")
-    protected String plainTextPassword = "";
-    public String getPlainTextPassword() {
-        return plainTextPassword;
-    }
-    public void setPlainTextPassword(String plainTextPassword) {
-        this.plainTextPassword = plainTextPassword;
-    }
-
-    @Parameter(names = {"--noVerify"}, description = "Use this option to bypass hostname verification for certificate. This is inherently unsafe and NOT recommended.")
-    protected boolean skipVerification = false;
-    public boolean isSkipVerification() {
-        return skipVerification;
-    }
-    public void setSkipVerification(boolean skipVerification) {
-        this.skipVerification = skipVerification;
-    }
-
-    @Parameter(names = {"--keystore"}, description = "Keystore for client certificate.")
-    protected String pkiKeystore;
-    public String getPkiKeystore() {
-        return pkiKeystore;
-    }
-    public void setPkiKeystore(String pkiKeystore) {
-        this.pkiKeystore = pkiKeystore;
-    }
-
-    @Parameter(names = {"--keystorePass"}, description = "Keystore password for client certificate.", password = true)
-    protected String pkiKeystorePass;
-    public String getPkiKeystorePass() {
-        return pkiKeystorePass;
-    }
-    public void setPkiKeystorePass(String pkiKeystorePass) {
-        this.pkiKeystorePass = pkiKeystorePass;
-    }
-
-    @Parameter (names = {"--proxyHost"}, description = "Proxy server hostname.")
-    protected String proxyHost;
-    public String getProxyHost() {
-        return proxyHost;
-    }
-    public void setProxyHost(String proxyHost) {
-        this.proxyHost = proxyHost;
-    }
-
-    @Parameter (names = {"--proxyPort"}, description = "Proxy server port.")
-    protected int proxyPort = Constants.DEEFAULT_HTTP_PORT;
-    public int getProxyPort() {
-        return proxyPort;
-    }
-    public void setProxyPort(int proxyPort) {
-        this.proxyPort = proxyPort;
-    }
-
-    @Parameter (names = {"--proxyUser"}, description = "Proxy server user name.")
-    protected String proxyUser;
-    public String getProxyUser() {
-        return proxyUser;
-    }
-    public void setProxyUser(String proxyUser) {
-        this.proxyUser = proxyUser;
-    }
-
-    @Parameter (names = {"--proxyPassword"}, description = "Proxy server password.", password = true)
-    protected String proxyPassword;
-    public String getProxyPassword() {
-        return proxyPassword;
-    }
-    public void setProxyPassword(String proxyPassword) {
-        this.proxyPassword = proxyPassword;
-    }
-
-    @Parameter(names = {"--bypassDiagVerify"}, description = "Bypass the diagnostic version check.")
-    protected boolean bypassDiagVerify = false;
-    public boolean isBypassDiagVerify() {
-        return bypassDiagVerify;
-    }
-    public void setBypassDiagVerify(boolean bypassDiagVerify) {
-        this.bypassDiagVerify = bypassDiagVerify;
-    }
-
-    public boolean isSecured() {
-        return (StringUtils.isNotEmpty(this.user) && StringUtils.isNotEmpty(this.password));
-    }
-
-    public boolean isPki(){
-        if(StringUtils.isEmpty(pkiKeystore) ){
-            return false;
-        }
-        return true;
-    }
-
-    public boolean validate() {
-
-        if( ! super.validate() ){
-            return false;
-        }
-
-        if(StringUtils.isEmpty(host)){
-            logger.info("A host name or IP Address configured as the HTTP endpoint of a cluster node is required.");
-            return false;
-        }
-
-        if (StringUtils.isNotEmpty(this.plainTextPassword)) {
-            this.password = plainTextPassword;
-        }
-
-        if (! isCompleteAuth(user, password)) {
-            logger.info("If authenticating both user and password are required.");
-            this.jCommander.usage();
-            return false;
-        }
-
-        if (! isCompleteAuth(proxyUser, proxyPassword)) {
-            logger.info("Uwer was specified for proxy but no password. Failures may occur.");
+        // If we got this far, get the passwords.
+        if(isPassword){
+                password = standardPasswordReader
+                        .read(passwordDescription);
         }
 
         if(StringUtils.isNotEmpty(pkiKeystore)){
-            File pki = new File(pkiKeystore);
-            if(! pki.exists()){
-                logger.info("A PKI Keystore was input but could not be located in the supplied location. Please check that the absolute path to the file is correct.");
+            if(isPkiPass){
+                pkiKeystorePass = standardPasswordReader
+                        .read(pkiKeystorePasswordDescription);
             }
         }
 
-        return true;
+        if(StringUtils.isNotEmpty(proxyUser)){
+            if(isProxyPass){
+                proxyPassword = standardPasswordReader
+                        .read(proxyPasswordDescription);
+            }
+        }
+
+        return errors;
 
     }
 
-    protected boolean isCompleteAuth(String user, String password) {
-        
-        if ( (StringUtils.isNotEmpty(user) && StringUtils.isEmpty(password)) ||
-                (StringUtils.isNotEmpty(password) && StringUtils.isEmpty(user)) ){
-            return false;
+    protected void runHttpInteractive(){
+
+        host = ResourceCache.textIO.newStringInputReader()
+                .withDefaultValue(host)
+                .withIgnoreCase()
+                .withInputTrimming(true)
+                .withValueChecker((String val, String propname) -> validateHost(val))
+                .read(SystemProperties.lineSeparator + hostDescription);
+
+        port = ResourceCache.textIO.newIntInputReader()
+                .withDefaultValue(port)
+                .withValueChecker((Integer val, String propname) -> validatePort(val))
+                .read(SystemProperties.lineSeparator + "Listening port. Defaults to " + port + ":");
+
+        isSsl = ResourceCache.textIO.newBooleanInputReader()
+                .withDefaultValue(true)
+                .read(SystemProperties.lineSeparator + sslDescription);
+
+        if(isSsl){
+            skipVerification = ResourceCache.textIO.newBooleanInputReader()
+                    .withDefaultValue(skipVerification)
+                    .read(SystemProperties.lineSeparator + skipHostnameVerificationDescription);
         }
-        return true;
+        else {
+            scheme = "http";
+        }
+
+        boolean isSecured = ResourceCache.textIO.newBooleanInputReader()
+                .withDefaultValue(true)
+                .read(SystemProperties.lineSeparator + "Cluster secured?");
+
+        if(isSecured){
+            user = standardStringReader
+                    .read(SystemProperties.lineSeparator + userDescription);
+
+            String authType = ResourceCache.textIO.newStringInputReader()
+                    .withNumberedPossibleValues(userLoginAuth, pkiLoginAuth)
+                    .withDefaultValue(userLoginAuth)
+                    .read(SystemProperties.lineSeparator + "Type of authentication to use:");
+
+            // SSL needs to be in place for PKI
+            if(authType.equals(pkiLoginAuth) && !isSsl){
+                ResourceCache.terminal.println("TLS must be enabled to use PKI - defaulting to user/password authentication.");
+                authType = userLoginAuth;
+            }
+
+            if(authType.equals(userLoginAuth)){
+                password = standardPasswordReader
+                        .read(SystemProperties.lineSeparator + passwordDescription);
+            }
+            else{
+                pkiKeystore = standardFileReader
+                        .read(SystemProperties.lineSeparator + pkiKeystoreDescription);
+                pkiKeystorePass = standardPasswordReader
+                        .read(SystemProperties.lineSeparator + pkiKeystorePasswordDescription);
+            }
+        }
+
+        boolean httpProxy = standardBooleanReader
+                .withDefaultValue(false)
+                .read(SystemProperties.lineSeparator + "Http Proxy Server present?");
+
+        if(httpProxy){
+            proxyHost = ResourceCache.textIO.newStringInputReader()
+                    .withIgnoreCase()
+                    .withInputTrimming(true)
+                    .withValueChecker((String val, String propname) -> validateProxyHost(val))
+                    .read(SystemProperties.lineSeparator + proxyHostDescription);
+
+            proxyPort = ResourceCache.textIO.newIntInputReader()
+                    .withDefaultValue(proxyPort)
+                    .withValueChecker((Integer val, String propname) -> validatePort(val))
+                    .read(SystemProperties.lineSeparator + proxyPortDescription);
+
+            proxyPassword = standardPasswordReader
+                    .read(SystemProperties.lineSeparator + proxyPasswordDescription);
+        }
+
+    }
+
+    public List<String> validateHost(String hostString) {
+
+        if(StringUtils.isEmpty(hostString)){
+            return Collections.singletonList("Host is required.");
+        }
+
+        if (hostString.toLowerCase().matches("((http|https?)://)?.*:(\\d{4,5})")) {
+            return Collections.singletonList("Should only contain a host name or IP Address, not a full URL");
+        }
+        return null;
+    }
+
+    public List<String> validateProxyHost(String hostString) {
+
+        if(StringUtils.isNotEmpty(hostString)){
+            if (hostString.toLowerCase().matches("(://)?.*:(\\d{4,5})")) {
+                return Collections.singletonList("Enter port separately");
+            }
+        }
+
+        return null;
+    }
+
+    public List<String> validateAuthType(String val){
+        if( val.equals(pkiLoginAuth) && !isSsl){
+            return Collections.singletonList("TLS must be enabled to use PKI Authentication.");
+        }
+        return null;
     }
 
     @Override
     public String toString() {
-        StringBuffer sb = new StringBuffer(super.toString());
-        sb.append("Bypass Diag Verification: " + bypassDiagVerify + Constants.TAB);
-
-        sb.append("Host: " + host + Constants.TAB);
-        sb.append("Port: " + port + Constants.TAB );
-        sb.append("Elasticsearch Login User: " + user + Constants.TAB);
-
-        sb.append("Proxy Host: " + proxyHost + Constants.TAB );
-        sb.append("Proxy Host: " + proxyHost + Constants.TAB );
-        sb.append("Proxy User: " + proxyUser + Constants.TAB );
-
-        sb.append("SSL: " + isSsl + Constants.TAB);
-        sb.append("Skip hostname Verification: " + this.skipVerification + Constants.TAB);
-        sb.append("PKI Keystore: " + this.pkiKeystore + Constants.TAB);
-
-        if(StringUtils.isNotEmpty(plainTextPassword)){
-            sb.append("Password sent in plain text: " + true + Constants.TAB);
-        }
-
-        return sb.toString().trim();
-
-
+        return "ElasticRestClientInputs{" +
+                "host='" + host + '\'' +
+                ", port=" + port +
+                ", proxyHost='" + proxyHost + '\'' +
+                ", proxyPort=" + proxyPort +
+                ", user='" + user + '\'' +
+                ", isPassword=" + isPassword +
+                ", pkiKeystore='" + pkiKeystore + '\'' +
+                ", isPkiPass=" + isPkiPass +
+                ", pkiKeystorePass='" + pkiKeystorePass + '\'' +
+                ", proxyUser='" + proxyUser + '\'' +
+                ", isProxyPass=" + isProxyPass +
+                ", isSsl=" + isSsl +
+                ", skipVerification=" + skipVerification +
+                ", scheme='" + scheme + '\'' +
+                '}';
     }
 }

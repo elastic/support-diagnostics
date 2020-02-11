@@ -10,7 +10,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class BaseQuery implements Command {
 
@@ -42,7 +43,7 @@ public abstract class BaseQuery implements Command {
                 logger.info("Some calls failed but were flagged as recoverable: retrying in {} seconds.", pause / 1000);
                 Thread.sleep(pause);
             } catch (Exception e) {
-                logger.error("Failed pause on error.", e);
+                logger.info("Failed pause on error.", e);
             }
 
             retryList = execQueryList(restClient, retryList, tempDir);

@@ -20,8 +20,8 @@ public class ScrubService extends BaseService {
 
       String filePath = inputs.getArchive();
       String infilePath = inputs.getInfile();
-      String outputDir = inputs.getOutputDir();
-      String temp = inputs.getTempDir();
+      String outputDir = inputs.outputDir;
+      String temp = inputs.outputDir + SystemProperties.fileSeparator + "scrubbed";
 
       try {
          int pos;
@@ -71,7 +71,7 @@ public class ScrubService extends BaseService {
 
       } catch (Throwable t) {
          logger.log(SystemProperties.DIAG, "Error occurred: ", t);
-         logger.error("Issue encountered during scrub processing. {}.", Constants.CHECK_LOG);
+         logger.info("Issue encountered during scrub processing. {}.", Constants.CHECK_LOG);
       }
       finally{
          closeLogs();

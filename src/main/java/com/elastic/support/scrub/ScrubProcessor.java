@@ -59,7 +59,7 @@ public class ScrubProcessor implements ArchiveEntryProcessor {
 
 
       } catch (Exception e) {
-         logger.error("Error initializing scrubbing  files.", e);
+         logger.info("Error initializing scrubbing  files.", e);
          throw new RuntimeException("Scrub initialization failed");
       }
 
@@ -114,7 +114,7 @@ public class ScrubProcessor implements ArchiveEntryProcessor {
 
          writer.close();
       } catch (Throwable t) {
-         logger.error("Error processing entry,", t);
+         logger.info("Error processing entry,", t);
       }
    }
 
@@ -169,7 +169,7 @@ public class ScrubProcessor implements ArchiveEntryProcessor {
          for(int i = 0; i < 4; i++){
             int set = Integer.parseInt(ipSegments[i]);
             if (!ipv4.containsKey(set)){
-               logger.error("Error converting ip segment {} from address: {}", Integer.toString(set), group);
+               logger.info("Error converting ip segment {} from address: {}", Integer.toString(set), group);
                throw new RuntimeException("Error scrubbing IP Addresses");
             }
             int replace = ipv4.get(set);

@@ -41,7 +41,7 @@ public class JsonYamlUtils {
          String fileString = FileUtils.readFileToString(jsonFile, "UTF8");
          return JsonYamlUtils.createJsonNodeFromString(fileString);
       } catch (IOException e) {
-         logger.error("Error reading in JSON string from file: {}", jsonFile);
+         logger.info("Error reading in JSON string from file: {}", jsonFile);
          throw new RuntimeException(e);
       }
    }
@@ -51,7 +51,7 @@ public class JsonYamlUtils {
          ObjectMapper mapper = new ObjectMapper();
          return mapper.readTree(nodeString);
       } catch (IOException e) {
-         logger.error("Error creating JSON node from input string: {}", nodeString);
+         logger.info("Error creating JSON node from input string: {}", nodeString);
          throw new RuntimeException(e);
       }
    }
@@ -64,7 +64,7 @@ public class JsonYamlUtils {
          ObjectMapper mapper = new ObjectMapper();
          return mapper.readTree(nodeString);
       } catch (IOException e) {
-         logger.error("Error creating JSON node {}", path);
+         logger.info("Error creating JSON node {}", path);
          throw new RuntimeException(e);
       }
    }
@@ -77,7 +77,7 @@ public class JsonYamlUtils {
          FileWriter writer = new FileWriter(path);
          yaml.dump(tree, writer);
       } catch (IOException e) {
-         logger.error("Error writing YAML to: {}", path);
+         logger.info("Error writing YAML to: {}", path);
          throw new RuntimeException(e);
       }
    }
@@ -89,7 +89,7 @@ public class JsonYamlUtils {
          SystemUtils.streamClose(path, inputStream);
          return doc;
       } catch (Exception e) {
-         logger.error("Error reading YAML from {}", path);
+         logger.info("Error reading YAML from {}", path);
          throw new RuntimeException(e);
       }
    }
@@ -115,7 +115,7 @@ public class JsonYamlUtils {
          doc = (Map) yaml.load(in);
 
       } catch (Exception e) {
-         logger.error("Error encountered retrieving yml file.", e);
+         logger.info("Error encountered retrieving yml file.", e);
       }
       finally {
          return nullSafeYamlMap(doc);

@@ -15,30 +15,73 @@ public class DiagnosticChainExec {
     public static void runDiagnostic(DiagnosticContext context, String type) {
 
         try {
-            new GenerateManifest().execute(context);
             new CheckDiagnosticVersion().execute(context);
 
-            if(Constants.local.equals(type) || Constants.localApi.equals(type)) {
-                new CheckElasticsearchVersion().execute(context);
-                new CheckUserAuthLevel().execute(context);
-                new RunClusterQueries().execute(context);
-            }
+            switch (type){
+                case Constants.api :
+                    new CheckElasticsearchVersion().execute(context);
+                    new CheckUserAuthLevel().execute(context);
+                    new CheckPlatformDetails().execute(context);
+                    new RunClusterQueries().execute(context);
+                    break;
 
-            if(Constants.local.equals(type)){
-                new VerifyHostType().execute(context);
-                new CollectLocalLogs().execute(context);
-                new CollectLocalSystemCalls().execute(context);
-                new RetrieveSystemDigest().execute(context);
-            }
+                case Constants.local :
+                    new CheckElasticsearchVersion().execute(context);
+                    new CheckUserAuthLevel().execute(context);
+                    new CheckPlatformDetails().execute(context);
+                    new RunClusterQueries().execute(context);
+                    if(context.runSystemCalls){
+                        new CollectSystemCalls().execute(context);
+                        new CollectLogs().execute(context);
+                        new RetrieveSystemDigest().execute(context);
+                    }
+                    if(context.dockerPresent){
+                        new CollectDockerInfo().execute(context);
+                    }
+                    break;
 
-            if(Constants.logstash.equals(type)){
-                new RunLogstashQueries().execute(context);
-                new CollectLocalSystemCalls().execute(context);
-                new RetrieveSystemDigest().execute(context);
-            }
+                case Constants.remote :
+                    new CheckElasticsearchVersion().execute(context);
+                    new CheckUserAuthLevel().execute(context);
+                    new CheckPlatformDetails().execute(context);
+                    new RunClusterQueries().execute(context);
+                    if(context.runSystemCalls){
+                        new CollectSystemCalls().execute(context);
+                        new CollectLogs().execute(context);
+                    }
+                    if(context.dockerPresent){
+                        new CollectDockerInfo().execute(context);
+                    }
+                    break;
+
+                case Constants.logstashLocal :
+                    new RunLogstashQueries().execute(context);
+                    if(context.runSystemCalls){
+                        new CollectSystemCalls().execute(context);
+                        new RetrieveSystemDigest().execute(context);
+                    }
+                    if(context.dockerPresent){
+                        new CollectDockerInfo().execute(context);
+                    }
+                    break;
+
+                case Constants.logstashRemote :
+                    new RunLogstashQueries().execute(context);
+                    if(context.runSystemCalls){
+                        new CollectSystemCalls().execute(context);
+                    }
+                    if(context.dockerPresent){
+                        new CollectDockerInfo().execute(context);
+                    }
+                    break;
+
+                case Constants.logstashApi :
+                    new RunLogstashQueries().execute(context);
+                    break;
+                }
 
             new GenerateManifest().execute(context);
-            
+
         } catch (DiagnosticException de) {
             throw de;
         }

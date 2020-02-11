@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration status="error">
+<Configuration status="warn">
     <CustomLevels>
         <CustomLevel name="DIAG" intLevel="250" />
     </CustomLevels>
@@ -7,14 +7,14 @@
         <Console name="Console" target="SYSTEM_OUT">
             <PatternLayout pattern="%msg%n"/>
             <Filters>
-                <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY"/>
-                <ThresholdFilter level="diag" onMatch="ACCEPT" onMismatch="NEUTRAL" />
+           <!--     <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>-->
+                <ThresholdFilter level="DIAG" onMatch="DENY" onMismatch="NEUTRAL" />
             </Filters>
         </Console>
     </Appenders>
     <Loggers>
         <Root level="info">
-            <AppenderRef ref="Console"/>
+            <AppenderRef ref="Console" />
         </Root>
     </Loggers>
 </Configuration>

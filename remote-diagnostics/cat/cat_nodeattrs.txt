@@ -1,0 +1,9 @@
+node    id   pid host       ip         port attr              value
+4Kmf8EY 4Kmf 1   172.18.0.3 172.18.0.3 9300 ml.machine_memory 2095681536
+4Kmf8EY 4Kmf 1   172.18.0.3 172.18.0.3 9300 ml.max_open_jobs  20
+4Kmf8EY 4Kmf 1   172.18.0.3 172.18.0.3 9300 xpack.installed   true
+4Kmf8EY 4Kmf 1   172.18.0.3 172.18.0.3 9300 ml.enabled        true
+osy2sf1 osy2 1   172.18.0.2 172.18.0.2 9300 ml.machine_memory 2095681536
+osy2sf1 osy2 1   172.18.0.2 172.18.0.2 9300 ml.max_open_jobs  20
+osy2sf1 osy2 1   172.18.0.2 172.18.0.2 9300 xpack.installed   true
+osy2sf1 osy2 1   172.18.0.2 172.18.0.2 9300 ml.enabled        true

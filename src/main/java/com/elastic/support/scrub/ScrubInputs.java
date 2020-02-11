@@ -7,6 +7,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class ScrubInputs extends BaseInputs {
 
@@ -39,33 +42,28 @@ public class ScrubInputs extends BaseInputs {
         this.configFile = configFile;
     }
 
+    public boolean runInteractive(){
+        logger.info("No interactive mode available at this time. Command line only.");
+        logger.info("Please consult the documentation for instructions.");
+        return true;
+    }
 
-    public boolean validate() {
-        // If we're in help just shut down.
-        if (isHelp()) {
+    public List<String> parseIinputs(String[] args){
+        List<String> errors = super.parseInputs(args);
+
+        if (help) {
             this.jCommander.usage();
-            return false;
+            return emptyList;
         }
 
         if(StringUtils.isEmpty(infile) && StringUtils.isEmpty(archive) ){
-            logger.warn("You must specify either an archive or individual file to process.");
-            return false;
+            errors.add("You must specify either an archive or individual file to process.");
         }
 
         if(StringUtils.isNotEmpty(infile) && StringUtils.isNotEmpty(archive) ){
-            logger.warn("You cannot specify both an archive and individual file to process.");
-            return false;
+            errors.add("You cannot specify both an archive and individual file to process.");
         }
 
-        return true;
-
-    }
-
-    public String getTempDir() {
-        if(StringUtils.isEmpty(outputDir)){
-            return SystemProperties.userDir + SystemProperties.fileSeparator + "scrubbed";
-        }
-
-        return outputDir + SystemProperties.fileSeparator + "scrubbed";
+        return errors;
     }
 }

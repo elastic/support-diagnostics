@@ -1,0 +1,14 @@
+Bad Request. Rejected
+{
+  "error" : {
+    "root_cause" : [
+      {
+        "type" : "remote_transport_exception",
+        "reason" : "[4Kmf8EY][172.18.0.3:9300][cluster:monitor/allocation/explain]"
+      }
+    ],
+    "type" : "illegal_argument_exception",
+    "reason" : "unable to find any unassigned shards to explain [ClusterAllocationExplainRequest[useAnyUnassignedShard=true,includeYesDecisions?=false]"
+  },
+  "status" : 400
+}

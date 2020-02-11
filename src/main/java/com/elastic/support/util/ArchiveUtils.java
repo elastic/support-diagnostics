@@ -46,7 +46,7 @@ public class ArchiveUtils {
          logger.info("Archive: " + filename + " was created");
 
       } catch (Exception ioe) {
-         logger.error("Couldn't create archive. {}", ioe);
+         logger.info("Couldn't create archive. {}", ioe);
       }
 
    }
@@ -77,7 +77,7 @@ public class ArchiveUtils {
             }
          }
       } catch (IOException e) {
-         logger.error("Archive Error", e);
+         logger.info("Archive Error", e);
       }
    }
 
@@ -101,7 +101,7 @@ public class ArchiveUtils {
             tae = archive.getNextTarEntry();
          }
       } catch (IOException e)      {
-         logger.error("Error extracting {}.", "", e);
+         logger.info("Error extracting {}.", "", e);
          throw new RuntimeException("Error extracting {} from archive.", e);
       }
    }

@@ -1,0 +1,1 @@
+{"_nodes":{"total":2,"successful":2,"failed":0},"cluster_name":"docker-cluster","manually_stopped":false,"stats":[{"node_id":"4Kmf8EYORYas5rHMd7fTuw","watcher_state":"started","watch_count":0,"execution_thread_pool":{"queue_size":0,"max_size":0}},{"node_id":"osy2sf1pRPO4AG6DQfeK_A","watcher_state":"started","watch_count":0,"execution_thread_pool":{"queue_size":0,"max_size":0}}]}

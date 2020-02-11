@@ -30,7 +30,6 @@ public class TestRestExecCalls {
     private ClientAndServer mockServer;
     private Map config;
     private PoolingHttpClientConnectionManager connectionManager;
-    private RestClientBuilder builder = new RestClientBuilder();
     private RestClient httpRestClient, httpsRestClient;
     private String temp = SystemProperties.userDir + SystemProperties.fileSeparator + "temp";
     private File tempDir = new File(temp);
@@ -46,6 +45,7 @@ public class TestRestExecCalls {
         mockServer.stop();
     }
 
+/*
     @BeforeEach
     public void setup() {
 
@@ -269,5 +269,6 @@ public class TestRestExecCalls {
 
         return true;
     }
+*/
 
 }
