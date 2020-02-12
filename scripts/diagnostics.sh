@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+scriptDir=$0
+scriptDir=${scriptDir/\/diagnostics.sh/$''}
+
 if [ -x "$JAVA_HOME/bin/java" ]; then
     JAVA="$JAVA_HOME/bin/java"
 else
@@ -18,4 +21,4 @@ fi
 [[ ${DIAG_JAVA_OPTS} == "" ]] && export DIAG_JAVA_OPTS="-Xms256m -Xmx2000m"
 
 echo "Using ${DIAG_JAVA_OPTS} ${DIAG_DEBUG_OPTS} for options."
-"$JAVA" $DIAG_JAVA_OPTS ${DIAG_DEBUG_OPTS} -cp .:./lib/*  com.elastic.support.diagnostics.DiagnosticApp "$@"
+"$JAVA" $DIAG_JAVA_OPTS ${DIAG_DEBUG_OPTS} -cp ${scriptDir}:${scriptDir}/lib/*  com.elastic.support.diagnostics.DiagnosticApp "$@"
