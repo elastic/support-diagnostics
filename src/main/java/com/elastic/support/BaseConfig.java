@@ -29,24 +29,27 @@ public class BaseConfig {
 
         this.configuration = configuration;
 
-        diagnosticVersion = (String)configuration.get("diagnosticVersion");
+        diagnosticVersion = (String) configuration.get("diagnosticVersion");
 
         Map<String, String> githubSettings = (Map<String, String>) configuration.get("github-settings");
 
-        if( StringUtils.isNotEmpty(githubSettings.get("diagReleaseHost")) ) {
-            diagReleaseHost = githubSettings.get("diagReleaseHost");
-        }
+        if ( githubSettings != null){
 
-        if(StringUtils.isNotEmpty( githubSettings.get("diagReleaseDest")) ){
-            diagReleaseDest = githubSettings.get("diagReleaseDest");
-        }
+            if (StringUtils.isNotEmpty(githubSettings.get("diagReleaseHost"))) {
+                diagReleaseHost = githubSettings.get("diagReleaseHost");
+            }
 
-        if(StringUtils.isNotEmpty(githubSettings.get("diagReleaseScheme")) ){
-            diagReleaseScheme = githubSettings.get("diagReleaseScheme");
-        }
+            if (StringUtils.isNotEmpty(githubSettings.get("diagReleaseDest"))) {
+                diagReleaseDest = githubSettings.get("diagReleaseDest");
+            }
 
-        if(StringUtils.isNotEmpty(githubSettings.get("diagLatestRelease")) ){
-            diagLatestRelease = githubSettings.get("diagLatestRelease");
+            if (StringUtils.isNotEmpty(githubSettings.get("diagReleaseScheme"))) {
+                diagReleaseScheme = githubSettings.get("diagReleaseScheme");
+            }
+
+            if (StringUtils.isNotEmpty(githubSettings.get("diagLatestRelease"))) {
+                diagLatestRelease = githubSettings.get("diagLatestRelease");
+            }
         }
 
         Map<String, Integer> restConfig = (Map<String, Integer>) configuration.get("rest-config");
@@ -57,10 +60,10 @@ public class BaseConfig {
         maxTotalConn = restConfig.get("maxTotalConn");
         maxConnPerRoute = restConfig.get("maxConnPerRoute");
 
-        dockerGlobal = (Map<String, String>)configuration.get("docker-global");
-        dockerContainer = (Map<String, String> )configuration.get("docker-container");
-        dockerContainerIds = (String)configuration.get("docker-container-ids");
-        dockerExecutablePath = (String)configuration.get("docker-executable-location");
+        dockerGlobal = (Map<String, String>) configuration.get("docker-global");
+        dockerContainer = (Map<String, String>) configuration.get("docker-container");
+        dockerContainerIds = (String) configuration.get("docker-container-ids");
+        dockerExecutablePath = (String) configuration.get("docker-executable-location");
 
 
     }
