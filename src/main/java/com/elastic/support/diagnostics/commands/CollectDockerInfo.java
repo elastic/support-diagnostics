@@ -2,6 +2,8 @@ package com.elastic.support.diagnostics.commands;
 
 import com.elastic.support.Constants;
 import com.elastic.support.diagnostics.DiagConfig;
+import com.elastic.support.diagnostics.JavaPlatform;
+import com.elastic.support.diagnostics.ProcessProfile;
 import com.elastic.support.diagnostics.chain.Command;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.util.*;
@@ -24,7 +26,19 @@ public class CollectDockerInfo implements Command {
   public void execute(DiagnosticContext context) {
 
       SystemCommand systemCommand = ResourceCache.getSystemCommand(Constants.systemCommands);
-      String targetDir = context.tempDir + SystemProperties.fileSeparator + "docker";
+
+      // Run the system calls first to get the host's stats
+      String targetDir = context.tempDir + SystemProperties.fileSeparator + "syscalls";
+      String pid = "1";
+      String platform = SystemUtils.parseOperatingSystemName(SystemProperties.osName);
+      if(systemCommand instanceof RemoteSystem){
+          platform = Constants.linuxPlatform;
+      }
+      Map<String, Map<String, String>> osCmds = context.diagsConfig.getSysCalls(platform);
+      Map<String, String> sysCalls = osCmds.get("sys");
+      CollectSystemCalls.processCalls(targetDir, sysCalls, systemCommand, pid);
+
+      targetDir = context.tempDir + SystemProperties.fileSeparator + "docker";
 
       // Run the global calls. It's a single pass
       runDockerCalls(targetDir, context.diagsConfig.dockerGlobal, systemCommand, "", context.diagsConfig.dockerExecutablePath);
@@ -37,7 +51,6 @@ public class CollectDockerInfo implements Command {
       for(String container: containerIds){
           runDockerCalls(targetDir, context.diagsConfig.dockerContainer, systemCommand, container, context.diagsConfig.dockerExecutablePath);
       }
-
   }
 
     public List<String> getDockerContainerIds(SystemCommand systemCommand, String idsCmd) {

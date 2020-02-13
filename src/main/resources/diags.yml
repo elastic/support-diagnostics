@@ -113,6 +113,7 @@ docker-global:
 docker-container:
   docker-logs: "docker logs {{CONTAINER_ID}}"
   docker-top: "docker top {{CONTAINER_ID}}"
+  docker-inspect: "docker inspect {{CONTAINER_ID}}"
 
 monitoring-stats:
   - cluster_stats
