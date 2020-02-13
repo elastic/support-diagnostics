@@ -62,7 +62,6 @@ public abstract class BaseInputs {
 
     public BaseInputs(){
         if(runningInDocker){
-            logger.info("docker");
             outputDir = "/diagnostic-output";
         }
     }
