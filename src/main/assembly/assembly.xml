@@ -8,6 +8,14 @@
     <fileSets>
 
         <fileSet>
+            <directory>${project.basedir}/docker</directory>
+            <outputDirectory>./docker</outputDirectory>
+            <includes>
+                <include>*</include>
+            </includes>
+        </fileSet>
+
+        <fileSet>
             <directory>${project.basedir}/scripts</directory>
             <outputDirectory>.</outputDirectory>
             <includes>
@@ -24,12 +32,12 @@
         </fileSet>
 
         <fileSet>
-        <directory>${project.basedir}/src/main/resources</directory>
-        <outputDirectory>.</outputDirectory>
-        <includes>
-            <include>scrub.yml</include>
-        </includes>
-    </fileSet>
+            <directory>${project.basedir}/src/main/resources</directory>
+            <outputDirectory>.</outputDirectory>
+            <includes>
+                <include>scrub.yml</include>
+            </includes>
+        </fileSet>
 
         <fileSet>
             <directory>${project.build.directory}</directory>

@@ -78,7 +78,4 @@ public class DiagnosticService extends ElasticRestClientService {
             ResourceCache.closeAll();
         }
     }
-
-
-
 }

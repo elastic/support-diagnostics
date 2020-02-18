@@ -5,6 +5,7 @@ import com.elastic.support.Constants;
 import com.elastic.support.rest.ElasticRestClientInputs;
 import com.elastic.support.util.ResourceCache;
 import com.elastic.support.util.SystemProperties;
+import com.elastic.support.util.SystemUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -25,14 +26,29 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
             Constants.logstashRemote,
             Constants.logstashApi};
 
-    public final static String[]
-            diagnosticTypeDescriptions = {
-            Constants.local + " - " + "Node on the same host as the diagnostic utility.",
-            Constants.remote + " - " + "Node on a different host than the diagnostic utility",
-            Constants.api + " - " + "Elasticsearch REST API calls, no system calls or logs.",
-            Constants.logstashLocal + " - " + "Logstash process on the same host as the diagnostic utility.",
-            Constants.logstashRemote + " - " + "Logstash on a different host than the diagnostic utility.",
-            Constants.logstashApi + " - " + "Logstash REST calls. No system calls. \t\t"};
+    public static final String localDesc = "Node on the same host as the diagnostic utility.";
+    public static final String remoteDesc = "Node on a different host than the diagnostic utility";
+    public static final String apiDesc = "Elasticsearch REST API calls, no system calls or logs.";
+    public static final String logstashLocalDesc = "Logstash process on the same host as the diagnostic utility.";
+    public static final String logstashRemoteDesc = "Logstash on a different host than the diagnostic utility.";
+    public static final String logstashApiDesc = "Logstash REST calls. No system calls. \t\t";
+
+    public static final String[]
+            diagnosticTypeEntries = {
+            Constants.local + " - " + localDesc,
+            Constants.remote + " - " + remoteDesc,
+            Constants.api + " - " + apiDesc,
+            Constants.logstashLocal + " - " + logstashLocalDesc,
+            Constants.logstashRemote + " - " + logstashRemoteDesc,
+            Constants.logstashApi + " - " + logstashApiDesc};
+
+    public static final String[]
+            diagnosticTypeEntriesDocker = {
+            Constants.remote + " - " + remoteDesc,
+            Constants.api + " - " + apiDesc,
+            Constants.logstashRemote + " - " + logstashRemoteDesc,
+            Constants.logstashApi + " - " + logstashApiDesc};
+
 
     public static final String remoteAccessMessage =
             SystemProperties.lineSeparator
@@ -106,6 +122,18 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
     public int remotePort = 22;
     // End Input Fields
 
+    String[] typeEntries;
+
+    public DiagnosticInputs(){
+        super();
+        if(runningInDocker){
+            typeEntries = diagnosticTypeEntriesDocker;
+        }
+        else{
+            typeEntries = diagnosticTypeEntries;
+        }
+    }
+
     public boolean runInteractive() {
 
         bypassDiagVerify = standardBooleanReader
@@ -113,21 +141,16 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
                 .read(SystemProperties.lineSeparator + bypassDiagVerifyDescription);
 
         diagType = ResourceCache.textIO.newStringInputReader()
-                .withNumberedPossibleValues(diagnosticTypeDescriptions)
-                .withDefaultValue(diagnosticTypeDescriptions[0])
+                .withNumberedPossibleValues(typeEntries)
+                .withDefaultValue(typeEntries[0])
                 .read(SystemProperties.lineSeparator + typeDescription)
                 .toLowerCase();
 
         diagType = diagType.substring(0, diagType.indexOf(" - "));
         setDefaultPortForDiagType(diagType);
 
-        if(diagType.contains("logstash")){
-            runHttpInteractive();
-        }
-        else{
-            runHttpInteractive();
-        }
-
+        // We'll do this for any Elastic or Logstash submit
+        runHttpInteractive();
 
         if(diagType.contains("remote")) {
             logger.info(remoteAccessMessage);
@@ -235,6 +258,12 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
         if (!types.contains(val)) {
             return Collections.singletonList(val + " was not a valid diagnostic type. Enter --help to see valid choices");
         }
+
+        if(runningInDocker &&val.contains("local") ){
+            return Collections.singletonList(val + " cannot be run from within a Docker container. Please use api or remote options.");
+        }
+
+
         return null;
     }
 
