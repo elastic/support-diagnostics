@@ -80,7 +80,7 @@ public class CollectSystemCalls implements Command {
         }
     }
 
-    public void processCalls(String targetDir, Map<String, String> commandMap, SystemCommand sysCmd, String pid) {
+    public static void processCalls(String targetDir, Map<String, String> commandMap, SystemCommand sysCmd, String pid) {
         commandMap.forEach((k, v) -> {
                     try {
                         String cmd = v.replace("{{PID}}", pid);
