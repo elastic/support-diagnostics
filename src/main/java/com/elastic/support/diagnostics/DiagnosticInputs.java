@@ -125,7 +125,6 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
     String[] typeEntries;
 
     public DiagnosticInputs(){
-        super();
         if(runningInDocker){
             typeEntries = diagnosticTypeEntriesDocker;
         }

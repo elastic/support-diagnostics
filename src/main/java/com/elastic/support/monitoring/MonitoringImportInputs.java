@@ -37,10 +37,6 @@ public class MonitoringImportInputs extends ElasticRestClientInputs {
 
     // End Input Readers
 
-    public MonitoringImportInputs(){
-        super();
-    }
-
     public boolean runInteractive(){
 
         clusterName = ResourceCache.textIO.newStringInputReader()
