@@ -308,6 +308,16 @@ ml_datafeeds:
     ">= 5.0.0 < 7.0.0": "/_xpack/ml/datafeeds?pretty"
     ">= 7.0.0": "/_ml/datafeeds?pretty"
 
+ml_dataframe:
+  subdir: "commercial"
+  versions:
+    ">= 7.3.0": "/_ml/data_frame/analytics?pretty"
+
+ml_dataframe_stats:
+  subdir: "commercial"
+  versions:
+    ">= 7.3.0": "/_ml/data_frame/analytics/_stats?pretty"
+
 ml_stats:
   subdir: "commercial"
   versions:
@@ -367,6 +377,18 @@ slm_stats:
   subdir: "commercial"
   versions:
     ">= 7.5.0": "/_slm/stats?pretty"
+
+transform:
+  subdir: "commercial"
+  versions:
+    ">= 7.2.0 < 7.5.0": "_data_frame/transforms?pretty"
+    ">= 7.5.0": "_transform?pretty"
+
+transform_stats:
+  subdir: "commercial"
+  versions:
+    ">= 7.2.0 < 7.5.0": "_data_frame/transforms/_stats?pretty"
+    ">= 7.5.0": "_transform/_stats?pretty"
 
 watcher_stats:
   subdir: "commercial"
