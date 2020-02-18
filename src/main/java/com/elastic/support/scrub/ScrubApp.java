@@ -2,7 +2,10 @@ package com.elastic.support.scrub;
 
 import com.elastic.support.Constants;
 import com.elastic.support.diagnostics.DiagnosticInputs;
+import com.elastic.support.monitoring.MonitoringImportInputs;
+import com.elastic.support.monitoring.MonitoringImportService;
 import com.elastic.support.util.ResourceCache;
+import com.elastic.support.util.SystemProperties;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -17,19 +20,13 @@ public class ScrubApp {
 
         try {
             ScrubInputs scrubInputs = new ScrubInputs();
-
             if(args.length == 0){
-                scrubInputs.interactive = true;
-            }
-            List<String> errors = scrubInputs.parseInputs(args);
-
-            if( args.length == 0 || scrubInputs.interactive){
-                // Create a new input object so we out clean
-                scrubInputs = new ScrubInputs();
+                logger.info(Constants.interactiveMsg);
                 scrubInputs.interactive = true;
                 scrubInputs.runInteractive();
             }
             else {
+                List<String> errors = scrubInputs.parseIinputs(args);
                 if (errors.size() > 0) {
                     for(String err: errors){
                         logger.info(err);
@@ -46,7 +43,6 @@ public class ScrubApp {
         } finally {
             ResourceCache.closeAll();
         }
-
     }
 
 }

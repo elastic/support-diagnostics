@@ -46,10 +46,6 @@ public class MonitoringExportInputs extends ElasticRestClientInputs {
     public String queryStartDate;
     public String queryEndDate;
 
-    public MonitoringExportInputs(){
-        super();
-    }
-
     public boolean runInteractive() {
 
         runHttpInteractive();

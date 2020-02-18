@@ -87,7 +87,6 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
     Logger logger = LogManager.getLogger(ElasticRestClientInputs.class);
 
     public ElasticRestClientInputs(){
-        super();
         if(runningInDocker){
             host = "";
         }

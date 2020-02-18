@@ -2,7 +2,9 @@ package com.elastic.support.scrub;
 
 import com.beust.jcommander.Parameter;
 import com.elastic.support.BaseInputs;
+import com.elastic.support.util.ResourceCache;
 import com.elastic.support.util.SystemProperties;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -50,18 +52,49 @@ public class ScrubInputs extends BaseInputs {
     }
 
     public boolean runInteractive(){
-        logger.info("No interactive mode available at this time. Command line only.");
-        logger.info("Please consult the documentation for instructions.");
+        String operation = standardStringReader
+                .withNumberedPossibleValues("Scrub Archive", "Scrub Single File")
+                .withIgnoreCase()
+                .read(SystemProperties.lineSeparator + "Select the type of file you wish to scrub." );
+        logger.info("");
+
+        if(operation.toLowerCase().contains("archive")) {
+            archive = ResourceCache.textIO.newStringInputReader()
+                    .withInputTrimming(true)
+                    .withValueChecker((String val, String propname) -> validateRequiredFile(val))
+                    .read("Enter the full path of the archive you wish to import.");
+        }
+        else {
+            infile = ResourceCache.textIO.newStringInputReader()
+                    .withInputTrimming(true)
+                    .withValueChecker((String val, String propname) -> validateRequiredFile(val))
+                    .read("Enter the full path of the individual file you wish to import.");
+        }
+
+        logger.info("");
+
+        logger.info("If you do not specify a yaml configuration file, the utility will automatically");
+        logger.info("obfuscate IP and MAC addresses by default. You do NOT need to configure that functionality.");
+        logger.info("If you wish to extend for additional masking you MUST explicitly enter a file to input.");
+        logger.info("Note that for docker containers this must be a file within the configured volume.");
+        configFile = ResourceCache.textIO.newStringInputReader()
+                .withInputTrimming(true)
+                .withMinLength(0)
+                .withValueChecker((String val, String propname) -> validateRequiredFile(val))
+                .read("Enter the full path of the Configuration file you wish to import or hit enter to take the default IP/MAC scrub.");
+
+        if(runningInDocker){
+            logger.info("Result will be written to the configured Docker volume.");
+        }
+        else{
+            runOutputDirInteractive();
+        }
+
         return true;
     }
 
     public List<String> parseIinputs(String[] args){
         List<String> errors = super.parseInputs(args);
-
-        if (help) {
-            this.jCommander.usage();
-            return emptyList;
-        }
 
         if(StringUtils.isEmpty(infile) && StringUtils.isEmpty(archive) ){
             errors.add("You must specify either an archive or individual file to process.");
@@ -69,6 +102,14 @@ public class ScrubInputs extends BaseInputs {
 
         if(StringUtils.isNotEmpty(infile) && StringUtils.isNotEmpty(archive) ){
             errors.add("You cannot specify both an archive and individual file to process.");
+        }
+
+        if(StringUtils.isNotEmpty(archive)){
+            errors.addAll(ObjectUtils.defaultIfNull(validateRequiredFile(archive), emptyList));
+        }
+
+        if(StringUtils.isNotEmpty(infile)){
+            errors.addAll(ObjectUtils.defaultIfNull(validateRequiredFile(infile), emptyList));
         }
 
         return errors;
