@@ -2,6 +2,13 @@
 
 scriptDir=$0
 scriptDir=${scriptDir/\/scrub.sh/$''}
+libDir=$scriptDir'/lib'
+
+if [  -d "libDir" ]; then
+    echo "Runtimes library does not exist - make sure you are running the "
+    echo "archive with 'dist-' in the name, not the one labeled: 'source'."
+    exit
+fi
 
 if [ -x "$JAVA_HOME/bin/java" ]; then
     JAVA="$JAVA_HOME/bin/java"

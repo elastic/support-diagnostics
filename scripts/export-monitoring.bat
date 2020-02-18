@@ -3,6 +3,13 @@ setlocal enabledelayedexpansion
 
 SET scriptpath=%~dp0
 SET diagpath=%scriptpath:~0,-1%
+SET libpath=%diagpath%\lib\NUL
+
+IF NOT EXIST %libpath% (
+    ECHO "Runtimes library does not exist - make sure you are running the "
+    ECHO "archive with 'dist' in the name, not the one labeled: 'source'."
+    EXIT
+)
 
 set JAVA_EXEC=java
 if not defined JAVA_HOME (
