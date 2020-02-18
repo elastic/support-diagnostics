@@ -1,5 +1,7 @@
 package com.elastic.support;
 
+import com.elastic.support.util.SystemProperties;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -59,6 +61,8 @@ public class Constants {
    public static final String systemCommands = "ssh:SystemCommand";
 
    public static final String runningInIde = "runningInIde";
+   public static final String interactiveMsg = "Command line options can be displayed with the --help argument. " +
+           "Entering interactive mode.";
 
 
 }

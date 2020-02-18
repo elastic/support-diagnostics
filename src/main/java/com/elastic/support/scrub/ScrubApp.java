@@ -21,10 +21,7 @@ public class ScrubApp {
         try {
             ScrubInputs scrubInputs = new ScrubInputs();
             if(args.length == 0){
-                logger.info("{}{}{}",
-                        "Command line options can be displayed with the --help arguemnt.",
-                        SystemProperties.lineSeparator,
-                        "Entering interactive mode.");
+                logger.info(Constants.interactiveMsg);
                 scrubInputs.interactive = true;
                 scrubInputs.runInteractive();
             }

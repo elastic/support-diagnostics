@@ -17,10 +17,7 @@ public class MonitoringExportApp {
         try {
             MonitoringExportInputs monitoringExportInputs = new MonitoringExportInputs();
             if (args.length == 0) {
-                logger.info("{}{}{}",
-                        "Command line options can be displayed with the --help arguemnt.",
-                        SystemProperties.lineSeparator,
-                        "Entering interactive mode.");
+                logger.info(Constants.interactiveMsg);
                 monitoringExportInputs.interactive = true;
                 monitoringExportInputs.runInteractive();
             } else {
