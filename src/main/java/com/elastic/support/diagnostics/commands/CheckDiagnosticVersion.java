@@ -96,7 +96,7 @@ public class CheckDiagnosticVersion implements Command {
             logger.log(SystemProperties.DIAG, e);
             logger.info("Issue encountered while checking diagnostic version for updates.");
             logger.info("Failed to get current diagnostic version from Github.");
-            logger.info("If Github is not accessible from this environemnt current supported version cannot be confirmed.");
+            logger.info("If Github is not accessible from this environment current supported version cannot be confirmed.");
         }
     }
 
