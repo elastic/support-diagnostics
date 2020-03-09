@@ -175,7 +175,7 @@ public class SystemUtils {
         try {
             Path path = Paths.get(SystemProperties.userDir).getParent();
             File cgroups = new File("/proc/1/cgroup");
-            logger.info(cgroups.getAbsolutePath());
+            
             // If it's not there we aren't in a container
             if( !cgroups.exists()){
                 return false;
