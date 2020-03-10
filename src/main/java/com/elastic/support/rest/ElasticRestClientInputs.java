@@ -76,7 +76,7 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
     // SSL and hostname verification switches
     @Parameter(names = {"-s", "--ssl"}, description = sslDescription + useOptionOnly )
     public boolean isSsl = false;
-    @Parameter(names = {"--noVerify"}, description = bypassDiagVerifyDescription + useOptionOnly)
+    @Parameter(names = {"--noVerify"}, description = skipHostnameVerificationDescription + useOptionOnly)
     public boolean skipVerification = false;
 
     // Other fields
