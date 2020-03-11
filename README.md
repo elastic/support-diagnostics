@@ -181,7 +181,7 @@
  <tr>
    <td width="20%" align="left" valign="top" >--type  </td>
    <td width="50%" align="left" valign="top"> The diagnostic mode to execute. Valid types are local, remote, api, logstash, log stash-local, or log stash-api. See the documentation for additional descriptions of the diagnostic modes. Default value is local.</td>
-   <td width="30%" align="left" valign="top">--type local<br/> --type remote<br/> --type api<br/> --type logstash<br/> --type logstash-remote<br/>--type logstash-api</td>
+   <td width="30%" align="left" valign="top">--type local<br/> --type remote<br/> --type api<br/> --type logstash-local<br/> --type logstash-remote<br/>--type logstash-api</td>
  </tr>
  
  <tr>
