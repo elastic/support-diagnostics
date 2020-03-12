@@ -111,7 +111,6 @@ public class CheckPlatformDetails implements Command {
                         targetOS = context.targetNode.os;
                     }
 
-
                     syscmd = new RemoteSystem(
                             targetOS,
                             context.diagnosticInputs.remoteUser,
@@ -151,12 +150,6 @@ public class CheckPlatformDetails implements Command {
                     syscmd = new LocalSystem(context.targetNode.os);
                     ResourceCache.addSystemCommand(Constants.systemCommands, syscmd);
 
-                    break;
-
-                case Constants.api:
-                    context.targetNode = findRemoteTargetNode(
-                            context.diagnosticInputs.host, nodeProfiles);
-                    context.runSystemCalls = false;
                     break;
 
                 default:
