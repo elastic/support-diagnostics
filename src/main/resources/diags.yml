@@ -8,7 +8,7 @@
 #
 #
 
-diagnosticVersion: 8.0.0
+diagnosticVersion: 8.0.1
 ## Should only need to change these if Github modifies something
   ## github-settings:
   ##   diagReleaseHost: "api.github.com"
