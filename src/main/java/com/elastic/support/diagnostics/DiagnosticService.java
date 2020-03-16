@@ -61,7 +61,7 @@ public class DiagnosticService extends ElasticRestClientService {
             DiagnosticChainExec.runDiagnostic(ctx, inputs.diagType);
 
             if (ctx.dockerPresent) {
-                logger.info("Identified Docker installations - bypassed log collection and system calls.");
+                logger.info("Identified Docker installations - bypassed log collection and some system calls.");
             }
 
            checkAuthLevel(ctx.diagnosticInputs.user, ctx.isAuthorized);

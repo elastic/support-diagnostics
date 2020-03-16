@@ -1,9 +1,6 @@
 package com.elastic.support.diagnostics.commands;
 
 import com.elastic.support.Constants;
-import com.elastic.support.diagnostics.DiagConfig;
-import com.elastic.support.diagnostics.JavaPlatform;
-import com.elastic.support.diagnostics.ProcessProfile;
 import com.elastic.support.diagnostics.chain.Command;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.util.*;
@@ -12,8 +9,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,39 +18,42 @@ public class CollectDockerInfo implements Command {
 
     private static final Logger logger = LogManager.getLogger(CollectDockerInfo.class);
 
-  public void execute(DiagnosticContext context) {
+    public void execute(DiagnosticContext context) {
 
-      SystemCommand systemCommand = ResourceCache.getSystemCommand(Constants.systemCommands);
+        SystemCommand systemCommand = ResourceCache.getSystemCommand(Constants.systemCommands);
 
-      // Run the system calls first to get the host's stats
-      String targetDir = context.tempDir + SystemProperties.fileSeparator + "syscalls";
-      String pid = "1";
-      String platform = SystemUtils.parseOperatingSystemName(SystemProperties.osName);
-      if(systemCommand instanceof RemoteSystem){
-          platform = Constants.linuxPlatform;
-      }
-      Map<String, Map<String, String>> osCmds = context.diagsConfig.getSysCalls(platform);
-      Map<String, String> sysCalls = osCmds.get("sys");
-      CollectSystemCalls.processCalls(targetDir, sysCalls, systemCommand, pid);
+        // Run the system calls first to get the host's stats
+        String targetDir = context.tempDir + SystemProperties.fileSeparator + "syscalls";
+        String pid = "1";
+        String platform = Constants.linuxPlatform;
+        if (systemCommand instanceof LocalSystem) {
+            SystemUtils.parseOperatingSystemName(SystemProperties.osName);
+        }
 
-      targetDir = context.tempDir + SystemProperties.fileSeparator + "docker";
+        Map<String, Map<String, String>> osCmds = context.diagsConfig.getSysCalls(platform);
+        Map<String, String> sysCalls = osCmds.get("sys");
+        CollectSystemCalls.processCalls(targetDir, sysCalls, systemCommand, pid);
 
-      // Run the global calls. It's a single pass
-      runDockerCalls(targetDir, context.diagsConfig.dockerGlobal, systemCommand, "", context.diagsConfig.dockerExecutablePath);
+        targetDir = context.tempDir + SystemProperties.fileSeparator + "docker";
 
-      String idsCmd = context.diagsConfig.dockerContainerIds;
-      if(systemCommand instanceof RemoteSystem){
-          idsCmd = context.diagsConfig.dockerExecutablePath + idsCmd;
-      }
-      List<String> containerIds = getDockerContainerIds(systemCommand, idsCmd);
-      for(String container: containerIds){
-          runDockerCalls(targetDir, context.diagsConfig.dockerContainer, systemCommand, container, context.diagsConfig.dockerExecutablePath);
-      }
-  }
+        // Determine where Docker is located
+        String dockerPath = getDockerPath(systemCommand, platform);
 
-    public List<String> getDockerContainerIds(SystemCommand systemCommand, String idsCmd) {
+        // Run the global calls. It's a single pass
+        runDockerCalls(targetDir, context.diagsConfig.dockerGlobal, systemCommand, "", dockerPath);
+
+        String idsCmd = context.diagsConfig.dockerContainerIds;
+
+        List<String> containerIds = getDockerContainerIds(systemCommand, idsCmd, dockerPath);
+        for (String container : containerIds) {
+            runDockerCalls(targetDir, context.diagsConfig.dockerContainer, systemCommand, container, dockerPath);
+        }
+    }
+
+    public List<String> getDockerContainerIds(SystemCommand systemCommand, String idsCmd, String dockerPath) {
 
         try {
+            idsCmd = idsCmd.replace("{{dockerPath}}", dockerPath);
             String output = systemCommand.runCommand(idsCmd);
 
             // If there's content add it to the file list
@@ -78,7 +76,7 @@ public class CollectDockerInfo implements Command {
 
     }
 
-    private void runDockerCalls(String targetDir, Map<String, String> commandMap, SystemCommand sysCmd, String token, String dockerExecutablePath) {
+    private void runDockerCalls(String targetDir, Map<String, String> commandMap, SystemCommand sysCmd, String token, String dockerPath) {
         String suffix = "";
         if (StringUtils.isNotEmpty(token)) {
             suffix = "-" + token;
@@ -87,9 +85,8 @@ public class CollectDockerInfo implements Command {
         for (Map.Entry<String, String> entry : commandMap.entrySet()) {
             try {
                 String cmd = entry.getValue().replace("{{CONTAINER_ID}}", token);
-                if(sysCmd instanceof RemoteSystem){
-                    cmd = dockerExecutablePath + cmd;
-                }
+                cmd = cmd.replace("{{dockerPath}}", dockerPath);
+
                 String output = sysCmd.runCommand(cmd);
                 SystemUtils.writeToFile(output, targetDir + SystemProperties.fileSeparator + entry.getKey() + suffix + ".txt");
             } catch (Exception e) {
@@ -97,6 +94,24 @@ public class CollectDockerInfo implements Command {
             }
         }
 
+    }
+
+    private String getDockerPath(SystemCommand systemCommand, String platform) {
+
+        if (platform.equalsIgnoreCase(Constants.winPlatform)) {
+            return "docker";
+        }
+
+        for(String path: Constants.exePaths){
+            String expectedPath = path + "docker";
+            String dockerPath = systemCommand.runCommand("ls " + expectedPath);
+            dockerPath = dockerPath.trim();
+            if(expectedPath.equalsIgnoreCase(dockerPath)){
+                return dockerPath;
+            }
+        }
+
+        return "docker";
     }
 
 }

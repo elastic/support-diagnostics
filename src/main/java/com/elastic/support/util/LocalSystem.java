@@ -20,6 +20,8 @@ public class LocalSystem extends SystemCommand {
 
     public LocalSystem(String osName) {
 
+        this.osName = osName;
+
         switch (osName) {
             case Constants.linuxPlatform:
             case Constants.macPlatform:
