@@ -103,17 +103,16 @@ winOS:
     elastic-arc: "dir /b  /l /o:-d /a:-d {{LOGPATH}}\\{{CLUSTERNAME}}-*.log.gz"
     gc: "dir /l /b /o:-d /a:-d {{LOGPATH}}\\gc.log.*"
 
-docker-container-ids: "docker ps -q"
-docker-executable-location: "/usr/local/bin/"
+docker-container-ids: "{{dockerPath}} ps -q"
 
 docker-global:
-  docker-info: "bash -c '/usr/local/bin/docker info'"
-  docker-ps-all: "bash -c '/usr/local/bin/docker ps -a --no-trunc'"
+  docker-info: "bash -c '{{dockerPath}} info'"
+  docker-ps-all: "bash -c '{{dockerPath}} ps -a --no-trunc'"
 
 docker-container:
-  docker-logs: "docker logs {{CONTAINER_ID}}"
-  docker-top: "docker top {{CONTAINER_ID}}"
-  docker-inspect: "docker inspect {{CONTAINER_ID}}"
+  docker-logs: "{{dockerPath}} logs {{CONTAINER_ID}}"
+  docker-top: "{{dockerPath}} top {{CONTAINER_ID}}"
+  docker-inspect: "{{dockerPath}} inspect {{CONTAINER_ID}}"
 
 monitoring-stats:
   - cluster_stats

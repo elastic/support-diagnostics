@@ -36,6 +36,8 @@ public class RemoteSystem extends SystemCommand {
                         boolean trustRemote,
                         boolean isSudo){
 
+        this.osName = osName;
+
         try {
             if(osName.equals(Constants.winPlatform)){
                 logger.info("Windows is not supported for remote calls at this time. Session not created.");
