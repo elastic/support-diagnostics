@@ -32,4 +32,26 @@ public class ProcessProfile {
         }
         return false;
     }
+
+    @Override
+    public String toString() {
+        return "ProcessProfile{" +
+                "isHttp=" + isHttp +
+                ", isDocker=" + isDocker +
+                ", currentMaster=" + currentMaster +
+                ", name='" + name + '\'' +
+                ", id='" + id + '\'' +
+                ", pid='" + pid + '\'' +
+                ", jvmPid='" + jvmPid + '\'' +
+                ", logDir='" + logDir + '\'' +
+                ", networkHost='" + networkHost + '\'' +
+                ", host='" + host + '\'' +
+                ", ip='" + ip + '\'' +
+                ", httpPublishAddr='" + httpPublishAddr + '\'' +
+                ", httpPort=" + httpPort +
+                ", os='" + os + '\'' +
+                ", boundAddresses=" + boundAddresses +
+                ", javaPlatform=" + javaPlatform +
+                '}';
+    }
 }
