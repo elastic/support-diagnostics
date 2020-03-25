@@ -232,8 +232,17 @@ public class CheckPlatformDetails implements Command {
                     ArrayNode boundAddresses = (ArrayNode) bnds;
                     for (JsonNode bnd : boundAddresses) {
                         String addr = bnd.asText();
-                        addr = addr.substring(0, addr.indexOf(":"));
-                        diagNode.boundAddresses.add(addr);
+                        // See if the bound address is a loopback. If so, we don't need it
+                        boolean notLoopBack = true;
+                        for(String loopback: Constants.localAddressList){
+                            if(addr.contains(loopback)){
+                                notLoopBack = false;
+                            }
+                        }
+                        if (notLoopBack) {
+                            addr = addr.substring(0, addr.indexOf(":"));
+                            diagNode.boundAddresses.add(addr);
+                        }
                     }
                 }
 
@@ -269,11 +278,8 @@ public class CheckPlatformDetails implements Command {
         // If the input host was a loopback we need to compare each of the none loopback addresses present
         // on this host to the set of bound http addresses in each node. If if a non-loopback was input
         // we can get away with just comparing that to the bound address list.
-        Set<String> localNetworkInterfaces;
-        if (Constants.localAddressList.contains(inputHost)) {
-            localNetworkInterfaces = excludeLoopback(SystemUtils.getNetworkInterfaces());
-        } else {
-            localNetworkInterfaces = new HashSet<>();
+        Set<String> localNetworkInterfaces = excludeLoopback(SystemUtils.getNetworkInterfaces());;
+        if (! Constants.localAddressList.contains(inputHost)) {
             localNetworkInterfaces.add(inputHost);
         }
 
@@ -312,7 +318,7 @@ public class CheckPlatformDetails implements Command {
 
         // If we got this far and came up empty, signal our displeasure
         logger.log(SystemProperties.DIAG, "Comparison did not result in an IP or Host match. {} {}", localAddrs, nodeAddrs);
-        throw new RuntimeException();
+        throw new RuntimeException("Could not find the target node.");
     }
 
     private boolean differentInstances(String host, int port, String masterHost, int masterPort) {

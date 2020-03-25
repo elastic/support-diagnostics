@@ -1,12 +1,13 @@
 package com.elastic.support.rest;
 
-import com.elastic.support.util.ResourceCache;
 import com.elastic.support.util.SystemProperties;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
+import org.apache.http.auth.AUTH;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.AuthCache;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
@@ -20,11 +21,10 @@ import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustAllStrategy;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.auth.BasicScheme;
+import org.apache.http.impl.client.*;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.message.BasicHeader;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -45,11 +45,12 @@ public class RestClient implements Closeable {
     private static ConcurrentMap<String, RestClient> cachedClients = new ConcurrentHashMap<>();
     private CloseableHttpClient client;
     private HttpHost httpHost;
-    private HttpClientContext httpContext = HttpClientContext.create();
+    private HttpClientContext httpContext;
 
-    public RestClient(CloseableHttpClient client, HttpHost httpHost) {
+    public RestClient(CloseableHttpClient client, HttpHost httpHost, HttpClientContext context) {
         this.client = client;
         this.httpHost = httpHost;
+        this.httpContext = context;
     }
 
     public RestResult execQuery(String url) {
@@ -127,6 +128,12 @@ public class RestClient implements Closeable {
             HttpClientBuilder clientBuilder = HttpClients.custom();
             HttpHost httpHost = new HttpHost(host, port, scheme);
             HttpHost httpProxyHost = null;
+            HttpClientContext context = HttpClientContext.create();
+
+            // Create AuthCache instance
+            AuthCache authCache = new BasicAuthCache();
+            // Generate BASIC scheme object and add it to the local auth cache
+            BasicScheme basicAuth = new BasicScheme();
 
             clientBuilder.setDefaultRequestConfig(RequestConfig.custom()
                     .setCookieSpec(CookieSpecs.STANDARD)
@@ -138,21 +145,34 @@ public class RestClient implements Closeable {
             if(StringUtils.isNotEmpty(proxyHost)){
                 httpProxyHost = new HttpHost(proxyHost, proxyPort);
                 clientBuilder.setProxy(httpProxyHost);
+                basicAuth.processChallenge(new BasicHeader(AUTH.PROXY_AUTH, "BASIC realm=default"));
+                authCache.put(httpProxyHost, basicAuth);
+
+            }
+            else{
+                authCache.put(httpHost, basicAuth);
             }
 
             CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
             clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
 
             // If authentication was supplied
-            if(StringUtils.isNotEmpty(user)){
-                credentialsProvider.setCredentials(new AuthScope(httpHost), new UsernamePasswordCredentials(user, password));
+            if(StringUtils.isNotEmpty(user) && StringUtils.isEmpty(proxyUser)){
+                context.setAuthCache(authCache);
+                credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(user, password));
             }
-
-            if(StringUtils.isNotEmpty(proxyUser)){
+            else if(StringUtils.isNotEmpty(user) && StringUtils.isNotEmpty(proxyUser)){
+                context.setAuthCache(authCache);
+                credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(user, password));
                 credentialsProvider.setCredentials(
-                        new AuthScope(httpProxyHost),
+                        AuthScope.ANY,
                         new UsernamePasswordCredentials(proxyUser, proxyPassword));
-
+            }
+            else if (StringUtils.isNotEmpty(proxyUser)){
+                context.setAuthCache(authCache);
+                credentialsProvider.setCredentials(
+                        AuthScope.ANY,
+                        new UsernamePasswordCredentials(proxyUser, proxyPassword));
             }
 
             SSLContextBuilder sslContextBuilder = new SSLContextBuilder();
@@ -186,7 +206,7 @@ public class RestClient implements Closeable {
             clientBuilder.setConnectionManager(mgr);
 
             CloseableHttpClient httpClient = clientBuilder.build();
-            RestClient restClient = new RestClient(httpClient, httpHost);
+            RestClient restClient = new RestClient(httpClient, httpHost, context);
 
             return restClient;
         }
@@ -195,5 +215,4 @@ public class RestClient implements Closeable {
             throw new RuntimeException("Error establishing http connection for: " + host, e);
         }
     }
-
 }
