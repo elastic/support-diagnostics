@@ -29,8 +29,6 @@ public class BaseConfig {
 
         this.configuration = configuration;
 
-        diagnosticVersion = (String) configuration.get("diagnosticVersion");
-
         Map<String, String> githubSettings = (Map<String, String>) configuration.get("github-settings");
 
         if ( githubSettings != null){
