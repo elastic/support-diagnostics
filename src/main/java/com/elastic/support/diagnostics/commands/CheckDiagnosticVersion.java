@@ -10,6 +10,7 @@ import com.elastic.support.rest.RestResult;
 import com.elastic.support.util.JsonYamlUtils;
 import com.elastic.support.util.SystemProperties;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.vdurmont.semver4j.Semver;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -62,29 +63,38 @@ public class CheckDiagnosticVersion implements Command {
             // the IDE via a run configuration and/or debugger it will
             // have a value of "debug" instead of an actual version.
             context.diagVersion = getToolVersion();
-            if (StringUtils.isEmpty(context.diagVersion)) {
-                throw new RuntimeException("Empty diagnostic version.");
-            }
-
-            if (context.diagVersion.equals(Constants.runningInIde)) {
+            if (context.diagVersion.equals(Constants.runningInIde) || StringUtils.isEmpty(context.diagVersion)) {
                 logger.info("Running in IDE");
-                context.diagVersion = context.diagsConfig.diagnosticVersion;
+                // Default it to something that won't blow up the Semver but shows it's not a normal run.
+                context.diagVersion = "0.0.0";
                 return;
             }
 
             RestResult restResult = new RestResult(restClient.execGet(
-                    context.diagsConfig.diagReleaseDest), context.diagsConfig.diagReleaseDest);
+                    context.diagsConfig.diagLatestRelease), context.diagsConfig.diagLatestRelease);
             JsonNode rootNode = JsonYamlUtils.createJsonNodeFromString(restResult.toString());
             String ver = rootNode.path("tag_name").asText();
-            List<JsonNode> assests = rootNode.findValues("assets");
-            JsonNode asset = assests.get(0);
-            String downloadUrl = asset.path("browser_download_url").asText();
             Semver diagVer = new Semver(context.diagVersion, Semver.SemverType.NPM);
             String rule = ">= " + ver;
 
             if (!diagVer.satisfies(rule)) {
+
                 logger.info("Warning: DiagnosticService version:{} is not the current recommended release", context.diagVersion);
                 logger.info("The current release is {}", ver);
+
+                // Try to get the link for the download url of the current release.
+                List<JsonNode> assets = rootNode.findValues("assets");
+                JsonNode asset = assets.get(0);
+                ArrayNode attachments = null;
+                if(asset.isArray()){
+                    attachments = (ArrayNode)asset;
+                    asset = attachments.get(0);
+                }
+                String downloadUrl = asset.path("browser_download_url").asText();
+                if(StringUtils.isEmpty(downloadUrl)){
+                    downloadUrl = context.diagsConfig.diagLatestRelease;
+                }
+
                 logger.info("The latest version can be downloaded at {}", downloadUrl);
                 logger.info("Press the Enter key to continue.");
 
