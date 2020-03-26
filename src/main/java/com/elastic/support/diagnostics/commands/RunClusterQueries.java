@@ -30,12 +30,13 @@ public class RunClusterQueries extends BaseQuery {
             List<RestEntry> entries = new ArrayList<>();
             entries.addAll(context.elasticRestCalls.values());
             RestClient client;
-            if(ResourceCache.resourceExists(Constants.restTargetHost)){
+            client = ResourceCache.getRestClient(Constants.restInputHost);
+/*            if(ResourceCache.resourceExists(Constants.restTargetHost)){
                 client = ResourceCache.getRestClient(Constants.restTargetHost);
             }
             else {
                 client = ResourceCache.getRestClient(Constants.restInputHost);
-            }
+            }*/
 
             runQueries(client, entries, context.tempDir, diagConfig.callRetries, diagConfig.pauseRetries);
         } catch (Throwable t) {

@@ -53,7 +53,9 @@ public class CheckPlatformDetails implements Command {
                 }
             }
 
-            if (!context.dockerPresent) {
+            // Removed temporarily until I put in an option to bypass this feature due to
+            // issue where master was inaccessible via http from another node even though it had http configured.
+/*            if (!context.dockerPresent) {
                 // Get the master node id and flag the master node profile
                 entry = calls.get("master");
                 result = restClient.execQuery(entry.getUrl());
@@ -89,7 +91,7 @@ public class CheckPlatformDetails implements Command {
 
                     ResourceCache.addRestClient(Constants.restTargetHost, masterRestClient);
                 }
-            }
+            }*/
 
             SystemCommand syscmd = null;
             switch (context.diagnosticInputs.diagType) {
