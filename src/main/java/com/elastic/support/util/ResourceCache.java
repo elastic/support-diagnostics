@@ -1,11 +1,14 @@
 package com.elastic.support.util;
 
 import com.elastic.support.rest.RestClient;
+import jdk.tools.jlink.internal.Jlink;
+import jline.console.ConsoleReader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.beryx.textio.TextIO;
 import org.beryx.textio.TextIoFactory;
 import org.beryx.textio.TextTerminal;
+import org.beryx.textio.jline.JLineTextTerminal;
 
 import java.io.Closeable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -18,6 +21,14 @@ public class ResourceCache{
 
     public static final TextIO textIO = TextIoFactory.getTextIO();
     public static final TextTerminal terminal = textIO.getTextTerminal();
+
+    static {
+        if(terminal instanceof JLineTextTerminal){
+            JLineTextTerminal jltt = (JLineTextTerminal)terminal;
+            ConsoleReader reader = jltt.getReader();
+            reader.setExpandEvents(false);
+        }
+    }
 
     public static boolean resourceExists(String name){
         return resources.containsKey(name);
