@@ -243,7 +243,7 @@
  </tr>
  
  <tr>
-   <td width="20%" align="left" valign="top">--pkiKeyPass</td>
+   <td width="20%" align="left" valign="top">--pkiPass</td>
    <td width="50%" align="left" valign="top">Prompt for a password if the PKI keystore is secured. </td>
    <td width="30%" align="left" valign="top">Option only - no value.</td>
  </tr>
