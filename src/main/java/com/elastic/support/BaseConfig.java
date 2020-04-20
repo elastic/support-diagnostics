@@ -60,7 +60,7 @@ public class BaseConfig {
         maxConnPerRoute = restConfig.get("maxConnPerRoute");
 
         dockerGlobal = (Map<String, String>) configuration.get("docker-global");
-        kubernates = (Map<String, String>) configuration.get("kuberantes");
+        //kubernates = (Map<String, String>) configuration.get("kuberantes");
 
         dockerContainer = (Map<String, String>) configuration.get("docker-container");
         dockerContainerIds = (String) configuration.get("docker-container-ids");
