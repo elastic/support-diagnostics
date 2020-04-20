@@ -171,8 +171,6 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
                 .read(SystemProperties.lineSeparator + "Cluster secured?");
 
         if(isSecured){
-            user = standardStringReader
-                    .read(SystemProperties.lineSeparator + userDescription);
 
             String authType = ResourceCache.textIO.newStringInputReader()
                     .withNumberedPossibleValues(userLoginAuth, pkiLoginAuth)
@@ -186,6 +184,9 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
             }
 
             if(authType.equals(userLoginAuth)){
+                user = standardStringReader
+                        .read(SystemProperties.lineSeparator + userDescription);
+
                 password = standardPasswordReader
                         .read(SystemProperties.lineSeparator + passwordDescription);
             }

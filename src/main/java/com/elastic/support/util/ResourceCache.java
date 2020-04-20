@@ -1,7 +1,6 @@
 package com.elastic.support.util;
 
 import com.elastic.support.rest.RestClient;
-import jdk.tools.jlink.internal.Jlink;
 import jline.console.ConsoleReader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

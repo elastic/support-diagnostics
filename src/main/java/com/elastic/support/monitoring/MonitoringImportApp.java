@@ -1,8 +1,10 @@
 package com.elastic.support.monitoring;
 
 import com.elastic.support.Constants;
+import com.elastic.support.diagnostics.ShowHelpException;
 import com.elastic.support.util.ResourceCache;
 import com.elastic.support.util.SystemProperties;
+import com.elastic.support.util.SystemUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -28,12 +30,13 @@ public class MonitoringImportApp {
                         logger.info(err);
                     }
                     monitoringImportInputs.usage();
-                    logger.info("Exiting...");
-                    System.exit(0);
+                    SystemUtils.quitApp();
                 }
             }
             ResourceCache.terminal.dispose();
             new MonitoringImportService().execImport(monitoringImportInputs);
+        } catch (ShowHelpException she){
+            SystemUtils.quitApp();
         } catch (Exception e) {
             logger.info("Error occurred: {}. {}", e.getMessage(), Constants.CHECK_LOG);
         } finally {

@@ -26,6 +26,11 @@ public class SystemUtils {
 
     private static final Logger logger = LogManager.getLogger(SystemUtils.class);
 
+    public static void quitApp(){
+        logger.info("Exiting...");
+        System.exit(0);
+    }
+
     public static void writeToFile(String content, String dest) {
         try {
             logger.info("Writing to {}", dest);

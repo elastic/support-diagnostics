@@ -243,7 +243,7 @@
  </tr>
  
  <tr>
-   <td width="20%" align="left" valign="top">--pkiKeyPass</td>
+   <td width="20%" align="left" valign="top">--pkiPass</td>
    <td width="50%" align="left" valign="top">Prompt for a password if the PKI keystore is secured. </td>
    <td width="30%" align="left" valign="top">Option only - no value.</td>
  </tr>
@@ -699,6 +699,8 @@
  
  ## Standard Diagnostic Troubleshooting
  
+   - If you get a message telling you that the Elasticsearch version could not be obtained it indicates that an initial connection to the node could not be obtained. This always indicates an issue with the connection parameters you have provided. Please verify, host, port, credentials, etc.
+   - If you receive 400 errors from the allocation explain API's it just means there weren't any usassigned shards to analyze.
    - The file: diagnostic.log file will be generated  and included in the archive. In all but the worst case an archive will be created. Some messages will be written to the console output but granualar errors and stack traces will only be written to this log.
    - If you get a message saying that it can't find a class file, you probably downloaded the src zip instead of the one with "-dist" in the name. Download that and try it again.
    - If you get a message saying that it can't locate the diagnostic node, it usually means you are running the diagnostic on a host containing a different node than the one you are pointing to. Try running in remote node or changing the host you are executing on.
