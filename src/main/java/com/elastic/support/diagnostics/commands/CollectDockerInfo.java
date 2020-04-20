@@ -38,11 +38,11 @@ public class CollectDockerInfo implements Command {
 
         // Determine where Docker is located
         String dockerPath = getDockerPath(systemCommand, platform);
-        String kubePath = getKubectlPath(dockerPath);
+        //String kubePath = getKubectlPath(dockerPath);
 
         // Run the global calls. It's a single pass
         runDockerCalls(targetDir, context.diagsConfig.dockerGlobal, systemCommand, "", dockerPath);
-        runDockerCalls(targetDir, context.diagsConfig.kubernates, systemCommand, "", kubePath);
+        //runDockerCalls(targetDir, context.diagsConfig.kubernates, systemCommand, "", kubePath);
 
         String idsCmd = context.diagsConfig.dockerContainerIds;
 
