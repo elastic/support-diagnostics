@@ -3,6 +3,8 @@ package com.elastic.support.util;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.compress.compressors.CompressorOutputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
@@ -28,9 +30,38 @@ public class ArchiveUtils {
    }
 
    public void createArchive(String dir, String archiveFileName) {
+      if(! createZipArchive(dir, archiveFileName)){
+         logger.info("Couldn't create zip archive. Trying tar.gz");
+         if(! createTarArchive(dir, archiveFileName)){
+            logger.info("Couldn't create tar.gz archive.");
+         }
+      }
+   }
+
+   public boolean createZipArchive(String dir, String archiveFileName)  {
 
       try {
+         File srcDir = new File(dir);
+         String filename = dir + "-" + archiveFileName + ".zip";
 
+         FileOutputStream fout = new FileOutputStream(filename);
+         ZipArchiveOutputStream taos = new ZipArchiveOutputStream(fout);
+         archiveResultsZip(archiveFileName, taos, srcDir, "", true);
+         taos.close();
+
+         logger.info("Archive: " + filename + " was created");
+
+      } catch (Exception ioe) {
+         logger.log(SystemProperties.DIAG, "Couldn't create archive.", ioe);
+         return false;
+      }
+      return true;
+
+   }
+
+   public boolean createTarArchive(String dir, String archiveFileName) {
+
+      try {
          File srcDir = new File(dir);
          String filename = dir + "-" + archiveFileName + ".tar.gz";
 
@@ -40,18 +71,51 @@ public class ArchiveUtils {
 
          taos.setBigNumberMode(TarArchiveOutputStream.BIGNUMBER_STAR);
          taos.setLongFileMode(TarArchiveOutputStream.LONGFILE_GNU);
-         archiveResults(archiveFileName, taos, srcDir, "", true);
+         archiveResultsTar(archiveFileName, taos, srcDir, "", true);
          taos.close();
 
          logger.info("Archive: " + filename + " was created");
 
       } catch (Exception ioe) {
-         logger.info("Couldn't create archive. {}", ioe);
+         logger.log(SystemProperties.DIAG, "Couldn't create archive.", ioe);
+         return false;
       }
+
+      return true;
 
    }
 
-   public void archiveResults(String archiveFilename, TarArchiveOutputStream taos, File file, String path, boolean append) {
+   public void archiveResultsZip(String archiveFilename, ZipArchiveOutputStream taos, File file, String path, boolean append) {
+
+      String relPath = "";
+
+      try {
+         if (append) {
+            relPath = path + "/" + file.getName() + "-" + archiveFilename;
+         } else {
+            relPath = path + "/" + file.getName();
+         }
+         ZipArchiveEntry tae = new ZipArchiveEntry(file, relPath);
+         taos.putArchiveEntry(tae);
+
+         if (file.isFile()) {
+            BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file));
+            IOUtils.copy(bis, taos);
+            taos.closeArchiveEntry();
+            bis.close();
+
+         } else if (file.isDirectory()) {
+            taos.closeArchiveEntry();
+            for (File childFile : file.listFiles()) {
+               archiveResultsZip(archiveFilename, taos, childFile, relPath, false);
+            }
+         }
+      } catch (IOException e) {
+         logger.info("Archive Error", e);
+      }
+   }
+
+   public void archiveResultsTar(String archiveFilename, TarArchiveOutputStream taos, File file, String path, boolean append) {
 
       String relPath = "";
 
@@ -73,7 +137,7 @@ public class ArchiveUtils {
          } else if (file.isDirectory()) {
             taos.closeArchiveEntry();
             for (File childFile : file.listFiles()) {
-               archiveResults(archiveFilename, taos, childFile, relPath, false);
+               archiveResultsTar(archiveFilename, taos, childFile, relPath, false);
             }
          }
       } catch (IOException e) {
