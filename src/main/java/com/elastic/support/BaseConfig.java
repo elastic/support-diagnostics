@@ -20,6 +20,7 @@ public class BaseConfig {
 
     public Map<String, String> dockerGlobal;
     public Map<String, String> dockerContainer;
+    public Map<String, String> kubernates;
     public String dockerContainerIds;
     public String dockerExecutablePath;
 
@@ -59,6 +60,8 @@ public class BaseConfig {
         maxConnPerRoute = restConfig.get("maxConnPerRoute");
 
         dockerGlobal = (Map<String, String>) configuration.get("docker-global");
+        kubernates = (Map<String, String>) configuration.get("kuberantes");
+
         dockerContainer = (Map<String, String>) configuration.get("docker-container");
         dockerContainerIds = (String) configuration.get("docker-container-ids");
         dockerExecutablePath = (String) configuration.get("docker-executable-location");

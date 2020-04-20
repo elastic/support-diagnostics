@@ -1,8 +1,10 @@
 package com.elastic.support.monitoring;
 
 import com.elastic.support.Constants;
+import com.elastic.support.diagnostics.ShowHelpException;
 import com.elastic.support.util.ResourceCache;
 import com.elastic.support.util.SystemProperties;
+import com.elastic.support.util.SystemUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -27,14 +29,15 @@ public class MonitoringExportApp {
                         logger.info(err);
                     }
                     monitoringExportInputs.usage();
-                    logger.info("Exiting...");
-                    System.exit(0);
+                    SystemUtils.quitApp();
                 }
             }
             // Needs to be done for both because in command line it
             // may be used for passwords.
             ResourceCache.terminal.dispose();
             new MonitoringExportService().execExtract(monitoringExportInputs);
+        } catch (ShowHelpException she){
+            SystemUtils.quitApp();
         } catch (Exception e) {
             logger.info("Fatal error occurred: {}. {}", e.getMessage(), Constants.CHECK_LOG);
         } finally {

@@ -1,9 +1,11 @@
 package com.elastic.support.diagnostics;
 
+import com.elastic.support.BaseInputs;
 import com.elastic.support.Constants;
 import com.elastic.support.util.JsonYamlUtils;
 import com.elastic.support.util.ResourceCache;
 import com.elastic.support.util.SystemProperties;
+import com.elastic.support.util.SystemUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -29,8 +31,7 @@ public class DiagnosticApp {
                         logger.info(err);
                     }
                     diagnosticInputs.usage();
-                    logger.info("Exiting...");
-                    System.exit(0);
+                    SystemUtils.quitApp();
                 }
             }
 
@@ -40,6 +41,8 @@ public class DiagnosticApp {
 
             ResourceCache.terminal.dispose();
             diag.exec(diagnosticInputs, diagConfig);
+        } catch (ShowHelpException she){
+            SystemUtils.quitApp();
         } catch (Exception e) {
             logger.info("Fatal error occurred: {}. {}", e.getMessage(), Constants.CHECK_LOG);
             logger.log(SystemProperties.DIAG, e);
@@ -47,6 +50,8 @@ public class DiagnosticApp {
             ResourceCache.closeAll();
         }
     }
+
+
 
 }
 
