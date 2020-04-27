@@ -1,5 +1,6 @@
 tokens:
-# Examples:
+# Examples: Do NOT do this in the form of attribute = value
+## Add only the value you wish to replace.
 #  - node-[\d?]*
 #  - cluster-630
 #  - disk1

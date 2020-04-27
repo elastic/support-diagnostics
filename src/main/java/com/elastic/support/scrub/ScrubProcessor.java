@@ -1,9 +1,15 @@
 package com.elastic.support.scrub;
 
+import com.elastic.support.diagnostics.ProcessProfile;
 import com.elastic.support.util.ArchiveEntryProcessor;
 import com.elastic.support.Constants;
 import com.elastic.support.util.JsonYamlUtils;
 import com.elastic.support.util.SystemProperties;
+import com.fasterxml.jackson.databind.JsonNode;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipFile;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,9 +29,12 @@ public class ScrubProcessor implements ArchiveEntryProcessor {
 
 
    LinkedHashMap<Integer, Integer> ipv4 = new LinkedHashMap<>();
+   LinkedHashMap<String, String> ipv6 = new LinkedHashMap<>();
    LinkedHashMap<String, String> usedTokenMatches = new LinkedHashMap<>();
    List<String> configuredTokens = new ArrayList<>();
    List<String> tokens = new ArrayList<>();
+   List<ProcessProfile> nodeIdent = new ArrayList<>();
+   ;
    String targetDir;
 
    public ScrubProcessor(String config, String targetDir){
@@ -57,12 +66,32 @@ public class ScrubProcessor implements ArchiveEntryProcessor {
             ipv4.put(i, vals[i]);
          }
 
-
       } catch (Exception e) {
          logger.info("Error initializing scrubbing  files.", e);
          throw new RuntimeException("Scrub initialization failed");
       }
 
+   }
+
+   public void init(ZipFile zf){
+      try {
+         // Add the cluster name, node names, and node id's to the existing token set.
+         String rootPath = zf.getEntriesInPhysicalOrder().nextElement().getName();
+         ZipArchiveEntry nodeEntry = zf.getEntry(rootPath + "nodes.json");
+         String nodesJson = IOUtils.toString(zf.getInputStream(nodeEntry), "UTF-8");
+         JsonNode nodesInfo = JsonYamlUtils.createJsonNodeFromString(nodesJson);
+         tokens.add(nodesInfo.path("cluster_name").asText());
+         JsonNode nodes = nodesInfo.path("nodes");
+         Iterator<Map.Entry<String, JsonNode>> iterNode = nodes.fields();
+         while (iterNode.hasNext()) {
+            Map.Entry<String, JsonNode> n = iterNode.next();
+            tokens.add(n.getKey());
+            JsonNode node = n.getValue();
+            tokens.add(node.path("name").asText());
+         }
+      } catch (Exception e) {
+         throw new RuntimeException("Error initializing archive for scrubbing.", e);
+      }
    }
 
    public String processLine(String line){
@@ -84,10 +113,10 @@ public class ScrubProcessor implements ArchiveEntryProcessor {
          InputStream processedStream = ais;
 
          logger.info("Processing: {}", name);
-
+         int dirPos =  name.indexOf("/");
+         name = name.substring(dirPos);
          // It's a directory, so we don't process the file. but we do need to create a target subdirectory for subsequent files.
          if(name.endsWith("/")){
-            name = name.replace("/", "");
             Files.createDirectories(Paths.get(targetDir + SystemProperties.fileSeparator + name));
             return;
          }
@@ -192,8 +221,27 @@ public class ScrubProcessor implements ArchiveEntryProcessor {
       Matcher matcher = pattern.matcher(input);
 
       while (matcher.find()) {
+         StringBuffer newIp = new StringBuffer();
+
          String group = matcher.group();
-         input = input.replaceFirst(group, "XXXX.XXXX.XXXX.XXXX.XXXX.XXXX.XXXX.XXXX");
+         String[] ipSegments = splitIpSegments(group, ":");
+         int sz = ipSegments.length;
+         for(int i = 0; i < sz; i++){
+            String replacement = ObjectUtils.defaultIfNull(ipSegments[i], "");
+            if(StringUtils.isNotEmpty(replacement)) {
+               if (usedTokenMatches.containsKey(group)) {
+                  replacement = usedTokenMatches.get(group);
+               } else {
+                  replacement = generateReplacementToken(group, group.length());
+                  usedTokenMatches.put(group, replacement);
+               }
+            }
+            newIp.append(replacement);
+            if(i < (sz - 1)){
+               newIp.append(":");
+            }
+         }
+         input = input.replaceFirst(group, newIp.toString());
       }
 
       return input;
@@ -224,6 +272,4 @@ public class ScrubProcessor implements ArchiveEntryProcessor {
       return newToken.toString().substring(0, len);
 
    }
-
-
 }

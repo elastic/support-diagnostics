@@ -7,6 +7,7 @@ import com.elastic.support.util.ArchiveEntryProcessor;
 import com.elastic.support.util.JsonYamlUtils;
 import com.elastic.support.util.SystemProperties;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -40,6 +41,8 @@ public class MonitoringImportProcessor implements ArchiveEntryProcessor {
         index = Constants.MONITORING_PREFIX   + inputs.indexName;
 
     }
+
+
 
     public void process(InputStream instream, String name) {
 
@@ -113,6 +116,10 @@ public class MonitoringImportProcessor implements ArchiveEntryProcessor {
             logger.info("{} events written from {}", eventsWritten, name);
         }
 
+    }
+
+    public void init(ZipFile zipFile) {
+        // Nothing to do here;;
     }
 
     private long writeBatch(String query, int size){
