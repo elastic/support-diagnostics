@@ -38,10 +38,10 @@ public class ScrubService extends BaseService {
 
          // Start out clean
          SystemUtils.nukeDirectory(temp);
-         createFileAppender(temp, "scrubber.log");
+         createFileAppender(inputs.outputDir, "scrubber.log");
 
          if(isArchive){
-            String scrubbedName = (filePath.substring(pos + 1)).replace(".tar.gz", "");
+            String scrubbedName = (filePath.substring(pos + 1)).replace(".zip", "");
             ArchiveUtils archiveUtils = new ArchiveUtils(new ScrubProcessor(inputs.getConfigFile(), temp));
             archiveUtils.extractDiagnosticArchive(filePath);
             archiveUtils.createArchive(temp, scrubbedName);
