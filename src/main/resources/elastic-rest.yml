@@ -173,6 +173,11 @@ fielddata_stats:
     ">= 0.9.0 < 5.0.0": "/_nodes/stats/indices/fielddata?pretty=true&fields=*"
     ">= 5.0.0": "/_nodes/stats/indices/fielddata?level=shards&pretty=true&fields=*"
 
+indices:
+  versions:
+    ">= 0.9.0 < 5.1.1": "/_cat/indices?v&format=json"
+    ">= 5.1.1": "/_cat/indices?v&s=index&format=json"
+
 indices_stats:
   retry: true
   versions:

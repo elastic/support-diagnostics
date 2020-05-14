@@ -70,7 +70,7 @@ public abstract class BaseInputs {
     public abstract boolean runInteractive();
 
     public List<String> parseInputs(String[] args){
-        logger.info("Processing diagnosticInputs...");
+        logger.info(Constants.CONSOLE, "Processing diagnosticInputs...");
         jCommander = new JCommander(this);
         jCommander.setCaseSensitiveOptions(true);
         jCommander.parse(args);
@@ -89,7 +89,7 @@ public abstract class BaseInputs {
             jCommander.usage();
         }
         else{
-            logger.info("Please rerun with the --help option or with no arguments for interactive mode.");
+            logger.error(Constants.CONSOLE, "Please rerun with the --help option or with no arguments for interactive mode.");
         }
     }
 
@@ -121,7 +121,7 @@ public abstract class BaseInputs {
                 file.mkdir();
             }
         } catch (Exception e) {
-            logger.log(SystemProperties.DIAG, e);
+            logger.error( e);
             return Collections.singletonList("Output directory did not exist and could not be created. " + Constants.CHECK_LOG);
         }
 

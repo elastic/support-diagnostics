@@ -81,7 +81,7 @@ public  class CollectLogs implements Command {
 
         } catch (Exception e) {
             logger.info("An error occurred while copying the logs. It may not have completed normally {}.", Constants.CHECK_LOG);
-            logger.log(SystemProperties.DIAG, e.getMessage(), e);
+            logger.error( e.getMessage(), e);
         }
     }
 
@@ -102,7 +102,7 @@ public  class CollectLogs implements Command {
                     }
                 }
             } catch (Exception e) {
-                logger.log(SystemProperties.DIAG, "Error getting directory listing.", e);
+                logger.error( "Error getting directory listing.", e);
             }
         }
 

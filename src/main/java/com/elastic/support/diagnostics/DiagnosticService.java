@@ -48,29 +48,28 @@ public class DiagnosticService extends ElasticRestClientService {
             // Create the temp directory - delete if first if it exists from a previous run
             String outputDir = inputs.outputDir;
             ctx.tempDir = outputDir + SystemProperties.fileSeparator + inputs.diagType + "-" + Constants.ES_DIAG;
-            logger.info("{}Creating temp directory: {}", SystemProperties.lineSeparator, ctx.tempDir);
+            logger.info(Constants.CONSOLE, "{}Creating temp directory: {}", SystemProperties.lineSeparator, ctx.tempDir);
 
             FileUtils.deleteDirectory(new File(ctx.tempDir));
             Files.createDirectories(Paths.get(ctx.tempDir));
 
             // Set up the log file manually since we're going to package it with the diagnostic.
             // It will go to wherever we have the temp dir set up.
-            logger.info("Configuring log file.");
+            logger.info(Constants.CONSOLE, "Configuring log file.");
             createFileAppender(ctx.tempDir, "diagnostics.log");
-
             DiagnosticChainExec.runDiagnostic(ctx, inputs.diagType);
 
             if (ctx.dockerPresent) {
-                logger.info("Identified Docker installations - bypassed log collection and some system calls.");
+                logger.info(Constants.CONSOLE, "Identified Docker installations - bypassed log collection and some system calls.");
             }
 
            checkAuthLevel(ctx.diagnosticInputs.user, ctx.isAuthorized);
 
         } catch (DiagnosticException de) {
-            logger.info(de.getMessage());
+            logger.error(Constants.CONSOLE, de.getMessage());
         } catch (Throwable t) {
-            logger.log(SystemProperties.DIAG, "Temp directory error", t);
-            logger.info(String.format("Issue with creating temp directory. %s", Constants.CHECK_LOG));
+            logger.error( "Temp directory error", t);
+            logger.info(Constants.CONSOLE, String.format("Issue with creating temp directory. %s", Constants.CHECK_LOG));
         } finally {
             closeLogs();
             createArchive(ctx.tempDir);

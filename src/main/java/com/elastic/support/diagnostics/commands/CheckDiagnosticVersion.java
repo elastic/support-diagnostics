@@ -33,7 +33,6 @@ public class CheckDiagnosticVersion implements Command {
 
     public void execute(DiagnosticContext context) {
 
-        logger.log(SystemProperties.DIAG, "This is a test");
         // For airgapped environments allow them to bypass this check
         if (context.diagnosticInputs.bypassDiagVerify) {
             return;
@@ -103,7 +102,7 @@ public class CheckDiagnosticVersion implements Command {
             }
 
         } catch (Exception e) {
-            logger.log(SystemProperties.DIAG, e);
+            logger.error( e);
             logger.info("Issue encountered while checking diagnostic version for updates.");
             logger.info("Failed to get current diagnostic version from Github.");
             logger.info("If Github is not accessible from this environemnt current supported version cannot be confirmed.");

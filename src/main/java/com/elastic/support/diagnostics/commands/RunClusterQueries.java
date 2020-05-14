@@ -40,7 +40,7 @@ public class RunClusterQueries extends BaseQuery {
 
             runQueries(client, entries, context.tempDir, diagConfig.callRetries, diagConfig.pauseRetries);
         } catch (Throwable t) {
-            logger.log(SystemProperties.DIAG, "Error executing REST queries", t);
+            logger.error( "Error executing REST queries", t);
             throw new DiagnosticException(String.format("Unrecoverable REST Query Execution error - exiting. %s", Constants.CHECK_LOG));
         }
 

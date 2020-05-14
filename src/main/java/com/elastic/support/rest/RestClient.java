@@ -1,5 +1,6 @@
 package com.elastic.support.rest;
 
+import com.elastic.support.Constants;
 import com.elastic.support.util.SystemProperties;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
@@ -70,10 +71,10 @@ public class RestClient implements Closeable {
         try {
             return client.execute(httpHost, httpRequest, httpContext);
         } catch (HttpHostConnectException e) {
-            logger.log(SystemProperties.DIAG, "Host connection error.", e);
+            logger.error( "Host connection error.", e);
             throw new RuntimeException("Host connection");
         } catch (Exception e) {
-            logger.log(SystemProperties.DIAG, "Unexpected Execution Error", e);
+            logger.error( "Unexpected Execution Error", e);
             throw new RuntimeException(e.getMessage());
         }
     }
@@ -87,7 +88,7 @@ public class RestClient implements Closeable {
             httpPost.setHeader("Content-type", "application/json");
             return execRequest(httpPost);
         } catch (UnsupportedEncodingException e) {
-            logger.info("Error with json body.", e);
+            logger.error(Constants.CONSOLE,  "Error with json body.", e);
             throw new RuntimeException("Could not complete post request.");
         }
     }
@@ -103,7 +104,7 @@ public class RestClient implements Closeable {
                 client.close();
             }
         } catch (Exception e) {
-            logger.log(SystemProperties.DIAG, "Error occurred closing client connection.");
+            logger.error( "Error occurred closing client connection.");
         }
     }
 
@@ -211,7 +212,7 @@ public class RestClient implements Closeable {
             return restClient;
         }
         catch (Exception e){
-            logger.log(SystemProperties.DIAG, "Connection setup failed", e);
+            logger.error( "Connection setup failed", e);
             throw new RuntimeException("Error establishing http connection for: " + host, e);
         }
     }

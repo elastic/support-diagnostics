@@ -58,7 +58,7 @@ public class JavaPlatform {
                 }
             }
         } catch (Exception e) {
-            logger.log(SystemProperties.DIAG, "Error obtaining the path for the JDK", e);
+            logger.error( "Error obtaining the path for the JDK", e);
         }
 
         // If we got this far we couldn't find a JDK

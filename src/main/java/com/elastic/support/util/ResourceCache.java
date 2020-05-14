@@ -64,7 +64,7 @@ public class ResourceCache{
                     resource.close();
                 }
                 catch (Exception e){
-                    logger.log(SystemProperties.DIAG, "Failed to close resource {}", name);
+                    logger.error( "Failed to close resource {}", name);
                 }
         });
         textIO.dispose();

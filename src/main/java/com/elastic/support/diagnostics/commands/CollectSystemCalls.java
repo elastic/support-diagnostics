@@ -75,7 +75,7 @@ public class CollectSystemCalls implements Command {
                 logger.info("JDK not found - bypassing jstack and jps commands.");
             }
         } catch (Exception e) {
-            logger.log(SystemProperties.DIAG, e);
+            logger.error( e);
             logger.info("Unexpected error - bypassing some or all system calls. {}", Constants.CHECK_LOG);
         }
     }

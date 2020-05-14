@@ -1,6 +1,5 @@
 package com.elastic.support.diagnostics;
 
-import com.elastic.support.BaseInputs;
 import com.elastic.support.Constants;
 import com.elastic.support.util.JsonYamlUtils;
 import com.elastic.support.util.ResourceCache;
@@ -21,14 +20,14 @@ public class DiagnosticApp {
         try {
             DiagnosticInputs diagnosticInputs = new DiagnosticInputs();
             if (args.length == 0) {
-                logger.info(Constants.interactiveMsg);
+                logger.info(Constants.CONSOLE, Constants.interactiveMsg);
                 diagnosticInputs.interactive = true;
                 diagnosticInputs.runInteractive();
             } else {
                 List<String> errors = diagnosticInputs.parseInputs(args);
                 if (errors.size() > 0) {
                     for (String err : errors) {
-                        logger.info(err);
+                        logger.error(Constants.CONSOLE, err);
                     }
                     diagnosticInputs.usage();
                     SystemUtils.quitApp();
@@ -44,8 +43,8 @@ public class DiagnosticApp {
         } catch (ShowHelpException she){
             SystemUtils.quitApp();
         } catch (Exception e) {
-            logger.info("Fatal error occurred: {}. {}", e.getMessage(), Constants.CHECK_LOG);
-            logger.log(SystemProperties.DIAG, e);
+            logger.error(Constants.CONSOLE,"Fatal error occurred: {}. {}", e.getMessage(), Constants.CHECK_LOG);
+            logger.error( e);
         } finally {
             ResourceCache.closeAll();
         }

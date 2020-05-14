@@ -53,7 +53,7 @@ public class ScrubProcessor implements ArchiveEntryProcessor {
          if(scrubConfig.get("tokens") != null){
             tokens = (List<String>)scrubConfig.get("tokens");
             if (tokens.size() == 0){
-               logger.info("Scrubbing was enabled but no substitutions were defined. Bypassing log file processing.");
+               logger.info(Constants.CONSOLE,  "Scrubbing was enabled but no substitutions were defined. Bypassing log file processing.");
             }
          }
 
@@ -67,7 +67,7 @@ public class ScrubProcessor implements ArchiveEntryProcessor {
          }
 
       } catch (Exception e) {
-         logger.info("Error initializing scrubbing  files.", e);
+         logger.error(Constants.CONSOLE,  "Error initializing scrubbing  files.", e);
          throw new RuntimeException("Scrub initialization failed");
       }
 
@@ -112,7 +112,7 @@ public class ScrubProcessor implements ArchiveEntryProcessor {
          String dir = targetDir;
          InputStream processedStream = ais;
 
-         logger.info("Processing: {}", name);
+         logger.info(Constants.CONSOLE,"Processing: {}", name);
          int dirPos =  name.indexOf("/");
          name = name.substring(dirPos);
          // It's a directory, so we don't process the file. but we do need to create a target subdirectory for subsequent files.

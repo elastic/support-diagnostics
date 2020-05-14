@@ -65,12 +65,12 @@ public class CollectDockerInfo implements Command {
                     return lines;
 
                 } catch (Exception e) {
-                    logger.log(SystemProperties.DIAG, "Error getting directory listing.", e);
+                    logger.error( "Error getting directory listing.", e);
                 }
             }
 
         } catch (Exception e) {
-            logger.log(SystemProperties.DIAG, "Error obtaining Docker Container Id's");
+            logger.error( "Error obtaining Docker Container Id's");
         }
 
         // If anything happened just bypass processing and continue with the rest.
@@ -92,7 +92,7 @@ public class CollectDockerInfo implements Command {
                 String output = sysCmd.runCommand(cmd);
                 SystemUtils.writeToFile(output, targetDir + SystemProperties.fileSeparator + entry.getKey() + suffix + ".txt");
             } catch (Exception e) {
-                logger.info(e.getMessage());
+                logger.error(Constants.CONSOLE, e.getMessage());
             }
         }
 

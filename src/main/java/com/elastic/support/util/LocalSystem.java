@@ -64,7 +64,7 @@ public class LocalSystem extends SystemCommand {
 
         } catch (Exception e) {
             logger.info("Error encountered running {}", cmd);
-            logger.log(SystemProperties.DIAG, "System command error", e);
+            logger.error( "System command error", e);
         }
 
         return sb.toString();
@@ -81,7 +81,7 @@ public class LocalSystem extends SystemCommand {
                 FileUtils.copyFile(new File(source), new File(target));
             } catch (IOException e) {
                 logger.info("Error retrieving log: {}. Bypassing.", entry);
-                logger.log(SystemProperties.DIAG, e);
+                logger.error( e);
             }
         }
     }

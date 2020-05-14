@@ -67,7 +67,7 @@ public class MonitoringImportService extends ElasticRestClientService {
             archiveUtils.extractDiagnosticArchive(inputs.input);
 
         }catch (Exception e){
-            logger.log(SystemProperties.DIAG, "Error extracting archive or indexing results", e);
+            logger.error( "Error extracting archive or indexing results", e);
             logger.info("Cannot contiue processing. {} \n {}", e.getMessage(), Constants.CHECK_LOG);
         }
         finally {

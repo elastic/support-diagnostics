@@ -50,7 +50,7 @@ public class MonitoringImportProcessor implements ArchiveEntryProcessor {
             return;
         }
 
-        logger.info("Processing: {}", name);
+        logger.info(Constants.CONSOLE, "Processing: {}", name);
         long eventsWritten = 0;
 
         try {
@@ -86,7 +86,7 @@ public class MonitoringImportProcessor implements ArchiveEntryProcessor {
 
                     // See if we need to
                     if(batch >= config.bulkSize){
-                        logger.info("Indexing document batch {} to {}",  eventsWritten, eventsWritten+batch);
+                        logger.info(Constants.CONSOLE,  "Indexing document batch {} to {}",  eventsWritten, eventsWritten+batch);
 
                         long docsWritten = writeBatch(batchBuilder.toString(), batch);
                         eventsWritten += docsWritten;
@@ -100,20 +100,20 @@ public class MonitoringImportProcessor implements ArchiveEntryProcessor {
 
                 // if there's anything left do the cleanup
                 if(batch > 0){
-                    logger.info("Indexing document batch {} to {}",  eventsWritten, eventsWritten+batch);
+                    logger.info(Constants.CONSOLE,  "Indexing document batch {} to {}",  eventsWritten, eventsWritten+batch);
                     long docsWritten = writeBatch(batchBuilder.toString(), batch);
                     eventsWritten  += docsWritten;
                 }
 
             } catch (Throwable t) {
                 // If something goes wrong just log it and keep boing.
-                logger.info("Error processing JSON event for {}.", t);
+                logger.error(Constants.CONSOLE,"Error processing JSON event for {}.", t);
             }
         } catch (Throwable t) {
-            logger.info("Error processing entry - stream related error,", t);
+            logger.error(Constants.CONSOLE,"Error processing entry - stream related error,", t);
         }
         finally {
-            logger.info("{} events written from {}", eventsWritten, name);
+            logger.info(Constants.CONSOLE,"{} events written from {}", eventsWritten, name);
         }
 
     }
@@ -125,9 +125,9 @@ public class MonitoringImportProcessor implements ArchiveEntryProcessor {
     private long writeBatch(String query, int size){
         RestResult res = new RestResult( client.execPost("_bulk", query), "_bulk");
         if( res.getStatus() != 200){
-            logger.info("Batch update had errors: {}  {}", res.getStatus(), res.getReason());
-            logger.info(Constants.CHECK_LOG);
-            logger.log(SystemProperties.DIAG, res.toString());
+            logger.error(Constants.CONSOLE,"Batch update had errors: {}  {}", res.getStatus(), res.getReason());
+            logger.error(Constants.CONSOLE,Constants.CHECK_LOG);
+            logger.error(res.toString());
             return 0;
         }
         else {

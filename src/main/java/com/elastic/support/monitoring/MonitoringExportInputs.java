@@ -1,9 +1,11 @@
 package com.elastic.support.monitoring;
 
 import com.beust.jcommander.Parameter;
+import com.elastic.support.Constants;
 import com.elastic.support.rest.ElasticRestClientInputs;
 import com.elastic.support.util.ResourceCache;
 import com.elastic.support.util.SystemProperties;
+import com.sun.xml.bind.v2.runtime.reflect.opt.Const;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -108,7 +110,7 @@ public class MonitoringExportInputs extends ElasticRestClientInputs {
             end = ZonedDateTime.parse(cutoff + ":00+00:00", DateTimeFormatter.ISO_OFFSET_DATE_TIME);
             ZonedDateTime current = ZonedDateTime.now(ZoneId.of("+0"));
             if (end.isAfter(current)) {
-                logger.info("Warning: The input collection interval designates a stopping point after the current date and time. Resetting the start to the current date/time.");
+                logger.warn(Constants.CONSOLE, "Warning: The input collection interval designates a stopping point after the current date and time. Resetting the start to the current date/time.");
                 end = current;
             }
 

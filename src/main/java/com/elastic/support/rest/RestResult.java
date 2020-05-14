@@ -35,7 +35,7 @@ public class RestResult implements Cloneable {
             responseString = EntityUtils.toString(response.getEntity());
         }
         catch (Exception e){
-            logger.log(SystemProperties.DIAG, "Error Processing Response", e);
+            logger.error( "Error Processing Response", e);
             throw new RuntimeException();
         }
         finally {
@@ -63,7 +63,7 @@ public class RestResult implements Cloneable {
                 IOUtils.write(reason + SystemProperties.lineSeparator + responseString, out, Constants.UTF_8);
             }
         } catch (Exception e) {
-            logger.log(SystemProperties.DIAG, "Error Streaming Response To OutputStream", e);
+            logger.error( "Error Streaming Response To OutputStream", e);
             throw new RuntimeException();
         }
         finally {
@@ -125,7 +125,7 @@ public class RestResult implements Cloneable {
             IOUtils.write(reason + SystemProperties.lineSeparator + responseString, fs, Constants.UTF_8);
         }
         catch (Exception e){
-            logger.log(SystemProperties.DIAG, "Error writing Response To OutputStream", e);
+            logger.error( "Error writing Response To OutputStream", e);
         }
     }
 

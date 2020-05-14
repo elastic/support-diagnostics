@@ -23,14 +23,14 @@ public class ScrubApp {
         try {
             ScrubInputs scrubInputs = new ScrubInputs();
             if (args.length == 0) {
-                logger.info(Constants.interactiveMsg);
+                logger.error(Constants.CONSOLE,  Constants.interactiveMsg);
                 scrubInputs.interactive = true;
                 scrubInputs.runInteractive();
             } else {
                 List<String> errors = scrubInputs.parseIinputs(args);
                 if (errors.size() > 0) {
                     for (String err : errors) {
-                        logger.info(err);
+                        logger.error(Constants.CONSOLE,  err);
                     }
                     scrubInputs.usage();
                     SystemUtils.quitApp();
@@ -41,7 +41,7 @@ public class ScrubApp {
         } catch (ShowHelpException she){
             SystemUtils.quitApp();
         } catch (Exception e) {
-            logger.info("Fatal error occurred: {}. {}", e.getMessage(), Constants.CHECK_LOG);
+            logger.error(Constants.CONSOLE,  "Fatal error occurred: {}. {}", e.getMessage(), Constants.CHECK_LOG);
         } finally {
             ResourceCache.closeAll();
         }

@@ -125,7 +125,7 @@ public class RemoteSystem extends SystemCommand {
                 }
                 if(channel.isClosed()){
                     if(istream.available()>0) continue;
-                    logger.log(SystemProperties.DIAG, "Cmd: {}, Exit status: {}", scrubCommandText(cmd), channel.getExitStatus());
+                    logger.error( "Cmd: {}, Exit status: {}", scrubCommandText(cmd), channel.getExitStatus());
                     break;
                 }
                 try{
@@ -134,7 +134,7 @@ public class RemoteSystem extends SystemCommand {
         }
         catch(Exception e){
             logger.info("Failed remote command: {}. {}", cmd, Constants.CHECK_LOG) ;
-            logger.log(SystemProperties.DIAG,"System command failed.", e);
+            logger.error("System command failed.", e);
         }
         finally {
             if (channel!= null && channel.isConnected()) {
@@ -177,7 +177,7 @@ public class RemoteSystem extends SystemCommand {
 
         } catch (Exception e) {
             logger.info("Error occurred copying remote logfiles. {}", Constants.CHECK_LOG);
-            logger.log(SystemProperties.DIAG, e);
+            logger.error( e);
         } finally {
             if(channelSftp != null && channelSftp.isConnected()){
                 channelSftp.disconnect();

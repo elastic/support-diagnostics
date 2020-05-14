@@ -2,6 +2,7 @@ package com.elastic.support.scrub;
 
 import com.beust.jcommander.Parameter;
 import com.elastic.support.BaseInputs;
+import com.elastic.support.Constants;
 import com.elastic.support.util.ResourceCache;
 import com.elastic.support.util.SystemProperties;
 import org.apache.commons.lang3.ObjectUtils;
@@ -56,7 +57,7 @@ public class ScrubInputs extends BaseInputs {
                 .withNumberedPossibleValues("Scrub Archive", "Scrub Single File")
                 .withIgnoreCase()
                 .read(SystemProperties.lineSeparator + "Select the type of file you wish to scrub." );
-        logger.info("");
+        logger.info(Constants.CONSOLE, "");
 
         if(operation.toLowerCase().contains("archive")) {
             archive = ResourceCache.textIO.newStringInputReader()
@@ -71,12 +72,12 @@ public class ScrubInputs extends BaseInputs {
                     .read("Enter the full path of the individual file you wish to import.");
         }
 
-        logger.info("");
+        logger.info(Constants.CONSOLE, "");
 
-        logger.info("If you do not specify a yaml configuration file, the utility will automatically");
-        logger.info("obfuscate IP and MAC addresses by default. You do NOT need to configure that functionality.");
-        logger.info("If you wish to extend for additional masking you MUST explicitly enter a file to input.");
-        logger.info("Note that for docker containers this must be a file within the configured volume.");
+        logger.info(Constants.CONSOLE,  "If you do not specify a yaml configuration file, the utility will automatically");
+        logger.info(Constants.CONSOLE,  "obfuscate IP and MAC addresses by default. You do NOT need to configure that functionality.");
+        logger.info(Constants.CONSOLE,  "If you wish to extend for additional masking you MUST explicitly enter a file to input.");
+        logger.info(Constants.CONSOLE,  "Note that for docker containers this must be a file within the configured volume.");
         configFile = ResourceCache.textIO.newStringInputReader()
                 .withInputTrimming(true)
                 .withMinLength(0)
@@ -84,7 +85,7 @@ public class ScrubInputs extends BaseInputs {
                 .read("Enter the full path of the Configuration file you wish to import or hit enter to take the default IP/MAC scrub.");
 
         if(runningInDocker){
-            logger.info("Result will be written to the configured Docker volume.");
+            logger.info(Constants.CONSOLE,  "Result will be written to the configured Docker volume.");
         }
         else{
             runOutputDirInteractive();
