@@ -53,8 +53,16 @@ public class DiagnosticService extends ElasticRestClientService {
             FileUtils.deleteDirectory(new File(ctx.tempDir));
             Files.createDirectories(Paths.get(ctx.tempDir));
 
-            // Set up the log file manually since we're going to package it with the diagnostic.
-            // It will go to wherever we have the temp dir set up.
+            // Modify the log file setup since we're going to package it with the diagnostic.
+            // The log4 configuration file sets up 2 loggers, one strictly for the console and a file log in the working directory to handle
+            // any errors we get at the library level that occur before we can get it initiailized.  When we have a target directory to
+            // redirect output to we can reconfigure the appender to go to the diagnostic output temp directory for packaging with the archive.
+            // This lets you configure and create loggers via the file if you want to up the level on one of the library dependencies as well
+            // as internal classes.
+            // If you want the output to also be shown on the console use: logger.info/error/warn/debug(Constants.CONSOLE, "Some log message");
+            // This will also log that same output to the diagnostic log file.
+            // To just log to the file log as normal: logger.info/error/warn/debug("Log mewssage");
+
             logger.info(Constants.CONSOLE, "Configuring log file.");
             createFileAppender(ctx.tempDir, "diagnostics.log");
             DiagnosticChainExec.runDiagnostic(ctx, inputs.diagType);
