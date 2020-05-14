@@ -151,8 +151,8 @@ public abstract class BaseInputs {
 
         File file = new File(val);
 
-        if (!file.exists() && file.isDirectory()) {
-            return Collections.singletonList("Specified directory location could not be located.");
+        if (!file.exists() || !file.isDirectory()) {
+            return Collections.singletonList("Specified directory location could not be located or is not a directory.");
         }
 
         return null;
