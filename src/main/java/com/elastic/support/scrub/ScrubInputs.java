@@ -80,7 +80,7 @@ public class ScrubInputs extends BaseInputs {
         configFile = ResourceCache.textIO.newStringInputReader()
                 .withInputTrimming(true)
                 .withMinLength(0)
-                .withValueChecker((String val, String propname) -> validateRequiredFile(val))
+                .withValueChecker((String val, String propname) -> validateFile(val))
                 .read("Enter the full path of the Configuration file you wish to import or hit enter to take the default IP/MAC scrub.");
 
         if(runningInDocker){
