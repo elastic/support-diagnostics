@@ -51,7 +51,7 @@ cat_indices:
   subdir: "cat"
   versions:
     ">= 0.9.0 < 5.1.1": "/_cat/indices?v"
-    ">= 5.1.1": "/_cat/indices?v&s=index"
+    ">= 5.1.1": "/_cat/indices?v&s=index&expand_wildcards=all"
 
 cat_master:
   extension: ".txt"
@@ -176,7 +176,7 @@ fielddata_stats:
 indices_stats:
   retry: true
   versions:
-    ">= 0.9.0": "/_stats?level=shards&pretty&human"
+    ">= 0.9.0": "/_stats?level=shards&pretty&human&expand_wildcards=all"
 
 licenses:
   versions:
@@ -187,7 +187,7 @@ licenses:
 
 mapping:
   versions:
-    ">= 0.9.0": "/_mapping?pretty"
+    ">= 0.9.0": "/_mapping?pretty&expand_wildcards=all"
 
 master:
   versions:
@@ -231,7 +231,7 @@ segments:
 settings:
   retry: true
   versions:
-    ">= 0.9.0": "/_settings?pretty&human"
+    ">= 0.9.0": "/_settings?pretty&human&expand_wildcards=all"
 
 shard_stores:
   versions:
