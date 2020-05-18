@@ -40,7 +40,7 @@ public class RemoteSystem extends SystemCommand {
 
         try {
             if(osName.equals(Constants.winPlatform)){
-                logger.info("Windows is not supported for remote calls at this time. Session not created.");
+                logger.info(Constants.CONSOLE, "Windows is not supported for remote calls at this time. Session not created.");
                 disabledForPlatform = true;
                 return;
             }
@@ -94,7 +94,7 @@ public class RemoteSystem extends SystemCommand {
 
     public String runCommand(String cmd) {
         if(disabledForPlatform){
-            logger.info("Windows is not supported for remote calls at this time");
+            logger.info(Constants.CONSOLE, "Windows is not supported for remote calls at this time");
             return "No Content available: Incompatible platform.";
         }
 
@@ -125,7 +125,7 @@ public class RemoteSystem extends SystemCommand {
                 }
                 if(channel.isClosed()){
                     if(istream.available()>0) continue;
-                    logger.log(SystemProperties.DIAG, "Cmd: {}, Exit status: {}", scrubCommandText(cmd), channel.getExitStatus());
+                    logger.error( "Cmd: {}, Exit status: {}", scrubCommandText(cmd), channel.getExitStatus());
                     break;
                 }
                 try{
@@ -133,8 +133,8 @@ public class RemoteSystem extends SystemCommand {
             }
         }
         catch(Exception e){
-            logger.info("Failed remote command: {}. {}", cmd, Constants.CHECK_LOG) ;
-            logger.log(SystemProperties.DIAG,"System command failed.", e);
+            logger.info(Constants.CONSOLE, "Failed remote command: {}. {}", cmd, Constants.CHECK_LOG) ;
+            logger.error("System command failed.", e);
         }
         finally {
             if (channel!= null && channel.isConnected()) {
@@ -176,8 +176,8 @@ public class RemoteSystem extends SystemCommand {
             runCommand(" rm -Rf templogs");
 
         } catch (Exception e) {
-            logger.info("Error occurred copying remote logfiles. {}", Constants.CHECK_LOG);
-            logger.log(SystemProperties.DIAG, e);
+            logger.info(Constants.CONSOLE, "Error occurred copying remote logfiles. {}", Constants.CHECK_LOG);
+            logger.error( e);
         } finally {
             if(channelSftp != null && channelSftp.isConnected()){
                 channelSftp.disconnect();

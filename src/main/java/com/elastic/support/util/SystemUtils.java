@@ -27,17 +27,17 @@ public class SystemUtils {
     private static final Logger logger = LogManager.getLogger(SystemUtils.class);
 
     public static void quitApp(){
-        logger.info("Exiting...");
+        logger.info(Constants.CONSOLE,  "Exiting...");
         System.exit(0);
     }
 
     public static void writeToFile(String content, String dest) {
         try {
-            logger.info("Writing to {}", dest);
+            logger.info(Constants.CONSOLE,  "Writing to {}", dest);
             File outFile = new File(dest);
             FileUtils.writeStringToFile(outFile, content, "UTF-8");
         } catch (IOException e) {
-            logger.log(SystemProperties.DIAG, "Error writing content for {}", dest, e);
+            logger.error( "Error writing content for {}", dest, e);
             throw new DiagnosticException("Error writing " + dest + " See diagnostic.log for details.");
         }
     }
@@ -48,10 +48,10 @@ public class SystemUtils {
             try {
                 instream.close();
             } catch (Throwable t) {
-                logger.info("Error encountered when attempting to close file {}", path);
+                logger.error(Constants.CONSOLE, "Error encountered when attempting to close file {}", path);
             }
         } else {
-            logger.info("Error encountered when attempting to close file: null InputStream {}", path);
+            logger.error(Constants.CONSOLE, "Error encountered when attempting to close file: null InputStream {}", path);
         }
 
     }
@@ -61,9 +61,9 @@ public class SystemUtils {
             File tmp = new File(dir);
             tmp.setWritable(true, false);
             FileUtils.deleteDirectory(tmp);
-            logger.info("Deleted directory: {}.", dir);
+            logger.info(Constants.CONSOLE,  "Deleted directory: {}.", dir);
         } catch (IOException e) {
-            logger.info("Delete of directory:{} failed. Usually this indicates a permission issue", dir, e);
+            logger.error(Constants.CONSOLE, "Delete of directory:{} failed. Usually this indicates a permission issue", dir, e);
         }
     }
 
@@ -85,7 +85,7 @@ public class SystemUtils {
             s = stdInput.readLine();
 
         } catch (IOException e) {
-            logger.info("Error retrieving hostname.", e);
+            logger.error(Constants.CONSOLE,  "Error retrieving hostname.", e);
         }
         finally {
             try {
@@ -93,14 +93,14 @@ public class SystemUtils {
                     stdError.close();
                 }
             } catch (IOException e) {
-                logger.info("Couldn't close stderror stream");
+                logger.error(Constants.CONSOLE,  "Couldn't close stderror stream");
             }
             try {
                 if(stdInput != null){
                     stdInput.close();
                 }
             } catch (IOException e) {
-                logger.info("Couldn't close stdinput stream");
+                logger.error(Constants.CONSOLE,  "Couldn't close stdinput stream");
             }
         }
 
@@ -129,7 +129,7 @@ public class SystemUtils {
                 }
             }
         } catch (Exception e) {
-            logger.info("Error occurred acquiring IP's and hostnames", e);
+            logger.error(Constants.CONSOLE,  "Error occurred acquiring IP's and hostnames", e);
         }
 
         return ipAndHosts;
@@ -170,7 +170,7 @@ public class SystemUtils {
 
         } else {
             // default it to Linux
-            logger.info("Unsupported OS -defaulting to Linux: {}", osName);
+            logger.warn(Constants.CONSOLE, "Unsupported OS -defaulting to Linux: {}", osName);
             return  Constants.linuxPlatform;
         }
     }
@@ -190,9 +190,9 @@ public class SystemUtils {
             isDocker = checkCGroupEntries(entries);
 
         } catch (Exception e) {
-            logger.log(SystemProperties.DIAG, e);
-            logger.info("Error encountered during check docker embedding. {} {}", e.getMessage(), Constants.CHECK_LOG);
-            logger.info("Assuming no container, local calls enabled.");
+            logger.error( e);
+            logger.error(Constants.CONSOLE,  "Error encountered during check docker embedding. {} {}", e.getMessage(), Constants.CHECK_LOG);
+            logger.error(Constants.CONSOLE,  "Assuming no container, local calls enabled.");
         }
 
         return isDocker;

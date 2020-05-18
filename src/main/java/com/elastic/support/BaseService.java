@@ -17,14 +17,14 @@ public abstract  class BaseService {
 
     private Logger logger = LogManager.getLogger(BaseService.class);
     protected String logPath;
+    protected LoggerContext loggerContext = (LoggerContext) LogManager.getContext(false);
+    protected Configuration logConfig = loggerContext.getConfiguration();
 
     protected void closeLogs() {
 
-        logger.info("Closing logger.");
+        logger.info(Constants.CONSOLE, "Closing loggers.");
 
-        LoggerContext lc = (LoggerContext) LogManager.getContext(false);
-        Configuration logConfig = lc.getConfiguration();
-        Appender appndr = logConfig.getAppender("File");
+        Appender appndr = logConfig.getAppender("diag");
         if(appndr != null && appndr.isStarted()){
             appndr.stop();
         }
@@ -36,9 +36,13 @@ public abstract  class BaseService {
     protected void createFileAppender(String logDir, String logFile) {
 
         logPath = logDir + SystemProperties.fileSeparator + logFile;
+        Appender appndr = logConfig.getAppender("diag");
 
-        LoggerContext context = (LoggerContext) LogManager.getContext(false);
-        Configuration logConfig = context.getConfiguration();
+/*        if(appndr != null && appndr.isStarted()){
+            appndr.stop();
+        }*/
+
+        logger.info(Constants.CONSOLE, logPath);
         Layout layout = PatternLayout.newBuilder()
                 .withConfiguration(logConfig)
                 .withPattern("%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n")
@@ -49,26 +53,32 @@ public abstract  class BaseService {
         builder.withFileName(logPath);
         builder.withAppend(false);
         builder.withLocking(false);
-        builder.setName("File");
+        builder.setName("diag");
         builder.setIgnoreExceptions(false);
         builder.withImmediateFlush(true);
         builder.withBufferedIo(false);
         builder.withBufferSize(0);
         builder.setLayout(layout);
-        builder.withAdvertise(false);
-        Appender appender = builder.build();
+        Appender diagAppender = builder.build();
 
-        appender.start();
-        logConfig.addAppender(appender);
-        AppenderRef.createAppenderRef("File", SystemProperties.DIAG, null);
-        logConfig.getRootLogger().addAppender(appender, Level.DEBUG, null);
-        context.updateLoggers();
+        Appender oldAppender = logConfig.getAppender("diag");
+        if(oldAppender != null && oldAppender.isStarted()){
+            oldAppender.stop();
+            logConfig.getRootLogger().removeAppender("diag");
+        }
+
+        diagAppender.start();
+        logConfig.addAppender(diagAppender);
+        AppenderRef.createAppenderRef("diag", null, null);
+        logConfig.getRootLogger().addAppender(diagAppender, null, null);
+        loggerContext.updateLoggers();
+        logger.info(Constants.CONSOLE, "Diagnostic logger reconfigured for inclusion into archive");
 
     }
 
     public void createArchive(String tempDir) {
 
-        logger.info("Archiving diagnostic results.");
+        logger.info(Constants.CONSOLE, "Archiving diagnostic results.");
 
         try {
             String archiveFilename = SystemProperties.getFileDateString();

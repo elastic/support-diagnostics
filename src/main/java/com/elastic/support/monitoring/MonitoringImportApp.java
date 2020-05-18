@@ -20,14 +20,14 @@ public class MonitoringImportApp {
         try {
             MonitoringImportInputs monitoringImportInputs = new MonitoringImportInputs();
             if (args.length == 0) {
-                logger.info(Constants.interactiveMsg);
+                logger.info(Constants.CONSOLE,  Constants.interactiveMsg);
                 monitoringImportInputs.interactive = true;
                 monitoringImportInputs.runInteractive();
             } else {
                 List<String> errors = monitoringImportInputs.parseInputs(args);
                 if (errors.size() > 0) {
                     for (String err : errors) {
-                        logger.info(err);
+                        logger.error(Constants.CONSOLE,  err);
                     }
                     monitoringImportInputs.usage();
                     SystemUtils.quitApp();
@@ -38,7 +38,7 @@ public class MonitoringImportApp {
         } catch (ShowHelpException she){
             SystemUtils.quitApp();
         } catch (Exception e) {
-            logger.info("Error occurred: {}. {}", e.getMessage(), Constants.CHECK_LOG);
+            logger.error(Constants.CONSOLE,  "Error occurred: {}. {}", e.getMessage(), Constants.CHECK_LOG);
         } finally {
             ResourceCache.closeAll();
         }

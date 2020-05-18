@@ -1,12 +1,16 @@
 package com.elastic.support;
 
 import com.elastic.support.util.SystemProperties;
+import org.apache.logging.log4j.Marker;
+import org.apache.logging.log4j.MarkerManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class Constants {
+
+   public static final Marker CONSOLE = MarkerManager.getMarker("CONSOLE");
 
    public static final String ES_DIAG = "diagnostics";
    public static final String NOT_FOUND = "not found";

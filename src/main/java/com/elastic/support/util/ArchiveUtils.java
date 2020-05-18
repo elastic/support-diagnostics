@@ -1,5 +1,6 @@
 package com.elastic.support.util;
 
+import com.elastic.support.Constants;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
@@ -34,9 +35,9 @@ public class ArchiveUtils {
 
    public void createArchive(String dir, String archiveFileName) {
       if(! createZipArchive(dir, archiveFileName)){
-         logger.info("Couldn't create zip archive. Trying tar.gz");
+         logger.error(Constants.CONSOLE,  "Couldn't create zip archive. Trying tar.gz");
          if(! createTarArchive(dir, archiveFileName)){
-            logger.info("Couldn't create tar.gz archive.");
+            logger.info(Constants.CONSOLE, "Couldn't create tar.gz archive.");
          }
       }
    }
@@ -52,10 +53,10 @@ public class ArchiveUtils {
          archiveResultsZip(archiveFileName, taos, srcDir, "", true);
          taos.close();
 
-         logger.info("Archive: " + filename + " was created");
+         logger.info(Constants.CONSOLE, "Archive: " + filename + " was created");
 
       } catch (Exception ioe) {
-         logger.log(SystemProperties.DIAG, "Couldn't create archive.", ioe);
+         logger.error( "Couldn't create archive.", ioe);
          return false;
       }
       return true;
@@ -77,10 +78,10 @@ public class ArchiveUtils {
          archiveResultsTar(archiveFileName, taos, srcDir, "", true);
          taos.close();
 
-         logger.info("Archive: " + filename + " was created");
+         logger.info(Constants.CONSOLE,  "Archive: " + filename + " was created");
 
       } catch (Exception ioe) {
-         logger.log(SystemProperties.DIAG, "Couldn't create archive.", ioe);
+         logger.error( "Couldn't create archive.", ioe);
          return false;
       }
 
@@ -113,7 +114,7 @@ public class ArchiveUtils {
             }
          }
       } catch (IOException e) {
-         logger.info("Archive Error", e);
+         logger.error(Constants.CONSOLE,"Archive Error", e);
       }
    }
 
@@ -142,13 +143,13 @@ public class ArchiveUtils {
             }
          }
       } catch (IOException e) {
-         logger.info("Archive Error", e);
+         logger.error(Constants.CONSOLE,"Archive Error", e);
       }
    }
 
    public void extractDiagnosticArchive(String sourceInput) throws Exception {
 
-      logger.info("Extracting archive...");
+      logger.info(Constants.CONSOLE,  "Extracting archive...");
 
       try {
          ZipFile zf = new ZipFile(new File(sourceInput));
@@ -164,7 +165,7 @@ public class ArchiveUtils {
          }
 
       } catch (IOException e)      {
-         logger.info("Error extracting {}.", "", e);
+         logger.error(Constants.CONSOLE, "Error extracting {}.", "", e);
          throw new RuntimeException("Error extracting {} from archive.", e);
       }
    }

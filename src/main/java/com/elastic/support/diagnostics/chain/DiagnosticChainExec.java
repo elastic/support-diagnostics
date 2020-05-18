@@ -87,7 +87,7 @@ public class DiagnosticChainExec {
             throw de;
         }
         catch (Throwable t){
-            logger.log(SystemProperties.DIAG, "Unexpected error", t);
+            logger.error( "Unexpected error", t);
             throw new DiagnosticException(String.format("Fatal error in diagnostic - could not continue. %s", Constants.CHECK_LOG));
         }
     }

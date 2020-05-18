@@ -30,7 +30,7 @@ public class GenerateManifest implements Command {
    public void execute(DiagnosticContext context) {
 
       // Dump out background information to provide information for potentially debugging the diagnostic if an issue occurs.
-      logger.info("Writing diagnostic manifest.");
+      logger.info(Constants.CONSOLE, "Writing diagnostic manifest.");
       try {
          ObjectMapper mapper = new ObjectMapper();
          mapper.enable(SerializationFeature.INDENT_OUTPUT);
@@ -46,7 +46,7 @@ public class GenerateManifest implements Command {
          File manifestFile = new File(context.tempDir + SystemProperties.fileSeparator + "manifest.json");
          mapper.writeValue(manifestFile, manifest);
       } catch (Exception e) {
-         logger.info("Error creating the manifest file", e);
+         logger.info(Constants.CONSOLE, "Error creating the manifest file", e);
       }
    }
 

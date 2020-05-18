@@ -102,7 +102,7 @@ public class CheckPlatformDetails implements Command {
                         context.runSystemCalls = false;
                         // We really don't have any way of really knowing
                         // what the enclosing platform is. So this may fail...
-                        logger.info("Docker containers detected on remote platform - unable to determine host OS. Linux will be used but if another operating system is present the Docker diagnostic calls may fail.");
+                        logger.warn(Constants.CONSOLE, "Docker containers detected on remote platform - unable to determine host OS. Linux will be used but if another operating system is present the Docker diagnostic calls may fail.");
                         targetOS = Constants.linuxPlatform;
                         //break;
                     }
@@ -157,15 +157,15 @@ public class CheckPlatformDetails implements Command {
                 default:
                     // If it's not one of the above types it shouldn't be here but try to keep going...
                     context.runSystemCalls = false;
-                    logger.info("Error occurred checking the network hosts information. Bypassing system calls.");
+                    logger.warn(Constants.CONSOLE, "Error occurred checking the network hosts information. Bypassing system calls.");
                     throw new RuntimeException("Host/Platform check error.");
 
             }
 
         } catch (Exception e) {
             // Try to keep going even if this didn't work.
-            logger.info("Error: {}", e.getMessage());
-            logger.log(SystemProperties.DIAG, "Error checking node metadata and deployment info.", e);
+            logger.error(Constants.CONSOLE,"Error: {}", e.getMessage());
+            logger.error( "Error checking node metadata and deployment info.", e);
             context.runSystemCalls = false;
         }
     }
@@ -179,7 +179,7 @@ public class CheckPlatformDetails implements Command {
                 .orElse(null);
 
         if (targetNode == null) {
-            logger.info("Could not find current master in node list.");
+            logger.warn(Constants.CONSOLE, "Could not find current master in node list.");
             throw new RuntimeException();
         }
 
@@ -251,7 +251,7 @@ public class CheckPlatformDetails implements Command {
                 nodeNetworkInfo.add(diagNode);
             }
         } catch (Exception e) {
-            logger.log(SystemProperties.DIAG, "Error extracting node network addresses from nodes output", e);
+            logger.error( "Error extracting node network addresses from nodes output", e);
         }
 
         return nodeNetworkInfo;
@@ -265,7 +265,7 @@ public class CheckPlatformDetails implements Command {
                 .orElse(null);
 
         if (targetNode == null) {
-            logger.info("Could not match node publish address to specified host. Bypassing system calls");
+            logger.warn(Constants.CONSOLE, "Could not match node publish address to specified host. Bypassing system calls");
             throw new RuntimeException();
         }
 
@@ -275,7 +275,7 @@ public class CheckPlatformDetails implements Command {
 
     public ProcessProfile findLocalTargetNode(String inputHost, List<ProcessProfile> nodeProfiles) {
 
-        logger.info("Checking the supplied hostname against the node information retrieved to verify location. This may take some time.");
+        logger.info(Constants.CONSOLE, "Checking the supplied hostname against the node information retrieved to verify location. This may take some time.");
 
         // If the input host was a loopback we need to compare each of the none loopback addresses present
         // on this host to the set of bound http addresses in each node. If if a non-loopback was input
@@ -319,7 +319,7 @@ public class CheckPlatformDetails implements Command {
         }
 
         // If we got this far and came up empty, signal our displeasure
-        logger.log(SystemProperties.DIAG, "Comparison did not result in an IP or Host match. {} {}", localAddrs, nodeAddrs);
+        logger.error( "Comparison did not result in an IP or Host match. {} {}", localAddrs, nodeAddrs);
         throw new RuntimeException("Could not find the target node.");
     }
 

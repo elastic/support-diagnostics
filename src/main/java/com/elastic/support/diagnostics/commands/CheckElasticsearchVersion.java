@@ -34,7 +34,7 @@ public class CheckElasticsearchVersion implements Command {
 
         // Get the version number from the JSON returned
         // by just submitting the host/port combo
-        logger.info("Getting Elasticsearch Version.");
+        logger.info(Constants.CONSOLE, "Getting Elasticsearch Version.");
         DiagnosticInputs inputs = context.diagnosticInputs;
 
         try {
@@ -67,7 +67,7 @@ public class CheckElasticsearchVersion implements Command {
         } catch (DiagnosticException de) {
             throw de;
         } catch (Exception e) {
-            logger.log(SystemProperties.DIAG, "Unanticipated error:", e);
+            logger.error( "Unanticipated error:", e);
             throw new DiagnosticException(String.format("Could not retrieve the Elasticsearch version due to a system or network error - unable to continue. %s%s%s", e.getMessage(), SystemProperties.lineSeparator, Constants.CHECK_LOG));
         }
     }

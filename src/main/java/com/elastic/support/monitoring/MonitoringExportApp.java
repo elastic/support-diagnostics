@@ -19,14 +19,14 @@ public class MonitoringExportApp {
         try {
             MonitoringExportInputs monitoringExportInputs = new MonitoringExportInputs();
             if (args.length == 0) {
-                logger.info(Constants.interactiveMsg);
+                logger.info(Constants.CONSOLE,  Constants.interactiveMsg);
                 monitoringExportInputs.interactive = true;
                 monitoringExportInputs.runInteractive();
             } else {
                 List<String> errors = monitoringExportInputs.parseInputs(args);
                 if (errors.size() > 0) {
                     for (String err : errors) {
-                        logger.info(err);
+                        logger.error(Constants.CONSOLE, err);
                     }
                     monitoringExportInputs.usage();
                     SystemUtils.quitApp();
@@ -39,7 +39,7 @@ public class MonitoringExportApp {
         } catch (ShowHelpException she){
             SystemUtils.quitApp();
         } catch (Exception e) {
-            logger.info("Fatal error occurred: {}. {}", e.getMessage(), Constants.CHECK_LOG);
+            logger.error(Constants.CONSOLE, "Fatal error occurred: {}. {}", e.getMessage(), Constants.CHECK_LOG);
         } finally {
             ResourceCache.closeAll();
         }

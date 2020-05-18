@@ -89,7 +89,8 @@ public class MonitoringExportConfig extends BaseConfig {
                     }
                 }
             } catch (IOException e) {
-                logger.info("Failed to read query configuration file", e);
+                logger.info(Constants.CONSOLE, "Failed to read query configuration file");
+                logger.info("Bad config", e);
             }
 
             buildQueries.put(entry.getKey(), resultStringBuilder.toString());

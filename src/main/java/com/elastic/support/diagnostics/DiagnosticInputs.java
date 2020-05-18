@@ -152,7 +152,7 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
         runHttpInteractive();
 
         if(diagType.contains("remote")) {
-            logger.info(remoteAccessMessage);
+            logger.info(Constants.CONSOLE, remoteAccessMessage);
 
             String  remoteUserTxt = "User account to be used for running system commands and obtaining logs." +
                     SystemProperties.lineSeparator

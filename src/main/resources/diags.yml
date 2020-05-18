@@ -8,7 +8,6 @@
 #
 #
 
-diagnosticVersion: 8.0.1
 ## Should only need to change these if Github modifies something
   ## github-settings:
   ##   diagReleaseHost: "api.github.com"
@@ -134,3 +133,36 @@ monitoring-queryfiles:
 monitoring-scroll-size: 500
 default-monitoring-index: ".monitoring-es-7"
 bulk-import-size: 250
+
+flight-recorder-es:
+  complete:
+    - allocation
+    - allocation_explain
+    - allocation_explain_disk
+    - cluster_settings
+    - cluster_settings_defaults
+    - cluster_stats
+    - fielddata
+    - fielddata_stats
+    - indices
+    - indices_stats
+    - licenses
+    - mapping
+    - master
+    - nodes
+    - nodes_stats
+    - nodes_usage
+    - pipelines
+    - recovery
+    - segments
+    - settings
+    - shards
+    - tasks
+    - templates
+    - ccr_stats
+    - enrich_stats
+    - ilm_status
+    - rollup_jobs
+  stability:
+    - nodes
+    - shards

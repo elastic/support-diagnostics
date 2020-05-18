@@ -49,12 +49,12 @@ public class MonitoringImportService extends ElasticRestClientService {
 
             // Create the temp directory - delete if first if it exists from a previous run
             SystemUtils.nukeDirectory(tempDir);
-            logger.info("Creating temp directory: {}", tempDir);
+            logger.info(Constants.CONSOLE, "Creating temp directory: {}", tempDir);
             Files.createDirectories(Paths.get(tempDir));
 
             // Set up the log file manually since we're going to package it with the diagnostic.
             // It will go to wherever we have the temp dir set up.
-            logger.info("Configuring log file.");
+            logger.info(Constants.CONSOLE, "Configuring log file.");
             createFileAppender(tempDir, "import.log");
 
             // Check the version.
@@ -67,8 +67,8 @@ public class MonitoringImportService extends ElasticRestClientService {
             archiveUtils.extractDiagnosticArchive(inputs.input);
 
         }catch (Exception e){
-            logger.log(SystemProperties.DIAG, "Error extracting archive or indexing results", e);
-            logger.info("Cannot contiue processing. {} \n {}", e.getMessage(), Constants.CHECK_LOG);
+            logger.error( "Error extracting archive or indexing results", e);
+            logger.info(Constants.CONSOLE, "Cannot contiue processing. {} \n {}", e.getMessage(), Constants.CHECK_LOG);
         }
         finally {
             closeLogs();

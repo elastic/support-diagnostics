@@ -27,7 +27,7 @@ public  class CollectLogs implements Command {
     public void execute(DiagnosticContext context) {
         // If we hit a snafu earlier in determining the details on where and how to run, then just get out.
         if(!context.runSystemCalls){
-            logger.info("There was an issue in setting up system logs collection - bypassing. {}", Constants.CHECK_LOG);
+            logger.info(Constants.CONSOLE, "There was an issue in setting up system logs collection - bypassing. {}", Constants.CHECK_LOG);
             return;
         }
 
@@ -61,7 +61,7 @@ public  class CollectLogs implements Command {
             logStatement = logStatement.replace("{{LOGPATH}}", logDir);
             String logListing = sysCmd.runCommand(logStatement).trim();
             if (StringUtils.isEmpty(logListing)) {
-                logger.info("No Elasticsearch log could be located at the path configured for this node. The cause of this is usually insufficient read authority. Please be sure the account you are using to access the logs has the necessary permissions or use sudo. See the diagnostic README for more information. ");
+                logger.info(Constants.CONSOLE, "No Elasticsearch log could be located at the path configured for this node. The cause of this is usually insufficient read authority. Please be sure the account you are using to access the logs has the necessary permissions or use sudo. See the diagnostic README for more information. ");
                 return;
             }
 
@@ -80,8 +80,8 @@ public  class CollectLogs implements Command {
             sysCmd.copyLogs(fileList, logDir, targetDir );
 
         } catch (Exception e) {
-            logger.info("An error occurred while copying the logs. It may not have completed normally {}.", Constants.CHECK_LOG);
-            logger.log(SystemProperties.DIAG, e.getMessage(), e);
+            logger.info(Constants.CONSOLE, "An error occurred while copying the logs. It may not have completed normally {}.", Constants.CHECK_LOG);
+            logger.error( e.getMessage(), e);
         }
     }
 
@@ -102,7 +102,7 @@ public  class CollectLogs implements Command {
                     }
                 }
             } catch (Exception e) {
-                logger.log(SystemProperties.DIAG, "Error getting directory listing.", e);
+                logger.error( "Error getting directory listing.", e);
             }
         }
 

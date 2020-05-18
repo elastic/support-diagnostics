@@ -9,6 +9,7 @@ import java.util.Date;
 public class SystemProperties {
 
    public static Level DIAG = Level.forName("DIAG", 250);
+   public static Level CONSOLE = Level.forName("CONSOLE", 50);
 
    public static final String osName = System.getProperty("os.name");
 

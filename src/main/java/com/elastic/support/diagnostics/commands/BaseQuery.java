@@ -1,5 +1,6 @@
 package com.elastic.support.diagnostics.commands;
 
+import com.elastic.support.Constants;
 import com.elastic.support.diagnostics.chain.Command;
 import com.elastic.support.rest.RestClient;
 import com.elastic.support.rest.RestEntry;
@@ -40,10 +41,10 @@ public abstract class BaseQuery implements Command {
 
             // Wait the configured pause time before trying again
             try {
-                logger.info("Some calls failed but were flagged as recoverable: retrying in {} seconds.", pause / 1000);
+                logger.warn(Constants.CONSOLE, "Some calls failed but were flagged as recoverable: retrying in {} seconds.", pause / 1000);
                 Thread.sleep(pause);
             } catch (Exception e) {
-                logger.info("Failed pause on error.", e);
+                logger.info(Constants.CONSOLE,  "Failed pause on error.", e);
             }
 
             retryList = execQueryList(restClient, retryList, tempDir);
@@ -73,7 +74,7 @@ public abstract class BaseQuery implements Command {
                 String fileName = subdir + SystemProperties.fileSeparator + entry.getName() + entry.getExtension();
                 RestResult restResult = restClient.execQuery(entry.getUrl(), fileName);
                 if (restResult.isValid()) {
-                    logger.info("Results written to: {}", fileName);
+                    logger.info(Constants.CONSOLE, "Results written to: {}", fileName);
                 }
                 else{
                     if(entry.isRetry() && restResult.isRetryable()){
@@ -82,13 +83,13 @@ public abstract class BaseQuery implements Command {
                         logger.info(restResult.formatStatusMessage("Flagged for retry."));
                     }
                     else{
-                        logger.info("{}   {}  failed. Bypassing", entry.getName(), entry.getUrl());
-                        logger.info(restResult.formatStatusMessage("See archived diagnostics.log for more detail."));
+                        logger.info(Constants.CONSOLE, "{}   {}  failed. Bypassing", entry.getName(), entry.getUrl());
+                        logger.info(Constants.CONSOLE, restResult.formatStatusMessage("See archived diagnostics.log for more detail."));
                     }
                 }
             } catch (Exception e) {
                 // Something happens just log it and go to the next query.
-                logger.log(SystemProperties.DIAG, "Error occurred executing query {}", entry.getName() + " - " + entry.getUrl(), e);
+                logger.error( "Error occurred executing query {}", entry.getName() + " - " + entry.getUrl(), e);
                 continue;
             }
 

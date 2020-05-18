@@ -2,6 +2,7 @@ package com.elastic.support.rest;
 
 import com.elastic.support.BaseService;
 import com.elastic.support.BaseConfig;
+import com.elastic.support.Constants;
 import com.elastic.support.util.SystemProperties;
 import com.elastic.support.util.SystemUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -16,16 +17,16 @@ public class ElasticRestClientService extends BaseService {
 
         if(StringUtils.isNotEmpty(user) && !isAuth){
             String border = SystemUtils.buildStringFromChar(60, '*');
-            logger.info(SystemProperties.lineSeparator);
-            logger.info(border);
-            logger.info(border);
-            logger.info(border);
-            logger.info("The elasticsearch user entered: {} does not appear to have sufficient authorization to access all collected information", user);
-            logger.info("Some of the calls may not have completed successfully.");
-            logger.info("If you are using a custom role please verify that it has the admin role for versions prior to 5.x or the superuser role for subsequent versions.");
-            logger.info(border);
-            logger.info(border);
-            logger.info(border);
+            logger.info(Constants.CONSOLE, SystemProperties.lineSeparator);
+            logger.info(Constants.CONSOLE, border);
+            logger.info(Constants.CONSOLE, border);
+            logger.info(Constants.CONSOLE, border);
+            logger.info(Constants.CONSOLE, "The elasticsearch user entered: {} does not appear to have sufficient authorization to access all collected information", user);
+            logger.info(Constants.CONSOLE, "Some of the calls may not have completed successfully.");
+            logger.info(Constants.CONSOLE, "If you are using a custom role please verify that it has the admin role for versions prior to 5.x or the superuser role for subsequent versions.");
+            logger.info(Constants.CONSOLE, border);
+            logger.info(Constants.CONSOLE, border);
+            logger.info(Constants.CONSOLE, border);
         }
 
     }

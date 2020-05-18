@@ -96,7 +96,7 @@ public class RunLogstashQueries extends BaseQuery {
 
 
         } catch (Throwable t) {
-            logger.log(SystemProperties.DIAG, "Logstash Query error:", t);
+            logger.error( "Logstash Query error:", t);
             throw new DiagnosticException(String.format("Error obtaining logstash output and/or process id - will bypass the rest of processing.. %s", Constants.CHECK_LOG));
         }
     }
