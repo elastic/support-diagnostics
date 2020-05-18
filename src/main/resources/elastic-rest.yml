@@ -69,7 +69,7 @@ cat_nodes:
   extension: ".txt"
   subdir: "cat"
   versions:
-    ">= 0.9.0": "/_cat/nodes?v&h=n,m,i,r,d,hp,rp,cpu,load_1m,load_5m,load_15m,nodeId"
+    ">= 0.9.0": "/_cat/nodes?v&h=n,nodeId,m,i,r,d,hp,rp,cpu,load_1m,load_5m,load_15m,"
 
 cat_pending_tasks:
   extension: ".txt"
@@ -175,8 +175,8 @@ fielddata_stats:
 
 indices:
   versions:
-    ">= 0.9.0 < 5.1.1": "/_cat/indices?v&format=json"
-    ">= 5.1.1": "/_cat/indices?v&s=index&format=json"
+    ">= 0.9.0 < 5.1.1": "/_cat/indices?format=json&bytes=b&h=index,shard,prirep,state,docs,store,id,node"
+    ">= 7.0.0": "/_cat/shards?format=json&bytes=b&s=index&h=index,shard,prirep,state,docs,store,id,node,se,sm,fm,fe,ft,iiti,iito,iitf,idto,idti,ftt,ua,ud,ur"
 
 indices_stats:
   retry: true
@@ -202,6 +202,10 @@ nodes:
   retry: true
   versions:
     ">= 0.9.0": "/_nodes?pretty&human"
+
+nodes_short:
+  versions:
+    ">= 0.9.0": "/_cat/nodes?format=json&v&full_id&h=name,id,master,ip,role"
 
 nodes_stats:
   retry: true

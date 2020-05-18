@@ -37,7 +37,7 @@ public class ArchiveUtils {
       if(! createZipArchive(dir, archiveFileName)){
          logger.error(Constants.CONSOLE,  "Couldn't create zip archive. Trying tar.gz");
          if(! createTarArchive(dir, archiveFileName)){
-            logger.info("Couldn't create tar.gz archive.");
+            logger.info(Constants.CONSOLE, "Couldn't create tar.gz archive.");
          }
       }
    }

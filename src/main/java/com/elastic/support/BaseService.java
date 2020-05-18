@@ -22,7 +22,7 @@ public abstract  class BaseService {
 
     protected void closeLogs() {
 
-        logger.info("Closing loggers.");
+        logger.info(Constants.CONSOLE, "Closing loggers.");
 
         Appender appndr = logConfig.getAppender("diag");
         if(appndr != null && appndr.isStarted()){
@@ -72,13 +72,13 @@ public abstract  class BaseService {
         AppenderRef.createAppenderRef("diag", null, null);
         logConfig.getRootLogger().addAppender(diagAppender, null, null);
         loggerContext.updateLoggers();
-        logger.info("Diagnostic ogger reconfigured for inclusion into archive");
+        logger.info(Constants.CONSOLE, "Diagnostic logger reconfigured for inclusion into archive");
 
     }
 
     public void createArchive(String tempDir) {
 
-        logger.info("Archiving diagnostic results.");
+        logger.info(Constants.CONSOLE, "Archiving diagnostic results.");
 
         try {
             String archiveFilename = SystemProperties.getFileDateString();

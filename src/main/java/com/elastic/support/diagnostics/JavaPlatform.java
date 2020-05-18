@@ -40,7 +40,7 @@ public class JavaPlatform {
 
             default:
                 // default it to Linux
-                logger.info("Failed to detect operating system for: {}", osName);
+                logger.info(Constants.CONSOLE, "Failed to detect operating system for: {}", osName);
                 this.platform = Constants.linuxPlatform;
         }
     }
@@ -62,7 +62,7 @@ public class JavaPlatform {
         }
 
         // If we got this far we couldn't find a JDK
-        logger.info("Could not locate the location of the java executable used to launch Elasticsearch");
+        logger.info(Constants.CONSOLE, "Could not locate the location of the java executable used to launch Elasticsearch");
         throw new DiagnosticException("JDK not found.");
     }
 

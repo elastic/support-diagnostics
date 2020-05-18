@@ -74,7 +74,7 @@ public abstract class BaseQuery implements Command {
                 String fileName = subdir + SystemProperties.fileSeparator + entry.getName() + entry.getExtension();
                 RestResult restResult = restClient.execQuery(entry.getUrl(), fileName);
                 if (restResult.isValid()) {
-                    logger.info("Results written to: {}", fileName);
+                    logger.info(Constants.CONSOLE, "Results written to: {}", fileName);
                 }
                 else{
                     if(entry.isRetry() && restResult.isRetryable()){
@@ -83,8 +83,8 @@ public abstract class BaseQuery implements Command {
                         logger.info(restResult.formatStatusMessage("Flagged for retry."));
                     }
                     else{
-                        logger.info("{}   {}  failed. Bypassing", entry.getName(), entry.getUrl());
-                        logger.info(restResult.formatStatusMessage("See archived diagnostics.log for more detail."));
+                        logger.info(Constants.CONSOLE, "{}   {}  failed. Bypassing", entry.getName(), entry.getUrl());
+                        logger.info(Constants.CONSOLE, restResult.formatStatusMessage("See archived diagnostics.log for more detail."));
                     }
                 }
             } catch (Exception e) {

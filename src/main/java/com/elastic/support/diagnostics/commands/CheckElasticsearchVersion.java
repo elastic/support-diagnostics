@@ -34,7 +34,7 @@ public class CheckElasticsearchVersion implements Command {
 
         // Get the version number from the JSON returned
         // by just submitting the host/port combo
-        logger.info("Getting Elasticsearch Version.");
+        logger.info(Constants.CONSOLE, "Getting Elasticsearch Version.");
         DiagnosticInputs inputs = context.diagnosticInputs;
 
         try {

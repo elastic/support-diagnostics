@@ -38,7 +38,7 @@ public class CheckDiagnosticVersion implements Command {
             return;
         }
 
-        logger.info("Checking for diagnostic version updates.");
+        logger.info(Constants.CONSOLE, "Checking for diagnostic version updates.");
         // Only need this once so let it auto-close at the end of the try catch block.
         try(RestClient restClient = RestClient.getClient(
                     context.diagsConfig.diagReleaseHost,
@@ -63,7 +63,7 @@ public class CheckDiagnosticVersion implements Command {
             // have a value of "debug" instead of an actual version.
             context.diagVersion = getToolVersion();
             if (context.diagVersion.equals(Constants.runningInIde) || StringUtils.isEmpty(context.diagVersion)) {
-                logger.info("Running in IDE");
+                logger.info(Constants.CONSOLE, "Running in IDE");
                 // Default it to something that won't blow up the Semver but shows it's not a normal run.
                 context.diagVersion = "0.0.0";
                 return;
@@ -78,8 +78,8 @@ public class CheckDiagnosticVersion implements Command {
 
             if (!diagVer.satisfies(rule)) {
 
-                logger.info("Warning: DiagnosticService version:{} is not the current recommended release", context.diagVersion);
-                logger.info("The current release is {}", ver);
+                logger.info(Constants.CONSOLE, "Warning: DiagnosticService version:{} is not the current recommended release", context.diagVersion);
+                logger.info(Constants.CONSOLE, "The current release is {}", ver);
 
                 // Try to get the link for the download url of the current release.
                 List<JsonNode> assets = rootNode.findValues("assets");
@@ -94,8 +94,8 @@ public class CheckDiagnosticVersion implements Command {
                     downloadUrl = context.diagsConfig.diagLatestRelease;
                 }
 
-                logger.info("The latest version can be downloaded at {}", downloadUrl);
-                logger.info("Press the Enter key to continue.");
+                logger.info(Constants.CONSOLE, "The latest version can be downloaded at {}", downloadUrl);
+                logger.info(Constants.CONSOLE, "Press the Enter key to continue.");
 
                 Scanner sc = new Scanner(System.in);
                 sc.nextLine();
@@ -103,9 +103,9 @@ public class CheckDiagnosticVersion implements Command {
 
         } catch (Exception e) {
             logger.error( e);
-            logger.info("Issue encountered while checking diagnostic version for updates.");
-            logger.info("Failed to get current diagnostic version from Github.");
-            logger.info("If Github is not accessible from this environemnt current supported version cannot be confirmed.");
+            logger.info(Constants.CONSOLE, "Issue encountered while checking diagnostic version for updates.");
+            logger.info(Constants.CONSOLE, "Failed to get current diagnostic version from Github.");
+            logger.info(Constants.CONSOLE, "If Github is not accessible from this environemnt current supported version cannot be confirmed.");
         }
     }
 

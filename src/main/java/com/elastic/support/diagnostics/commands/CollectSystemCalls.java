@@ -9,6 +9,7 @@ import com.elastic.support.util.ResourceCache;
 import com.elastic.support.util.SystemCommand;
 import com.elastic.support.util.SystemProperties;
 import com.elastic.support.util.SystemUtils;
+import com.sun.xml.bind.v2.runtime.reflect.opt.Const;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import java.util.Map;
@@ -21,7 +22,7 @@ public class CollectSystemCalls implements Command {
 
         // If we hit a snafu earlier in determining the details on where and how to run, then just get out.
         if(!context.runSystemCalls){
-            logger.info("There was an issue in setting up system call collection - bypassing. {}", Constants.CHECK_LOG);
+            logger.info( Constants.CONSOLE, "There was an issue in setting up system call collection - bypassing. {}", Constants.CHECK_LOG);
             return;
         }
 
@@ -49,7 +50,7 @@ public class CollectSystemCalls implements Command {
             // JVM that's running ES. Given that it could be the bundled one or some
             // previously installed version we need to shell out and check before we run them.
             String esJavaHome = javaPlatform.extractJavaHome(javaExecutablePath);
-            logger.info("Java Home installation at: {}", esJavaHome);
+            logger.info(Constants.CONSOLE, "Java Home installation at: {}", esJavaHome);
 
             // Check for the presence of a JDK - run the javac command with no arguments
             // and see if you get a valid return - javac <version>
@@ -72,11 +73,11 @@ public class CollectSystemCalls implements Command {
                 processCalls(targetDir, javaCalls, sysCmd, pid);
             }
             else {
-                logger.info("JDK not found - bypassing jstack and jps commands.");
+                logger.info( Constants.CONSOLE, "JDK not found - bypassing jstack and jps commands.");
             }
         } catch (Exception e) {
             logger.error( e);
-            logger.info("Unexpected error - bypassing some or all system calls. {}", Constants.CHECK_LOG);
+            logger.info(Constants.CONSOLE, "Unexpected error - bypassing some or all system calls. {}", Constants.CHECK_LOG);
         }
     }
 
