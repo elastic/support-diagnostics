@@ -96,7 +96,7 @@ public abstract class BaseInputs {
     protected void runOutputDirInteractive(){
         String output = ResourceCache.textIO.newStringInputReader()
                 .withMinLength(0)
-                .withValueChecker(( String val, String propname) -> validateFile(val))
+                .withValueChecker(( String val, String propname) -> validateOutputDirectory(val))
                 .read(SystemProperties.lineSeparator + outputDirDescription);
         if(StringUtils.isNotEmpty(output)){
             outputDir = output;
