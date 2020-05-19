@@ -51,7 +51,8 @@ cat_indices:
   subdir: "cat"
   versions:
     ">= 0.9.0 < 5.1.1": "/_cat/indices?v"
-    ">= 5.1.1": "/_cat/indices?v&s=index&expand_wildcards=all"
+    ">= 5.1.1 < 7.7.0": "/_cat/indices?v&s=index"
+    ">= 7.7.0": "/_cat/indices?v&s=index&expand_wildcards=all"
 
 cat_master:
   extension: ".txt"
