@@ -96,7 +96,8 @@ cat_segments:
   subdir: "cat"
   versions:
     ">= 0.9.0 < 5.1.1": "/_cat/segments?v"
-    ">= 5.1.1": "/_cat/segments?v&s=index"
+    ">= 5.1.1 < 7.7.0": "/_cat/segments?v&s=index"
+    ">= 7.7.0": "/_cat/segments/*,.*?v&s=index"
 
 cat_shards:
   extension: ".txt"
