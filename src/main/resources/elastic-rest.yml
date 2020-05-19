@@ -189,7 +189,8 @@ licenses:
 
 mapping:
   versions:
-    ">= 0.9.0": "/_mapping?pretty&expand_wildcards=all"
+    ">= 0.9.0 < 7.7.0": "/_mapping?pretty"
+    ">= 7.7.0": "/_mapping?pretty&expand_wildcards=all"
 
 master:
   versions:
