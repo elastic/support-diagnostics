@@ -22,7 +22,6 @@ public abstract class BaseInputs {
 
     private static final Logger logger = LogManager.getLogger(BaseInputs.class);
     public static final String outputDirDescription = "Fully qualified path to an output directory. If it does not exist the diagnostic will attempt to create it. If not specified the diagnostic directory will be used: ";
-    public static final String interactiveModeDescription = "Interactive mode. Prompt for all values and validate as you go.";
     public static final String bypassDiagVerifyDescription = "Bypass the diagnostic version check. Use when internet outbound HTTP access is blocked by a firewall.";
     protected List<String> emptyList = new ArrayList<>();
     protected JCommander jCommander;

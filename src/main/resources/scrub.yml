@@ -1,7 +1,24 @@
+
+# Uncomment to process as a default
+auto-scrub:
+  - "ipv4"
+  - "ipv6"
+  - "mac"
+  - "nodeName"
+  - "nodeId"
+  - "clustername"
+
+global-exclude:
+  - ".*.gc.*"
+
+remove:
+#  - ".*.tar.gz"
+#  - ".*.zip"
+
 tokens:
-# Examples: Do NOT do this in the form of attribute = value
-## Add only the value you wish to replace.
-#  - node-[\d?]*
-#  - cluster-630
-#  - disk1
-#  - Typhoid
+ - token: "gnieman"
+   include: ["manifest.json"]
+#   exclude: ["manifest.json"]
+# - token: "some sensitive string"
+#   include: "*slowlog*.log"
+

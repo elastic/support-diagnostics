@@ -67,6 +67,13 @@ public class SystemUtils {
         }
     }
 
+    public static void refreshDir(String dir){
+        nukeDirectory(dir);
+        File tmp = new File(dir);
+        tmp.setWritable(true, false);
+        tmp.mkdir();
+    }
+
     public static String getHostName() {
         String s = null;
 
@@ -197,6 +204,8 @@ public class SystemUtils {
 
         return isDocker;
     }
+
+
 
     public static boolean checkCGroupEntries(List<String> cgroups){
         for(String entry: cgroups){

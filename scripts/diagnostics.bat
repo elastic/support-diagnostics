@@ -23,6 +23,6 @@ if not defined DIAG_JAVA_OPTIONS (
   set DIAG_JAVA_OPTIONS=-Xmx512m
 )
 
-"%JAVA_EXEC%" %DIAG_JAVA_OPTIONS% -cp %diagpath%;%diagpath%\lib\* com.elastic.support.diagnostics.DiagnosticApp %*
+"%JAVA_EXEC%" %DIAG_JAVA_OPTIONS% -cp %diagpath%\config;%diagpath%\lib\* com.elastic.support.diagnostics.DiagnosticApp %*
 
 endlocal

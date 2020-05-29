@@ -83,7 +83,7 @@ cat_recovery:
   subdir: "cat"
   versions:
     ">= 0.9.0 < 7.7.0": "/_cat/recovery?v"
-    ">= 7.7.0": "": "/_cat/recovery?v&expand_wildcards=all"
+    ">= 7.7.0": "/_cat/recovery?v&expand_wildcards=all"
 
 cat_repositories:
   extension: ".txt"

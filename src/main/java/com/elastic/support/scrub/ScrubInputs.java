@@ -3,6 +3,7 @@ package com.elastic.support.scrub;
 import com.beust.jcommander.Parameter;
 import com.elastic.support.BaseInputs;
 import com.elastic.support.Constants;
+import com.elastic.support.diagnostics.commands.CollectSystemCalls;
 import com.elastic.support.util.ResourceCache;
 import com.elastic.support.util.SystemProperties;
 import org.apache.commons.lang3.ObjectUtils;
@@ -10,7 +11,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
+import java.io.File;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -19,109 +21,98 @@ public class ScrubInputs extends BaseInputs {
     private static Logger logger = LogManager.getLogger(ScrubInputs.class);
 
     // Start Input Fields
-    @Parameter(names = {"-a", "--archive"}, description = "Required field if infile not specified.  Full path to the archive file to be scrubbed.")
-    private String archive;
-    public String getArchive() {
-        return archive;
-    }
-    public void setArchive(String archive) {
-        this.archive = archive;
-    }
+    @Parameter(names = {"--input"}, description = "Required field. Full path to the archive file, directory, or individual file to be scrubbed.")
+    public String scrub;
 
-    @Parameter(names = {"-i", "--infile"}, description = "Required field if archive not specified.  Full path to the individual file to be scrubbed.")
-    private String infile;
-    public String getInfile() {
-        return infile;
-    }
-    public void setInfile(String infile) {
-        this.infile = infile;
-    }
-
-    @Parameter(names = {"-c", "--config"}, required = false, description = "Optional field.  Full path to the .yml file where string tokens you wish to have removed resides.")
-    private String configFile = "";
-    public String getConfigFile() {
-        return configFile;
-    }
-    public void setConfigFile(String configFile) {
-        this.configFile = configFile;
-    }
+    @Parameter(names = {"--workers"}, description = "Optional field. How many processing instances to run. Defaults to the number of detected cores.")
+    public int workers = Runtime.getRuntime().availableProcessors();
 
     // End Input Fields
 
-    public ScrubInputs(){
-        super();
-    }
+    public String type = "zip";
+    public boolean isArchive = true;
+    public String scrubbedFileBaseName;
 
-    public boolean runInteractive(){
-        String operation = standardStringReader
-                .withNumberedPossibleValues("Scrub Archive", "Scrub Single File")
-                .withIgnoreCase()
-                .read(SystemProperties.lineSeparator + "Select the type of file you wish to scrub." );
-        logger.info(Constants.CONSOLE, "");
+    public boolean runInteractive() {
 
-        if(operation.toLowerCase().contains("archive")) {
-            archive = ResourceCache.textIO.newStringInputReader()
-                    .withInputTrimming(true)
-                    .withValueChecker((String val, String propname) -> validateRequiredFile(val))
-                    .read("Enter the full path of the archive you wish to import.");
-        }
-        else {
-            infile = ResourceCache.textIO.newStringInputReader()
-                    .withInputTrimming(true)
-                    .withValueChecker((String val, String propname) -> validateRequiredFile(val))
-                    .read("Enter the full path of the individual file you wish to import.");
-        }
-
-        logger.info(Constants.CONSOLE, "");
-
-        logger.info(Constants.CONSOLE,  "If you do not specify a yaml configuration file, the utility will automatically");
-        logger.info(Constants.CONSOLE,  "obfuscate IP and MAC addresses by default. You do NOT need to configure that functionality.");
-        logger.info(Constants.CONSOLE,  "If you wish to extend for additional masking you MUST explicitly enter a file to input.");
-        logger.info(Constants.CONSOLE,  "Note that for docker containers this must be a file within the configured volume.");
-        configFile = ResourceCache.textIO.newStringInputReader()
+        scrub = ResourceCache.textIO.newStringInputReader()
                 .withInputTrimming(true)
-                .withMinLength(0)
-                .withValueChecker((String val, String propname) -> validateRequiredFile(val))
-                .read("Enter the full path of the Configuration file you wish to import or hit enter to take the default IP/MAC scrub.");
+                .withValueChecker((String val, String propname) -> validateScrubInput(val))
+                .read("Enter the full path of the archive you wish to import.");
 
-        if(runningInDocker){
-            logger.info(Constants.CONSOLE,  "Result will be written to the configured Docker volume.");
-        }
-        else{
+        workers = ResourceCache.textIO.newIntInputReader()
+                .withMinVal(0)
+                .withDefaultValue(workers)
+                .read("Enter the number of workers to run in parallel. Defaults to the detected number of processors: " + workers);
+
+        logger.info(Constants.CONSOLE, "");
+        logger.info(Constants.CONSOLE, "The utility will obfuscate IP and MAC addresses by default. You do NOT need to configure that functionality.");
+        logger.info(Constants.CONSOLE, "If you wish to extend for additional masking you MUST explicitly enter a file to input.");
+        logger.info(Constants.CONSOLE, "Note that for docker containers this must be a file within the configured volume.");
+
+        if (runningInDocker) {
+            logger.info(Constants.CONSOLE, "Result will be written to the configured Docker volume.");
+        } else {
             runOutputDirInteractive();
         }
 
         return true;
     }
 
-    public List<String> parseIinputs(String[] args){
+    public List<String> parseIinputs(String[] args) {
         List<String> errors = super.parseInputs(args);
 
-        if(StringUtils.isEmpty(infile) && StringUtils.isEmpty(archive) ){
-            errors.add("You must specify either an archive or individual file to process.");
-        }
-
-        if(StringUtils.isNotEmpty(infile) && StringUtils.isNotEmpty(archive) ){
-            errors.add("You cannot specify both an archive and individual file to process.");
-        }
-
-        if(StringUtils.isNotEmpty(archive)){
-            errors.addAll(ObjectUtils.defaultIfNull(validateRequiredFile(archive), emptyList));
-        }
-
-        if(StringUtils.isNotEmpty(infile)){
-            errors.addAll(ObjectUtils.defaultIfNull(validateRequiredFile(infile), emptyList));
+        List valid = validateScrubInput(scrub);
+        if(valid != null){
+            errors.addAll(valid);
         }
 
         return errors;
     }
 
+    public List<String> validateScrubInput(String val) {
+        if (StringUtils.isEmpty(val.trim())) {
+            return Collections.singletonList("Input archive, directory, or single file is required.");
+        }
+
+        File file = new File(val);
+
+        if (!file.exists() ) {
+            return Collections.singletonList("Specified required file location could not be located or is a directory.");
+        }
+        int filePosition = scrub.lastIndexOf(SystemProperties.fileSeparator);
+
+        if( scrub.endsWith(".zip")){
+            this.type = "zip";
+            scrubbedFileBaseName = (scrub.substring(filePosition + 1)).replace(".zip", "");
+        }
+        else if(scrub.endsWith(".tar.gz")){
+            this.type = "tar.gz";
+            scrubbedFileBaseName = (scrub.substring(filePosition + 1)).replace(".tar.gz", "");
+        }
+        else if(scrub.endsWith(".tar")){
+            this.type = "tar";
+            scrubbedFileBaseName = (scrub.substring(filePosition + 1)).replace(".tar", "");
+        }
+        else if(file.isDirectory()){
+            this.type = "dir";
+            isArchive = false;
+            scrubbedFileBaseName = scrub.substring(filePosition + 1);
+        }
+        else{
+            this.type = "file";
+            isArchive = false;
+            scrubbedFileBaseName = scrub.substring(filePosition + 1, scrub.lastIndexOf("."));
+        }
+
+        return null;
+
+    }
+
     @Override
     public String toString() {
         return "ScrubInputs{" +
-                "archive='" + archive + '\'' +
-                ", infile='" + infile + '\'' +
-                ", configFile='" + configFile + '\'' +
+                "input='" + scrub + '\'' +
                 '}';
     }
 }

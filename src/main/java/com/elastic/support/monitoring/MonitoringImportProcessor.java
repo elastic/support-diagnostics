@@ -8,6 +8,7 @@ import com.elastic.support.util.JsonYamlUtils;
 import com.elastic.support.util.SystemProperties;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.commons.compress.archivers.zip.ZipFile;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,8 +16,9 @@ import org.apache.logging.log4j.Logger;
 import java.io.*;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Vector;
 
-public class MonitoringImportProcessor implements ArchiveEntryProcessor {
+public class MonitoringImportProcessor{
 
     private static final Logger logger = LogManager.getLogger(MonitoringImportProcessor.class);
 
@@ -42,18 +44,27 @@ public class MonitoringImportProcessor implements ArchiveEntryProcessor {
 
     }
 
-
-
-    public void process(InputStream instream, String name) {
-
-        if(name.contains(".log")){
-            return;
-        }
-
-        logger.info(Constants.CONSOLE, "Processing: {}", name);
-        long eventsWritten = 0;
+    public void exec(Vector<File> files){
 
         try {
+            for(File file: files){
+                if (file.isDirectory() || file.getName().contains(".log")){
+                    continue;
+                }
+                logger.info("Processing: {}", file.getName());
+                process(file);
+            }
+        } catch (Exception e) {
+            logger.error(e);
+        }
+    }
+
+    public void process(File file) {
+
+        logger.info(Constants.CONSOLE, "Processing: {}", file.getName());
+        long eventsWritten = 0;
+
+        try(InputStream instream = new FileInputStream(file)) {
             BufferedReader br = new BufferedReader(new InputStreamReader(instream));
             StringBuilder batchBuilder = new StringBuilder();
             String contents;
@@ -113,7 +124,7 @@ public class MonitoringImportProcessor implements ArchiveEntryProcessor {
             logger.error(Constants.CONSOLE,"Error processing entry - stream related error,", t);
         }
         finally {
-            logger.info(Constants.CONSOLE,"{} events written from {}", eventsWritten, name);
+            logger.info(Constants.CONSOLE,"{} events written from {}", eventsWritten, file.getName());
         }
 
     }
