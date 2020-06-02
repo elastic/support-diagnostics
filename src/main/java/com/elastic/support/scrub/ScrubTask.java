@@ -1,5 +1,6 @@
 package com.elastic.support.scrub;
 
+import com.elastic.support.Constants;
 import com.elastic.support.util.SystemProperties;
 import com.elastic.support.util.TaskEntry;
 import org.apache.commons.io.FileUtils;
@@ -28,6 +29,7 @@ public class ScrubTask implements Callable<String> {
         String result = "";
         // If it's in remove we not only don't process it we don't write it to the scrubbed archive either
         if(processor.isRemove(entry.entryName())){
+            logger.info(Constants.CONSOLE, "Removing entry: {}", entry.entryName());
             return entry.entryName() + ":removed";
         }
 
@@ -35,11 +37,15 @@ public class ScrubTask implements Callable<String> {
 
         if( processor.isExclude(entry.entryName())) {
             result = entry.entryName() + ":excluded";
+            logger.info(Constants.CONSOLE, "Excluded from sanitization: {}", entry.entryName());
+
         }
         else{
             content = processor.processAutoscrub(content);
             content = processor.processLineWithTokens(content, entry.entryName());
             result = entry.entryName() + ":sanitized";
+            logger.info(Constants.CONSOLE, "Processed entry: {}", entry.entryName());
+
         }
 
         String targetFileName = dir + SystemProperties.fileSeparator + entry.entryName();

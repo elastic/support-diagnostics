@@ -24,14 +24,19 @@ public class ScrubService extends BaseService {
     private Logger logger = LogManager.getLogger(ScrubService.class);
 
     public void exec(ScrubInputs inputs) {
-        ExecutorService executorService = Executors.newFixedThreadPool(inputs.workers);
-        String scrubDir = inputs.outputDir + SystemProperties.fileSeparator + "scrubbed-" + inputs.scrubbedFileBaseName;
+        ExecutorService executorService = null;
+        String scrubDir = "";
+
 
         try {
+            scrubDir = inputs.outputDir + SystemProperties.fileSeparator + "scrubbed-" + inputs.scrubbedFileBaseName;
+
             SystemUtils.refreshDir(scrubDir);
 
             // Redirect the log file output to the scrubbed output target location.
             createFileAppender(inputs.outputDir, "scrubber.log");
+            executorService = Executors.newFixedThreadPool(inputs.workers);
+            logger.info(Constants.CONSOLE, "Threadpool configured with {} workers.", inputs.workers);
 
             // Get a collection of entries to send parcel out to the task collection
             Vector<TaskEntry> entriesToScrub;

@@ -12,12 +12,14 @@ global-exclude:
   - ".*.gc.*"
 
 remove:
-#  - ".*.tar.gz"
+  - ".*.gz"
 #  - ".*.zip"
 
 tokens:
- - token: "gnieman"
-   include: ["manifest.json"]
+ - token: '\w*.abcd.mydept.mycompany.com'
+ - token: '\w*nyc1234abcd*'
+ - token: '\w*1xyza'
+
 #   exclude: ["manifest.json"]
 # - token: "some sensitive string"
 #   include: "*slowlog*.log"
