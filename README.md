@@ -688,13 +688,13 @@
  Uses the generated index name but gives the cluster a different name:
  
  ```$xslt
-     ./import-monitoring.sh --host 10.0.0.20 -u elastic -p --ssl --input /Users/joe_user/temp/export-20190801-150615.zip -clusterName messed_up_cluster
+     ./import-monitoring.sh --host 10.0.0.20 -u elastic -p --ssl --input /Users/joe_user/temp/export-20190801-150615.zip --clusterName messed_up_cluster
  ```  
  
  Uses a custom index and cluster name:
  
  ```$xslt
-    ./import-monitoring.sh --host 10.0.0.20 -u elastic -p --ssl --input /Users/joe_user/temp/export-20190801-150615.zip  -clusterName big_cluster --indexName big_cluster_2019_10_01    
+    ./import-monitoring.sh --host 10.0.0.20 -u elastic -p --ssl --input /Users/joe_user/temp/export-20190801-150615.zip  --clusterName big_cluster --indexName big_cluster_2019_10_01    
  ```
  
  ## Standard Diagnostic Troubleshooting
