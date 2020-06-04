@@ -16,5 +16,13 @@ public class ScrubTokenEntry {
     public final List<String> exclude;
     public final Pattern pattern;
 
-
+    @Override
+    public String toString() {
+        return "\nScrubTokenEntry{" +
+                "token='" + token + '\'' +
+                ", include=" + include +
+                ", exclude=" + exclude +
+                ", pattern=" + pattern +
+                '}';
+    }
 }

@@ -24,33 +24,48 @@ public class ScrubTask implements Callable<String> {
     }
 
     @Override
-    public String call() throws Exception {
+    public String call() {
+        String result;
+        try {
+            logger.debug(entry.entryName() + " started");
 
-        String result = "";
-        // If it's in remove we not only don't process it we don't write it to the scrubbed archive either
-        if(processor.isRemove(entry.entryName())){
-            logger.info(Constants.CONSOLE, "Removing entry: {}", entry.entryName());
-            return entry.entryName() + ":removed";
+            // If it's in remove we not only don't process it we don't write it to the scrubbed archive either
+            if (processor.isRemove(entry.entryName())) {
+                logger.info(Constants.CONSOLE, "Removing entry: {}", entry.entryName());
+                return entry.entryName() + ":removed";
+            }
+
+            String content = entry.content();
+
+            if (processor.isExclude(entry.entryName())) {
+                result = entry.entryName() + ":excluded";
+                logger.info(Constants.CONSOLE, "Excluded from sanitization: {}", entry.entryName());
+
+            } else {
+                content = processor.processAutoscrub(content);
+                content = processor.processContentWithTokens(content, entry.entryName());
+                result = entry.entryName() + ":sanitized";
+                logger.info(Constants.CONSOLE, "Processed entry: {}", entry.entryName());
+
+            }
+
+            String targetFileName = dir + SystemProperties.fileSeparator + entry.entryName();
+            FileUtils.writeStringToFile(new File(targetFileName), content, "UTF-8");
+
+        } catch (Exception e) {
+            logger.error("Error occurrred processing: {}", entry.entryName(), e);
+            result = "error:" + entry.entryName() + " " + e.getMessage();
         }
 
-        String content = entry.content();
-
-        if( processor.isExclude(entry.entryName())) {
-            result = entry.entryName() + ":excluded";
-            logger.info(Constants.CONSOLE, "Excluded from sanitization: {}", entry.entryName());
-
-        }
-        else{
-            content = processor.processAutoscrub(content);
-            content = processor.processLineWithTokens(content, entry.entryName());
-            result = entry.entryName() + ":sanitized";
-            logger.info(Constants.CONSOLE, "Processed entry: {}", entry.entryName());
-
-        }
-
-        String targetFileName = dir + SystemProperties.fileSeparator + entry.entryName();
-        FileUtils.writeStringToFile(new File(targetFileName), content, "UTF-8");
+        logger.debug(entry.entryName() + " complete");
 
         return result;
+
     }
+
+    @Override
+    public String toString() {
+        return super.toString() + entry.entryName() + ":incomplete";
+    }
+
 }

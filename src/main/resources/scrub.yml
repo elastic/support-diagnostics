@@ -16,9 +16,9 @@ remove:
 #  - ".*.zip"
 
 tokens:
- - token: '\w*.abcd.mydept.mycompany.com'
- - token: '\w*nyc1234abcd*'
- - token: '\w*1xyza'
+ - token: '\w*.phew.sisyphus.tty.org'
+ - token: '\w*IGOTMP3s*'
+ - token: 'unknown'
 
 #   exclude: ["manifest.json"]
 # - token: "some sensitive string"

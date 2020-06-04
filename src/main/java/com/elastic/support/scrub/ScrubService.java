@@ -78,7 +78,7 @@ public class ScrubService extends BaseService {
             List<Future<String>> futures = executorService.invokeAll(tasks);
             futures.forEach ( e -> {
                 try {
-                    logger.info(Constants.CONSOLE, "processed: " + e.get());
+                    logger.debug("processed: " + e.get());
                 } catch (Exception ex) {
                     logger.error(e);
                 }

@@ -27,6 +27,11 @@ public class ScrubProcessor {
     private static Vector<ScrubTokenEntry> tokens = new Vector<>();
     private static ConcurrentHashMap<String, String> clusterInfoCache = new ConcurrentHashMap<>();
     private static ConcurrentHashMap<String, String> tokenCache = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<String, String> ipv4TokenCache = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<String, String> ipv6TokenCache = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<String, String> macTokenCache = new ConcurrentHashMap<>();
+
+
 
     public ScrubProcessor(String nodes) {
 
@@ -104,6 +109,8 @@ public class ScrubProcessor {
                 logger.info(Constants.CONSOLE, "Scrubbing was enabled but no tokens were defined. Bypassing custom token processing.");
             }
         }
+
+        logger.debug(tokens);
 
     }
 
@@ -196,7 +203,7 @@ public class ScrubProcessor {
 
     }
 
-    public String processLineWithTokens(String line, String entry) {
+    public String processContentWithTokens(String content, String entry) {
         for (ScrubTokenEntry token : tokens) {
             if (!token.include.isEmpty()) {
                 boolean filtered = true;
@@ -225,63 +232,100 @@ public class ScrubProcessor {
                     continue;
                 }
             }
-
-            Matcher matcher = token.pattern.matcher(line);
-            if (matcher.find()) {
-                String group = matcher.group();
-                String replacement = tokenCache.computeIfAbsent(group, k -> generateToken(k));
-                logger.trace("{} generated {}", group, replacement);
-                line = matcher.replaceAll(replacement);
+            Matcher matcher = token.pattern.matcher(content);
+            Set<String> tokenHits = new HashSet<>();
+            while(matcher.find()){
+                tokenHits.add(matcher.group());
+            }
+            for(String hit: tokenHits){
+                String replacement = tokenCache.computeIfAbsent(hit, k -> generateToken(k));
+                logger.debug("Entry: {} - Pattern:{}  Found:{}   Replacement: {}", entry, token.pattern.toString(), hit, replacement);
+                content = content.replaceAll(hit, replacement );
             }
 
-        }
-        return line;
-    }
+/*            while (matcher.find()) {
+                String group = matcher.group();
+                String replacement = tokenCache.computeIfAbsent(group, k -> generateToken(k));
+                logger.debug("Entry: {} - Pattern:{}  Found:{}   Replacement: {}", entry, token.pattern.toString(), group, replacement);
+                content = content.replaceFirst(group, replacement);
+            }*/
 
-    public String processMacddresses(String input) {
 
-        String content = input;
-        Pattern pattern = Pattern.compile(Constants.MacAddrRegex);
-        Matcher matcher = pattern.matcher(content);
-        if(matcher.find()){
-            String group = matcher.group();
-            content = content.replaceAll(group, "XX:XX:XX:XX:XX:XX");
+
         }
         return content;
-
     }
 
-    private String processIpv4Addresses(String input) {
+    public String processMacddresses(String content) {
 
-        String content = input;
-        Pattern pattern = Pattern.compile(Constants.IPv4Regex);
+/*        Pattern pattern = Pattern.compile(Constants.MacAddrRegex);
         Matcher matcher = pattern.matcher(content);
 
-        if (matcher.find()) {
+        while(matcher.find()){
             String group = matcher.group();
-            String replacement = tokenCache.computeIfAbsent(group, k -> scrubIPv4(k));
-            content = content.replaceAll(group, replacement);
+            content.replaceAll(group, "XX:XX:XX:XX:XX:XX");
+        }*/
+        content = processTokens(content, macTokenCache, Constants.MacAddrRegex, tokenGen);
+
+        return content;
+
+    }
+
+    private String processIpv4Addresses(String content) {
+
+/*        Pattern pattern = Pattern.compile(Constants.IPv4Regex);
+        Matcher matcher = pattern.matcher(content);
+        Set<String> ips = new HashSet<>();
+        while(matcher.find()){
+            ips.add(matcher.group());
         }
+        for(String ip: ips){
+            String replacement = ipv4TokenCache.computeIfAbsent(ip, k -> scrubIPv4(k));
+            content = content.replaceAll(ip, replacement );
+        }*/
+        content = processTokens(content, ipv4TokenCache, Constants.IPv4Regex, ipv4Gen);
+
 
         return content;
 
     }
 
 
-    private String processIpv6Addresses(String input) {
+    private String processIpv6Addresses(String content) {
 
-        String content = input;
-        Pattern pattern = Pattern.compile(Constants.IPv6Regex);
-        Matcher matcher = pattern.matcher(input);
+/*        Pattern pattern = Pattern.compile(Constants.IPv6Regex);
+        Matcher matcher = pattern.matcher(content);
 
-        if (matcher.find()) {
-            String group = matcher.group();
-            String replacement = tokenCache.computeIfAbsent(group, k -> scrubIPv6(k));
-            content = content.replaceAll(group, replacement);
+        Set<String> ips = new HashSet<>();
+        while(matcher.find()){
+            ips.add(matcher.group());
         }
+        for(String ip: ips){
+            String replacement = ipv6TokenCache.computeIfAbsent(ip, k -> scrubIPv6(k));
+            content = content.replaceAll(ip, replacement );
+        }*/
+        content = processTokens(content, ipv6TokenCache, Constants.IPv6Regex, ipv6Gen);
 
         return content;
     }
+
+    private String processTokens(String content, Map<String, String> cache, String regexString, TokenGenerator generator){
+        Pattern pattern = Pattern.compile(regexString);
+        Matcher matcher = pattern.matcher(content);
+
+        Set<String> tokenHits = new HashSet<>();
+        while(matcher.find()){
+            tokenHits.add(matcher.group());
+        }
+        for(String token: tokenHits){
+            String replacement = cache.computeIfAbsent(token, k -> generator.generate(k));
+            content = content.replaceAll(token, replacement );
+        }
+
+        return content;
+
+    }
+
 
     private String processClusterArtifacts(String input) {
         String content = input;
@@ -309,6 +353,51 @@ public class ScrubProcessor {
         return content;
 
     }
+
+    private TokenGenerator ipv4Gen = new TokenGenerator() {
+        @Override
+        public String generate(String input) {
+            StringBuffer newIp = new StringBuffer();
+            String[] ipSegments = input.split("\\.");
+            for (int i = 0; i < 4; i++) {
+                int set = Integer.parseInt(ipSegments[i]);
+                if (!ipv4.containsKey(set)) {
+                    logger.info("Error converting ip segment {} from address: {}", Integer.toString(set));
+                    throw new RuntimeException("Error scrubbing IP Addresses");
+                }
+                int replace = ipv4.get(set);
+                newIp.append(replace);
+                if (i < 3) {
+                    newIp.append(".");
+                }
+            }
+            return newIp.toString();
+        }
+    };
+
+    private TokenGenerator ipv6Gen = new TokenGenerator() {
+        @Override
+        public String generate(String input) {
+            String[] ipSegments = input.split(":");
+            int sz = ipSegments.length;
+            StringBuilder newIp = new StringBuilder();
+
+            for (int i = 0; i < sz; i++) {
+                newIp.append(generateToken(ipSegments[i]));
+                if (i < (sz - 1)) {
+                    newIp.append(":");
+                }
+            }
+            return newIp.toString();
+        }
+    };
+
+    private TokenGenerator tokenGen = new TokenGenerator() {
+        @Override
+        public String generate(String input) {
+            return generateToken(input);
+        }
+    };
 
 }
 
