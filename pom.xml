@@ -236,6 +236,7 @@
                     <excludes>
                         <exclude>**/*.yml</exclude>
                         <exclude>**/*.xml</exclude>
+                        <exclude>**/*.json</exclude>
                     </excludes>
                     <archive>
                         <manifest>

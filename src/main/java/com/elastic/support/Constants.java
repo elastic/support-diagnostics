@@ -21,18 +21,14 @@ public class Constants {
    public static final String LS_REST = "logstash-rest.yml";
    public static final String MONITORING_REST = "monitoring-rest.yml";
 
-
    public static final String QUERY_CONFIG_PACKAGE = "monitoring-extract/";
+   public static final String TEMPLATE_CONFIG_PACKAGE = "monitoring-extract/templates/";
    public static final String MONITORING_DIR = "monitoring-export";
-   public static final String MONITORING_PREFIX= ".monitoring-es-7-import-";
 
-   public static final String NODES = "nodes.json";
    public static final String DIAG_VERSION = "diagVersion";
 
-   public static final int DEEFAULT_HTTP_PORT = 80;
    public static final int DEEFAULT_HTTPS_PORT = 443;
    public static final int DEEFAULT_PROXY_PORT = 8080;
-
 
    public static final int LOGSTASH_PORT = 9600;
    public static final String[] LOCAL_ADDRESSES = {"127.0.0.1","localhost", "[::1]"};
@@ -51,8 +47,6 @@ public class Constants {
    public static final String linuxPlatform = "linuxOS";
    public static final String macPlatform = "macOS";
 
-   public static final String TAB = "\t";
-
    public final static String local =  "local";
    public final static String api = "api";
    public final static String remote = "remote";
@@ -62,12 +56,10 @@ public class Constants {
    public final static String logstashApi = "logstash-api";
 
    public static final String restInputHost = "rest:InputHost";
-   public static final String restTargetHost = "resTtargetHost";
    public static final String systemCommands = "ssh:SystemCommand";
 
    public static final String runningInIde = "runningInIde";
    public static final String interactiveMsg = "Command line options can be displayed with the --help argument. " +
            "Entering interactive mode.";
-
 
 }

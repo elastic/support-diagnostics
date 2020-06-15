@@ -187,6 +187,9 @@ public class ScrubProcessor {
 
         StringBuilder newToken = new StringBuilder();
         int len = token.length();
+        if(len > 64){
+            len = 64;
+        }
         int passes = 1;
         if (len > 32) {
             passes = (len / 32) + 1;

@@ -3,6 +3,7 @@ package com.elastic.support.monitoring;
 
 import com.elastic.support.BaseConfig;
 import com.elastic.support.Constants;
+import com.elastic.support.util.JsonYamlUtils;
 import com.elastic.support.util.SystemProperties;
 import com.vdurmont.semver4j.Semver;
 import org.apache.logging.log4j.LogManager;
@@ -20,16 +21,26 @@ import java.util.Map;
 public class MonitoringImportConfig extends BaseConfig {
 
     protected int bulkSize ;
-    protected String bulkUri;
-    protected String bulkIndexLine;
+
+    public String monitoringExtractIndexPattern;
+    public String logstashExtractIndexPattern;
+    public String metricbeatExtractIndexPattern;
+
+    public String metricbeatTemplate;
+    public String logstashTemplate;
+    public String esTemplate;
+
+    public List<String> templateList;
 
     Logger logger = LogManager.getLogger(MonitoringImportConfig.class);
 
     public MonitoringImportConfig(Map configuration) {
         super(configuration);
         bulkSize = (Integer) configuration.get("bulk-import-size");
-        bulkUri = (String)configuration.get("bulk-uri");
-        bulkIndexLine = (String)configuration.get("bulk-index-line");
+        monitoringExtractIndexPattern = (String)configuration.get("monitoring-extract-pattern");
+        logstashExtractIndexPattern = (String)configuration.get("logstash-extract-pattern");
+        metricbeatExtractIndexPattern = (String)configuration.get("metricbeatExtractIndexPattern");
+        templateList = (List<String>)configuration.get("import-templates");
 
     }
 

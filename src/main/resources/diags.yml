@@ -113,7 +113,28 @@ docker-container:
   docker-top: "{{dockerPath}} top {{CONTAINER_ID}}"
   docker-inspect: "{{dockerPath}} inspect {{CONTAINER_ID}}"
 
-monitoring-stats:
+monitoring-scroll-size: 1000
+bulk-import-size: 500
+
+import-templates:
+  - "monitoring-es-diag"
+  - "monitoring-logstash-diag"
+  - "metricbeat-system-diag"
+
+monitoring-extract-pattern: ".monitoring-es-7-diag-import"
+logstash-extract-pattern: ".monitoring-logstash-7-diag-import"
+metricbeat-extract-pattern: "metricbeat-7-diag-import"
+
+query-files:
+  - general
+  - index_stats
+  - index_all
+  - cluster_id_check
+  - cluster_ids
+  - metricbeat
+
+monitor-sets:
+  - cluster_state
   - cluster_stats
   - node_stats
   - indices_stats
@@ -123,16 +144,24 @@ monitoring-stats:
   - ccr_stats
   - ccr_auto_follow_stats
 
-monitoring-queryfiles:
-  general: "general.json"
-  index_stats: "index_stats.json"
-  index_all: "index_all.json"
-  cluster_id_check: "cluster_id_check.json"
-  cluster_ids: "cluster_ids.json"
+logstash-sets:
+  - logstash_stats
+  - logstash_state
 
-monitoring-scroll-size: 500
-default-monitoring-index: ".monitoring-es-7"
-bulk-import-size: 250
+metric-sets:
+  - cpu
+  - load
+  - memory
+  #- network
+  #- process
+  #- process_summary
+  #- socket_summary
+  #- entropy
+  - core
+  - diskio
+  #- socket
+  #- service
+  #- users
 
 flight-recorder-es:
   complete:
