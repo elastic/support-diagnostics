@@ -4,7 +4,7 @@
 
     <groupId>com.elasticsearch</groupId>
     <artifactId>support-diagnostics</artifactId>
-    <version>8.0.7</version>
+    <version>8.1.0</version>
     <packaging>jar</packaging>
     <name>Support Diagnostics Utilities</name>
     <properties>
@@ -76,7 +76,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-compress</artifactId>
-            <version>1.19</version>
+            <version>1.20</version>
         </dependency>
 
         <dependency>
@@ -233,6 +233,11 @@
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>3.1.1</version>
                 <configuration>
+                    <excludes>
+                        <exclude>**/*.yml</exclude>
+                        <exclude>**/*.xml</exclude>
+                        <exclude>**/*.json</exclude>
+                    </excludes>
                     <archive>
                         <manifest>
                             <addDefaultImplementationEntries>

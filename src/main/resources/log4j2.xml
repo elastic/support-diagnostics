@@ -10,7 +10,7 @@
                 <MarkerFilter marker="CONSOLE" onMatch="ACCEPT" onMismatch="DENY"/>
             </Filters>
         </Console>
-        <File name="diag" fileName="diag-startup.log"
+        <File name="packaged" fileName="startup.log"
               append="false"
               immediateFlush="true">
             <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>

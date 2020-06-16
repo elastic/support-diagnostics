@@ -1,7 +1,50 @@
+# Comment out to remove from default processing
+auto-scrub:
+  - "ipv4"
+  - "ipv6"
+  - "mac"
+  - "nodeName"
+  - "nodeId"
+  - "clustername"
+
+# Files matching any regex here will be excluded from
+# any sanitization. If you know there's nothing sensitive
+# in there you can save some processing. By default GC
+# logs are not sanitized.
+global-exclude:
+  - ".*.gc.*"
+
+# Files matching any regex here will be removed from
+# the final sanitized product. For instance, if you
+# don't need slow logs and they have a lot of sensitive
+# info you can bypass them completely here.
+remove:
+  - ".*.gz"
+#  - ".*.zip"
+
 tokens:
-# Examples: Do NOT do this in the form of attribute = value
-## Add only the value you wish to replace.
-#  - node-[\d?]*
-#  - cluster-630
-#  - disk1
-#  - Typhoid
+ - token: '\w*.see.sisyphus.rock.org'
+ - token: '\w*IGOTMP3s*'
+ - token: 'unknown'
+
+# For individual tokens you can also specify
+# an include and/or exclude paramater as well.
+# Depending on which you use, it will only check for that
+# token in a file matching the include pattern or
+# will bypass that check for files marked with exclude
+
+# Example
+# Removes the query section between the brackets
+# ONLY for slow log files
+  # tokens:
+   #  - token: "\[.*\]"
+   #    include: ["*slowlog*.log"]
+
+# Example
+# Removes this token everywhere except for
+# log files and manifest.json
+# tokens:
+#  - token: '\w*IGOTMP3s*'
+#    exclude: ["*.log", "manifest.json"]
+#
+

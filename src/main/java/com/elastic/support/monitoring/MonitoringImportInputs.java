@@ -18,13 +18,10 @@ public class MonitoringImportInputs extends ElasticRestClientInputs {
 
     // Start Input Fields
 
-    @Parameter(names = {"--clusterName"}, description = "Overrides the name of the imported cluster.")
+    @Parameter(names = {"--clustername"}, description = "Overrides the name of the imported cluster.")
     protected String clusterName;
 
-    @Parameter(names = {"--indexName"}, description = "Overrides the name of the imported index from the date, appending it to .monitoring-es-7- .")
-    protected String indexName = "diag-import-" + SystemProperties.getUtcDateString();
-
-    @Parameter(names = {"--input"}, description = "Required: The archive that you wish to import into Elastic Monitoring. This must be in the format produced by the diagnostic export utility.")
+    @Parameter(names = {"-i", "--input"}, description = "Required: The archive that you wish to import into Elastic Monitoring. This must be in the format produced by the diagnostic export utility.")
     protected String input;
 
     // End Input Fields
@@ -43,11 +40,6 @@ public class MonitoringImportInputs extends ElasticRestClientInputs {
                 .withMinLength(0)
                 .read("Specify an alternate name for the imported cluster or hit enter to use original cluster name:");
 
-        indexName = ResourceCache.textIO.newStringInputReader()
-                .withMinLength(8)
-                .withDefaultValue(indexName)
-                .read("Specify an alternate index name for the imported index or hit enter for the default generated name:");
-
         input = ResourceCache.textIO.newStringInputReader()
                 .withInputTrimming(true)
                 .withValueChecker((String val, String propname) -> validateRequiredFile(val))
@@ -63,7 +55,6 @@ public class MonitoringImportInputs extends ElasticRestClientInputs {
         List<String> errors = super.parseInputs(args);
 
         errors.addAll(ObjectUtils.defaultIfNull(validateId(clusterName), emptyList));
-        errors.addAll(ObjectUtils.defaultIfNull(validateId(indexName), emptyList));
         errors.addAll(ObjectUtils.defaultIfNull(validateRequiredFile(input), emptyList));
 
         return errors;
@@ -84,7 +75,6 @@ public class MonitoringImportInputs extends ElasticRestClientInputs {
     public String toString() {
         return "MonitoringImportInputs{" +
                 "clusterName='" + clusterName + '\'' +
-                ", indexName='" + indexName + '\'' +
                 ", input='" + input + '\'' +
                 ", proxyHostReader=" + proxyHostReader +
                 '}';

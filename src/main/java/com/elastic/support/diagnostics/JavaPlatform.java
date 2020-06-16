@@ -1,17 +1,10 @@
 package com.elastic.support.diagnostics;
 
 import com.elastic.support.Constants;
-import com.elastic.support.util.SystemProperties;
-import com.elastic.support.util.SystemUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
 import java.io.BufferedReader;
 import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class JavaPlatform {
 

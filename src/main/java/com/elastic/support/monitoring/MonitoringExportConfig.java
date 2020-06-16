@@ -12,10 +12,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class MonitoringExportConfig extends BaseConfig {
 
@@ -26,19 +23,25 @@ public class MonitoringExportConfig extends BaseConfig {
     protected String monitoringScrollUri;
     protected String monitoringScrollTtl;
     protected int  monitoringScrollSize;
-    protected int bulkSize ;
-    protected String bulkUri;
-    protected String bulkIndexLine;
     protected Semver semver;
+
+    protected List<String> queryFiles;
+    protected List<String> monitorSets;
+    protected List<String> logstashSets;
+    protected List<String> metricSets;
 
     Logger logger = LogManager.getLogger(MonitoringExportConfig.class);
 
     public MonitoringExportConfig(Map configuration) {
+
         super(configuration);
-        monitoringStats = (List<String>) configuration.get("monitoring-stats");
+
+        monitorSets = (List<String>) configuration.get("monitor-sets");
+        metricSets = (List<String>) configuration.get("metric-sets");
+        logstashSets = (List<String>) configuration.get("logstash-sets");
+        queryFiles = (List<String>) configuration.get("query-files");
         monitoringScrollSize = (Integer)configuration.get("monitoring-scroll-size");
-        Map<String, String> queryFiles =(Map<String, String>) configuration.get("monitoring-queryfiles");
-        queries = getQueriesFromFiles(queryFiles);
+        queries = getQueriesFromFiles();
 
     }
 
@@ -69,16 +72,30 @@ public class MonitoringExportConfig extends BaseConfig {
         return monitoringStats;
     }
 
-    public Map<String, String> getQueries() {
-        return queries;
+    public List<String> getStatsByType(String type){
+
+        List<String> stats = new ArrayList<>();
+        switch (type){
+            case "all" :
+                stats.addAll(monitorSets);
+                stats.addAll(logstashSets);
+                stats.addAll(metricSets);
+                return stats;
+            case "metric" :
+                return metricSets;
+            default:
+                stats.addAll(monitorSets);
+                stats.addAll(logstashSets);
+                return stats;
+        }
     }
 
-    private Map<String, String> getQueriesFromFiles(Map<String, String> queryFiles) {
+    private Map<String, String> getQueriesFromFiles() {
 
         Map<String, String> buildQueries = new LinkedHashMap<>();
-        for (Map.Entry<String, String> entry : queryFiles.entrySet()) {
+        for (String entry: queryFiles) {
             StringBuilder resultStringBuilder = new StringBuilder();
-            String  path = Constants.QUERY_CONFIG_PACKAGE + entry.getValue();
+            String  path = Constants.QUERY_CONFIG_PACKAGE + entry + ".json";
             InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(path);
 
             try {
@@ -93,7 +110,7 @@ public class MonitoringExportConfig extends BaseConfig {
                 logger.info("Bad config", e);
             }
 
-            buildQueries.put(entry.getKey(), resultStringBuilder.toString());
+            buildQueries.put(entry, resultStringBuilder.toString());
 
         }
 

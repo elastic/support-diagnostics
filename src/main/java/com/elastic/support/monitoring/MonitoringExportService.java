@@ -85,12 +85,14 @@ public class MonitoringExportService extends ElasticRestClientService {
                 return;
             }
 
-            if (StringUtils.isEmpty(inputs.clusterId)) {
-                throw new DiagnosticException("missingClusterId");
+            if(inputs.type.equalsIgnoreCase("all") || inputs.type.equalsIgnoreCase("monitoring")){
+                if (StringUtils.isEmpty(inputs.clusterId)) {
+                    throw new DiagnosticException("missingClusterId");
+                }
+                validateClusterId(inputs.clusterId, config, client, monitoringUri);
             }
 
-            validateClusterId(inputs.clusterId, config, client, monitoringUri);
-            runExportQueries(tempDir, client, config, inputs.queryStartDate, inputs.queryEndDate, inputs.clusterId, versionedRestCalls);
+            runExportQueries(tempDir, client, config, inputs, versionedRestCalls);
 
         } catch (DiagnosticException de) {
             switch (de.getMessage()) {
@@ -191,37 +193,51 @@ public class MonitoringExportService extends ElasticRestClientService {
         }
     }
 
-    private void runExportQueries(String tempDir, RestClient client, MonitoringExportConfig config, String queryStartDate, String queryEndDate, String clusterId, Map<String, RestEntry> restCalls) {
+    private void runExportQueries(String tempDir, RestClient client, MonitoringExportConfig config, MonitoringExportInputs inputs, Map<String, RestEntry> restCalls) {
 
         //Get the monitoring stats labels and the general query.
-        List<String> statsFields = config.monitoringStats;
+        List<String> statsFields = config.getStatsByType(inputs.type);
 
         String monitoringScroll = Long.toString(config.monitoringScrollSize);
-        String general = config.queries.get("general");
-        String indexStats = config.queries.get("index_stats");
         String monitoringStartUri = restCalls.get("monitoring-start-scroll-uri").url;
+        String metricbeatStartUri = restCalls.get("metricbeat-start-scroll-uri").url;
         String monitoringScrollUri = restCalls.get("monitoring-scroll-uri").url;
 
         for (String stat : statsFields) {
+            String startUri;
             logger.info(Constants.CONSOLE,  "Now extracting {}...", stat);
-            String statFile = tempDir + SystemProperties.fileSeparator + stat + ".json";
+            String statFile;
             String query;
-            if (stat.equals("index_stats")) {
-                query = indexStats;
-            } else {
-                query = general;
+            if(stat.equalsIgnoreCase("index_stats")){
+                query = config.queries.get("index_stats");
+                startUri = monitoringStartUri.replace("{{type}}", "es");
+                statFile = tempDir + SystemProperties.fileSeparator + stat + ".json";
+            }
+            else if (config.logstashSets.contains(stat)) {
+                query = config.queries.get("general");
+                startUri = monitoringStartUri.replace("{{type}}", "logstash");
+                statFile = tempDir + SystemProperties.fileSeparator + stat + ".json";
+            }
+            else if(config.metricSets.contains(stat)){
+                query = config.queries.get("metricbeat");
+                startUri = metricbeatStartUri;
+                statFile = tempDir + SystemProperties.fileSeparator + "metricbeat-" + stat + ".json";
+            }
+            else{
+                query = config.queries.get("general");
+                startUri = monitoringStartUri.replace("{{type}}", "es");
+                statFile = tempDir + SystemProperties.fileSeparator + stat + ".json";
             }
 
             query = query.replace("{{type}}", stat);
             query = query.replace("{{size}}", monitoringScroll);
-            query = query.replace("{{start}}", queryStartDate);
-            query = query.replace("{{stop}}", queryEndDate);
-            query = query.replace("{{clusterId}}", clusterId);
-
+            query = query.replace("{{start}}", inputs.queryStartDate);
+            query = query.replace("{{stop}}", inputs.queryEndDate);
+            query = query.replace("{{clusterId}}", inputs.clusterId);
 
             PrintWriter pw = null;
             try {
-                RestResult restResult = new RestResult(client.execPost(monitoringStartUri, query), monitoringStartUri);
+                RestResult restResult = new RestResult(client.execPost(startUri, query), startUri);
                 if (restResult.getStatus() != 200) {
                     logger.error(Constants.CONSOLE,  "Initial retrieve for stat: {} failed with status: {}, reason: {}, bypassing and going to next call.", stat, restResult.getStatus(), restResult.getReason());
                     logger.error(Constants.CONSOLE,  "Bypassing.");

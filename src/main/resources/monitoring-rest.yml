@@ -5,8 +5,13 @@ monitoring-uri:
 
 monitoring-start-scroll-uri:
   versions:
-    "< 7.0.0":  "/.monitoring-es*/_search?scroll=2m"
-    ">= 7.0.0": "/.monitoring-es*/_search?scroll=2m&rest_total_hits_as_int=true"
+    "< 7.0.0":  "/.monitoring-{{type}}*/_search?scroll=2m"
+    ">= 7.0.0": "/.monitoring-{{type}}*/_search?scroll=2m&rest_total_hits_as_int=true"
+
+metricbeat-start-scroll-uri:
+  versions:
+    "< 7.0.0":  "/metricbeat*/_search?scroll=2m"
+    ">= 7.0.0": "/metricbeat**/_search?scroll=2m&rest_total_hits_as_int=true"
 
 monitoring-scroll-uri:
   versions:

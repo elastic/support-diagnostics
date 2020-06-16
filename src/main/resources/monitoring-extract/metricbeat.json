@@ -1,0 +1,28 @@
+{
+  "size": {{size}},
+    "query":{
+      "bool": {
+        "filter": [
+          { "range":
+            { "@timestamp":
+              {
+                "gte": "{{start}}",
+                "lte": "{{stop}}"
+              }
+            }
+          },
+          {
+            "term": {"metricset.name": "{{type}}"}
+          }
+        ]
+      }
+    },
+    "sort": [
+        {
+          "@timestamp":
+          {
+            "order": "asc"
+          }
+        }
+    ]
+}

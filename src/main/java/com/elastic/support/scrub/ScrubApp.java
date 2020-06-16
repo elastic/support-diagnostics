@@ -3,6 +3,7 @@ package com.elastic.support.scrub;
 import com.elastic.support.Constants;
 import com.elastic.support.diagnostics.DiagnosticInputs;
 import com.elastic.support.diagnostics.ShowHelpException;
+import com.elastic.support.diagnostics.commands.GenerateManifest;
 import com.elastic.support.monitoring.MonitoringImportInputs;
 import com.elastic.support.monitoring.MonitoringImportService;
 import com.elastic.support.util.ResourceCache;
@@ -37,6 +38,7 @@ public class ScrubApp {
                 }
             }
             ResourceCache.terminal.dispose();
+            logger.info(Constants.CONSOLE, "Using version: {} of diagnostic-utiliy", GenerateManifest.class.getPackage().getImplementationVersion());
             new ScrubService().exec(scrubInputs);
         } catch (ShowHelpException she){
             SystemUtils.quitApp();

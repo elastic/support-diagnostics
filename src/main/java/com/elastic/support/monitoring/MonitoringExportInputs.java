@@ -41,6 +41,9 @@ public class MonitoringExportInputs extends ElasticRestClientInputs {
     @Parameter(names = {"--list"}, description = "List the clusters available on the monitoring cluster.")
     boolean listClusters = false;
 
+    @Parameter(names = {"--type"}, description = "Enter monitoring, metrics, or all.")
+    String type = "monitoring";
+
     // End Input Fields
 
 
@@ -59,6 +62,11 @@ public class MonitoringExportInputs extends ElasticRestClientInputs {
 
         operation = operation.toLowerCase();
         if(operation.equals("extract")){
+            type = ResourceCache.textIO.newStringInputReader()
+                    .withInputTrimming(true)
+                    .withDefaultValue("monitoring")
+                    .read(SystemProperties.lineSeparator + "Enter monitoring for ES and Logstash monitoring data, metric for metricbeat system data, or all.");
+
             clusterId = ResourceCache.textIO.newStringInputReader()
                     .withInputTrimming(true)
                     .withValueChecker((String val, String propname) -> validateCluster(val))

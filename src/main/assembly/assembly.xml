@@ -33,9 +33,9 @@
 
         <fileSet>
             <directory>${project.basedir}/src/main/resources</directory>
-            <outputDirectory>.</outputDirectory>
+            <outputDirectory>./config</outputDirectory>
             <includes>
-                <include>scrub.yml</include>
+                <include>**/*</include>
             </includes>
         </fileSet>
 

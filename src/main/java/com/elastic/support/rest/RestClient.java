@@ -64,6 +64,7 @@ public class RestClient implements Closeable {
 
     public HttpResponse execGet(String query) {
         HttpGet httpGet = new HttpGet(query);
+        logger.debug(query);
         return execRequest(httpGet);
     }
 
@@ -86,6 +87,7 @@ public class RestClient implements Closeable {
             httpPost.setEntity(entity);
             httpPost.setHeader("Accept", "application/json");
             httpPost.setHeader("Content-type", "application/json");
+            logger.debug(uri + SystemProperties.fileSeparator + payload);
             return execRequest(httpPost);
         } catch (UnsupportedEncodingException e) {
             logger.error(Constants.CONSOLE,  "Error with json body.", e);
@@ -95,6 +97,8 @@ public class RestClient implements Closeable {
 
     public HttpResponse execDelete(String uri) {
         HttpDelete httpDelete = new HttpDelete( uri);
+        logger.debug(uri);
+
         return execRequest(httpDelete);
     }
 
