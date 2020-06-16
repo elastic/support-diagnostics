@@ -18,8 +18,6 @@ public class TestDockerAwareness {
     @Test
     public void testDockerAwareness() {
 
-        JsonNode node = JsonYamlUtils.createJsonNodeFromString("{ }");
-        System.out.println(node.isEmpty());
 
     }
 }

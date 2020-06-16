@@ -18,10 +18,10 @@ public class MonitoringImportInputs extends ElasticRestClientInputs {
 
     // Start Input Fields
 
-    @Parameter(names = {"--clusterName"}, description = "Overrides the name of the imported cluster.")
+    @Parameter(names = {"--clustername"}, description = "Overrides the name of the imported cluster.")
     protected String clusterName;
 
-    @Parameter(names = {"--input"}, description = "Required: The archive that you wish to import into Elastic Monitoring. This must be in the format produced by the diagnostic export utility.")
+    @Parameter(names = {"-i", "--input"}, description = "Required: The archive that you wish to import into Elastic Monitoring. This must be in the format produced by the diagnostic export utility.")
     protected String input;
 
     // End Input Fields

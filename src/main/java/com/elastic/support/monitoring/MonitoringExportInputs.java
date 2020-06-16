@@ -65,7 +65,7 @@ public class MonitoringExportInputs extends ElasticRestClientInputs {
             type = ResourceCache.textIO.newStringInputReader()
                     .withInputTrimming(true)
                     .withDefaultValue("monitoring")
-                    .read(SystemProperties.lineSeparator + "Enter monitoring for standard monitoring data, metric for metricbeat system data, or all.");
+                    .read(SystemProperties.lineSeparator + "Enter monitoring for ES and Logstash monitoring data, metric for metricbeat system data, or all.");
 
             clusterId = ResourceCache.textIO.newStringInputReader()
                     .withInputTrimming(true)

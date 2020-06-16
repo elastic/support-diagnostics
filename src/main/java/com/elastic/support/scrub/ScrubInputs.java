@@ -21,7 +21,7 @@ public class ScrubInputs extends BaseInputs {
     private static Logger logger = LogManager.getLogger(ScrubInputs.class);
 
     // Start Input Fields
-    @Parameter(names = {"--input"}, description = "Required field. Full path to the archive file, directory, or individual file to be scrubbed.")
+    @Parameter(names = {"-i", "--input"}, description = "Required field. Full path to the archive file, directory, or individual file to be scrubbed.")
     public String scrub;
 
     @Parameter(names = {"--workers"}, description = "Optional field. How many processing instances to run. Defaults to the number of detected cores.")

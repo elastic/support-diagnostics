@@ -15,6 +15,9 @@
        - [Remote Execution Options](#remote-execution-options)
        - [Usage Examples](#usage-examples)
        - [Customizing What Is Collected](#customizing-what-is-collected)
+           - [The Config Directory](#the-config-directory)
+           - [Removing Or Modifying Calls](#removing-or-modifying-calls)
+           - [Preventing Retries](#preventing-retries)
        - [Executing Scripted Runs](#executing-scripted-runs)
    - [Docker](#docker)
      - [Elasticsearch Deployed In Docker Containers](#elasticsearch-deployed-in-docker-containers)
@@ -395,11 +398,32 @@
    ```$xslt
    ./diagnostics.sh --host 10.0.0.20 --type remote -u someuser --password --ssl --remoteUser someuser --keyFile "~.ssh/es_rsa" --bypassDiagVerify
    ```  
- 
+  
+  Executing against a cloud cluster. Note that in this case we use 9243 for the port, disable host name verification and force the type to strictly api calls.
+  
+```$xslt
+./diagnostics.sh --host 2775abprd8230d55d11e5edc86752260dd.us-east-1.aws.found.io -u elastic -p --port 9243 --ssl --type api --noVerify
+```
+
+    
  #### Customizing What Is Collected
  
- The `diag.yml`, `elasticsearch-rest.yml`, and `logstash-rest.yml` files in the `/lib/support-diagnostics-x.x.x.jar` contain all the REST and system commands that will be run. Versioning and OS versioning in the file ties these commands to a unique deployment. You can extract these files and remove commands you do not wish to run as well as adding or modifying. Place this revised file in the directory containing the diagnostics.sh or diagnostic.bat script and it will override the settings contained in the jar.
+ ##### The Config Directory
  
+ All configuration used by the utility is located the config _/config_ under the folder created when the diagnostic utility was unzipped. These can be modified to change some behaviors in the diagnostic utility. 
+ The *-rest.yml files all contain queries that executed against the cluster being diagnosed. They are versioned, the the Elasticsearch calls have additional modifiers that can be used to further
+ customize the retrievals. The diags.yml file has generalized configuration information, and scrub.yml can be used to drive the sanitization function.  
+ 
+ ##### Removing Or Modifying Calls
+ 
+ To prevent a call from being executed or modify the results via the syntax, simple comment out, remove or change the entry. You can also add a completely different entry. Make sure that the key 
+ you use for that call does not overlap with another one already used. The file name of the output that will be packaged in the diag will be derived from that key.
+ 
+ ##### Preventing Retries
+ 
+ At times you may want to compress the time frames for a diagnostic run and do not want multiple retry attempts if the first one fails. These will only be executed if a REST call within the 
+ configuration file has a _retry: true_ parameter in its configuration. If this setting exists simply comment it out or set it to false to disable the retry.
+   
  #### Executing Scripted Runs
  
  Executing the diagnostic via a script passing in all parameters at a time but passwords must currently be sent in via plain text so it is not recommended unless you have the proper security mechanisms in place to safeguard your credentials. The parameters:<br/> --passwordText, --pkiPassText, --proxyPassText, --pkiPassText, --remotePassText, and --keyFilePassText can be used instead of their switch parameter equivalents to send in a value rather than prompt for a masked password. These are not displayed via the help or on the command line options table because we do not encourage their use unless you absolutely need to have this functionality.
@@ -439,10 +463,12 @@
  ### Running The Santizer
  
  - Start with a generated diagnostic archive from Support Diagnostics 6.4 or later and an installation of the latest diagnostic utility.
- - Add any tokens for text you wish to conceal to your config file. By default the utility will look for a file named `scrub.yml` in the working directory but you can choose any name or location that is accessible by the utility.
- - Run the utility, inputing the full absolute path the archive or single file you wish to process. Options are described below.
+ - Add any tokens for text you wish to conceal to your config file. The utility will look for a file named `scrub.yml` located in the /config directory within the unzipped uutility dir. It must reside in this location.
+ - Run the utility, inputing the full absolute path the archive, directory, or single file you wish to process. Options are described below.
+ - The sanitization process will check for the number of processors on the host it is run on and create a worker per processor to distribute the load. If you wish to override this it can be done via the command line --workers option.
  - If you are processing a large cluster's diagnostic, this may take a while to run, and you may need to use the `DIAG_JAVA_OPTS` environment variable to increase the size of the Java heap if processing is extremely slow or you see OutOfMemoryExceptions.
- - When running against a standard diagnostic package, it will re-archive the file with "scrubbed-" prepended to the  name.  Single files will be written to the output directory prepended with _scrubbed-_.  
+ - You can bypass specified files from processing, remove specified files from the sanitized archive altogether, and include or exclude certain file types from sanitization on a token by token basis. See the scrub file for examples.
+ - When running against a standard diagnostic package, it will re-archive the file with "scrubbed-" prepended to the  name.  Single files and directories will be enclosed within a new archive .  
  
  #### Sanitization Options
  
@@ -456,15 +482,9 @@
  </thead>
  
  <tr>
-   <td width="20%" align="left" valign="top">-a<br/>--archive</td>
-   <td width="50%" align="left" valign="top"> An absolute path to the archive file you wish to sanitize, Required if a single file is not specified. Use quotes if there are spaces in the directory name.</td>
-   <td width="30%" align="left" valign="top">-a "/home/some developer/diagnostic archives/diagnostics-20191014-172051.tar.gz"</td>
- </tr>
- 
- <tr>
-   <td width="20%" align="left" valign="top">`-i<br/>--infile</td>
-   <td width="50%" align="left" valign="top">An absolute path to the individual file you wish to sanitize. Required if a diagnostic archive file is not specified. Use quotes if there are spaces in the directory name.</td>
-   <td width="30%" align="left" valign="top">--infile /home/admin/diags/diagnostics-20191014-172051/logs/elasticsearch.log</td>
+   <td width="20%" align="left" valign="top">`-i<br/>--input</td>
+   <td width="50%" align="left" valign="top">An absolute path to the diagnostic archive, directory, or individual file you wish to sanitize. All contents of the archive or directory are examined by default. Use quotes if there are spaces in the directory name.</td>
+   <td width="30%" align="left" valign="top">--input /home/admin/diags/diagnostics-20191014-172051/logs/elasticsearch.log <br> -i /home/admin/local-diagnostics-2020-06-06.zip< <br> --input "/home/admin/collected diags/local-diagnostics-2020-06-06"/td>
  </tr>
  
  <tr>
@@ -474,9 +494,9 @@
  </tr>
  
  <tr>
-   <td width="20%" align="left" valign="top">`-c<br/>--config</td>
-   <td width="50%" align="left" valign="top">The configuration file containing any text tokens you wish to conceal. These can be literals or regex's. The default is the scrub.yml contained in the jar distribution. Use quotes if there are spaces in the directory name.</td>
-   <td width="30%" align="left" valign="top">-c "/Users/Joe Admin/diagnostics/scrub.yml"</td>
+   <td width="20%" align="left" valign="top">--workers</td>
+   <td width="50%" align="left" valign="top">The utility will check the host it is being fun on for number of processors and create an equal number of workers to parallelize the processing. This parameter allows you to increase or reduce this number.</td>
+   <td width="30%" align="left" valign="top">-- workers 20</td>
  </tr>
  </table>  
  
@@ -494,21 +514,11 @@
    ./scrub.sh -a /Users/rdavies/diagoutput/diagnostics-20180621-161231.tar.gz -o /home/adminuser/sanitized-diags -c /home/adminuser/sanitized-diags/scrub.yml
    ```  
  
- With a token file processing a single log file:  
+ With a token file processing a single log file and using a single worker:  
  
    ```$xslt
-   ./scrub.sh -i /home/adminuser/elasticsearch.log -o /home/adminuser/sanitized-diags -c /home/adminuser/sanitized-diags/scrub.yml
+   ./scrub.sh -i /home/adminuser/elasticsearch.log -o /home/adminuser/sanitized-diags --workers 1
    ```  
- 
- Sample token scrub file entries:  
- 
-   ```$xslt
-   tokens:
-     - 'node-[\d?]-'
-     - 'cluster-630'
-     - 'disk1'
-     - 'data-one'
-   ```
  
  ## Extracting Time Series Diagnostics From Monitoring
  
@@ -530,11 +540,12 @@
  
  To extract monitoring data you need to connect to a monitoring cluster in exactly the same way you do with a normal cluster. Therefore all the same standard and extended authentication parameters from running a standard diagnostic also apply here with some additional parameters required to determine what data to extract and how much.  A cluster_id is required. If you don't know the one for the cluster you wish to extract data from run the extract scrtipt with the `--list` parameter and it will display a list of clusters available. The range of data is determined via the cutoffDate, cutoffTime and interval parameters. The cutoff date and time will designate the end of a time segment you wish to view the monitoring data for. The utility will take that cuttof date and time, subtract supplied interval hours, and then use that generated start date/time and the input end date/time to determine the start and stop points of the monitoring extract.
  
- As with a stanard diagnostics the superuser role for Elasticsearch authentication is recommended. Sudo execution of the utility should not be necessary. 
+ As with a standard diagnostics the superuser role for Elasticsearch authentication is recommended. Sudo execution of the utility should not be necessary. 
  
- The monitoring indices types being collected are as follows: cluster_stats, node_stats, indices_stats, index_stats, shards, job_stats, ccr_stats, and ccr_auto_follow_stats.  
+ The monitoring indices types being collected are as follows: cluster_stats, node_stats, indices_stats, index_stats, shards, job_stats, ccr_stats, and ccr_auto_follow_stats. If Logstash monitoring
+ information exists for the specified cluster it will also be collected. 
  
- Metricbeat information is not available at this time.  
+ Metricbeat system information can also be collected by specifying the input type as _metric_ or collecting monitoring data as well with _all_.
  
  ### Monitoring Extract Options  
  
@@ -552,6 +563,12 @@
    <td width="50%" align="left" valign="top">The cluster_id of the cluster you wish to retrieve data for. Because multiple clusters may be monitored this is necessary to retrieve the correct subset of data. If you are not sure, see the --list option example below to see which clusters are available.</td>
    <td width="30%" align="left" valign="top">--id gELr3Yv1RvuW4v4fZq73Dg</td>
  </tr>
+ 
+  <tr>
+    <td width="20%" align="left" valign="top">--type</td>
+    <td width="50%" align="left" valign="top">What kind of information to collect. Valid options are monitoring, metric, or all. Default is monitoring only.</td>
+    <td width="30%" align="left" valign="top">--type monitoring</td>
+  </tr>
  
  <tr>
    <td width="20%" align="left" valign="top">--interval</td>
@@ -599,10 +616,10 @@
      ./export-monitoring.sh --host 10.0.0.20 -u elastic -p --ssl --id 37G473XV7843 --interval 8
  ```
  
- Specifies a specific date, time and interval:  
+ Specifies a specific date, time and interval and gets metricbeat as well:  
  
  ```$xslt
-     ./export-monitoring.sh --host 10.0.0.20 -u elastic -p --ssl --id 37G473XV7843 --cutoffDate 2019-08-25 --cutoffTime 08:30 --interval 10
+     ./export-monitoring.sh --host 10.0.0.20 -u elastic -p --ssl --id 37G473XV7843 --cutoffDate 2019-08-25 --cutoffTime 08:30 --interval 10 --type all
  ```
  
  Lists the clusters available in this monitoring cluster
@@ -640,6 +657,9 @@
  
  Only a monitoring export archive produced by the diagnostic utility is supported. It will not work with a standard diagnostic bundle or a custom archive.  
  
+ A specialized template will be used to make sure the indexed data is usuable by Kibana. If you've adjusted the monitoring index patterns to something other than .monitoring-es-7, .monitoring-logstash-7, or metricbeat- you will need to adjust the index template name in the
+ diags.yml file, as well as the indexing templates contained in the monitoring-extract/templates directory.
+ 
  ### Running The Monitoring Data Import  
  
  Similar to the extract, you must provide a target host and authentication parameters for the Elasticsearch cluster that will receive the monitoring data. The only required additional parameter is the path to the archive you wish to import. If you have multiple clusters you may designate a unique index name. For instance, if you wish to see two separate weeks. of extracts separately you could give each a unique cluster name. Such as logging-cluster-05-01 and logging cluster 05-08. You can also override the actual monitoring index name used if that assists in managing separate imports. Whatever value you use will be appended to `.monitoring-es-7-`. If you do not specify this parameter, the imported data will be indexed into the standard monitoring index name format with the current date appended. No spaces in the cluster or index names are allowed.
@@ -658,21 +678,15 @@
  </thead>
  
  <tr>
-   <td width="20%" align="left" valign="top">--input</td>
+   <td width="20%" align="left" valign="top">-i <br></br>--input</td>
    <td width="50%" align="left" valign="top">The absolute path the to archive containing extracted monitoring data. Paths with spaces should be contained in quotes.</td>
    <td width="30%" align="left" valign="top">--input /data/monitoring-export-20200106-161558.tar.gz</td>
  </tr>
  
  <tr>
-   <td width="20%" align="left" valign="top">--clusterName</td>
-   <td width="50%" align="left" valign="top">An alternative clustername to be used when displaying the cluster data in monitoring. Default is the existing clusterName. No spaces allowed.</td>
+   <td width="20%" align="left" valign="top">--clustername</td>
+   <td width="50%" align="left" valign="top">An alternative cluster name to be used when displaying the cluster data in monitoring. Default is the existing clusterName. No spaces allowed.</td>
    <td width="30%" align="left" valign="top">--clustername testCluster</td>
- </tr>
- 
- <tr>
-   <td width="20%" align="left" valign="top">--indexName</td>
-   <td width="50%" align="left" valign="top">An alternative clustername to be used when displaying the cluster data in monitoring. Default is the existing index name template including the date. No spaces allowed.</td>
-   <td width="30%" align="left" valign="top">--indexName myImportedIndex</td>
  </tr>
  
  </table>  
