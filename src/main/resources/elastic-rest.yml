@@ -329,6 +329,11 @@ ml_datafeeds:
     ">= 5.0.0 < 7.0.0": "/_xpack/ml/datafeeds?pretty"
     ">= 7.0.0": "/_ml/datafeeds?pretty"
 
+ml_datafeeds_stats:
+  subdir: "commercial"
+  versions:
+    ">= 7.4.0": "/_ml/datafeeds/_stats?pretty"
+
 ml_dataframe:
   subdir: "commercial"
   versions:
