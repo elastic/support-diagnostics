@@ -5,7 +5,7 @@ auto-scrub:
   - "mac"
   - "nodeName"
   - "nodeId"
-  - "clustername"
+  - "clusterName"
 
 # Files matching any regex here will be excluded from
 # any sanitization. If you know there's nothing sensitive
@@ -23,9 +23,11 @@ remove:
 #  - ".*.zip"
 
 tokens:
- - token: '\w*.see.sisyphus.rock.org'
- - token: '\w*IGOTMP3s*'
- - token: 'unknown'
+## Example tokens - regex or literal.
+## Checked in every file
+# - token: '\w*.sisyphus.rock.org'
+# - token: '\w*IGOTMP3s*'
+# - token: 'unknown'
 
 # For individual tokens you can also specify
 # an include and/or exclude paramater as well.
