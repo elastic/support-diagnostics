@@ -495,7 +495,7 @@
  
  <tr>
    <td width="20%" align="left" valign="top">--workers</td>
-   <td width="50%" align="left" valign="top">The utility will check the host it is being fun on for number of processors and create an equal number of workers to parallelize the processing. This parameter allows you to increase or reduce this number.</td>
+   <td width="50%" align="left" valign="top">The utility will check the host it is being run on for number of processors and create an equal number of workers to parallelize the processing. This parameter allows you to increase or reduce this number.</td>
    <td width="30%" align="left" valign="top">-- workers 20</td>
  </tr>
  </table>  
@@ -505,13 +505,13 @@
  With no tokens specified, writing the same directory as the diagnostic:
  
    ```$xslt
-   ./scrub.sh -a /home/adminuser/diagoutput/diagnostics-20180621-161231.tar.gz`
+   ./scrub.sh -i /home/adminuser/diagoutput/diagnostics-20180621-161231.tar.gz`
    ```
  
  With a token file writing to a specific output directory:  
  
    ```$xslt
-   ./scrub.sh -a /Users/rdavies/diagoutput/diagnostics-20180621-161231.tar.gz -o /home/adminuser/sanitized-diags -c /home/adminuser/sanitized-diags/scrub.yml
+   ./scrub.sh -i /Users/rdavies/diagoutput/diagnostics-20180621-161231.tar.gz -o /home/adminuser/sanitized-diags -c /home/adminuser/sanitized-diags/scrub.yml
    ```  
  
  With a token file processing a single log file and using a single worker:  
