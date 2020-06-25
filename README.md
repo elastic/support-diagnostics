@@ -502,23 +502,27 @@
  
  #### Sanitization Examples  
  
- With no tokens specified, writing the same directory as the diagnostic:
+ Writing output from a diagnostic zip file to the working directory with the workers determined dynamically:
  
    ```$xslt
-   ./scrub.sh -i /home/adminuser/diagoutput/diagnostics-20180621-161231.tar.gz`
+   ./scrub.sh -i /home/adminuser/diagoutput/diagnostics-20180621-161231.zip
    ```
  
- With a token file writing to a specific output directory:  
+ Writing output from a diagnostic zip file in a directory with spaces to a specific directory with the workers determined dynamically:  
  
    ```$xslt
-   ./scrub.sh -i /Users/rdavies/diagoutput/diagnostics-20180621-161231.tar.gz -o /home/adminuser/sanitized-diags -c /home/adminuser/sanitized-diags/scrub.yml
+   ./scrub.sh -i '/Users/adminuser/diagnostic output/diagnostics-20180621-161231.zip' -o /home/adminuser/sanitized-diags -c /home/adminuser/sanitized-diags/scrub.yml
    ```  
  
- With a token file processing a single log file and using a single worker:  
+ Processing a single log file and using a single worker:  
  
    ```$xslt
    ./scrub.sh -i /home/adminuser/elasticsearch.log -o /home/adminuser/sanitized-diags --workers 1
    ```  
+  Processing a directory and using specific number of workers:  
+  
+    ```$xslt
+    ./scrub.sh -i /home/adminuser/log-files -o /home/adminuser/sanitized-diags --workers 6
  
  ## Extracting Time Series Diagnostics From Monitoring
  
