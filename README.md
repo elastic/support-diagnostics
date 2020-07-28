@@ -399,11 +399,11 @@
    ./diagnostics.sh --host 10.0.0.20 --type remote -u someuser --password --ssl --remoteUser someuser --keyFile "~.ssh/es_rsa" --bypassDiagVerify
    ```  
   
-  Executing against a cloud cluster. Note that in this case we use 9243 for the port, disable host name verification and force the type to strictly api calls.
+ Executing against a cloud cluster. Note that in this case we use 9243 for the port, disable host name verification and force the type to strictly api calls.
   
-```$xslt
-./diagnostics.sh --host 2775abprd8230d55d11e5edc86752260dd.us-east-1.aws.found.io -u elastic -p --port 9243 --ssl --type api --noVerify
-```
+   ```$xslt
+   ./diagnostics.sh --host 2775abprd8230d55d11e5edc86752260dd.us-east-1.aws.found.io -u elastic -p --port 9243 --ssl --type api --noVerify
+   ```
 
     
  #### Customizing What Is Collected
@@ -482,7 +482,7 @@
  </thead>
  
  <tr>
-   <td width="20%" align="left" valign="top">`-i<br/>--input</td>
+   <td width="20%" align="left" valign="top">-i<br/>--input</td>
    <td width="50%" align="left" valign="top">An absolute path to the diagnostic archive, directory, or individual file you wish to sanitize. All contents of the archive or directory are examined by default. Use quotes if there are spaces in the directory name.</td>
    <td width="30%" align="left" valign="top">--input /home/admin/diags/diagnostics-20191014-172051/logs/elasticsearch.log <br> -i /home/admin/local-diagnostics-2020-06-06.zip< <br> --input "/home/admin/collected diags/local-diagnostics-2020-06-06"/td>
  </tr>
@@ -519,10 +519,11 @@
    ```$xslt
    ./scrub.sh -i /home/adminuser/elasticsearch.log -o /home/adminuser/sanitized-diags --workers 1
    ```  
-  Processing a directory and using specific number of workers:  
+ Processing a directory and using specific number of workers:  
   
-    ```$xslt
-    ./scrub.sh -i /home/adminuser/log-files -o /home/adminuser/sanitized-diags --workers 6
+   ```$xslt
+   ./scrub.sh -i /home/adminuser/log-files -o /home/adminuser/sanitized-diags --workers 6
+   ```
  
  ## Extracting Time Series Diagnostics From Monitoring
  
