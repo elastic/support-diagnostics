@@ -4,12 +4,12 @@
 
     <groupId>com.elasticsearch</groupId>
     <artifactId>support-diagnostics</artifactId>
-    <version>8.1.1</version>
+    <version>8.1.2</version>
     <packaging>jar</packaging>
     <name>Support Diagnostics Utilities</name>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <log4j.version>2.12.1</log4j.version>
+        <log4j.version>2.13.2</log4j.version>
     </properties>
 
     <dependencies>

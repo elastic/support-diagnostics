@@ -460,7 +460,7 @@
  
  After it has checked for IP and MAC addresses it will use any configured tokens. If you include a configuration file of supplied string tokens, any occurrence of that token will be replaced with a generated replacement. As with IP's this will be consistent from file to file but not between runs. It supports explicit string literal replacement or regexes that match a broader set of criteria. An example configuration file (`scrub.yml`) is included in the root installation directory as an example for creating your own tokens.
  
- ### Running The Santizer
+ ### Running The Sanitizer
  
  - Start with a generated diagnostic archive from Support Diagnostics 6.4 or later and an installation of the latest diagnostic utility.
  - Add any tokens for text you wish to conceal to your config file. The utility will look for a file named `scrub.yml` located in the /config directory within the unzipped uutility dir. It must reside in this location.
@@ -707,13 +707,13 @@
  Uses the generated index name but gives the cluster a different name:
  
  ```$xslt
-     ./import-monitoring.sh --host 10.0.0.20 -u elastic -p --ssl -i /Users/joe_user/temp/export-20190801-150615.zip -clusterName messed_up_cluster
+     ./import-monitoring.sh --host 10.0.0.20 -u elastic -p --ssl -i /Users/joe_user/temp/export-20190801-150615.zip -clustername messed_up_cluster
  ```  
  
  Uses a custom index and cluster name:
  
  ```$xslt
-    ./import-monitoring.sh --host 10.0.0.20 -u elastic -p --ssl -i /Users/joe_user/temp/export-20190801-150615.zip  -clusterName big_cluster --indexName big_cluster_2019_10_01    
+    ./import-monitoring.sh --host 10.0.0.20 -u elastic -p --ssl -i /Users/joe_user/temp/export-20190801-150615.zip  -clustername big_cluster --indexName big_cluster_2019_10_01    
  ```
  
  ## Standard Diagnostic Troubleshooting
