@@ -63,8 +63,7 @@
  
  ### Downloading And Installing
  
- - If you are reading this on Github you are almost there. Look at the second row of links near the top of the page and locate the item that says: <_some number_> Releases.
- - - Clicking that link will bring you to the release page. The most recent release will usually be at the top. The most recent certified version will also have a link to the left of it that says: _Latest Release_.
+ - Locate the [latest release](https://github.com/elastic/support-diagnostics/releases/latest)
  - Select the zip file labeled support-diagnostic-XX.XX.XX-dist.zip to download the binary files. **_Do not select the zip or tar files labeled: 'Source code'._** These do not contain compiled runtimes and will generate errors if you attempt to use the scripts contained in them.
  - Unzip the downloaded file into the directory you intend to run from. This can be on the same host as the as the Elasticsearch or Logstash host you wish to interrogate, or on a remote server or workstation. You can also run it from within a Docker container(see further instructions down for generating an image).
  
