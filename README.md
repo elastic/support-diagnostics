@@ -201,7 +201,7 @@
  
  <tr>
    <td width="20%" align="left" valign="top">-p<br/>--password</td>
-   <td width="50%" align="left" valign="top">Generates obfuscated prompt for the elasticsearch password. Passing of a plain text password for automated processes is possible but not encouraged given it cannot be concealed from the history. See documentation for details. All other password prompts function in a similar fashion. </td>
+   <td width="50%" align="left" valign="top">Generates obfuscated prompt for the elasticsearch password. All other password prompts function in a similar fashion. </td>
    <td width="30%" align="left" valign="top">Option only - no value.</td>
  </tr>
  
