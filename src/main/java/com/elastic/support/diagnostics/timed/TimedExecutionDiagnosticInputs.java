@@ -19,8 +19,8 @@ public class TimedExecutionDiagnosticInputs extends DiagnosticInputs {
     public int executions = 6;
     private static String executionsMsg = "Execution count must be greater than 1.";
 
-    @Parameter(names = {"--interval", "-i"}, description = "Interval between executions in seconds. Defaults to 30 seconds.")
-    public int interval = 30;
+    @Parameter(names = {"--interval", "-i"}, description = "Interval between executions in seconds. Defaults to 10 seconds.")
+    public int interval = 10;
     private static String intervalMsg = "Interval must be at least 20 seconds.";
 
 
@@ -28,12 +28,12 @@ public class TimedExecutionDiagnosticInputs extends DiagnosticInputs {
         ResourceCache.textIO.getTextTerminal().rawPrint("Timed execution mode. Enter the number of diagnostic executions to run and the delay between each run.");
 
         executions = ResourceCache.textIO.newIntInputReader()
-                .withDefaultValue(6)
+                .withDefaultValue(executions)
                 .withMinVal(2)
                 .read(SystemProperties.lineSeparator + executionsMsg);
 
         interval = ResourceCache.textIO.newIntInputReader()
-                .withDefaultValue(30)
+                .withDefaultValue(interval)
                 .withMinVal(1)
                 .read(SystemProperties.lineSeparator + intervalMsg);
 
@@ -44,7 +44,7 @@ public class TimedExecutionDiagnosticInputs extends DiagnosticInputs {
     public List<String> parseInputs(String[] args){
         List<String> errors = super.parseInputs(args);
 
-        if(interval < 20){
+        if(interval < 5){
             errors.add(intervalMsg);
         }
         if(executions < 2 ){
