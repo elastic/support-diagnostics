@@ -5,17 +5,13 @@ import com.elastic.support.diagnostics.commands.CheckElasticsearchVersion;
 import com.elastic.support.rest.ElasticRestClientService;
 import com.elastic.support.Constants;
 import com.elastic.support.rest.RestClient;
-import com.elastic.support.rest.RestEntry;
 import com.elastic.support.util.*;
 import com.vdurmont.semver4j.Semver;
-import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Vector;
 
@@ -29,10 +25,10 @@ public class MonitoringImportService extends ElasticRestClientService {
         Map configMap = JsonYamlUtils.readYamlFromClasspath(Constants.DIAG_CONFIG, true);
         MonitoringImportConfig config = new MonitoringImportConfig(configMap);
 
-        try (RestClient client = getClient(inputs, config)){
+        try (RestClient client = new RestClient(inputs, config)){
 
             String tempDir = SystemProperties.userDir + SystemProperties.fileSeparator + Constants.MONITORING_DIR;
-            String extractDir = tempDir + SystemProperties.fileSeparator +"extract";
+            String extractDir = tempDir + SystemProperties.fileSeparator +"import-data";
 
             // Create the temp directory - delete if first if it exists from a previous run
             SystemUtils.nukeDirectory(tempDir);
@@ -69,28 +65,4 @@ public class MonitoringImportService extends ElasticRestClientService {
         files.addAll(FileUtils.listFiles(targetDir, null, true));
         return files;
     }
-
-    private RestClient getClient(MonitoringImportInputs inputs, MonitoringImportConfig config){
-
-        return RestClient.getClient(
-                inputs.host,
-                inputs.port,
-                inputs.scheme,
-                inputs.user,
-                inputs.password,
-                inputs.proxyHost,
-                inputs.proxyPort,
-                inputs.proxyUser,
-                inputs.proxyPassword,
-                inputs.pkiKeystore,
-                inputs.pkiKeystorePass,
-                inputs.skipVerification,
-                config.connectionTimeout,
-                config.connectionRequestTimeout,
-                config.socketTimeout
-        );
-
-    }
-
-
 }

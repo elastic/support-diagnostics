@@ -9,7 +9,6 @@ import com.elastic.support.util.ResourceCache;
 import com.elastic.support.util.SystemCommand;
 import com.elastic.support.util.SystemProperties;
 import com.elastic.support.util.SystemUtils;
-import com.sun.xml.bind.v2.runtime.reflect.opt.Const;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import java.util.Map;
@@ -27,7 +26,7 @@ public class CollectSystemCalls implements Command {
         }
 
         // Should be cached from the PlatformDetails check.
-        SystemCommand sysCmd = ResourceCache.getSystemCommand(Constants.systemCommands);
+        SystemCommand sysCmd = ResourceCache.systemCommand;
         String targetDir = context.tempDir + SystemProperties.fileSeparator + "syscalls";
         String pid = context.targetNode.pid;
         ProcessProfile targetNode = context.targetNode;

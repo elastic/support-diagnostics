@@ -1,16 +1,11 @@
 package com.elastic.support.util;
 
-
 import com.elastic.support.Constants;
 import com.elastic.support.diagnostics.DiagnosticException;
-import com.elastic.support.diagnostics.DiagnosticInputs;
-import com.elastic.support.rest.RestClient;
-import com.elastic.support.rest.RestResult;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.util.SystemPropertiesPropertySource;
 
 import java.io.*;
 import java.net.InetAddress;

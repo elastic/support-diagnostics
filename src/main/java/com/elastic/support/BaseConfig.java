@@ -12,9 +12,12 @@ public class BaseConfig {
     public int socketTimeout;
     public int maxTotalConn;
     public int maxConnPerRoute;
+    public long idleExpire;
 
-    public String diagReleaseHost = "api.github.com";
-    public String diagReleaseDest = "/repos/elastic/support-diagnostics/releases/latest";
+    public String diagReleaseHost = "";
+    public String diagHost = "https://api.github.com";
+    public String diagQuery = "/repos/elastic/support-diagnostics/releases/latest";
+
     public String diagReleaseScheme = "https";
     public String diagLatestRelease = "https://api.github.com/repos/elastic/support-diagnostics/releases/latest";
 
@@ -33,21 +36,13 @@ public class BaseConfig {
         Map<String, String> githubSettings = (Map<String, String>) configuration.get("github-settings");
 
         if ( githubSettings != null){
-
-            if (StringUtils.isNotEmpty(githubSettings.get("diagReleaseHost"))) {
-                diagReleaseHost = githubSettings.get("diagReleaseHost");
+            if (StringUtils.isNotEmpty(githubSettings.get("diagHost"))) {
+                diagHost = githubSettings.get("diagHost");
             }
-
-            if (StringUtils.isNotEmpty(githubSettings.get("diagReleaseDest"))) {
-                diagReleaseDest = githubSettings.get("diagReleaseDest");
-            }
-
-            if (StringUtils.isNotEmpty(githubSettings.get("diagReleaseScheme"))) {
-                diagReleaseScheme = githubSettings.get("diagReleaseScheme");
-            }
-
-            if (StringUtils.isNotEmpty(githubSettings.get("diagLatestRelease"))) {
-                diagLatestRelease = githubSettings.get("diagLatestRelease");
+        }
+        if ( githubSettings != null){
+            if (StringUtils.isNotEmpty(githubSettings.get("diagQuery"))) {
+                diagQuery = githubSettings.get("diagQuery");
             }
         }
 
@@ -58,6 +53,8 @@ public class BaseConfig {
         socketTimeout = restConfig.get("socketTimeout") * 1000;
         maxTotalConn = restConfig.get("maxTotalConn");
         maxConnPerRoute = restConfig.get("maxConnPerRoute");
+        idleExpire = restConfig.get("idleExpire");
+
 
         dockerGlobal = (Map<String, String>) configuration.get("docker-global");
         //kubernates = (Map<String, String>) configuration.get("kuberantes");

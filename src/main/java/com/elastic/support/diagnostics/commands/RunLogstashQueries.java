@@ -5,7 +5,6 @@ import com.elastic.support.diagnostics.DiagnosticException;
 import com.elastic.support.diagnostics.JavaPlatform;
 import com.elastic.support.diagnostics.ProcessProfile;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
-import com.elastic.support.rest.RestClient;
 import com.elastic.support.rest.RestEntry;
 import com.elastic.support.rest.RestEntryConfig;
 import com.elastic.support.util.*;
@@ -29,20 +28,17 @@ public class RunLogstashQueries extends BaseQuery {
     public void execute(DiagnosticContext context) {
 
         try {
-            RestClient client = ResourceCache.getRestClient(Constants.restInputHost);
-
             RestEntryConfig builder = new RestEntryConfig("1.0.0");
             Map restCalls = JsonYamlUtils.readYamlFromClasspath(Constants.LS_REST, true);
             Map<String, RestEntry> entries = builder.buildEntryMap(restCalls);
 
             List<RestEntry> queries = new ArrayList<>();
             queries.addAll(entries.values());
-            runQueries(client, queries, context.tempDir, 0, 0);
+            runQueries(ResourceCache.restClient, queries, context.tempDir, 0, 0, true);
 
             // Get the information we need to run system calls. It's easier to just get it off disk after all the REST calls run.
             ProcessProfile nodeProfile = new ProcessProfile();
             context.targetNode = nodeProfile;
-
             JsonNode nodeData = JsonYamlUtils.createJsonNodeFromFileName(context.tempDir, "logstash_node.json");
             nodeProfile.pid = nodeData.path("jvm").path("pid").asText();
 
@@ -63,29 +59,26 @@ public class RunLogstashQueries extends BaseQuery {
                     else{
                         targetOS = nodeProfile.os;
                     }
-                    syscmd = new RemoteSystem(
+                    ResourceCache.systemCommand = new RemoteSystem(
                             targetOS,
                             context.diagnosticInputs.remoteUser,
                             context.diagnosticInputs.remotePassword,
                             context.diagnosticInputs.host,
                             context.diagnosticInputs.remotePort,
                             context.diagnosticInputs.keyfile,
-                            context.diagnosticInputs.pkiKeystorePass,
+                            context.diagnosticInputs.pkiPass,
                             context.diagnosticInputs.knownHostsFile,
                             context.diagnosticInputs.trustRemote,
                             context.diagnosticInputs.isSudo
                     );
-                    ResourceCache.addSystemCommand(Constants.systemCommands, syscmd);
                     break;
 
                 case Constants.logstashLocal:
                     if (context.dockerPresent) {
-                        syscmd = new LocalSystem(SystemUtils.parseOperatingSystemName(SystemProperties.osName));
+                        ResourceCache.systemCommand = new LocalSystem(SystemUtils.parseOperatingSystemName(SystemProperties.osName));
                     } else {
-                        syscmd = new LocalSystem(nodeProfile.os);
+                        ResourceCache.systemCommand  = new LocalSystem(nodeProfile.os);
                     }
-                    ResourceCache.addSystemCommand(Constants.systemCommands, syscmd);
-
                     break;
 
                 default:

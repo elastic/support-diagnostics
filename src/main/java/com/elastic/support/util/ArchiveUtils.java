@@ -195,7 +195,7 @@ public class ArchiveUtils {
             }
          }
 
-         System.out.println("Extract completed successfully!");
+         System.out.println("Data extracted from archive.");
       } catch (IOException e) {
          logger.error(e);
       }

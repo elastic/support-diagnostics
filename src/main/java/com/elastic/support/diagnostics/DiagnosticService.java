@@ -24,26 +24,24 @@ public class DiagnosticService extends ElasticRestClientService {
         ctx.diagsConfig = config;
         ctx.diagnosticInputs = inputs;
 
-        try(
-                RestClient esRestClient = RestClient.getClient(
-                    inputs.host,
-                    inputs.port,
-                    inputs.scheme,
-                    inputs.user,
-                    inputs.password,
-                    inputs.proxyHost,
-                    inputs.proxyPort,
-                    inputs.proxyUser,
-                    inputs.proxyPassword,
-                    inputs.pkiKeystore,
-                    inputs.pkiKeystorePass,
-                    inputs.skipVerification,
-                    config.connectionTimeout,
-                    config.connectionRequestTimeout,
-                    config.socketTimeout
-            )){
-
-            ResourceCache.addRestClient(Constants.restInputHost, esRestClient);
+        try{
+                ResourceCache.restClient = new RestClient(
+                inputs.url,
+                inputs.bypassAuth,
+                inputs.verifyHost,
+                inputs.user,
+                inputs.password,
+                inputs.pkiKeystore,
+                inputs.pkiPass,
+                inputs.proxyUrl,
+                inputs.proxyUser,
+                inputs.proxyPassword,
+                config.connectionTimeout,
+                config.connectionRequestTimeout,
+                config.socketTimeout,
+                config.maxTotalConn,
+                config.maxConnPerRoute,
+                config.idleExpire);
 
             // Create the temp directory - delete if first if it exists from a previous run
             String outputDir = inputs.outputDir;

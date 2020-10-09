@@ -1,13 +1,9 @@
 package com.elastic.support.scrub;
 
 import com.elastic.support.Constants;
-import com.elastic.support.diagnostics.DiagnosticInputs;
 import com.elastic.support.diagnostics.ShowHelpException;
 import com.elastic.support.diagnostics.commands.GenerateManifest;
-import com.elastic.support.monitoring.MonitoringImportInputs;
-import com.elastic.support.monitoring.MonitoringImportService;
 import com.elastic.support.util.ResourceCache;
-import com.elastic.support.util.SystemProperties;
 import com.elastic.support.util.SystemUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

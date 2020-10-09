@@ -63,8 +63,9 @@
  
  ### Downloading And Installing
  
- - If you are reading this on Github you are almost there. Look at the second row of links near the top of the page and locate the item that says: <_some number_> Releases.
- - - Clicking that link will bring you to the release page. The most recent release will usually be at the top. The most recent certified version will also have a link to the left of it that says: _Latest Release_.
+ - If you are reading this on Github you are almost there. Look to the rightmost column on the page and locate the heading that says Releases. 
+ - Below the Releases Heading will be a link to the latest release of the Elasticsearch Diagnostic Utility.
+ - Click the latest release link. If you wish an earlier release click the Releases Header link or the + <number of releases> link to see a full list of all releases. You will usually just need the latest release.
  - Select the zip file labeled support-diagnostic-XX.XX.XX-dist.zip to download the binary files. **_Do not select the zip or tar files labeled: 'Source code'._** These do not contain compiled runtimes and will generate errors if you attempt to use the scripts contained in them.
  - Unzip the downloaded file into the directory you intend to run from. This can be on the same host as the as the Elasticsearch or Logstash host you wish to interrogate, or on a remote server or workstation. You can also run it from within a Docker container(see further instructions down for generating an image).
  
@@ -95,7 +96,7 @@
  - Input parameters may be specified in any order.
  - As previously stated, to ensure that all artifacts are collected it is recommended that you run the tool with elevated privileges. This means sudo on Linux type platforms and via an Administor Prompt in Windows. This is not set in stone, and is entirely dependent upon the privileges of the account running the diagnostic. Logs can be especially problematic to collect on Linux systems where Elasticsearch was installed via a package manager. When determining how to run, it is suggested you try copying one or more log files from the configured log directory to the user home of the running account. If that works you probably have sufficient authority to run without sudo or the administrative role.
  - An archive with the format `<diagnostic type>-diagnostics`-`<DateTimeStamp>`.tar.gz will be created in the working directory or an output directory you have specified.
- - A truststore does not need to be specified - it's assumed you are running this against a node that you set up and if you didn't trust it you wouldn't be running this.
+ - A trust store does not need to be specified - it's assumed you are running this against a node that you set up and if you didn't trust it you wouldn't be running this.
  - You can specify additional Java options such as a higher `-Xmx` value by setting them via the environment variable: `DIAG_JAVA_OPTS`.
  
  #### Diagnostic Types
@@ -168,46 +169,26 @@
  </tr>
  
  <tr>
-   <td width="20%" align="left" valign="top">-h<br>--host</td>
-   <td width="50%" align="left" valign="top">The hostname or IP address of the target node. Defaults to localhost. IP address will generally produce the most consistent results.<br> 
-   This should  <strong>NOT</strong> be in the form of a URL containing http:// or https://. </td>
-   <td width="30%" align="left" valign="top"> --host myhost.somplace.com<br>-h 10.75.0.50 </td>
- </tr>
- 
- <tr>
-   <td width="20%" align="left" valign="top">--port</td>
-   <td width="50%" align="left" valign="top">The HTTP listening port for the target node if set to a different value than the default 9200. Not required if the node is listening on the default. 
-    The target node <strong>MUST</strong> have an HTTP listener in order to run the diagnostic. When running against a Logstash process the default value will be 9600.</td>
-   <td width="30%" align="left" valign="top" >--port 9205</td>
+   <td width="20%" align="left" valign="top">--url</td>
+   <td width="50%" align="left" valign="top">Required: The full url containing scheme, host and port. The same as you would type into the browser bar.</td>
+   <td width="30%" align="left" valign="top"> --url https://myhost.somplace.com:9200 </td>
  </tr>
  
  <tr>
    <td width="20%" align="left" valign="top" >--type  </td>
-   <td width="50%" align="left" valign="top"> The diagnostic mode to execute. Valid types are local, remote, api, logstash, log stash-local, or log stash-api. See the documentation for additional descriptions of the diagnostic modes. Default value is local.</td>
+   <td width="50%" align="left" valign="top">The diagnostic mode to execute. Valid types are local, remote, api, logstash, log stash-local, or log stash-api. See the documentation for additional descriptions of the diagnostic modes. Default value is local.</td>
    <td width="30%" align="left" valign="top">--type local<br/> --type remote<br/> --type api<br/> --type logstash-local<br/> --type logstash-remote<br/>--type logstash-api</td>
  </tr>
  
- <tr>
-   <td width="20%" align="left" valign="top">-s<br/>--ssl</td>
-   <td width="50%" align="left" valign="top">Cluster is configured for TLS (SSL). Use this if you access your cluster with an https:// url from the browser or curl. Default is false</td>
-   <td width="30%" align="left" valign="top">Option only - no value.</td>
- </tr>
+  <tr>
+    <td width="20%" align="left" valign="top" >--bypassAuth  </td>
+    <td width="50%" align="left" valign="top">Login authentication is enabled by default. You will always be prompted to provide a user/id combination or PKI credentials. </td>
+    <td width="30%" align="left" valign="top">Option only - no value.</td>
+  </tr>
  
  <tr>
-   <td width="20%" align="left" valign="top">-u<br/>--user</td>
-   <td width="50%" align="left" valign="top">The login id for the Elasticsearch cluster when set up for user/password authentication.This account should have sufficient authority to read system indices so an account with a superuser role is recommended. exampleswise output may be incomplete depending on the authorization level configured. </td>
-   <td width="30%" align="left" valign="top"></td>
- </tr>
- 
- <tr>
-   <td width="20%" align="left" valign="top">-p<br/>--password</td>
-   <td width="50%" align="left" valign="top">Generates obfuscated prompt for the elasticsearch password. Passing of a plain text password for automated processes is possible but not encouraged given it cannot be concealed from the history. See documentation for details. All other password prompts function in a similar fashion. </td>
-   <td width="30%" align="left" valign="top">Option only - no value.</td>
- </tr>
- 
- <tr>
-   <td width="20%" align="left" valign="top">--noVerify</td>
-   <td width="50%" align="left" valign="top">Bypass hostname verification for the certificate when using the --ssl option.  This can be unsafe in some cases, but can be used to bypass issues with an incorrect or missing hostname in the certificate. Default value is false.</td>
+   <td width="20%" align="left" valign="top">--verifyHost</td>
+   <td width="50%" align="left" valign="top">By default the hostname will not be checked against the certificate.  If you are sure you will not have issues with an incorrect or missing hostname in the certificate you may add this option to enforce an extra level of safety. Default value is false.</td>
    <td width="30%" align="left" valign="top">Option only - no value.</td>
  </tr>
  
@@ -361,48 +342,48 @@
  
  _NOTE: Windows users use .\diagnostics.bat instead of ./diagnostics.sh_  
  
- Local or remote host, default port, no security or TLS  
+ No login authentication. 
  
    ```$xslt
-   sudo ./diagnostics.sh --host localhost  
-   sudo ./diagnostics.sh --host 10.0.0.20
+   sudo ./diagnostics.sh --url http://localhost:9200 --bypassAuth
+   sudo ./diagnostics.sh --url https://10.55.6.222:9243 --bypassAuth
    ```  
  
- Basic Auth with and without TLS
+ Basic Auth with w/TLS
    
    ```$xslt
-   sudo ./diagnostics.sh --host myhost.mycompany.com -u someuser -p  
-   sudo ./diagnostics.sh --host 10.0.0.20 -u someuser --password --ssl  
+   sudo ./diagnostics.sh ---url https://localhost:9200 myhost.mycompany.com 
+   sudo ./diagnostics.sh --url https://10.0.0.20:9200
    ```
  
   Running the api type to suppress system call and log collection and explicitly configuring an output directory.
  
    ```$xslt
-   sudo ./diagnostics.sh --host localhost --type api -o /home/user1/diag-out
+   sudo ./diagnostics.sh --url https://10.0.0.20:9200 --type api -o /home/user1/diag-out
    ```
  
  Executing Logstash diagnostics with a non-default port  
  
    ```$xslt
-   sudo ./diagnostics.sh --host 10.0.0.20 --type logstash-local --port 9607 
+   sudo ./diagnostics.sh --url https://localhost:9607 --type logstash-local
    ```
  
  Executing against a remote host with full collection, using sudo, and enabling trust where there's no known host entry. Note that the diagnostic is not executed via sudo because all the privileged access is on a different host.  
  
    ```$xslt  
-   ./diagnostics.sh --host 10.0.0.20 --type remote -u someuser --password --ssl --remoteUser someuser --remotePass --trustRemote --sudo`
+   ./diagnostics.sh --url https://mydomain.internal.com:9243 --type remote  --sudo`
    ```
  
  Executing against a remote host, full collection, using an ssh public key file and bypassing the diagnostics version check.
  
    ```$xslt
-   ./diagnostics.sh --host 10.0.0.20 --type remote -u someuser --password --ssl --remoteUser someuser --keyFile "~.ssh/es_rsa" --bypassDiagVerify
+   ./diagnostics.sh --url https://mydomain.internal.com:9243 --type remote  --keyFile "~.ssh/es_rsa" --bypassDiagVerify
    ```  
   
  Executing against a cloud cluster. Note that in this case we use 9243 for the port, disable host name verification and force the type to strictly api calls.
   
    ```$xslt
-   ./diagnostics.sh --host 2775abprd8230d55d11e5edc86752260dd.us-east-1.aws.found.io -u elastic -p --port 9243 --ssl --type api --noVerify
+   ./diagnostics.sh --url https://2775abprd8230d55d11e5edc86752260dd.us-east-1.aws.found.io:9243 --type api
    ```
 
     
@@ -426,7 +407,58 @@
    
  #### Executing Scripted Runs
  
- Executing the diagnostic via a script passing in all parameters at a time but passwords must currently be sent in via plain text so it is not recommended unless you have the proper security mechanisms in place to safeguard your credentials. The parameters:<br/> --passwordText, --pkiPassText, --proxyPassText, --pkiPassText, --remotePassText, and --keyFilePassText can be used instead of their switch parameter equivalents to send in a value rather than prompt for a masked password. These are not displayed via the help or on the command line options table because we do not encourage their use unless you absolutely need to have this functionality.
+ Executing the diagnostic via a script passing in all parameters at a time but passwords must currently be sent in via plain text so it is not recommended unless you have the proper security mechanisms in place to safeguard your credentials. 
+   <table>
+   <thead>
+     <tr >
+       <th>Option</th>
+       <th>Description</th>
+       <th>Examples</th>
+     </tr>
+   </thead>
+  <tr>
+    <td width="20%" align="left" valign="top">--credentials</td>
+    <td width="50%" align="left" valign="top">Username and password for the elastic cluster concatenated and joined by a colon in the format: <b>usernam:password</b></td>
+    <td width="30%" align="left" valign="top">--credentials elastic:ruty5?-7G</td>
+  </tr>
+  
+  <tr>
+    <td width="20%" align="left" valign="top">--pkiCredentials</td>
+    <td width="50%" align="left" valign="top">Absolute path to the PKI store and password for the elastic cluster concatenated and joined by a colon in the format: <b>truststore:password</b>. If not password protected omit both it and the colon.</td>
+    <td width="30%" align="left" valign="top">--pkiCredentials "/Users/admin/elastic/config/pkiStore.jks:ruty5?-7G"</td>
+  </tr>
+  
+  <tr>
+    <td width="20%" align="left" valign="top">--proxyCredentials</td>
+    <td width="50%" align="left" valign="top">Username and password for an http proxy concatenated and joined by a colon in the format: <b>usernam:password</b>. If no password is present omit both it and the colon.</td>
+    <td width="30%" align="left" valign="top">--credentials elastic:ruty5?-7G</td>
+  </tr>
+ </table>
+ 
+#### Multiple Diagnostic Runs At Timed Intervals
+
+It is also possible to set the diagnostic up for multiple runs with a specified elapsed interval between those runs. Each diagnostic run will be written to the specified output directory. This can assist in determining how certain performance statistics change over time.
+<table>
+<thead>
+  <tr >
+    <th>Option</th>
+    <th>Description</th>
+    <th>Examples</th>
+  </tr>
+</thead>
+<tr>
+ <td width="20%" align="left" valign="top">--executions</td>
+ <td width="50%" align="left" valign="top">The number of diagnostic runs you wish to take.</td></td>
+ <td width="30%" align="left" valign="top">--credentials elastic:ruty5?-7G</td>
+</tr>
+
+<tr>
+ <td width="20%" align="left" valign="top">--interval</td>
+ <td width="50%" align="left" valign="top">Time in seconds between executions. Minimum value is 20 seconds.</td>
+ <td width="30%" align="left" valign="top">--interval 120</td>
+</tr>
+
+</table>
  
  ## Docker
  

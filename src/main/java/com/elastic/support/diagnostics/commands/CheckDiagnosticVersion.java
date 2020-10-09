@@ -1,14 +1,11 @@
 package com.elastic.support.diagnostics.commands;
 
 import com.elastic.support.Constants;
-import com.elastic.support.diagnostics.DiagConfig;
-import com.elastic.support.diagnostics.DiagnosticInputs;
 import com.elastic.support.diagnostics.chain.Command;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.rest.RestClient;
 import com.elastic.support.rest.RestResult;
 import com.elastic.support.util.JsonYamlUtils;
-import com.elastic.support.util.SystemProperties;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.vdurmont.semver4j.Semver;
@@ -32,7 +29,6 @@ public class CheckDiagnosticVersion implements Command {
      */
 
     public void execute(DiagnosticContext context) {
-
         // For airgapped environments allow them to bypass this check
         if (context.diagnosticInputs.bypassDiagVerify) {
             return;
@@ -40,22 +36,24 @@ public class CheckDiagnosticVersion implements Command {
 
         logger.info(Constants.CONSOLE, "Checking for diagnostic version updates.");
         // Only need this once so let it auto-close at the end of the try catch block.
-        try(RestClient restClient = RestClient.getClient(
-                    context.diagsConfig.diagReleaseHost,
-                    Constants.DEEFAULT_HTTPS_PORT,
-                    context.diagsConfig.diagReleaseScheme,
-                    "",
-                    "",
-                    "",
-                    0,
-                    "",
-                    "",
-                    "",
-                    "",
-                    true,
-                    context.diagsConfig.connectionTimeout,
-                    context.diagsConfig.connectionRequestTimeout,
-                    context.diagsConfig.socketTimeout)){
+        try (RestClient restClient = new RestClient(
+                context.diagsConfig.diagHost,
+                true,
+                true,
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                context.diagsConfig.connectionTimeout,
+                context.diagsConfig.connectionRequestTimeout,
+                context.diagsConfig.socketTimeout,
+                context.diagsConfig.maxTotalConn,
+                context.diagsConfig.maxConnPerRoute,
+                context.diagsConfig.idleExpire
+                )) {
 
             // Get the current diagnostic version that was populated in the
             // manifest generation step - if we're running in
@@ -69,8 +67,7 @@ public class CheckDiagnosticVersion implements Command {
                 return;
             }
 
-            RestResult restResult = new RestResult(restClient.execGet(
-                    context.diagsConfig.diagLatestRelease), context.diagsConfig.diagLatestRelease);
+            RestResult restResult = restClient.execQuery(context.diagsConfig.diagQuery);
             JsonNode rootNode = JsonYamlUtils.createJsonNodeFromString(restResult.toString());
             String ver = rootNode.path("tag_name").asText();
             Semver diagVer = new Semver(context.diagVersion, Semver.SemverType.NPM);
@@ -85,12 +82,12 @@ public class CheckDiagnosticVersion implements Command {
                 List<JsonNode> assets = rootNode.findValues("assets");
                 JsonNode asset = assets.get(0);
                 ArrayNode attachments = null;
-                if(asset.isArray()){
-                    attachments = (ArrayNode)asset;
+                if (asset.isArray()) {
+                    attachments = (ArrayNode) asset;
                     asset = attachments.get(0);
                 }
                 String downloadUrl = asset.path("browser_download_url").asText();
-                if(StringUtils.isEmpty(downloadUrl)){
+                if (StringUtils.isEmpty(downloadUrl)) {
                     downloadUrl = context.diagsConfig.diagLatestRelease;
                 }
 
@@ -102,7 +99,7 @@ public class CheckDiagnosticVersion implements Command {
             }
 
         } catch (Exception e) {
-            logger.error( e);
+            logger.error(e);
             logger.info(Constants.CONSOLE, "Issue encountered while checking diagnostic version for updates.");
             logger.info(Constants.CONSOLE, "Failed to get current diagnostic version from Github.");
             logger.info(Constants.CONSOLE, "If Github is not accessible from this environment current supported version cannot be confirmed.");

@@ -3,7 +3,6 @@ package com.elastic.support.monitoring;
 import com.beust.jcommander.Parameter;
 import com.elastic.support.rest.ElasticRestClientInputs;
 import com.elastic.support.util.ResourceCache;
-import com.elastic.support.util.SystemProperties;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -34,7 +33,7 @@ public class MonitoringImportInputs extends ElasticRestClientInputs {
 
     // End Input Readers
 
-    public boolean runInteractive(){
+    public void runInteractive(){
 
         clusterName = ResourceCache.textIO.newStringInputReader()
                 .withMinLength(0)
@@ -46,8 +45,6 @@ public class MonitoringImportInputs extends ElasticRestClientInputs {
                 .read("Enter the full path of the archvive you wish to import.");
 
         runHttpInteractive();
-
-        return true;
     }
 
     public List<String> parseInputs(String[] args){

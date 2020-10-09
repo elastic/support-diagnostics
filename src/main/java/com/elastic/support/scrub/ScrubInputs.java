@@ -33,7 +33,7 @@ public class ScrubInputs extends BaseInputs {
     public boolean isArchive = true;
     public String scrubbedFileBaseName;
 
-    public boolean runInteractive() {
+    public void runInteractive() {
 
         scrub = ResourceCache.textIO.newStringInputReader()
                 .withInputTrimming(true)
@@ -55,8 +55,6 @@ public class ScrubInputs extends BaseInputs {
         } else {
             runOutputDirInteractive();
         }
-
-        return true;
     }
 
     public List<String> parseIinputs(String[] args) {

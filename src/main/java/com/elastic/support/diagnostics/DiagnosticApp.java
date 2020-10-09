@@ -33,11 +33,9 @@ public class DiagnosticApp {
                     SystemUtils.quitApp();
                 }
             }
-
             Map diagMap = JsonYamlUtils.readYamlFromClasspath(Constants.DIAG_CONFIG, true);
             DiagConfig diagConfig = new DiagConfig(diagMap);
             DiagnosticService diag = new DiagnosticService();
-
             ResourceCache.terminal.dispose();
             diag.exec(diagnosticInputs, diagConfig);
         } catch (ShowHelpException she){

@@ -51,7 +51,7 @@ public class MonitoringExportInputs extends ElasticRestClientInputs {
     public String queryStartDate;
     public String queryEndDate;
 
-    public boolean runInteractive() {
+    public void runInteractive() {
 
         runHttpInteractive();
 
@@ -93,7 +93,6 @@ public class MonitoringExportInputs extends ElasticRestClientInputs {
 
         runOutputDirInteractive();
 
-        return true;
     }
 
     public List<String> parseInputs(String[] args) {

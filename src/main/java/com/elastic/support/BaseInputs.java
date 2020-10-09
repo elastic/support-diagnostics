@@ -22,7 +22,6 @@ public abstract class BaseInputs {
 
     private static final Logger logger = LogManager.getLogger(BaseInputs.class);
     public static final String outputDirDescription = "Fully qualified path to an output directory. If it does not exist the diagnostic will attempt to create it. If not specified the diagnostic directory will be used: ";
-    public static final String bypassDiagVerifyDescription = "Bypass the diagnostic version check. Use when internet outbound HTTP access is blocked by a firewall.";
     protected List<String> emptyList = new ArrayList<>();
     protected JCommander jCommander;
 
@@ -37,8 +36,7 @@ public abstract class BaseInputs {
     public boolean interactive = false;
 
     // Stop the diag from checking itself for latest version.
-    @Parameter(names = {"--bypassDiagVerify"}, description = bypassDiagVerifyDescription)
-    public boolean bypassDiagVerify = false;
+
 
     // End Input Fields
 
@@ -66,7 +64,7 @@ public abstract class BaseInputs {
         }
     }
 
-    public abstract boolean runInteractive();
+    public abstract void runInteractive();
 
     public List<String> parseInputs(String[] args){
         logger.info(Constants.CONSOLE, "Processing diagnosticInputs...");

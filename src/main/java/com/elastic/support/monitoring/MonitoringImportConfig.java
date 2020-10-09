@@ -6,6 +6,7 @@ import com.elastic.support.Constants;
 import com.elastic.support.util.JsonYamlUtils;
 import com.elastic.support.util.SystemProperties;
 import com.vdurmont.semver4j.Semver;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -26,9 +27,8 @@ public class MonitoringImportConfig extends BaseConfig {
     public String logstashExtractIndexPattern;
     public String metricbeatExtractIndexPattern;
 
-    public String metricbeatTemplate;
-    public String logstashTemplate;
-    public String esTemplate;
+    public long bulkPause;
+    public int  bulkMaxRetries;
 
     public List<String> templateList;
 
@@ -41,6 +41,8 @@ public class MonitoringImportConfig extends BaseConfig {
         logstashExtractIndexPattern = (String)configuration.get("logstash-extract-pattern");
         metricbeatExtractIndexPattern = (String)configuration.get("metricbeatExtractIndexPattern");
         templateList = (List<String>)configuration.get("import-templates");
+        bulkPause = NumberUtils.createLong(configuration.get("bulk-pause").toString());
+        bulkMaxRetries =  NumberUtils.createInteger(configuration.get("bulk-max-retries").toString());
 
     }
 

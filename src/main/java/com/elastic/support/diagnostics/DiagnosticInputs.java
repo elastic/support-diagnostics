@@ -5,12 +5,10 @@ import com.elastic.support.Constants;
 import com.elastic.support.rest.ElasticRestClientInputs;
 import com.elastic.support.util.ResourceCache;
 import com.elastic.support.util.SystemProperties;
-import com.elastic.support.util.SystemUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.beryx.textio.*;
 import java.util.*;
 import java.util.List;
 
@@ -96,6 +94,8 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
     public final static String  knownHostsDescription = "Known hosts file to search for target server. Default is ~/.ssh/known_hosts for Linux/Mac. Windows users should always set this explicitly.";
     public final static String  sudoDescription = "Use sudo for remote commands? If not used, log retrieval and some system calls may fail.";
     public final static String  remotePortDescription = "SSH port for the host being queried.";
+    public static final String  retryFailedCalls = "Attempt to retry failed REST calls? Default number of retries is 1. ";
+
 
     // Input Fields
     @Parameter(names = {"--type"}, description = "Designates the type of service to run. Enter local, remote, api, logstash, or logstash-api. Defaults to local.")
@@ -120,6 +120,9 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
     public boolean isSudo = false;
     @Parameter(names = {"--remotePort"}, description = remotePortDescription)
     public int remotePort = 22;
+    @Parameter(names = {"--bypassRetry"}, description = retryFailedCalls)
+    public boolean bypassRetry = false;
+
     // End Input Fields
 
     String[] typeEntries;
@@ -133,11 +136,7 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
         }
     }
 
-    public boolean runInteractive() {
-
-        bypassDiagVerify = standardBooleanReader
-                .withDefaultValue(bypassDiagVerify)
-                .read(SystemProperties.lineSeparator + bypassDiagVerifyDescription);
+    public void runInteractive() {
 
         diagType = ResourceCache.textIO.newStringInputReader()
                 .withNumberedPossibleValues(typeEntries)
@@ -146,10 +145,13 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
                 .toLowerCase();
 
         diagType = diagType.substring(0, diagType.indexOf(" - "));
-        setDefaultPortForDiagType(diagType);
 
         // We'll do this for any Elastic or Logstash submit
         runHttpInteractive();
+
+        bypassRetry = ResourceCache.textIO.newBooleanInputReader()
+                .withDefaultValue(false)
+                .read(SystemProperties.lineSeparator + retryFailedCalls);
 
         if(diagType.contains("remote")) {
             logger.info(Constants.CONSOLE, remoteAccessMessage);
@@ -212,16 +214,13 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
         }
 
         runOutputDirInteractive();
-
         ResourceCache.textIO.dispose();
-        return true;
     }
 
     public List<String> parseInputs(String[] args){
         List<String> errors = super.parseInputs(args);
 
         errors.addAll(ObjectUtils.defaultIfNull(validateDiagType(diagType), emptyList));
-        errors.addAll(ObjectUtils.defaultIfNull(setDefaultPortForDiagType(diagType), emptyList));
         errors.addAll(ObjectUtils.defaultIfNull(validateRemoteUser(remoteUser), emptyList));
         errors.addAll(ObjectUtils.defaultIfNull(validatePort(remotePort), emptyList));
         errors.addAll(ObjectUtils.defaultIfNull(validateFile(keyfile), emptyList));
@@ -239,17 +238,6 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
 
         return errors;
 
-    }
-
-    public List<String> setDefaultPortForDiagType(String val) {
-        // Check the diag type and reset the default port value if
-        // it is a Logstash diag.
-        if (val.toLowerCase().contains("logstash")) {
-            if (port == 9200) {
-                port = Constants.LOGSTASH_PORT;
-            }
-        }
-        return null;
     }
 
     public List<String> validateDiagType(String val) {
