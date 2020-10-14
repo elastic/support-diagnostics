@@ -3,10 +3,8 @@ package com.elastic.support.scrub;
 import com.beust.jcommander.Parameter;
 import com.elastic.support.BaseInputs;
 import com.elastic.support.Constants;
-import com.elastic.support.diagnostics.commands.CollectSystemCalls;
-import com.elastic.support.util.ResourceCache;
+import com.elastic.support.util.ResourceUtils;
 import com.elastic.support.util.SystemProperties;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -21,26 +19,29 @@ public class ScrubInputs extends BaseInputs {
     private static Logger logger = LogManager.getLogger(ScrubInputs.class);
 
     // Start Input Fields
-    @Parameter(names = {"-i", "--input"}, description = "Required field. Full path to the archive file, directory, or individual file to be scrubbed.")
+    @Parameter(names = {"-input"}, description = "Required field. Full path to the archive file, directory, or individual file to be scrubbed.")
     public String scrub;
 
-    @Parameter(names = {"--workers"}, description = "Optional field. How many processing instances to run. Defaults to the number of detected cores.")
+    @Parameter(names = {"-workers"}, description = "Optional field. How many processing instances to run. Defaults to the number of detected cores.")
     public int workers = Runtime.getRuntime().availableProcessors();
 
     // End Input Fields
-
     public String type = "zip";
     public boolean isArchive = true;
     public String scrubbedFileBaseName;
 
+    public ScrubInputs(String delimiter){
+        super(delimiter);
+    }
+
     public void runInteractive() {
 
-        scrub = ResourceCache.textIO.newStringInputReader()
+        scrub = ResourceUtils.textIO.newStringInputReader()
                 .withInputTrimming(true)
                 .withValueChecker((String val, String propname) -> validateScrubInput(val))
                 .read("Enter the full path of the archive you wish to import.");
 
-        workers = ResourceCache.textIO.newIntInputReader()
+        workers = ResourceUtils.textIO.newIntInputReader()
                 .withMinVal(0)
                 .withDefaultValue(workers)
                 .read("Enter the number of workers to run in parallel. Defaults to the detected number of processors: " + workers);

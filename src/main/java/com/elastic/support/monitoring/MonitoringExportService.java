@@ -1,16 +1,18 @@
 package com.elastic.support.monitoring;
 
+import com.elastic.support.BaseService;
 import com.elastic.support.Constants;
 import com.elastic.support.diagnostics.DiagnosticException;
 import com.elastic.support.diagnostics.commands.CheckElasticsearchVersion;
 import com.elastic.support.rest.*;
 import com.elastic.support.util.JsonYamlUtils;
-import com.elastic.support.util.ResourceCache;
+import com.elastic.support.util.ResourceUtils;
 import com.elastic.support.util.SystemProperties;
 import com.elastic.support.util.SystemUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.ser.Serializers;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -24,37 +26,27 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MonitoringExportService extends ElasticRestClientService {
+public class MonitoringExportService implements BaseService {
 
     private static final String SCROLL_ID = "{ \"scroll_id\" : \"{{scrollId}}\" }";
     private Logger logger = LogManager.getLogger(MonitoringExportService.class);
 
-    public void execExtract(MonitoringExportInputs inputs) {
+    MonitoringExportInputs inputs;
+    MonitoringExportConfig config;
 
-        MonitoringExportConfig config = null;
-        String tempDir = SystemProperties.fileSeparator + Constants.MONITORING_DIR;
+    public MonitoringExportService(MonitoringExportInputs inputs, MonitoringExportConfig config){
+        this.inputs = inputs;
+        this.config = config;
+    }
+
+    public void exec() {
         String monitoringUri = "";
 
         try{
-            Map configMap = JsonYamlUtils.readYamlFromClasspath(Constants.DIAG_CONFIG, true);
-            config = new MonitoringExportConfig(configMap);
-            ResourceCache.restClient = new RestClient(
+            ResourceUtils.restClient = new RestClient(
                             inputs, config);
 
-            if (StringUtils.isEmpty(inputs.outputDir)) {
-                tempDir = SystemProperties.userDir + tempDir;
-            } else {
-                tempDir = inputs.outputDir + tempDir;
-            }
-
-            // Initialize the temp directory first.
-            // Set up the log file manually since we're going to package it with the diagnostic.
-            // It will go to wherever we have the temp dir set up.
-            SystemUtils.nukeDirectory(tempDir);
-            Files.createDirectories(Paths.get(tempDir));
-            createFileAppender(tempDir, "extract.log");
-
-            config.semver = CheckElasticsearchVersion.getElasticsearchVersion(ResourceCache.restClient);
+            config.semver = CheckElasticsearchVersion.getElasticsearchVersion(ResourceUtils.restClient);
             String version = config.semver.getValue();
             RestEntryConfig builder = new RestEntryConfig(version);
             Map restCalls = JsonYamlUtils.readYamlFromClasspath(Constants.MONITORING_REST, true);
@@ -64,7 +56,7 @@ public class MonitoringExportService extends ElasticRestClientService {
 
             if (inputs.listClusters) {
                 logger.info(Constants.CONSOLE,  "Diaplaying a list of available clusters.");
-                showAvailableClusters(config, ResourceCache.restClient, monitoringUri);
+                showAvailableClusters(config, ResourceUtils.restClient, monitoringUri);
                 return;
             }
 
@@ -72,10 +64,10 @@ public class MonitoringExportService extends ElasticRestClientService {
                 if (StringUtils.isEmpty(inputs.clusterId)) {
                     throw new DiagnosticException("missingClusterId");
                 }
-                validateClusterId(inputs.clusterId, config, ResourceCache.restClient, monitoringUri);
+                validateClusterId(inputs.clusterId, config, ResourceUtils.restClient, monitoringUri);
             }
 
-            runExportQueries(tempDir, ResourceCache.restClient, config, inputs, versionedRestCalls);
+            runExportQueries(inputs.tempDir, ResourceUtils.restClient, config, inputs, versionedRestCalls);
 
         } catch (DiagnosticException de) {
             switch (de.getMessage()) {
@@ -84,28 +76,20 @@ public class MonitoringExportService extends ElasticRestClientService {
                     break;
                 case "missingClusterId":
                     logger.error(Constants.CONSOLE, "Cluster id is required. Diaplaying a list of available clusters.");
-                    showAvailableClusters(config, ResourceCache.restClient, monitoringUri);
+                    showAvailableClusters(config, ResourceUtils.restClient, monitoringUri);
                     break;
                 case "noClusterIdFound":
                     logger.error(Constants.CONSOLE, "Entered cluster id not found. Please enure you have a valid cluster_uuid for the monitored clusters.");
-                    showAvailableClusters(config, ResourceCache.restClient, monitoringUri);
+                    showAvailableClusters(config, ResourceUtils.restClient, monitoringUri);
                     break;
                 default:
                     logger.info(Constants.CONSOLE,  "Entered cluster id not found - unexpected exception. Please enure you have a valid cluster_uuid for the monitored clusters. Check diagnostics.log for more details.");
                     logger.error( de);
             }
             logger.error(Constants.CONSOLE, "Cannot contiue processing. Exiting {}", Constants.CHECK_LOG);
-        } catch (IOException e) {
-            logger.error(Constants.CONSOLE, "Access issue with temp directory", e);
-            throw new RuntimeException("Issue with creating temp directory - see logs for details.");
         } catch (Throwable t) {
             logger.error( "Unexpected error occurred", t);
             logger.error(Constants.CONSOLE, "Unexpected error. {}", Constants.CHECK_LOG);
-        } finally {
-            ResourceCache.textIO.dispose();
-            closeLogs();
-            createArchive(tempDir);
-            SystemUtils.nukeDirectory(tempDir);
         }
     }
 

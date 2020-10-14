@@ -26,21 +26,12 @@ public class MonitoringImportProcessor {
     RestClient client;
     MonitoringImportConfig config;
     MonitoringImportInputs inputs;
-    String newClusterName;
-    boolean updateClusterName = false;
+
 
     public MonitoringImportProcessor(MonitoringImportConfig config, MonitoringImportInputs inputs, RestClient client) {
         this.config = config;
         this.inputs = inputs;
         this.client = client;
-
-        // Check for overrides
-        if (StringUtils.isNotEmpty(inputs.clusterName)) {
-            this.newClusterName = inputs.clusterName;
-            updateClusterName = true;
-        }
-
-        checkForExtractTemplates();
     }
 
     public void exec(Vector<File> files) {
@@ -59,6 +50,17 @@ public class MonitoringImportProcessor {
     }
 
     public void process(File file) {
+
+        String newClusterName = "";
+        boolean updateClusterName = false;
+
+        // Check for overrides
+        if (StringUtils.isNotEmpty(inputs.clusterName)) {
+            newClusterName = inputs.clusterName;
+            updateClusterName = true;
+        }
+
+        checkForExtractTemplates();
 
         logger.info(Constants.CONSOLE, "Processing: {}", file.getName());
         long eventsWritten = 0;

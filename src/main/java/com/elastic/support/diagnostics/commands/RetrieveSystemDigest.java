@@ -32,14 +32,14 @@ public class RetrieveSystemDigest implements Command {
             SystemInfo si = new SystemInfo();
             HardwareAbstractionLayer hal = si.getHardware();
             OperatingSystem os = si.getOperatingSystem();
-            File sysFileJson = new File(context.tempDir + SystemProperties.fileSeparator + "system-digest.json");
+            File sysFileJson = new File(context.diagnosticInputs.tempDir + SystemProperties.fileSeparator + "system-digest.json");
             OutputStream outputStreamJson = new FileOutputStream(sysFileJson);
             BufferedWriter jsonWriter = new BufferedWriter(new OutputStreamWriter(outputStreamJson));
             String jsonInfo = si.toPrettyJSON();
             jsonWriter.write(jsonInfo);
             jsonWriter.close();
 
-            File sysFile = new File(context.tempDir + SystemProperties.fileSeparator + "system-digest.txt");
+            File sysFile = new File(context.diagnosticInputs.tempDir + SystemProperties.fileSeparator + "system-digest.txt");
             OutputStream outputStream = new FileOutputStream(sysFile);
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream));
 

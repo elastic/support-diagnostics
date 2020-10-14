@@ -6,7 +6,6 @@ import com.elastic.support.util.SystemProperties;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.client5.http.ssl.DefaultHostnameVerifier;
 import org.apache.hc.core5.http.io.SocketConfig;
-import org.apache.hc.core5.ssl.SSLContexts;
 import org.apache.hc.core5.util.TimeValue;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -50,12 +49,12 @@ public class RestClient implements Closeable {
     public RestClient(ElasticRestClientInputs inputs, BaseConfig config) {
 
         this(inputs.url, inputs.bypassAuth, inputs.verifyHost, inputs.user, inputs.password, inputs.pkiKeystore,
-                inputs.pkiPass, inputs.proxyUrl, inputs.proxyUser, inputs.proxyPassword, config.connectionTimeout,
+                inputs.pkiPass, inputs.proxyUrl, config.connectionTimeout,
                 config.connectionRequestTimeout, config.socketTimeout, config.maxTotalConn, config.maxConnPerRoute, config.idleExpire);
     }
 
     public RestClient(String url, boolean bypassAuth, boolean verifyHost, String user, String password,
-            String pkiKeystore, String pkiPass, String proxyUri, String proxyUser, String proxyPassword,
+            String pkiKeystore, String pkiPass, String proxyUrl,
             int connectionTimeout, int connectionRequestTimeout, int socketTimeout, int maxTotal,
             int defaultMaxPerRoute, long idleExpire) {
 
@@ -70,19 +69,15 @@ public class RestClient implements Closeable {
                     .setConnectionRequestTimeout(Timeout.ofSeconds(connectionRequestTimeout));
 
             httpHost = HttpHost.create(url);
-            if (!bypassAuth) {
+            if (!bypassAuth && StringUtils.isEmpty(pkiKeystore)) {
                 credsProvider.setCredentials(new AuthScope(httpHost),
                         new UsernamePasswordCredentials(user, password.toCharArray()));
             }
 
             HttpHost proxyHost = null;
-            if (StringUtils.isNotEmpty(proxyUri)) {
-                proxyHost = HttpHost.create((proxyUri));
+            if (StringUtils.isNotEmpty(proxyUrl)) {
+                proxyHost = HttpHost.create((proxyUrl));
                 requestConfigBuilder.setProxy(proxyHost);
-                if (StringUtils.isNotEmpty(proxyUser)) {
-                    credsProvider.setCredentials(new AuthScope(proxyHost),
-                            new UsernamePasswordCredentials(proxyUser, proxyPassword.toCharArray()));
-                }
             }
 
             clientBuilder.evictExpiredConnections()

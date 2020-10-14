@@ -8,7 +8,7 @@ import com.elastic.support.rest.RestClient;
 import com.elastic.support.rest.RestEntryConfig;
 import com.elastic.support.rest.RestResult;
 import com.elastic.support.util.JsonYamlUtils;
-import com.elastic.support.util.ResourceCache;
+import com.elastic.support.util.ResourceUtils;
 import com.elastic.support.util.SystemProperties;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.vdurmont.semver4j.Semver;
@@ -36,7 +36,7 @@ public class CheckElasticsearchVersion implements Command {
         logger.info(Constants.CONSOLE, "Getting Elasticsearch Version.");
 
         try {
-            context.version = getElasticsearchVersion(ResourceCache.restClient);
+            context.version = getElasticsearchVersion(ResourceUtils.restClient);
             String version = context.version.getValue();
             RestEntryConfig builder = new RestEntryConfig(version);
             Map restCalls = JsonYamlUtils.readYamlFromClasspath(Constants.ES_REST, true);

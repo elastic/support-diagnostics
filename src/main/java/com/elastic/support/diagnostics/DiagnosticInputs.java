@@ -3,7 +3,7 @@ package com.elastic.support.diagnostics;
 import com.beust.jcommander.Parameter;
 import com.elastic.support.Constants;
 import com.elastic.support.rest.ElasticRestClientInputs;
-import com.elastic.support.util.ResourceCache;
+import com.elastic.support.util.ResourceUtils;
 import com.elastic.support.util.SystemProperties;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -14,12 +14,12 @@ import java.util.List;
 
 public class DiagnosticInputs extends ElasticRestClientInputs {
 
-    
     public final static String[]
             diagnosticTypeValues = {
             Constants.local,
             Constants.remote,
             Constants.api,
+            Constants.cloud,
             Constants.logstashLocal,
             Constants.logstashRemote,
             Constants.logstashApi};
@@ -27,6 +27,8 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
     public static final String localDesc = "Node on the same host as the diagnostic utility.";
     public static final String remoteDesc = "Node on a different host than the diagnostic utility";
     public static final String apiDesc = "Elasticsearch REST API calls, no system calls or logs.";
+    public static final String cloudDesc = "Cloud cluster = only Elasticsearch REST API calls.";
+
     public static final String logstashLocalDesc = "Logstash process on the same host as the diagnostic utility.";
     public static final String logstashRemoteDesc = "Logstash on a different host than the diagnostic utility.";
     public static final String logstashApiDesc = "Logstash REST calls. No system calls. \t\t";
@@ -36,6 +38,7 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
             Constants.local + " - " + localDesc,
             Constants.remote + " - " + remoteDesc,
             Constants.api + " - " + apiDesc,
+            Constants.cloud + " - " + cloudDesc,
             Constants.logstashLocal + " - " + logstashLocalDesc,
             Constants.logstashRemote + " - " + logstashRemoteDesc,
             Constants.logstashApi + " - " + logstashApiDesc};
@@ -46,7 +49,6 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
             Constants.api + " - " + apiDesc,
             Constants.logstashRemote + " - " + logstashRemoteDesc,
             Constants.logstashApi + " - " + logstashApiDesc};
-
 
     public static final String remoteAccessMessage =
             SystemProperties.lineSeparator
@@ -94,51 +96,53 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
     public final static String  knownHostsDescription = "Known hosts file to search for target server. Default is ~/.ssh/known_hosts for Linux/Mac. Windows users should always set this explicitly.";
     public final static String  sudoDescription = "Use sudo for remote commands? If not used, log retrieval and some system calls may fail.";
     public final static String  remotePortDescription = "SSH port for the host being queried.";
-    public static final String  retryFailedCalls = "Attempt to retry failed REST calls? Default number of retries is 1. ";
-
+    public static final String  retryFailedCalls = "Attempt to retry failed REST calls? ";
 
     // Input Fields
-    @Parameter(names = {"--type"}, description = "Designates the type of service to run. Enter local, remote, api, logstash, or logstash-api. Defaults to local.")
-    public String diagType = Constants.local;
-    @Parameter(names = {"--remoteUser"}, description = remoteUserDescription)
+    @Parameter(names = {"-type"}, description = "Designates the type of service to run. Enter local, remote, api, logstash, or logstash-api. Defaults to local.")
+    public String diagType = "";
+    @Parameter(names = {"-remoteUser"}, description = remoteUserDescription)
     public String remoteUser;
-    @Parameter(names = {"--remotePass"}, description = "Show password prompt for the remote user account.")
+    @Parameter(names = {"-remotePass"}, description = "Show password prompt for the remote user account.")
     public boolean isRemotePass = false;
-    @Parameter(names = {"--remotePassText"}, hidden = true)
+    @Parameter(names = {"-remotePassText"}, hidden = true)
     public String remotePassword = "";
-    @Parameter(names = {"--keyFile"}, description = sshKeyFileDescription)
+    @Parameter(names = {"-keyFile"}, description = sshKeyFileDescription)
     public String keyfile = "";
-    @Parameter(names = {"--keyFilePass" }, description = "Show prompt for keyfile passphrase for the keyfile if one exists.")
+    @Parameter(names = {"-keyFilePass" }, description = "Show prompt for keyfile passphrase for the keyfile if one exists.")
     public boolean isKeyFilePass = false;
-    @Parameter(names = {"--keyFilePassText"}, hidden = true)
+    @Parameter(names = {"-keyFilePassText"}, hidden = true)
     public String keyfilePassword = "";
-    @Parameter(names = {"--trustRemote"}, description = trustRemoteDescription)
+    @Parameter(names = {"-trustRemote"}, description = trustRemoteDescription)
     public boolean trustRemote = false;
     @Parameter(names = {"--knownHostsFile"}, description = knownHostsDescription)
     public String knownHostsFile = "";
-    @Parameter(names = {"--sudo"}, description = sudoDescription)
+    @Parameter(names = {"-sudo"}, description = sudoDescription)
     public boolean isSudo = false;
-    @Parameter(names = {"--remotePort"}, description = remotePortDescription)
+    @Parameter(names = {"-remotePort"}, description = remotePortDescription)
     public int remotePort = 22;
-    @Parameter(names = {"--bypassRetry"}, description = retryFailedCalls)
-    public boolean bypassRetry = false;
+    @Parameter(names = {"-bypassRetry"}, description = retryFailedCalls)
+    public boolean retryFailed = false;
 
     // End Input Fields
 
     String[] typeEntries;
 
-    public DiagnosticInputs(){
+    public DiagnosticInputs(String delimiter){
+        super(delimiter);
         if(runningInDocker){
+            diagType = Constants.api;
             typeEntries = diagnosticTypeEntriesDocker;
         }
         else{
+            diagType = Constants.local;
             typeEntries = diagnosticTypeEntries;
         }
     }
 
     public void runInteractive() {
 
-        diagType = ResourceCache.textIO.newStringInputReader()
+        diagType = ResourceUtils.textIO.newStringInputReader()
                 .withNumberedPossibleValues(typeEntries)
                 .withDefaultValue(typeEntries[0])
                 .read(SystemProperties.lineSeparator + typeDescription)
@@ -149,7 +153,7 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
         // We'll do this for any Elastic or Logstash submit
         runHttpInteractive();
 
-        bypassRetry = ResourceCache.textIO.newBooleanInputReader()
+        retryFailed = ResourceUtils.textIO.newBooleanInputReader()
                 .withDefaultValue(false)
                 .read(SystemProperties.lineSeparator + retryFailedCalls);
 
@@ -160,16 +164,16 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
                     SystemProperties.lineSeparator
                     + "This account must have sufficient authority to run the commands and access the logs.";
 
-            remoteUser = ResourceCache.textIO.newStringInputReader()
+            remoteUser = ResourceUtils.textIO.newStringInputReader()
                     .withInputTrimming(true)
                     .withValueChecker((String val, String propname) -> validateRemoteUser(val))
                     .read(SystemProperties.lineSeparator + remoteUserTxt);
 
-            isSudo = ResourceCache.textIO.newBooleanInputReader()
+            isSudo = ResourceUtils.textIO.newBooleanInputReader()
                     .withDefaultValue(isSudo)
                     .read(SystemProperties.lineSeparator + sudoDescription);
 
-            boolean useKeyfile = ResourceCache.textIO.newBooleanInputReader()
+            boolean useKeyfile = ResourceUtils.textIO.newBooleanInputReader()
                     .withDefaultValue(false)
                     .read(SystemProperties.lineSeparator + "Use a keyfile for authentication?");
 
@@ -198,7 +202,7 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
                         .read(SystemProperties.lineSeparator + remotePasswordDescription);
             }
 
-            remotePort = ResourceCache.textIO.newIntInputReader()
+            remotePort = ResourceUtils.textIO.newIntInputReader()
                     .withDefaultValue(remotePort)
                     .withValueChecker((Integer val, String propname) -> validatePort(val))
                     .read(SystemProperties.lineSeparator + remotePortDescription);
@@ -214,7 +218,7 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
         }
 
         runOutputDirInteractive();
-        ResourceCache.textIO.dispose();
+        ResourceUtils.textIO.dispose();
     }
 
     public List<String> parseInputs(String[] args){
@@ -236,6 +240,7 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
                     .read(sshKeyFIlePassphraseDescription);
         }
 
+        ResourceUtils.textIO.dispose();
         return errors;
 
     }
@@ -246,7 +251,7 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
             return Collections.singletonList(val + " was not a valid diagnostic type. Enter --help to see valid choices");
         }
 
-        if(runningInDocker &&val.contains("local") ){
+        if(runningInDocker && val.contains("local") ){
             return Collections.singletonList(val + " cannot be run from within a Docker container. Please use api or remote options.");
         }
 

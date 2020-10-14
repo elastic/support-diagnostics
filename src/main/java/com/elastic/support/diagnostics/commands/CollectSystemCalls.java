@@ -5,7 +5,7 @@ import com.elastic.support.diagnostics.ProcessProfile;
 import com.elastic.support.diagnostics.JavaPlatform;
 import com.elastic.support.diagnostics.chain.Command;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
-import com.elastic.support.util.ResourceCache;
+import com.elastic.support.util.ResourceUtils;
 import com.elastic.support.util.SystemCommand;
 import com.elastic.support.util.SystemProperties;
 import com.elastic.support.util.SystemUtils;
@@ -26,8 +26,8 @@ public class CollectSystemCalls implements Command {
         }
 
         // Should be cached from the PlatformDetails check.
-        SystemCommand sysCmd = ResourceCache.systemCommand;
-        String targetDir = context.tempDir + SystemProperties.fileSeparator + "syscalls";
+        SystemCommand sysCmd = ResourceUtils.systemCommand;
+        String targetDir = context.diagnosticInputs.tempDir + SystemProperties.fileSeparator + "syscalls";
         String pid = context.targetNode.pid;
         ProcessProfile targetNode = context.targetNode;
         JavaPlatform javaPlatform = targetNode.javaPlatform;

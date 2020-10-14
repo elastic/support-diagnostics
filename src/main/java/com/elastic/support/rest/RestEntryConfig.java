@@ -23,7 +23,7 @@ public class RestEntryConfig {
         for(Map.Entry<String, Object> entry: config.entrySet()){
             RestEntry re = build(entry);
             if(re.getUrl().equals(RestEntry.MISSING) ){
-                logger.error( "{} was bypassed due by version check.", re.getName());
+                logger.info( "{} was bypassed due by version check.", re.getName());
             }
             else{
                 entries.put(re.getName(), re);

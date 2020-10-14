@@ -6,6 +6,11 @@
   ##   diagHost: "https://api.github.com"
   ##   diagQuery: "/repos/elastic/support-diagnostics/releases/latest"
 
+# Colon is the standard field delimiter for all concatentated strings containing
+# urls, credentials etc. If that creates a password conflict you may change it.
+# The modified value will be used for ALL concatenated string inputs.
+field-delimiter: ":"
+
 # Maximum number of log files including zip archives
 log-settings:
   maxLogs: 3

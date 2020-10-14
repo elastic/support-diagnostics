@@ -3,7 +3,7 @@ package com.elastic.support.rest;
 import com.beust.jcommander.Parameter;
 import com.elastic.support.BaseInputs;
 import com.elastic.support.Constants;
-import com.elastic.support.util.ResourceCache;
+import com.elastic.support.util.ResourceUtils;
 import com.elastic.support.util.SystemProperties;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -21,66 +21,46 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
     public static final String pkiKeystoreDescription = "Path/filename for PKI keystore with client certificate: ";
     public static final String pkiKeystorePasswordDescription = "PKI keystore password if required: ";
 
-    public static final String deprecationMessage = "Deprecated parameters: -h, --port, -u -p, --ssl are being used. Consult the documentation or run --help to see the new formate.";
     public static final String verifyHostName = "Verify hostname for certificate? ";
     public static final String disableDiagCheck = "Bypass the diagnostic version check. Use when internet outbound HTTP access is blocked by a firewall. ";
-
-    public final static String userLoginAuth = "Username:Password";
-    public final static String pkiLoginAuth = "PKI:";
-
-    // Deprecrated parameters - send back a message prompting for new
-    // Indicates we need to prompt for a masked input
-    @Parameter(names = {"-h", "--host"}, hidden = true)
-    public String host = "";
-    @Parameter(names = {"--port"}, hidden = true)
-    public int port = -1;
-    @Parameter(names = {"-u", "--user"}, hidden = true)
-    public String user = "";
-    @Parameter(names = {"-p", "--password"}, hidden = true)
-    public String password = "";
-    @Parameter(names = {"-s", "--ssl"}, hidden = true)
-    public boolean isSsl = false;
-    @Parameter(names = {"--pkiKeystore"}, description = pkiKeystoreDescription)
-    public String pkiKeystore = "";
+    public static final String disableAuthPrompt = "Do not send login credentials - cluster is unsecured.";
 
     // The basics
-    @Parameter(names = {"-n", "--node", "--url"}, description = uriDescription)
+    @Parameter(names = {"-url"}, description = uriDescription)
     public String url = "";
-    @Parameter(names = {"--proxyUri"}, description = proxyUriDescription)
-    public String proxyUrl = "";
+    public String host;
 
+    public String user;
+    public String password;
+
+    @Parameter(names = {"-proxyUrl"}, description = proxyUriDescription)
+    public String proxyUrl = "";
+    public String pkiKeystore = "";
     public String pkiPass = "";
+
     // Not shown in the the help display due to security risks - allow input via command line arguments in plain text.
-    @Parameter(names = {"--credentials"}, hidden = true)
+    @Parameter(names = {"-credentials"}, hidden = true)
     public String credentials = "";
-    @Parameter(names = {"--proxyCredentials"}, hidden = true)
-    public String proxyCredentials = "";
-    @Parameter(names = {"--pkiCredentials"}, hidden = true)
+    @Parameter(names = {"-pkiCredentials"}, hidden = true)
     public String pkiCredentials = "";
-    public String proxyUser = "";
-    public String proxyPassword = "";
 
     // Behavioral modifiers
-    @Parameter(names = {"--bypassAuth"}, description = "Do not send login credentials - cluster is unsecured.")
+    @Parameter(names = {"-bypassAuth"}, description = disableAuthPrompt)
     public boolean bypassAuth = false;
-    @Parameter(names = {"--verifyHost"}, description = verifyHostName)
+    @Parameter(names = {"-verifyHost"}, description = verifyHostName)
     public boolean verifyHost = false;
-    @Parameter(names = {"--disableDiagCheck"}, description = disableDiagCheck)
+    @Parameter(names = {"-disableDiagCheck"}, description = disableDiagCheck)
     public boolean bypassDiagVerify = false;
 
     Logger logger = LogManager.getLogger(ElasticRestClientInputs.class);
 
+    public ElasticRestClientInputs(String delimiter){
+        super(delimiter);
+    }
+
     public List<String> parseInputs(String args[]) {
 
         List<String> errors = super.parseInputs(args);
-        if (StringUtils.isNotEmpty(host) ||
-                StringUtils.isNotEmpty(user) ||
-                port != -1 ||
-                StringUtils.isNotEmpty(password) ||
-                isSsl == true) {
-            errors.addAll(Collections.singletonList(deprecationMessage));
-        }
-
         errors.addAll(ObjectUtils.defaultIfNull(validateEsUri(url), emptyList));
 
         if (!bypassAuth && (StringUtils.isEmpty(credentials) && StringUtils.isEmpty(pkiCredentials))) {
@@ -89,23 +69,13 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
             if (StringUtils.isNotEmpty(credentials)) {
                 errors.addAll(ObjectUtils.defaultIfNull(validateEsCredentials(), emptyList));
             } else {
-                errors.addAll(ObjectUtils.defaultIfNull(validatePkiCredentials(), emptyList));
+                errors.addAll(ObjectUtils.defaultIfNull(validatePkiInputs(), emptyList));
+                errors.addAll(ObjectUtils.defaultIfNull(validatePKIScheme(), emptyList));
             }
         }
 
         if (StringUtils.isNotEmpty(proxyUrl)) {
             errors.addAll(ObjectUtils.defaultIfNull(validateUri(proxyUrl), emptyList));
-            if (StringUtils.isNotEmpty(proxyCredentials)) {
-                errors.addAll(ObjectUtils.defaultIfNull(validateProxyCredentials(), emptyList));
-            } else {
-                proxyInteractive();
-            }
-
-        }
-
-        errors.addAll(ObjectUtils.defaultIfNull(validateFile(pkiKeystore), emptyList));
-        if (StringUtils.isNotEmpty(pkiKeystore)) {
-            errors.addAll(ObjectUtils.defaultIfNull(validatePKI(pkiLoginAuth), emptyList));
         }
 
         return errors;
@@ -115,22 +85,22 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
     protected void runHttpInteractive() {
 
         try {
-            bypassDiagVerify = ResourceCache.textIO.newBooleanInputReader()
+            bypassDiagVerify = ResourceUtils.textIO.newBooleanInputReader()
                     .withDefaultValue(false)
                     .read(SystemProperties.lineSeparator + disableDiagCheck);
 
-            url = ResourceCache.textIO.newStringInputReader()
+            url = ResourceUtils.textIO.newStringInputReader()
                     .withIgnoreCase()
                     .withInputTrimming(true)
                     .withMinLength(1)
                     .withValueChecker((String val, String propname) -> validateEsUri(val))
                     .read(SystemProperties.lineSeparator + uriDescription).toLowerCase();
 
-            bypassAuth = ResourceCache.textIO.newBooleanInputReader()
+            bypassAuth = ResourceUtils.textIO.newBooleanInputReader()
                     .withDefaultValue(false)
                     .read(SystemProperties.lineSeparator + "Bypass authentication - cluster is unsecured? ");
 
-            if(!bypassAuth){
+            if (!bypassAuth) {
                 authInteractive();
             }
 
@@ -145,13 +115,11 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
                     .read(SystemProperties.lineSeparator + "Use Http Proxy Server? ");
 
             if (httpProxy) {
-                proxyUrl = ResourceCache.textIO.newStringInputReader()
+                proxyUrl = ResourceUtils.textIO.newStringInputReader()
                         .withIgnoreCase()
                         .withInputTrimming(true)
                         .withValueChecker((String val, String propname) -> validateUri(val))
                         .read(SystemProperties.lineSeparator + proxyUriDescription).toLowerCase();
-
-                proxyInteractive();
 
             }
 
@@ -162,12 +130,12 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
 
     protected void authInteractive() {
         if (!bypassAuth) {
-            String authType = ResourceCache.textIO.newStringInputReader()
-                    .withNumberedPossibleValues(userLoginAuth, pkiLoginAuth)
-                    .withDefaultValue(userLoginAuth)
-                    .withValueChecker((String val, String propname) -> validatePKI(val))
-                    .read(SystemProperties.lineSeparator + "Basic or PKI Authentication: ");
-            if (authType.equals(pkiLoginAuth)) {
+            String authType = ResourceUtils.textIO.newStringInputReader()
+                    .withNumberedPossibleValues("Basic Auth", "PKI")
+                    .withDefaultValue("Basic Auth")
+                    .withValueChecker((String val, String propname) -> validatePKIScheme())
+                    .read(SystemProperties.lineSeparator + "Basic Auth or PKI: ");
+            if (authType.equals("PKI")) {
                 pkiInteractive();
             } else {
                 basicInteractive();
@@ -177,12 +145,12 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
 
     protected void basicInteractive() {
 
-        user = ResourceCache.textIO.newStringInputReader()
+        user = ResourceUtils.textIO.newStringInputReader()
                 .withInputMasking(true)
                 .withInputTrimming(true)
                 .withMinLength(1).read(SystemProperties.lineSeparator + "user: ");
 
-        password = ResourceCache.textIO.newStringInputReader()
+        password = ResourceUtils.textIO.newStringInputReader()
                 .withInputMasking(true)
                 .withInputTrimming(true)
                 .withMinLength(6).read(SystemProperties.lineSeparator + "password: ");
@@ -196,34 +164,17 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
                 .read(SystemProperties.lineSeparator + pkiKeystorePasswordDescription);
     }
 
-
-    protected void proxyInteractive() {
-
-        boolean httpProxyAuth = standardBooleanReader
-                .withDefaultValue(false)
-                .read(SystemProperties.lineSeparator + "Proxy secured? ");
-
-        if (httpProxyAuth) {
-            proxyUser = ResourceCache.textIO.newStringInputReader()
-                    .withInputMasking(true)
-                    .withInputTrimming(true)
-                    .withMinLength(1).read(SystemProperties.lineSeparator + "proxy user: ");
-
-            if (StringUtils.isNotEmpty(proxyUser)) {
-                proxyPassword = ResourceCache.textIO.newStringInputReader()
-                        .withInputMasking(true)
-                        .withInputTrimming(true)
-                        .withMinLength(1).read(SystemProperties.lineSeparator + "proxy password: ");
-            }
-        }
-    }
-
-
     public List<String> validateEsUri(String val) {
 
         if (StringUtils.isEmpty(val)) {
             return Collections.singletonList("Full uri for the endpoint is required." + SystemProperties.lineSeparator + uriDescription);
         }
+
+        if (!isValidUri(val)) {
+            return Collections.singletonList("Full uri for the endpoint is required." + SystemProperties.lineSeparator + uriDescription);
+        }
+
+        host = url.substring(url.lastIndexOf("/") + 1);
 
         if (runningInDocker) {
             String host = url.substring(url.lastIndexOf("/") + 1);
@@ -233,19 +184,14 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
             }
         }
 
-        if (!isValidUri(val)) {
-            return Collections.singletonList("Full uri for the endpoint is required." + SystemProperties.lineSeparator + uriDescription);
-        }
-
         return null;
     }
 
-    public List validatePKI(String val) {
-        if (val.equals(pkiLoginAuth)) {
-            if (!url.contains("https")) {
-                return Collections.singletonList("TLS must be enabled to use PKI.");
-            }
+    public List validatePKIScheme() {
+        if (!url.contains("https")) {
+            return Collections.singletonList("TLS must be enabled to use PKI.");
         }
+
         return null;
     }
 
@@ -254,14 +200,14 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
     }
 
     public List validateEsCredentials() {
-        String[] combo = credentials.split(":");
+        String[] combo = credentials.split(delimiter);
 
-        if (combo.length < 2){
-            return Collections.singletonList("Invalid credentials content or format " + userLoginAuth);
+        if (combo.length < 2) {
+            return Collections.singletonList("Invalid credentials content or format.");
         }
 
-        if(combo[1].length() < 6) {
-            return Collections.singletonList("Password must have at least 6 characters. " + userLoginAuth);
+        if (combo[1].length() < 6) {
+            return Collections.singletonList("Password must have at least 6 characters.");
         }
 
         user = combo[0];
@@ -270,10 +216,14 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
         return null;
     }
 
-    public List validatePkiCredentials() {
-        String[] combo = pkiCredentials.split(":");
+    public List validatePkiInputs() {
+        if (StringUtils.isEmpty(pkiCredentials)) {
+            return Collections.singletonList("Format for credentials is <absolute path to filename> or <absolute path to filename>:password");
+        }
+        String[] combo = pkiCredentials.split(delimiter);
+
         List errs = validateRequiredFile(combo[0]);
-        if (errs.size() > 0) {
+        if (errs != null) {
             return Collections.singletonList("Format for credentials is <absolute path to filename> or <absolute path to filename>:password");
         }
 
@@ -281,28 +231,13 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
             pkiKeystore = combo[0];
         }
         if (combo.length > 1 && StringUtils.isNotEmpty(combo[1])) {
-            pkiKeystore = combo[1];
+            pkiPass = combo[1];
+        }
+        else{
+            pkiPass = "";
         }
 
         return null;
-    }
-
-    public List validateProxyCredentials() {
-        if (!proxyCredentials.contains(":")) {
-            return Collections.singletonList("Format for credentials is" + userLoginAuth);
-        }
-
-        String[] combo = proxyCredentials.split(":");
-
-        if (combo.length < 2) {
-            return Collections.singletonList("Format for credentials is" + userLoginAuth);
-        }
-
-        proxyUser = combo[0];
-        proxyPassword = combo[1];
-
-        return null;
-
     }
 
     public List<String> validateUri(String val) {
@@ -312,7 +247,6 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
                 return Collections.singletonList(proxyUriDescription);
             }
         }
-
         return null;
     }
 

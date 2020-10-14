@@ -5,7 +5,7 @@ import com.elastic.support.diagnostics.ProcessProfile;
 import com.elastic.support.diagnostics.JavaPlatform;
 import com.elastic.support.diagnostics.chain.Command;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
-import com.elastic.support.util.ResourceCache;
+import com.elastic.support.util.ResourceUtils;
 import com.elastic.support.util.SystemCommand;
 import com.elastic.support.util.SystemProperties;
 import org.apache.commons.io.IOUtils;
@@ -32,8 +32,8 @@ public  class CollectLogs implements Command {
         }
 
         // Should be cached from the PlatformDetails check.
-        SystemCommand sysCmd = ResourceCache.systemCommand;
-        String targetDir = context.tempDir + SystemProperties.fileSeparator + "logs";
+        SystemCommand sysCmd = ResourceUtils.systemCommand;
+        String targetDir = context.diagnosticInputs.tempDir + SystemProperties.fileSeparator + "logs";
         ProcessProfile targetNode = context.targetNode;
         JavaPlatform javaPlatform = targetNode.javaPlatform;
         String logDir = targetNode.logDir;

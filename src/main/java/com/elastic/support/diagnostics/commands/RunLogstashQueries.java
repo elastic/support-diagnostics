@@ -34,12 +34,12 @@ public class RunLogstashQueries extends BaseQuery {
 
             List<RestEntry> queries = new ArrayList<>();
             queries.addAll(entries.values());
-            runQueries(ResourceCache.restClient, queries, context.tempDir, 0, 0, true);
+            runQueries(ResourceUtils.restClient, queries, context.diagnosticInputs.tempDir, 0, 0, context.diagnosticInputs.retryFailed);
 
             // Get the information we need to run system calls. It's easier to just get it off disk after all the REST calls run.
             ProcessProfile nodeProfile = new ProcessProfile();
             context.targetNode = nodeProfile;
-            JsonNode nodeData = JsonYamlUtils.createJsonNodeFromFileName(context.tempDir, "logstash_node.json");
+            JsonNode nodeData = JsonYamlUtils.createJsonNodeFromFileName(context.diagnosticInputs.tempDir, "logstash_node.json");
             nodeProfile.pid = nodeData.path("jvm").path("pid").asText();
 
             nodeProfile.os = SystemUtils.parseOperatingSystemName(nodeData.path("os").path("name").asText());
@@ -59,7 +59,7 @@ public class RunLogstashQueries extends BaseQuery {
                     else{
                         targetOS = nodeProfile.os;
                     }
-                    ResourceCache.systemCommand = new RemoteSystem(
+                    ResourceUtils.systemCommand = new RemoteSystem(
                             targetOS,
                             context.diagnosticInputs.remoteUser,
                             context.diagnosticInputs.remotePassword,
@@ -75,9 +75,9 @@ public class RunLogstashQueries extends BaseQuery {
 
                 case Constants.logstashLocal:
                     if (context.dockerPresent) {
-                        ResourceCache.systemCommand = new LocalSystem(SystemUtils.parseOperatingSystemName(SystemProperties.osName));
+                        ResourceUtils.systemCommand = new LocalSystem(SystemUtils.parseOperatingSystemName(SystemProperties.osName));
                     } else {
-                        ResourceCache.systemCommand  = new LocalSystem(nodeProfile.os);
+                        ResourceUtils.systemCommand  = new LocalSystem(nodeProfile.os);
                     }
                     break;
 

@@ -2,6 +2,7 @@ package com.elastic.support.scrub;
 
 import com.elastic.support.BaseService;
 import com.elastic.support.Constants;
+import com.elastic.support.diagnostics.commands.GenerateManifest;
 import com.elastic.support.util.*;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipFile;
@@ -19,23 +20,23 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 
-public class ScrubService extends BaseService {
+public class ScrubService implements BaseService {
 
     private Logger logger = LogManager.getLogger(ScrubService.class);
 
-    public void exec(ScrubInputs inputs) {
-        ExecutorService executorService = null;
-        String scrubDir = "";
+    ScrubInputs inputs;
+    public ScrubService(ScrubInputs inputs){
+        this.inputs = inputs;
+    }
 
+    public void exec() {
 
         try {
-            scrubDir = inputs.outputDir + SystemProperties.fileSeparator + "scrubbed-" + inputs.scrubbedFileBaseName;
+            logger.info(Constants.CONSOLE, "Using version: {} of diagnostic-utility", SystemUtils.getToolVersion());
 
-            SystemUtils.refreshDir(scrubDir);
+            SystemUtils.refreshDir(inputs.tempDir);
 
-            // Redirect the log file output to the scrubbed output target location.
-            createFileAppender(inputs.outputDir, "scrubber.log");
-            executorService = Executors.newFixedThreadPool(inputs.workers);
+            ResourceUtils.executorService = Executors.newFixedThreadPool(inputs.workers);
             logger.info(Constants.CONSOLE, "Threadpool configured with {} workers.", inputs.workers);
 
             // Get a collection of entries to send parcel out to the task collection
@@ -46,15 +47,15 @@ public class ScrubService extends BaseService {
                 case "tar.gz":
                     String extractTarget = inputs.outputDir + SystemProperties.fileSeparator + "extract";
                     ArchiveUtils.extractArchive(inputs.scrub, extractTarget);
-                    entriesToScrub = collectDirEntries(inputs.scrub, scrubDir);
+                    entriesToScrub = collectDirEntries(inputs.scrub, inputs.tempDir);
                     nodeString = getNodeInfoFromDir(extractTarget);
                     break;
                 case "zip":
-                    entriesToScrub = collectZipEntries(inputs.scrub, scrubDir);
+                    entriesToScrub = collectZipEntries(inputs.scrub, inputs.tempDir);
                     nodeString = getNodeInfoFromZip(inputs.scrub);
                     break;
                 case "dir":
-                    entriesToScrub = collectDirEntries(inputs.scrub, scrubDir);
+                    entriesToScrub = collectDirEntries(inputs.scrub, inputs.tempDir);
                     nodeString = getNodeInfoFromDir(inputs.scrub);
                     break;
                 default:
@@ -72,10 +73,10 @@ public class ScrubService extends BaseService {
 
             ArrayList<ScrubTask> tasks = new ArrayList<>();
             for(TaskEntry entry: entriesToScrub ){
-                tasks.add(new ScrubTask(processor, entry, scrubDir));
+                tasks.add(new ScrubTask(processor, entry, inputs.tempDir));
             }
 
-            List<Future<String>> futures = executorService.invokeAll(tasks);
+            List<Future<String>> futures = ResourceUtils.executorService.invokeAll(tasks);
             futures.forEach ( e -> {
                 try {
                     logger.debug("processed: " + e.get());
@@ -84,16 +85,9 @@ public class ScrubService extends BaseService {
                 }
             });
 
-            // Finish up by zipping it.
-            createArchive(scrubDir);
-
         } catch (Throwable t) {
             logger.error("Error occurred: ", t);
             logger.error(Constants.CONSOLE, "Issue encountered during scrub processing. {}.", Constants.CHECK_LOG);
-        } finally {
-            executorService.shutdown();
-            closeLogs();
-            SystemUtils.nukeDirectory(scrubDir);
         }
     }
 

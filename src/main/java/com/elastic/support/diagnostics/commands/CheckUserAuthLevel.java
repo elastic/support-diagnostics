@@ -5,7 +5,7 @@ import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.rest.RestEntry;
 import com.elastic.support.rest.RestResult;
 import com.elastic.support.util.JsonYamlUtils;
-import com.elastic.support.util.ResourceCache;
+import com.elastic.support.util.ResourceUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vdurmont.semver4j.Semver;
@@ -34,7 +34,7 @@ public class CheckUserAuthLevel implements Command {
         RestEntry entry =  calls.get("security_users");
         String url = entry.getUrl().replace("?pretty", "/" + context.diagnosticInputs.user);
 
-        RestResult result = ResourceCache.restClient.execQuery(url);
+        RestResult result = ResourceUtils.restClient.execQuery(url);
 
         if (result.getStatus() == 200) {
             String userJsonString = result.toString();

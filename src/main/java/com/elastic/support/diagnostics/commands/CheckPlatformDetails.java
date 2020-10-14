@@ -28,7 +28,7 @@ public class CheckPlatformDetails implements Command {
             Map<String, RestEntry> calls = context.elasticRestCalls;
             RestEntry entry = calls.get("nodes");
             String url = entry.getUrl().replace("?pretty", "/os,process,settings,transport,http?pretty&human");
-            RestResult result = ResourceCache.restClient.execQuery(url);
+            RestResult result = ResourceUtils.restClient.execQuery(url);
 
             // Initialize to empty node which mimimizes NPE opportunities
             JsonNode infoNodes = JsonYamlUtils.mapper.createObjectNode();
@@ -109,7 +109,7 @@ public class CheckPlatformDetails implements Command {
                         targetOS = context.targetNode.os;
                     }
 
-                    ResourceCache.systemCommand = new RemoteSystem(
+                    ResourceUtils.systemCommand = new RemoteSystem(
                             targetOS,
                             context.diagnosticInputs.remoteUser,
                             context.diagnosticInputs.remotePassword,
@@ -129,7 +129,7 @@ public class CheckPlatformDetails implements Command {
                         context.runSystemCalls = false;
 
                         // We do need a system command local to run the docker calls
-                        ResourceCache.systemCommand =  new LocalSystem(SystemUtils.parseOperatingSystemName(SystemProperties.osName));
+                        ResourceUtils.systemCommand =  new LocalSystem(SystemUtils.parseOperatingSystemName(SystemProperties.osName));
                         break;
                     }
 
@@ -143,7 +143,7 @@ public class CheckPlatformDetails implements Command {
                     context.targetNode = findLocalTargetNode(
                             context.diagnosticInputs.host, nodeProfiles);
 
-                    ResourceCache.systemCommand =  new LocalSystem(context.targetNode.os);
+                    ResourceUtils.systemCommand =  new LocalSystem(context.targetNode.os);
                     break;
 
                 default:

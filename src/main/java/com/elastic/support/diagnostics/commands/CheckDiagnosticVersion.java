@@ -6,6 +6,8 @@ import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.rest.RestClient;
 import com.elastic.support.rest.RestResult;
 import com.elastic.support.util.JsonYamlUtils;
+import com.elastic.support.util.ResourceUtils;
+import com.elastic.support.util.SystemUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.vdurmont.semver4j.Semver;
@@ -36,30 +38,13 @@ public class CheckDiagnosticVersion implements Command {
 
         logger.info(Constants.CONSOLE, "Checking for diagnostic version updates.");
         // Only need this once so let it auto-close at the end of the try catch block.
-        try (RestClient restClient = new RestClient(
-                context.diagsConfig.diagHost,
-                true,
-                true,
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                context.diagsConfig.connectionTimeout,
-                context.diagsConfig.connectionRequestTimeout,
-                context.diagsConfig.socketTimeout,
-                context.diagsConfig.maxTotalConn,
-                context.diagsConfig.maxConnPerRoute,
-                context.diagsConfig.idleExpire
-                )) {
 
+        try{
             // Get the current diagnostic version that was populated in the
             // manifest generation step - if we're running in
             // the IDE via a run configuration and/or debugger it will
             // have a value of "debug" instead of an actual version.
-            context.diagVersion = getToolVersion();
+            context.diagVersion = SystemUtils.getToolVersion();
             if (context.diagVersion.equals(Constants.runningInIde) || StringUtils.isEmpty(context.diagVersion)) {
                 logger.info(Constants.CONSOLE, "Running in IDE");
                 // Default it to something that won't blow up the Semver but shows it's not a normal run.
@@ -67,7 +52,7 @@ public class CheckDiagnosticVersion implements Command {
                 return;
             }
 
-            RestResult restResult = restClient.execQuery(context.diagsConfig.diagQuery);
+            RestResult restResult = ResourceUtils.githubRestClient.execQuery(context.diagsConfig.diagQuery);
             JsonNode rootNode = JsonYamlUtils.createJsonNodeFromString(restResult.toString());
             String ver = rootNode.path("tag_name").asText();
             Semver diagVer = new Semver(context.diagVersion, Semver.SemverType.NPM);
@@ -105,11 +90,5 @@ public class CheckDiagnosticVersion implements Command {
             logger.info(Constants.CONSOLE, "If Github is not accessible from this environment current supported version cannot be confirmed.");
         }
     }
-
-    public String getToolVersion() {
-        String ver = GenerateManifest.class.getPackage().getImplementationVersion();
-        return (ver != null) ? ver : Constants.runningInIde;
-    }
-
 
 }

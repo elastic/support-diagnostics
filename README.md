@@ -132,6 +132,13 @@
    </td>
  </tr>
  
+  <tr>
+    <td width="30%" align="left" valign="top">cloud</td>
+    <td width="70%" align="left" valign="top">
+    Use this type for a cloud cluster. Currently it executes the same calls as the <i>api</i> edition. 
+    </td>
+  </tr>
+ 
  <tr>
    <td width="30%" align="left" valign="top">logstash-local</td>
    <td width="70%" align="left" valign="top">Similar to Elasticsearch local mode, this runs against a logstash process running on the same host as the installed diagnostic utility. Retrieves Logstash REST API dignostic information as well as the output from the same system calls as the Elasticsearch type.
@@ -193,11 +200,11 @@
  </tr>
  
  <tr>
-   <td width="20%" align="left" valign="top">-o<br/>--output</td>
+   <td width="20%" align="left" valign="top">--output</td>
    <td width="50%" align="left" valign="top">Absolute path to the output directory, or if running in a container the configured volume. Temp files and the final archive will be
    written to this location. Quotes must be used for paths with spaces. If not supplied, the working directory will be used unless it is running in a container, in which case
    the configured volume name will be used.</td>
-   <td width="30%" align="left" valign="top">-o "/User/someuser/diagnostics" <br/> -o "C:\temp\My Diagnostics"</td>
+   <td width="30%" align="left" valign="top">-output "/User/someuser/diagnostics" <br/> -output "C:\temp\My Diagnostics"</td>
  </tr>
  
  <tr>
@@ -248,28 +255,10 @@
  </thead>
  
  <tr>
-   <td width="20%" align="left" valign="top">--proxyHost</td>
-   <td width="50%" align="left" valign="top">The hostname or IP address of the host in the proxy url. <br> 
+   <td width="20%" align="left" valign="top">--proxyUrl</td>
+   <td width="50%" align="left" valign="top">The hostname or IP address of the host and the port in the proxy url. <br> 
    This should  <strong>NOT</strong> be in the form of a URL containing http:// or https://. </td>
-   <td width="30%" align="left" valign="top"></td>
- </tr>
- 
- <tr>
-   <td width="20%" align="left" valign="top">--proxyPort</td>
-   <td width="50%" align="left" valign="top">Port used by the http proxy.</td>
-   <td width="30%" align="left" valign="top"></td>
- </tr>
- 
- <tr>
-   <td width="20%" align="left" valign="top">--proxyUser</td>
-   <td width="50%" align="left" valign="top">User account if http proxy requires authentication.</td>
-   <td width="30%" align="left" valign="top"></td>
- </tr>
- 
- <tr>
-   <td width="20%" align="left" valign="top">--proxyPass</td>
-   <td width="50%" align="left" valign="top">Prompt for password if required by the http proxy.</td>
-   <td width="30%" align="left" valign="top">Option only - no value.</td>
+   <td width="30%" align="left" valign="top">localhost:8888</td>
  </tr>
  </table>  
  
@@ -380,13 +369,12 @@
    ./diagnostics.sh --url https://mydomain.internal.com:9243 --type remote  --keyFile "~.ssh/es_rsa" --bypassDiagVerify
    ```  
   
- Executing against a cloud cluster. Note that in this case we use 9243 for the port, disable host name verification and force the type to strictly api calls.
+ Executing against a cloud cluster. Note that in this case we use 9243 for the port and force the type to strictly api calls.
   
    ```$xslt
    ./diagnostics.sh --url https://2775abprd8230d55d11e5edc86752260dd.us-east-1.aws.found.io:9243 --type api
    ```
 
-    
  #### Customizing What Is Collected
  
  ##### The Config Directory

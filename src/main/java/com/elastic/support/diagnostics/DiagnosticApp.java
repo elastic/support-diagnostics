@@ -1,54 +1,46 @@
 package com.elastic.support.diagnostics;
 
-import com.elastic.support.Constants;
-import com.elastic.support.util.JsonYamlUtils;
-import com.elastic.support.util.ResourceCache;
-import com.elastic.support.util.SystemProperties;
-import com.elastic.support.util.SystemUtils;
+import com.elastic.support.*;
+import com.elastic.support.util.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.List;
-import java.util.Map;
-
-public class DiagnosticApp {
+public class DiagnosticApp extends BaseApp {
 
     private static final Logger logger = LogManager.getLogger(DiagnosticApp.class);
 
     public static void main(String[] args) {
 
         try {
-            DiagnosticInputs diagnosticInputs = new DiagnosticInputs();
-            if (args.length == 0) {
-                logger.info(Constants.CONSOLE, Constants.interactiveMsg);
-                diagnosticInputs.interactive = true;
-                diagnosticInputs.runInteractive();
-            } else {
-                List<String> errors = diagnosticInputs.parseInputs(args);
-                if (errors.size() > 0) {
-                    for (String err : errors) {
-                        logger.error(Constants.CONSOLE, err);
-                    }
-                    diagnosticInputs.usage();
-                    SystemUtils.quitApp();
-                }
-            }
-            Map diagMap = JsonYamlUtils.readYamlFromClasspath(Constants.DIAG_CONFIG, true);
-            DiagConfig diagConfig = new DiagConfig(diagMap);
-            DiagnosticService diag = new DiagnosticService();
-            ResourceCache.terminal.dispose();
-            diag.exec(diagnosticInputs, diagConfig);
+            DiagnosticConfig config = new DiagnosticConfig(JsonYamlUtils.readYamlFromClasspath(Constants.DIAG_CONFIG, true));
+            DiagnosticInputs inputs = new DiagnosticInputs(config.delimiter);
+            initInputs(args, inputs);
+            elasticsearchConnection(inputs, config);
+            githubConnection(config);
+            DiagnosticService service = new DiagnosticService(inputs, config);
+            runServiceSequence(inputs, config, service, inputs.diagType);
         } catch (ShowHelpException she){
             SystemUtils.quitApp();
         } catch (Exception e) {
             logger.error(Constants.CONSOLE,"Fatal error occurred: {}. {}", e.getMessage(), Constants.CHECK_LOG);
             logger.error( e);
         } finally {
-            ResourceCache.closeAll();
+            ResourceUtils.closeAll();
         }
     }
 
-
-
+    protected static void runServiceSequence(BaseInputs inputs, BaseConfig config, BaseService service, String archiveType){
+        try {
+            inputs.tempDir = ResourceUtils.createTempDirectory(inputs.outputDir);
+            ResourceUtils.startLog(inputs.tempDir + SystemProperties.fileSeparator + "diagnostic.log");
+            service.exec();
+        } catch (Exception e) {
+            System.out.println("Error during service run. Check logs in temp directory or last archive created.");
+        } finally {
+            ResourceUtils.closeFileLogs();
+            ArchiveUtils.archiveDirectory(inputs.tempDir, inputs.outputDir + SystemProperties.fileSeparator + archiveType + "-diagnostics-" + SystemProperties.getFileDateString() + ".zip");
+            SystemUtils.nukeDirectory(inputs.tempDir);
+        }
+    }
 }
 
