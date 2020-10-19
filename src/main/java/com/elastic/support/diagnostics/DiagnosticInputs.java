@@ -101,18 +101,16 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
     // Input Fields
     @Parameter(names = {"-type"}, description = "Designates the type of service to run. Enter local, remote, api, logstash, or logstash-api. Defaults to local.")
     public String diagType = "";
-    @Parameter(names = {"-remoteUser"}, description = remoteUserDescription)
+
+    @Parameter(names = {"-remoteUser"}, hidden = true)
     public String remoteUser;
-    @Parameter(names = {"-remotePass"}, description = "Show password prompt for the remote user account.")
-    public boolean isRemotePass = false;
-    @Parameter(names = {"-remotePassText"}, hidden = true)
+    @Parameter(names = {"-remotePass"}, hidden = true)
     public String remotePassword = "";
+
     @Parameter(names = {"-keyFile"}, description = sshKeyFileDescription)
     public String keyfile = "";
-    @Parameter(names = {"-keyFilePass" }, description = "Show prompt for keyfile passphrase for the keyfile if one exists.")
-    public boolean isKeyFilePass = false;
-    @Parameter(names = {"-keyFilePassText"}, hidden = true)
     public String keyfilePassword = "";
+
     @Parameter(names = {"-trustRemote"}, description = trustRemoteDescription)
     public boolean trustRemote = false;
     @Parameter(names = {"--knownHostsFile"}, description = knownHostsDescription)
@@ -121,7 +119,7 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
     public boolean isSudo = false;
     @Parameter(names = {"-remotePort"}, description = remotePortDescription)
     public int remotePort = 22;
-    @Parameter(names = {"-bypassRetry"}, description = retryFailedCalls)
+    @Parameter(names = {"-retryFailed"}, description = retryFailedCalls)
     public boolean retryFailed = false;
 
     // End Input Fields
@@ -230,14 +228,28 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
         errors.addAll(ObjectUtils.defaultIfNull(validateFile(keyfile), emptyList));
         errors.addAll(ObjectUtils.defaultIfNull(validateFile(knownHostsFile), emptyList));
 
-        if(isRemotePass){
-            remotePassword = standardPasswordReader
-                    .read(remotePasswordDescription);
-        }
+        boolean isRemote = diagType.contains("remote");
+        boolean remotePrompt = StringUtils.isEmpty(remoteUser) || StringUtils.isEmpty(remotePassword);
+        boolean keyfilePresent = StringUtils.isNotEmpty(keyfile);
 
-        if(isKeyFilePass){
-            keyfilePassword = standardPasswordReader
-                    .read(sshKeyFIlePassphraseDescription);
+        if(isRemote){
+            if(remotePrompt){
+                remoteUser = ResourceUtils.textIO.newStringInputReader()
+                        .withInputTrimming(true)
+                        .withMinLength(1).read(SystemProperties.lineSeparator + "remote user: ");
+
+                remotePassword = standardPasswordReader
+                        .read(remotePasswordDescription);
+            }
+            if(keyfilePresent){
+                if(keyfilePassword.equalsIgnoreCase("no")){
+                    keyfilePassword = "";
+                }
+                else {
+                    keyfilePassword = standardPasswordReader
+                            .read(SystemProperties.lineSeparator + sshKeyFIlePassphraseDescription);
+                }
+            }
         }
 
         ResourceUtils.textIO.dispose();
@@ -264,7 +276,7 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
         // it is a Logstash diag.
         if(diagType.contains("remote")){
             if(StringUtils.isEmpty(val)){
-                return Collections.singletonList("For remote execution a user account must be specified");
+                return Collections.singletonList("For remote execution a user account for that host must be specified");
             }
         }
         return null;
@@ -278,7 +290,6 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
                 ", diagType='" + diagType + '\'' +
                 ", remoteUser='" + remoteUser + '\'' +
                 ", keyfile='" + keyfile + '\'' +
-                ", isKeyFilePass=" +  isKeyFilePass + '\'' +
                 ", trustRemote=" + trustRemote + '\'' +
                 ", knownHostsFile='" + knownHostsFile + '\'' +
                 ", sudo=" + isSudo + '\'' +

@@ -15,7 +15,7 @@ import java.util.List;
 
 public abstract class ElasticRestClientInputs extends BaseInputs {
 
-    public static final String uriDescription = " Required field. Full uri in format <scheme>://<host>:<port> ex. https://localhost:9200.  HTTP access for this node must be enabled. ";
+    public static final String urlDescription = " Required field. Full uri in format <scheme>://<host>:<port> ex. https://localhost:9200.  HTTP access for this node must be enabled. ";
     public static final String proxyUriDescription = "Full proxy server uri in format <scheme>://<host>:<port> ex. https://localhost:8888 ";
 
     public static final String pkiKeystoreDescription = "Path/filename for PKI keystore with client certificate: ";
@@ -26,23 +26,22 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
     public static final String disableAuthPrompt = "Do not send login credentials - cluster is unsecured.";
 
     // The basics
-    @Parameter(names = {"-url"}, description = uriDescription)
-    public String url = "";
+    @Parameter(names = {"-url"}, description = urlDescription)
+    public String url;
     public String host;
 
+    @Parameter(names = {"-user"}, hidden = true)
     public String user;
+    @Parameter(names = {"-password"}, hidden = true)
     public String password;
+
+    @Parameter(names = {"-pkiKeytore"}, description = pkiKeystoreDescription)
+    public String pkiKeystore = "";
+    @Parameter(names = {"-pkiPassword"}, hidden = true)
+    public String pkiPass = "";
 
     @Parameter(names = {"-proxyUrl"}, description = proxyUriDescription)
     public String proxyUrl = "";
-    public String pkiKeystore = "";
-    public String pkiPass = "";
-
-    // Not shown in the the help display due to security risks - allow input via command line arguments in plain text.
-    @Parameter(names = {"-credentials"}, hidden = true)
-    public String credentials = "";
-    @Parameter(names = {"-pkiCredentials"}, hidden = true)
-    public String pkiCredentials = "";
 
     // Behavioral modifiers
     @Parameter(names = {"-bypassAuth"}, description = disableAuthPrompt)
@@ -54,7 +53,7 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
 
     Logger logger = LogManager.getLogger(ElasticRestClientInputs.class);
 
-    public ElasticRestClientInputs(String delimiter){
+    public ElasticRestClientInputs(String delimiter) {
         super(delimiter);
     }
 
@@ -62,24 +61,43 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
 
         List<String> errors = super.parseInputs(args);
         errors.addAll(ObjectUtils.defaultIfNull(validateEsUri(url), emptyList));
-
-        if (!bypassAuth && (StringUtils.isEmpty(credentials) && StringUtils.isEmpty(pkiCredentials))) {
-            authInteractive();
-        } else {
-            if (StringUtils.isNotEmpty(credentials)) {
-                errors.addAll(ObjectUtils.defaultIfNull(validateEsCredentials(), emptyList));
-            } else {
-                errors.addAll(ObjectUtils.defaultIfNull(validatePkiInputs(), emptyList));
-                errors.addAll(ObjectUtils.defaultIfNull(validatePKIScheme(), emptyList));
-            }
-        }
-
         if (StringUtils.isNotEmpty(proxyUrl)) {
             errors.addAll(ObjectUtils.defaultIfNull(validateUri(proxyUrl), emptyList));
         }
 
-        return errors;
+        // Auth disabled so exit
+        if (bypassAuth) {
+            return errors;
+        }
 
+        boolean loginPrompt = StringUtils.isEmpty(user) || StringUtils.isEmpty(password);
+        boolean usePki = StringUtils.isNotEmpty(pkiKeystore);
+
+        // Looks weird but if they give a PKI input the only way we know whether there's
+        // a password to prompt for is if we know intent. Trade off of cutting down on the
+        // numnber of input fields for resetting the value.
+        if (usePki) {
+            if (pkiPass.equalsIgnoreCase("no")) {
+                pkiPass = "";
+            } else {
+                if (StringUtils.isEmpty(pkiPass)) {
+                    pkiPass = standardPasswordReader
+                            .withDefaultValue("none")
+                            .read(SystemProperties.lineSeparator + pkiKeystorePasswordDescription);
+                }
+            }
+
+            errors.addAll(ObjectUtils.defaultIfNull(validatePkiInputs(), emptyList));
+            errors.addAll(ObjectUtils.defaultIfNull(validatePKIScheme(), emptyList));
+        } else {
+            if (loginPrompt) {
+                basicInteractive();
+            } else {
+                errors.addAll(ObjectUtils.defaultIfNull(validateEsCredentials(), emptyList));
+            }
+        }
+
+        return errors;
     }
 
     protected void runHttpInteractive() {
@@ -94,7 +112,7 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
                     .withInputTrimming(true)
                     .withMinLength(1)
                     .withValueChecker((String val, String propname) -> validateEsUri(val))
-                    .read(SystemProperties.lineSeparator + uriDescription).toLowerCase();
+                    .read(SystemProperties.lineSeparator + urlDescription).toLowerCase();
 
             bypassAuth = ResourceUtils.textIO.newBooleanInputReader()
                     .withDefaultValue(false)
@@ -146,7 +164,6 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
     protected void basicInteractive() {
 
         user = ResourceUtils.textIO.newStringInputReader()
-                .withInputMasking(true)
                 .withInputTrimming(true)
                 .withMinLength(1).read(SystemProperties.lineSeparator + "user: ");
 
@@ -157,7 +174,6 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
     }
 
     protected void pkiInteractive() {
-
         pkiKeystore = standardFileReader
                 .read(SystemProperties.lineSeparator + pkiKeystoreDescription);
         pkiPass = standardPasswordReader
@@ -167,11 +183,11 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
     public List<String> validateEsUri(String val) {
 
         if (StringUtils.isEmpty(val)) {
-            return Collections.singletonList("Full uri for the endpoint is required." + SystemProperties.lineSeparator + uriDescription);
+            return Collections.singletonList("Full uri for the endpoint is required." + SystemProperties.lineSeparator + urlDescription);
         }
 
         if (!isValidUri(val)) {
-            return Collections.singletonList("Full uri for the endpoint is required." + SystemProperties.lineSeparator + uriDescription);
+            return Collections.singletonList("Full uri for the endpoint is required." + SystemProperties.lineSeparator + urlDescription);
         }
 
         host = url.substring(url.lastIndexOf("/") + 1);
@@ -191,7 +207,6 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
         if (!url.contains("https")) {
             return Collections.singletonList("TLS must be enabled to use PKI.");
         }
-
         return null;
     }
 
@@ -200,44 +215,14 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
     }
 
     public List validateEsCredentials() {
-        String[] combo = credentials.split(delimiter);
-
-        if (combo.length < 2) {
-            return Collections.singletonList("Invalid credentials content or format.");
-        }
-
-        if (combo[1].length() < 6) {
+        if (password.length() < 6) {
             return Collections.singletonList("Password must have at least 6 characters.");
         }
-
-        user = combo[0];
-        password = combo[1];
-
         return null;
     }
 
     public List validatePkiInputs() {
-        if (StringUtils.isEmpty(pkiCredentials)) {
-            return Collections.singletonList("Format for credentials is <absolute path to filename> or <absolute path to filename>:password");
-        }
-        String[] combo = pkiCredentials.split(delimiter);
-
-        List errs = validateRequiredFile(combo[0]);
-        if (errs != null) {
-            return Collections.singletonList("Format for credentials is <absolute path to filename> or <absolute path to filename>:password");
-        }
-
-        if (StringUtils.isNotEmpty(combo[0])) {
-            pkiKeystore = combo[0];
-        }
-        if (combo.length > 1 && StringUtils.isNotEmpty(combo[1])) {
-            pkiPass = combo[1];
-        }
-        else{
-            pkiPass = "";
-        }
-
-        return null;
+        return validateRequiredFile(pkiKeystore);
     }
 
     public List<String> validateUri(String val) {
@@ -252,7 +237,6 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
 
     @Override
     public String toString() {
-
         String superString = super.toString();
         return superString + ",";
     }

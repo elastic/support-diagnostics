@@ -16,7 +16,6 @@
     <Loggers>
         <Root level="info">
             <AppenderRef ref="console" />
-            <AppenderRef ref="diag" />
         </Root>
     </Loggers>
 </Configuration>

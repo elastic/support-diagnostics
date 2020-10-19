@@ -69,11 +69,11 @@ public class MonitoringImportProcessor {
 
         try (InputStream instream = new FileInputStream(file)) {
             if (file.getName().contains("logstash")) {
-                indexName = config.logstashExtractIndexPattern + "-" + indexDate;
+                indexName = config.logstashPattern + "-" + indexDate;
             } else if (file.getName().contains("metricbeat")) {
-                indexName = config.metricbeatExtractIndexPattern + "-" + indexDate;
+                indexName = config.metricbeatPattern + "-" + indexDate;
             } else {
-                indexName = config.monitoringExtractIndexPattern + "-" + indexDate;
+                indexName = config.elasticPattern + "-" + indexDate;
             }
 
             BufferedReader br = new BufferedReader(new InputStreamReader(instream));

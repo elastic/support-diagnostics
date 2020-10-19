@@ -15,10 +15,11 @@ public class MonitoringExportApp extends BaseApp {
 
     public static void main(String[] args) {
 
+        MonitoringExportInputs inputs = null;
         try {
             Map configMap = JsonYamlUtils.readYamlFromClasspath(Constants.DIAG_CONFIG, true);
             MonitoringExportConfig config = new MonitoringExportConfig(configMap);
-            MonitoringExportInputs inputs = new MonitoringExportInputs(config.delimiter);
+            inputs = new MonitoringExportInputs(config.delimiter);
             initInputs(args, inputs);
             elasticsearchConnection(inputs, config);
             githubConnection(config);
@@ -28,6 +29,7 @@ public class MonitoringExportApp extends BaseApp {
             ArchiveUtils.archiveDirectory(inputs.tempDir, "monitoring-export-" + SystemProperties.getFileDateString() + ".zip");
             SystemUtils.nukeDirectory(inputs.tempDir);
         } catch (ShowHelpException she){
+            inputs.usage();
             SystemUtils.quitApp();
         } catch (Exception e) {
             logger.error(Constants.CONSOLE, "Fatal error occurred: {}. {}", e.getMessage(), Constants.CHECK_LOG);

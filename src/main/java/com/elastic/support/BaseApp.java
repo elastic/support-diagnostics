@@ -1,5 +1,6 @@
 package com.elastic.support;
 
+import com.elastic.support.diagnostics.ShowHelpException;
 import com.elastic.support.rest.ElasticRestClientInputs;
 import com.elastic.support.rest.RestClient;
 import com.elastic.support.util.ArchiveUtils;
@@ -27,19 +28,24 @@ public abstract class BaseApp {
 
     protected static void initInputs(String args[],
                                      BaseInputs inputs) {
-        if (args.length == 0) {
-            logger.info(Constants.CONSOLE, Constants.interactiveMsg);
-            inputs.interactive = true;
-            inputs.runInteractive();
-        } else {
-            List<String> errors = inputs.parseInputs(args);
-            if (errors.size() > 0) {
-                for (String err : errors) {
-                    logger.error(Constants.CONSOLE, err);
+        try {
+            if (args.length == 0) {
+                logger.info(Constants.CONSOLE, Constants.interactiveMsg);
+                inputs.interactive = true;
+                inputs.runInteractive();
+            } else {
+                List<String> errors = inputs.parseInputs(args);
+                if (errors.size() > 0) {
+                    for (String err : errors) {
+                        logger.error(Constants.CONSOLE, err);
+                    }
+                    inputs.usage();
+                    SystemUtils.quitApp();
                 }
-                inputs.usage();
-                SystemUtils.quitApp();
             }
+        } catch (Exception e) {
+            logger.info(Constants.CONSOLE, SystemProperties.lineSeparator + e.getMessage() + SystemProperties.lineSeparator);
+            throw new ShowHelpException();
         }
 
         inputs.tempDir = ResourceUtils.createTempDirectory(inputs.outputDir);

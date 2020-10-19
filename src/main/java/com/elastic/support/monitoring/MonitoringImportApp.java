@@ -15,11 +15,12 @@ public class MonitoringImportApp extends BaseApp {
     private static final Logger logger = LogManager.getLogger(com.elastic.support.monitoring.MonitoringImportApp.class);
 
     public static void main(String[] args) {
+        MonitoringImportInputs inputs = null;
 
         try {
             Map configMap = JsonYamlUtils.readYamlFromClasspath(Constants.DIAG_CONFIG, true);
             MonitoringImportConfig config = new MonitoringImportConfig(configMap);
-            MonitoringImportInputs inputs = new MonitoringImportInputs(config.delimiter);
+            inputs = new MonitoringImportInputs(config.delimiter);
             initInputs(args, inputs);
             ResourceUtils.startLog(inputs.outputDir + SystemProperties.fileSeparator + "diagnostic.log");
             elasticsearchConnection(inputs, config);
@@ -28,6 +29,7 @@ public class MonitoringImportApp extends BaseApp {
             ResourceUtils.closeFileLogs();
             SystemUtils.nukeDirectory(inputs.tempDir);
         } catch (ShowHelpException she){
+            inputs.usage();
             SystemUtils.quitApp();
         } catch (Exception e) {
             logger.error(Constants.CONSOLE,  "Error occurred: {}. {}", e.getMessage(), Constants.CHECK_LOG);

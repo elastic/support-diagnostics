@@ -25,14 +25,6 @@ public class MonitoringImportInputs extends ElasticRestClientInputs {
 
     // End Input Fields
 
-    // Start Input Readers
-
-    protected StringInputReader proxyHostReader = ResourceUtils.textIO.newStringInputReader()
-            .withInputTrimming(true)
-            .withValueChecker((String val, String propname) -> validateId(val));
-
-    // End Input Readers
-
     public MonitoringImportInputs(String delimiter){
         super(delimiter);
     }
@@ -79,7 +71,6 @@ public class MonitoringImportInputs extends ElasticRestClientInputs {
         return "MonitoringImportInputs{" +
                 "clusterName='" + clusterName + '\'' +
                 ", input='" + input + '\'' +
-                ", proxyHostReader=" + proxyHostReader +
                 '}';
     }
 }

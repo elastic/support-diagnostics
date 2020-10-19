@@ -19,17 +19,19 @@ public class TimedExecutionDiagnosticApp extends DiagnosticApp {
 
     public static void main(String[] args) {
 
+        TimedExecutionDiagnosticInputs inputs = null;
         try {
             logger.warn(Constants.CONSOLE,"Retries have been disabled due to timed execution run.");
             Map diagMap = JsonYamlUtils.readYamlFromClasspath(Constants.DIAG_CONFIG, true);
             TimedExecutionDiagConfig config = new TimedExecutionDiagConfig(diagMap);
-            TimedExecutionDiagnosticInputs inputs = new TimedExecutionDiagnosticInputs(config.delimiter);
+            inputs = new TimedExecutionDiagnosticInputs(config.delimiter);
             initInputs(args, inputs);
             elasticsearchConnection(inputs, config);
             githubConnection(config);
             DiagnosticService diag = new DiagnosticService(inputs, config);
             runTimedExecs(diag, config, inputs);
         } catch (ShowHelpException she){
+            inputs.usage();
             SystemUtils.quitApp();
         } catch (Exception e) {
             logger.error(Constants.CONSOLE,"Fatal error occurred: {}. {}", e.getMessage(), Constants.CHECK_LOG);

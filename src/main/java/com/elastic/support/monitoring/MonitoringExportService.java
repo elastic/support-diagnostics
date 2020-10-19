@@ -8,18 +8,19 @@ import com.elastic.support.rest.*;
 import com.elastic.support.util.JsonYamlUtils;
 import com.elastic.support.util.ResourceUtils;
 import com.elastic.support.util.SystemProperties;
-import com.elastic.support.util.SystemUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.ser.Serializers;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.IOException;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.PrintWriter;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -216,7 +217,9 @@ public class MonitoringExportService implements BaseService {
                 // If there are no hits, move to the next.
                 if (totalHits > 0) {
                     logger.info(Constants.CONSOLE,  "{} documents retrieved. Writing to disk.", totalHits);
-                    pw = new PrintWriter(statFile);
+                    //pw = new PrintWriter(new BufferedWriter(new FileWriter(statFile)));
+                    Path path = FileSystems.getDefault().getPath(statFile);
+                    pw = new PrintWriter(Files.newBufferedWriter(path));
                 } else {
                     logger.info(Constants.CONSOLE,  "No documents found for: {}.", stat);
                     continue;
@@ -231,18 +234,33 @@ public class MonitoringExportService implements BaseService {
                     processHits(hitsNode, pw);
                     processedHits += hitsNode.size();
                     logger.info(Constants.CONSOLE,  "{} of {} processed.", processedHits, totalHits);
-
                     scrollId = resultNode.path("_scroll_id").asText();
                     String scrollQuery = SCROLL_ID.replace("{{scrollId}}", scrollId);
-                    RestResult scrollResult = client.execPost(monitoringScrollUri, scrollQuery);
-                    if (restResult.getStatus() == 200) {
-                        resultNode = JsonYamlUtils.createJsonNodeFromString(scrollResult.toString());
-                        hitsNode = getHitsArray(resultNode);
-                        hitsCount = hitsNode.size();
-                    } else {
-                        logger.error(Constants.CONSOLE,  "Scroll for stat: {} Operation failed with status: {}, reason: {}, bypassing and going to next call.", stat, restResult.getStatus(), restResult.getReason());
-                    }
+                    int tries = 1;
+                    boolean done = false;
+                    while (!done) {
+                        try {
+                            RestResult scrollResult = client.execPost(monitoringScrollUri, scrollQuery);
+                            if (restResult.getStatus() == 200) {
+                                resultNode = JsonYamlUtils.createJsonNodeFromString(scrollResult.toString());
+                                hitsNode = getHitsArray(resultNode);
+                                hitsCount = hitsNode.size();
+                            } else {
+                                logger.error(Constants.CONSOLE,  "Scroll for stat: {} Operation failed with status: {}, reason: {}, bypassing and going to next call.", stat, restResult.getStatus(), restResult.getReason());
+                            }
+                            done = true;
 
+                        } catch (Exception e) {
+                            logger.error(Constants.CONSOLE,  "Retrieval error, retry {} of 3", tries, e.getMessage());
+                            logger.error("Caused by:",  e);
+                            if(tries > 3){
+                                done = true;
+                            }
+                            else {
+                               tries++;
+                            }
+                        }
+                    }
                 } while (hitsCount != 0);
 
                 // Delete the scroll to free up the resources

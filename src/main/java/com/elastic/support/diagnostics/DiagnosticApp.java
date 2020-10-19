@@ -10,16 +10,18 @@ public class DiagnosticApp extends BaseApp {
     private static final Logger logger = LogManager.getLogger(DiagnosticApp.class);
 
     public static void main(String[] args) {
+        DiagnosticInputs inputs = null;
 
         try {
             DiagnosticConfig config = new DiagnosticConfig(JsonYamlUtils.readYamlFromClasspath(Constants.DIAG_CONFIG, true));
-            DiagnosticInputs inputs = new DiagnosticInputs(config.delimiter);
+            inputs = new DiagnosticInputs(config.delimiter);
             initInputs(args, inputs);
             elasticsearchConnection(inputs, config);
             githubConnection(config);
             DiagnosticService service = new DiagnosticService(inputs, config);
             runServiceSequence(inputs, config, service, inputs.diagType);
         } catch (ShowHelpException she){
+            inputs.usage();
             SystemUtils.quitApp();
         } catch (Exception e) {
             logger.error(Constants.CONSOLE,"Fatal error occurred: {}. {}", e.getMessage(), Constants.CHECK_LOG);

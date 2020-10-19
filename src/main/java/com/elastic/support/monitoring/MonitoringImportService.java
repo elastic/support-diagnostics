@@ -30,17 +30,15 @@ public class MonitoringImportService  implements BaseService {
     public void exec(){
 
         try {
-            String extractDir = inputs.tempDir + SystemProperties.fileSeparator +"import-data";
-
             // Check the version.
             Semver version = CheckElasticsearchVersion.getElasticsearchVersion(ResourceUtils.restClient);
             if (version.getMajor() < 7) {
                 throw new DiagnosticException("Target cluster must be at least 7.x");
             }
 
-            ArchiveUtils.extractArchive(inputs.input, extractDir);
+            ArchiveUtils.extractArchive(inputs.input, inputs.tempDir);
             MonitoringImportProcessor processor = new MonitoringImportProcessor(config, inputs, ResourceUtils.restClient);
-            processor.exec(getDirectoryEntries(extractDir));
+            processor.exec(getDirectoryEntries(inputs.tempDir));
 
         }catch (Exception e){
             logger.error( "Error extracting archive or indexing results", e);

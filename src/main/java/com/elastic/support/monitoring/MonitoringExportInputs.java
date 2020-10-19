@@ -31,8 +31,8 @@ public class MonitoringExportInputs extends ElasticRestClientInputs {
     @Parameter(names = {"-cutoffTime"}, description = "Time for the cutoff point of the data extraction. Defaults to today's current UTC time, and the starting point will be calculated as that minus the configured interval. Must be in the 24 hour format HH:mm.")
     public String cutoffTime = DateTimeFormatter.ofPattern("HH:mm").format(ZonedDateTime.now(ZoneId.of("+0")));;;
 
-    @Parameter(names = {"-interval"}, description = "Number of hours back to collect statistics. Defaults to 6 hours, but but can be set as high as 12.")
-    public int interval = defaultInterval;
+    @Parameter(names = {"-duration"}, description = "Number of hours back to collect statistics. Defaults to 6 hours, but but can be set as high as 12.")
+    public int duration = defaultInterval;
 
     @Parameter(names = {"-list"}, description = "List the clusters available on the monitoring cluster.")
     boolean listClusters = false;
@@ -41,7 +41,6 @@ public class MonitoringExportInputs extends ElasticRestClientInputs {
     String type = "monitoring";
 
     // End Input Fields
-
 
     // Generated during the validate method for use by the query.
     public String queryStartDate;
@@ -82,9 +81,9 @@ public class MonitoringExportInputs extends ElasticRestClientInputs {
                     .withMinLength(0)
                     .read(SystemProperties.lineSeparator + "Enter the time for the cutoff point of the extraction. Defaults to the current UTC time. Must be in the 24 hour format HH:mm.");
 
-            interval = ResourceUtils.textIO.newIntInputReader()
+            duration = ResourceUtils.textIO.newIntInputReader()
                     .withInputTrimming(true)
-                    .withDefaultValue(interval)
+                    .withDefaultValue(duration)
                     .withValueChecker((Integer val, String propname) -> validateInterval(val))
                     .read(SystemProperties.lineSeparator + "The number of hours you wish to extract. Whole integer values only. Defaults to 6 hours.");
 
@@ -103,7 +102,7 @@ public class MonitoringExportInputs extends ElasticRestClientInputs {
 
         if (!listClusters) {
             errors.addAll(ObjectUtils.defaultIfNull(validateCluster(clusterId), emptyList));
-            errors.addAll(ObjectUtils.defaultIfNull(validateInterval(interval), emptyList));
+            errors.addAll(ObjectUtils.defaultIfNull(validateInterval(duration), emptyList));
             errors.addAll(ObjectUtils.defaultIfNull(validateTimeWindow(), emptyList));
         }
 
@@ -126,7 +125,7 @@ public class MonitoringExportInputs extends ElasticRestClientInputs {
             // Generate the string subs to be used in the query.
             queryEndDate = cutoff +  ":00.000Z";
 
-            start = end.minusHours(interval);
+            start = end.minusHours(duration);
             queryStartDate = (DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").format(start) + ":00.000Z").replace(" ", "T");
 
         } catch (Exception e) {
@@ -157,7 +156,7 @@ public class MonitoringExportInputs extends ElasticRestClientInputs {
                 "clusterId='" + clusterId + '\'' +
                 ", cutoffDate='" + cutoffDate + '\'' +
                 ", cutoffTime='" + cutoffTime + '\'' +
-                ", interval=" + interval +
+                ", interval=" + duration +
                 ", listClusters=" + listClusters +
                 ", queryStartDate='" + queryStartDate + '\'' +
                 ", queryEndDate='" + queryEndDate + '\'' +
