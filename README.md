@@ -420,12 +420,12 @@ It is also possible to set the diagnostic up for multiple runs with a specified 
 <tr>
  <td width="20%" align="left" valign="top">-executions</td>
  <td width="50%" align="left" valign="top">The number of diagnostic runs you wish to take.</td></td>
- <td width="30%" align="left" valign="top">-credentials elastic:ruty5?-7G</td>
+ <td width="30%" align="left" valign="top">-executions 8</td>
 </tr>
 
 <tr>
  <td width="20%" align="left" valign="top">-interval</td>
- <td width="50%" align="left" valign="top">Time in seconds between executions. Minimum value is 20 seconds.</td>
+ <td width="50%" align="left" valign="top">Time in seconds between executions. Minimum value is 5 seconds.</td>
  <td width="30%" align="left" valign="top">-interval 120</td>
 </tr>
 
@@ -521,6 +521,7 @@ After it has checked for IP and MAC addresses it will use any configured tokens.
 
    ```$xslt
    ./scrub.sh -input /home/adminuser/elasticsearch.log -output /home/adminuser/sanitized-diags -workers 1
+   ```
 
  Processing a directory and using specific number of workers:  
   
@@ -578,9 +579,9 @@ Metricbeat system information can also be collected by specifying the input type
   </tr>
 
  <tr>
-   <td width="20%" align="left" valign="top">-duration</td>
+   <td width="20%" align="left" valign="top">-interval</td>
    <td width="50%" align="left" valign="top">The number of hours of statistics you wish to collect. Default value of 6. Whole integer values only. Minimum value of 1, maximum value of 12.</td>
-   <td width="30%" align="left" valign="top"> -duration 10 </td>
+   <td width="30%" align="left" valign="top"> -interval 10 </td>
  </tr>
 
  <tr>
