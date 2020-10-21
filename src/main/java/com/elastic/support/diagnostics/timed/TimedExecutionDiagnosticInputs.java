@@ -13,11 +13,11 @@ public class TimedExecutionDiagnosticInputs extends DiagnosticInputs {
 
     private static final Logger logger = LogManager.getLogger(TimedExecutionDiagnosticInputs.class);
 
-    @Parameter(names = {"-executions", "-e"}, description = "Total number of diagnostic runs to execute. Defaults to 6")
+    @Parameter(names = {"-executions"}, description = "Total number of diagnostic runs to execute. Defaults to 6")
     public int executions = 6;
     private static String executionsMsg = "Execution count must be greater than 1.";
 
-    @Parameter(names = {"-interval", "-i"}, description = "Interval between executions in seconds. Defaults to 10 seconds.")
+    @Parameter(names = {"-interval"}, description = "Interval between executions in seconds. Defaults to 10 seconds.")
     public int interval = 10;
     private static String intervalMsg = "Interval must be at least 5 seconds.";
 

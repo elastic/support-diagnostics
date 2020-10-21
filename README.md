@@ -431,6 +431,11 @@ It is also possible to set the diagnostic up for multiple runs with a specified 
 
 </table>
 
+Running REST api calls 3 times with a pause of 5 seconds between executions.
+   ```$xslt  
+   ./timed-exec.sh -url https://mydomain.internal.com:9243 -type api  -interval 5 executions 3
+   ```
+
 ## Docker
 
 ### Elasticsearch Deployed In Docker Containers

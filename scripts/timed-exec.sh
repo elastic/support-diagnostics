@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 scriptDir=$0
-scriptDir=${scriptDir/\/diagnostics.sh/$''}
+scriptDir=${scriptDir/\/timed-exec.sh/$''}
 libDir=$scriptDir'/lib'
 
 if [  -d "libDir" ]; then
