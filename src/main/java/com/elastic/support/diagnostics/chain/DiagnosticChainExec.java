@@ -20,15 +20,16 @@ public class DiagnosticChainExec {
             switch (type){
                 case Constants.api :
                     new CheckElasticsearchVersion().execute(context);
-                    new CheckUserAuthLevel().execute(context);
-                    // Removed temporarily due to issues with finding and accessing cloud master
-                    //new CheckPlatformDetails().execute(context);
+                    new RunClusterQueries().execute(context);
+                    break;
+
+                case Constants.cloud :
+                    new CheckElasticsearchVersion().execute(context);
                     new RunClusterQueries().execute(context);
                     break;
 
                 case Constants.local :
                     new CheckElasticsearchVersion().execute(context);
-                    new CheckUserAuthLevel().execute(context);
                     new CheckPlatformDetails().execute(context);
                     new RunClusterQueries().execute(context);
                     if(context.runSystemCalls){
@@ -43,7 +44,6 @@ public class DiagnosticChainExec {
 
                 case Constants.remote :
                     new CheckElasticsearchVersion().execute(context);
-                    new CheckUserAuthLevel().execute(context);
                     new CheckPlatformDetails().execute(context);
                     new RunClusterQueries().execute(context);
                     if(context.runSystemCalls){

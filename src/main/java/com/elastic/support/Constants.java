@@ -13,6 +13,7 @@ public class Constants {
    public static final Marker CONSOLE = MarkerManager.getMarker("CONSOLE");
 
    public static final String ES_DIAG = "diagnostics";
+   public static final String ES_DIAG_TEMP = "diagnostics-temp";
    public static final String NOT_FOUND = "not found";
    public static final String CHECK_LOG = "Check diagnostics.log in the archive file for more detail.";
 
@@ -26,11 +27,6 @@ public class Constants {
    public static final String MONITORING_DIR = "monitoring-export";
 
    public static final String DIAG_VERSION = "diagVersion";
-
-   public static final int DEEFAULT_HTTPS_PORT = 443;
-   public static final int DEEFAULT_PROXY_PORT = 8080;
-
-   public static final int LOGSTASH_PORT = 9600;
    public static final String[] LOCAL_ADDRESSES = {"127.0.0.1","localhost", "[::1]"};
    public static final List<String> localAddressList = Arrays.asList(LOCAL_ADDRESSES);
    public static final String UTF_8 = "UTF-8";
@@ -49,14 +45,12 @@ public class Constants {
 
    public final static String local =  "local";
    public final static String api = "api";
+   public final static String cloud = "cloud";
    public final static String remote = "remote";
 
    public final static String logstashLocal = "logstash-local";
    public final static String logstashRemote = "logstash-remote";
    public final static String logstashApi = "logstash-api";
-
-   public static final String restInputHost = "rest:InputHost";
-   public static final String systemCommands = "ssh:SystemCommand";
 
    public static final String runningInIde = "runningInIde";
    public static final String interactiveMsg = "Command line options can be displayed with the --help argument. " +

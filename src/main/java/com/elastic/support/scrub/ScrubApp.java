@@ -1,51 +1,39 @@
 package com.elastic.support.scrub;
 
+import com.elastic.support.BaseApp;
 import com.elastic.support.Constants;
-import com.elastic.support.diagnostics.DiagnosticInputs;
+import com.elastic.support.diagnostics.DiagnosticConfig;
 import com.elastic.support.diagnostics.ShowHelpException;
-import com.elastic.support.diagnostics.commands.GenerateManifest;
-import com.elastic.support.monitoring.MonitoringImportInputs;
-import com.elastic.support.monitoring.MonitoringImportService;
-import com.elastic.support.util.ResourceCache;
-import com.elastic.support.util.SystemProperties;
-import com.elastic.support.util.SystemUtils;
+import com.elastic.support.util.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.List;
+import java.util.Map;
 
 
-public class ScrubApp {
+public class ScrubApp extends BaseApp {
 
     private static Logger logger = LogManager.getLogger(ScrubApp.class);
 
     public static void main(String[] args) {
 
+        ScrubInputs inputs = null;
         try {
-            ScrubInputs scrubInputs = new ScrubInputs();
-            if (args.length == 0) {
-                logger.error(Constants.CONSOLE,  Constants.interactiveMsg);
-                scrubInputs.interactive = true;
-                scrubInputs.runInteractive();
-            } else {
-                List<String> errors = scrubInputs.parseIinputs(args);
-                if (errors.size() > 0) {
-                    for (String err : errors) {
-                        logger.error(Constants.CONSOLE,  err);
-                    }
-                    scrubInputs.usage();
-                    SystemUtils.quitApp();
-                }
-            }
-            ResourceCache.terminal.dispose();
-            logger.info(Constants.CONSOLE, "Using version: {} of diagnostic-utiliy", GenerateManifest.class.getPackage().getImplementationVersion());
-            new ScrubService().exec(scrubInputs);
+            Map configMap = JsonYamlUtils.readYamlFromClasspath(Constants.DIAG_CONFIG, true);
+            DiagnosticConfig config = new DiagnosticConfig(configMap);
+            inputs = new ScrubInputs(config.delimiter);
+            initInputs(args, inputs);
+            ResourceUtils.startLog(inputs.tempDir + SystemProperties.fileSeparator + "diagnostic.log");
+            new ScrubService(inputs).exec();
+            ArchiveUtils.archiveDirectory(inputs.tempDir, inputs.outputDir + SystemProperties.fileSeparator + "scrubbed-" + inputs.scrubbedFileBaseName +  ".zip");
         } catch (ShowHelpException she){
+            inputs.usage();
             SystemUtils.quitApp();
         } catch (Exception e) {
             logger.error(Constants.CONSOLE,  "Fatal error occurred: {}. {}", e.getMessage(), Constants.CHECK_LOG);
         } finally {
-            ResourceCache.closeAll();
+
+            ResourceUtils.closeAll();
         }
     }
 

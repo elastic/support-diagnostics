@@ -1,19 +1,15 @@
 #
-#
-#
-#
 #  The REST call settings have been moved to elastic-rest.yml and logstash-rest.yml
 #
-#
-#
-#
 
-## Should only need to change these if Github modifies something
-  ## github-settings:
-  ##   diagReleaseHost: "api.github.com"
-  ##   diagReleaseDest: "/repos/elastic/support-diagnostics/releases/latest"
-  ##   diagReleaseScheme: "https"
-  ## diagLatestRelease: "https://api.github.com/repos/elastic/support-diagnostics/releases/latest"
+## Should only need to change if Github modifies something
+  ##   diagHost: "https://api.github.com"
+  ##   diagQuery: "/repos/elastic/support-diagnostics/releases/latest"
+
+# Colon is the standard field delimiter for all concatentated strings containing
+# urls, credentials etc. If that creates a password conflict you may change it.
+# The modified value will be used for ALL concatenated string inputs.
+field-delimiter: ":"
 
 # Maximum number of log files including zip archives
 log-settings:
@@ -23,9 +19,13 @@ log-settings:
 # Uncomment only if modifying defaults
 rest-config:
    # timeouts in seconds
-   requestTimeout: 60
-   connectTimeout: 60
-   socketTimeout:  120
+   requestTimeout: 30
+   connectTimeout: 30
+   socketTimeout:  30
+
+   # milliseconds
+   idleExpire:     100
+
    maxTotalConn: 100
    maxConnPerRoute: 10
 
@@ -115,15 +115,17 @@ docker-container:
 
 monitoring-scroll-size: 1000
 bulk-import-size: 500
+bulk-pause: 15000
+bulk-max-retries: 3
 
 import-templates:
   - "monitoring-es-diag"
   - "monitoring-logstash-diag"
   - "metricbeat-system-diag"
 
-monitoring-extract-pattern: ".monitoring-es-7-diag-import"
-logstash-extract-pattern: ".monitoring-logstash-7-diag-import"
-metricbeat-extract-pattern: "metricbeat-7-diag-import"
+elastic-pattern: ".monitoring-es-7-diag-import"
+logstash-pattern: ".monitoring-logstash-7-diag-import"
+metricbeat-pattern: "metricbeat-7-diag-import"
 
 query-files:
   - general

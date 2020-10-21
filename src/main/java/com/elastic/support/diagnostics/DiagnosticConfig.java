@@ -6,13 +6,13 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.Map;
 
-public class DiagConfig extends BaseConfig {
+public class DiagnosticConfig extends BaseConfig {
 
-    private static Logger logger = LogManager.getLogger(DiagConfig.class);
+    private static Logger logger = LogManager.getLogger(DiagnosticConfig.class);
 
 
     public int callRetries, pauseRetries, maxLogs, maxGcLogs;
-    public DiagConfig(Map configuration) {
+    public DiagnosticConfig(Map configuration) {
 
         super(configuration);
 

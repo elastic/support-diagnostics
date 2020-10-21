@@ -1,13 +1,13 @@
 package com.elastic.support.monitoring;
 
+import com.elastic.support.BaseService;
 import com.elastic.support.Constants;
 import com.elastic.support.diagnostics.DiagnosticException;
 import com.elastic.support.diagnostics.commands.CheckElasticsearchVersion;
 import com.elastic.support.rest.*;
 import com.elastic.support.util.JsonYamlUtils;
-import com.elastic.support.util.ResourceCache;
+import com.elastic.support.util.ResourceUtils;
 import com.elastic.support.util.SystemProperties;
-import com.elastic.support.util.SystemUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -15,63 +15,39 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.IOException;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.PrintWriter;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MonitoringExportService extends ElasticRestClientService {
+public class MonitoringExportService implements BaseService {
 
     private static final String SCROLL_ID = "{ \"scroll_id\" : \"{{scrollId}}\" }";
     private Logger logger = LogManager.getLogger(MonitoringExportService.class);
 
-    public void execExtract(MonitoringExportInputs inputs) {
+    MonitoringExportInputs inputs;
+    MonitoringExportConfig config;
 
-        // Initialize outside the block for Exception handling
-        RestClient client = null;
-        MonitoringExportConfig config = null;
-        String tempDir = SystemProperties.fileSeparator + Constants.MONITORING_DIR;
+    public MonitoringExportService(MonitoringExportInputs inputs, MonitoringExportConfig config){
+        this.inputs = inputs;
+        this.config = config;
+    }
+
+    public void exec() {
         String monitoringUri = "";
 
-        try {
-            if (StringUtils.isEmpty(inputs.outputDir)) {
-                tempDir = SystemProperties.userDir + tempDir;
-            } else {
-                tempDir = inputs.outputDir + tempDir;
-            }
+        try{
+            ResourceUtils.restClient = new RestClient(
+                            inputs, config);
 
-            // Initialize the temp directory first.
-            // Set up the log file manually since we're going to package it with the diagnostic.
-            // It will go to wherever we have the temp dir set up.
-            SystemUtils.nukeDirectory(tempDir);
-            Files.createDirectories(Paths.get(tempDir));
-            createFileAppender(tempDir, "extract.log");
-
-            Map configMap = JsonYamlUtils.readYamlFromClasspath(Constants.DIAG_CONFIG, true);
-            config = new MonitoringExportConfig(configMap);
-            client = RestClient.getClient(
-                    inputs.host,
-                    inputs.port,
-                    inputs.scheme,
-                    inputs.user,
-                    inputs.password,
-                    inputs.proxyHost,
-                    inputs.proxyPort,
-                    inputs.proxyUser,
-                    inputs.proxyPassword,
-                    inputs.pkiKeystore,
-                    inputs.pkiKeystorePass,
-                    inputs.skipVerification,
-                    config.connectionTimeout,
-                    config.connectionRequestTimeout,
-                    config.socketTimeout
-            );
-
-            config.semver = CheckElasticsearchVersion.getElasticsearchVersion(client);
+            config.semver = CheckElasticsearchVersion.getElasticsearchVersion(ResourceUtils.restClient);
             String version = config.semver.getValue();
             RestEntryConfig builder = new RestEntryConfig(version);
             Map restCalls = JsonYamlUtils.readYamlFromClasspath(Constants.MONITORING_REST, true);
@@ -81,7 +57,7 @@ public class MonitoringExportService extends ElasticRestClientService {
 
             if (inputs.listClusters) {
                 logger.info(Constants.CONSOLE,  "Diaplaying a list of available clusters.");
-                showAvailableClusters(config, client, monitoringUri);
+                showAvailableClusters(config, ResourceUtils.restClient, monitoringUri);
                 return;
             }
 
@@ -89,10 +65,10 @@ public class MonitoringExportService extends ElasticRestClientService {
                 if (StringUtils.isEmpty(inputs.clusterId)) {
                     throw new DiagnosticException("missingClusterId");
                 }
-                validateClusterId(inputs.clusterId, config, client, monitoringUri);
+                validateClusterId(inputs.clusterId, config, ResourceUtils.restClient, monitoringUri);
             }
 
-            runExportQueries(tempDir, client, config, inputs, versionedRestCalls);
+            runExportQueries(inputs.tempDir, ResourceUtils.restClient, config, inputs, versionedRestCalls);
 
         } catch (DiagnosticException de) {
             switch (de.getMessage()) {
@@ -101,29 +77,20 @@ public class MonitoringExportService extends ElasticRestClientService {
                     break;
                 case "missingClusterId":
                     logger.error(Constants.CONSOLE, "Cluster id is required. Diaplaying a list of available clusters.");
-                    showAvailableClusters(config, client, monitoringUri);
+                    showAvailableClusters(config, ResourceUtils.restClient, monitoringUri);
                     break;
                 case "noClusterIdFound":
                     logger.error(Constants.CONSOLE, "Entered cluster id not found. Please enure you have a valid cluster_uuid for the monitored clusters.");
-                    showAvailableClusters(config, client, monitoringUri);
+                    showAvailableClusters(config, ResourceUtils.restClient, monitoringUri);
                     break;
                 default:
                     logger.info(Constants.CONSOLE,  "Entered cluster id not found - unexpected exception. Please enure you have a valid cluster_uuid for the monitored clusters. Check diagnostics.log for more details.");
                     logger.error( de);
             }
             logger.error(Constants.CONSOLE, "Cannot contiue processing. Exiting {}", Constants.CHECK_LOG);
-        } catch (IOException e) {
-            logger.error(Constants.CONSOLE, "Access issue with temp directory", e);
-            throw new RuntimeException("Issue with creating temp directory - see logs for details.");
         } catch (Throwable t) {
             logger.error( "Unexpected error occurred", t);
             logger.error(Constants.CONSOLE, "Unexpected error. {}", Constants.CHECK_LOG);
-        } finally {
-            ResourceCache.textIO.dispose();
-            closeLogs();
-            createArchive(tempDir);
-            client.close();
-            SystemUtils.nukeDirectory(tempDir);
         }
     }
 
@@ -136,7 +103,7 @@ public class MonitoringExportService extends ElasticRestClientService {
         String clusterIdQuery = config.queries.get("cluster_id_check");
         clusterIdQuery = clusterIdQuery.replace("{{clusterId}}", clusterId);
 
-        RestResult restResult = new RestResult(client.execPost(monitoringUri, clusterIdQuery), monitoringUri);
+        RestResult restResult = client.execPost(monitoringUri, clusterIdQuery);
         if (restResult.getStatus() != 200) {
             logger.error(Constants.CONSOLE,  "Cluster Id validation failed with status: {}, reason: {}.", restResult.getStatus(), restResult.getReason());
             throw new DiagnosticException("clusterQueryError");
@@ -155,7 +122,7 @@ public class MonitoringExportService extends ElasticRestClientService {
         String clusterIdQuery = config.queries.get("cluster_ids");
 
         List<Map<String, String>> clusterIds = new ArrayList<>();
-        RestResult restResult = new RestResult(client.execPost(monitoringUri, clusterIdQuery), monitoringUri);
+        RestResult restResult = client.execPost(monitoringUri, clusterIdQuery);
         if (restResult.getStatus() != 200) {
             logger.error(Constants.CONSOLE,  "Cluster Id listing failed with status: {}, reason: {}.", restResult.getStatus(), restResult.getReason());
             return clusterIds;
@@ -237,7 +204,7 @@ public class MonitoringExportService extends ElasticRestClientService {
 
             PrintWriter pw = null;
             try {
-                RestResult restResult = new RestResult(client.execPost(startUri, query), startUri);
+                RestResult restResult = client.execPost(startUri, query);
                 if (restResult.getStatus() != 200) {
                     logger.error(Constants.CONSOLE,  "Initial retrieve for stat: {} failed with status: {}, reason: {}, bypassing and going to next call.", stat, restResult.getStatus(), restResult.getReason());
                     logger.error(Constants.CONSOLE,  "Bypassing.");
@@ -250,7 +217,9 @@ public class MonitoringExportService extends ElasticRestClientService {
                 // If there are no hits, move to the next.
                 if (totalHits > 0) {
                     logger.info(Constants.CONSOLE,  "{} documents retrieved. Writing to disk.", totalHits);
-                    pw = new PrintWriter(statFile);
+                    //pw = new PrintWriter(new BufferedWriter(new FileWriter(statFile)));
+                    Path path = FileSystems.getDefault().getPath(statFile);
+                    pw = new PrintWriter(Files.newBufferedWriter(path));
                 } else {
                     logger.info(Constants.CONSOLE,  "No documents found for: {}.", stat);
                     continue;
@@ -265,18 +234,33 @@ public class MonitoringExportService extends ElasticRestClientService {
                     processHits(hitsNode, pw);
                     processedHits += hitsNode.size();
                     logger.info(Constants.CONSOLE,  "{} of {} processed.", processedHits, totalHits);
-
                     scrollId = resultNode.path("_scroll_id").asText();
                     String scrollQuery = SCROLL_ID.replace("{{scrollId}}", scrollId);
-                    RestResult scrollResult = new RestResult(client.execPost(monitoringScrollUri, scrollQuery), monitoringScrollUri);
-                    if (restResult.getStatus() == 200) {
-                        resultNode = JsonYamlUtils.createJsonNodeFromString(scrollResult.toString());
-                        hitsNode = getHitsArray(resultNode);
-                        hitsCount = hitsNode.size();
-                    } else {
-                        logger.error(Constants.CONSOLE,  "Scroll for stat: {} Operation failed with status: {}, reason: {}, bypassing and going to next call.", stat, restResult.getStatus(), restResult.getReason());
-                    }
+                    int tries = 1;
+                    boolean done = false;
+                    while (!done) {
+                        try {
+                            RestResult scrollResult = client.execPost(monitoringScrollUri, scrollQuery);
+                            if (restResult.getStatus() == 200) {
+                                resultNode = JsonYamlUtils.createJsonNodeFromString(scrollResult.toString());
+                                hitsNode = getHitsArray(resultNode);
+                                hitsCount = hitsNode.size();
+                            } else {
+                                logger.error(Constants.CONSOLE,  "Scroll for stat: {} Operation failed with status: {}, reason: {}, bypassing and going to next call.", stat, restResult.getStatus(), restResult.getReason());
+                            }
+                            done = true;
 
+                        } catch (Exception e) {
+                            logger.error(Constants.CONSOLE,  "Retrieval error, retry {} of 3", tries, e.getMessage());
+                            logger.error("Caused by:",  e);
+                            if(tries > 3){
+                                done = true;
+                            }
+                            else {
+                               tries++;
+                            }
+                        }
+                    }
                 } while (hitsCount != 0);
 
                 // Delete the scroll to free up the resources

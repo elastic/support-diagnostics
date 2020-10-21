@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="warn">
-    <CustomLevels>
-        <CustomLevel name="DIAG" intLevel="250" />
-    </CustomLevels>
     <Appenders>
         <Console name="console" target="SYSTEM_OUT">
             <PatternLayout pattern="%msg%n"/>
@@ -19,7 +16,6 @@
     <Loggers>
         <Root level="info">
             <AppenderRef ref="console" />
-            <AppenderRef ref="diag" />
         </Root>
     </Loggers>
 </Configuration>

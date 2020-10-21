@@ -3,7 +3,7 @@ package com.elastic.support;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.elastic.support.diagnostics.ShowHelpException;
-import com.elastic.support.util.ResourceCache;
+import com.elastic.support.util.ResourceUtils;
 import com.elastic.support.util.SystemProperties;
 
 import com.elastic.support.util.SystemUtils;
@@ -22,51 +22,47 @@ public abstract class BaseInputs {
 
     private static final Logger logger = LogManager.getLogger(BaseInputs.class);
     public static final String outputDirDescription = "Fully qualified path to an output directory. If it does not exist the diagnostic will attempt to create it. If not specified the diagnostic directory will be used: ";
-    public static final String bypassDiagVerifyDescription = "Bypass the diagnostic version check. Use when internet outbound HTTP access is blocked by a firewall.";
     protected List<String> emptyList = new ArrayList<>();
     protected JCommander jCommander;
 
-    // Input Fields
+    BaseConfig config;
 
-    @Parameter(names = {"-?", "--help"}, description = "Help contents.", help = true)
+    @Parameter(names = {"-help"}, description = "Help contents.", help = true)
     public boolean help;
 
     // If no output directory was specified default to the working directory
-    @Parameter(names = {"-o", "--out", "--output", "--outputDir"}, description = outputDirDescription)
+    @Parameter(names = {"-output"}, description = outputDirDescription)
     public String outputDir = SystemProperties.userDir;
+    public String tempDir;
     public boolean interactive = false;
 
-    // Stop the diag from checking itself for latest version.
-    @Parameter(names = {"--bypassDiagVerify"}, description = bypassDiagVerifyDescription)
-    public boolean bypassDiagVerify = false;
+    protected String delimiter;
 
     // End Input Fields
 
     // Input Readers
     // Generic - change the read label only
     // Warning: Setting default values may leak into later prompts if not reset. Better to use a new Reader.
-    protected StringInputReader standardStringReader = ResourceCache.textIO.newStringInputReader()
+    protected StringInputReader standardStringReader = ResourceUtils.textIO.newStringInputReader()
             .withMinLength(0)
             .withInputTrimming(true);
-    protected BooleanInputReader standardBooleanReader = ResourceCache.textIO.newBooleanInputReader();
-    protected StringInputReader  standardPasswordReader = ResourceCache.textIO.newStringInputReader()
+    protected BooleanInputReader standardBooleanReader = ResourceUtils.textIO.newBooleanInputReader();
+    protected StringInputReader  standardPasswordReader = ResourceUtils.textIO.newStringInputReader()
             .withInputMasking(true)
             .withInputTrimming(true)
             .withMinLength(0);
-    protected StringInputReader standardFileReader = ResourceCache.textIO.newStringInputReader()
+    protected StringInputReader standardFileReader = ResourceUtils.textIO.newStringInputReader()
             .withInputTrimming(true)
             .withValueChecker((String val, String propname) -> validateFile(val));
     // End Input Readers
 
     public boolean runningInDocker = SystemUtils.isRunningInDocker();
 
-    public BaseInputs(){
-        if(runningInDocker){
-            outputDir = "/diagnostic-output";
-        }
-    }
+    public abstract void runInteractive();
 
-    public abstract boolean runInteractive();
+    public BaseInputs(String delimiter){
+        this.delimiter = delimiter;
+    }
 
     public List<String> parseInputs(String[] args){
         logger.info(Constants.CONSOLE, "Processing diagnosticInputs...");
@@ -79,7 +75,7 @@ public abstract class BaseInputs {
             throw new ShowHelpException();
         }
 
-        return ObjectUtils.defaultIfNull(validateDir(outputDir), emptyList);
+        return ObjectUtils.defaultIfNull(validateOutputDirectory(outputDir), emptyList);
 
     }
 
@@ -93,13 +89,11 @@ public abstract class BaseInputs {
     }
 
     protected void runOutputDirInteractive(){
-        String output = ResourceCache.textIO.newStringInputReader()
+         outputDir = ResourceUtils.textIO.newStringInputReader()
+                .withDefaultValue(outputDir)
                 .withMinLength(0)
                 .withValueChecker(( String val, String propname) -> validateOutputDirectory(val))
                 .read(SystemProperties.lineSeparator + outputDirDescription);
-        if(StringUtils.isNotEmpty(output)){
-            outputDir = output;
-        }
     }
 
     public List<String> validatePort(int val){
@@ -111,12 +105,9 @@ public abstract class BaseInputs {
 
     public List<String> validateOutputDirectory(String val){
         try {
-            if (StringUtils.isEmpty(val.trim())) {
-                return null;
-            }
-
             File file = new File(val);
             if(!file.exists()){
+                logger.info(Constants.CONSOLE, "Output directory {} does not exist. Creating now.", val);
                 file.mkdir();
             }
         } catch (Exception e) {

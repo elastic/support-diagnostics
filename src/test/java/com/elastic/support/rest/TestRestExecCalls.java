@@ -1,24 +1,14 @@
 package com.elastic.support.rest;
 
-import com.elastic.support.diagnostics.commands.RunClusterQueries;
 import com.elastic.support.util.SystemProperties;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.io.FileUtils;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.junit.jupiter.api.*;
 import org.mockserver.integration.ClientAndServer;
-import org.mockserver.matchers.Times;
-import org.mockserver.model.Header;
-import org.mockserver.model.Parameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
@@ -29,7 +19,6 @@ public class TestRestExecCalls {
     private final Logger logger = LoggerFactory.getLogger(TestRestExecCalls.class);
     private ClientAndServer mockServer;
     private Map config;
-    private PoolingHttpClientConnectionManager connectionManager;
     private RestClient httpRestClient, httpsRestClient;
     private String temp = SystemProperties.userDir + SystemProperties.fileSeparator + "temp";
     private File tempDir = new File(temp);
