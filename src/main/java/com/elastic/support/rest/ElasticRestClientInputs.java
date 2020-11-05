@@ -190,10 +190,10 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
             return Collections.singletonList("Full uri for the endpoint is required." + SystemProperties.lineSeparator + urlDescription);
         }
 
-        host = url.substring(url.lastIndexOf("/") + 1);
+        host = val.substring(val.lastIndexOf("/") + 1);
 
         if (runningInDocker) {
-            String host = url.substring(url.lastIndexOf("/") + 1);
+            String host = val.substring(val.lastIndexOf("/") + 1);
             host = val.substring(0, host.indexOf(":"));
             if (Constants.localAddressList.contains(host)) {
                 return Collections.singletonList("Local addresses are not permitted when running in a Docker container. Please use an assigned host name or IP address.");
