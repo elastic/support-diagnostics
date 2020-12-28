@@ -10,16 +10,15 @@
                 <MarkerFilter marker="CONSOLE" onMatch="ACCEPT" onMismatch="DENY"/>
             </Filters>
         </Console>
-        <File name="packaged" fileName="startup.log"
+<!--        <File name="packaged" fileName="startup.log"
               append="false"
               immediateFlush="true">
             <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
-        </File>
+        </File>-->
     </Appenders>
     <Loggers>
         <Root level="info">
             <AppenderRef ref="console" />
-            <AppenderRef ref="diag" />
         </Root>
     </Loggers>
 </Configuration>
