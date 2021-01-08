@@ -43,7 +43,7 @@
  
  [Click here for the latest version of the Support Diagnostics Utility](https://github.com/elastic/support-diagnostics/releases/latest)
  
- The support diagnostic utility is a Java application that can interrogate a running Elasticsearch cluster or Logstash process to obtain data about the state of the cluster at that point in time. It is compatible with all versions of Elasticsearch (including alpha, beta and release candidates), and for Logstash versions greater than v5.  The release version of the diagnostic is independent of the Elasticsearch or Logstash version it is being run against. If it cannot match the targeted version it will attempt to run calls from the latest configured release. Linux, OSX, or Windows platforms are all supported, and it can be run as a standalone utility or from within a Docker container.
+ The support diagnostic utility is a Java application that can interrogate a running Elasticsearch cluster, Kibana or Logstash process to obtain data about the state of the cluster at that point in time. It is compatible with all versions of Elasticsearch (including alpha, beta and release candidates), and for Logstash versions greater than v5, and for Kibana greater than v6.5.  The release version of the diagnostic is independent of the Elasticsearch, Kibana or Logstash version it is being run against. If it cannot match the targeted version it will attempt to run calls from the latest configured release. Linux, OSX, or Windows platforms are all supported, and it can be run as a standalone utility or from within a Docker container.
  
  ## Overview - What It Does
  
