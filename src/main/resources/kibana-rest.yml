@@ -1,0 +1,47 @@
+# The new settings format:
+# At the top level the label descring the query that will also be used as the
+#   file name for its output.
+#   Below the query label are the following attributes:
+#     * extension - the file extension to be used for output. Optional, defaults to .json.
+#     * subdir - some api's are now grouped in a subdirectory of the output directory to lessen clutter. Optional, defaults to root dir.
+#     * retry - whether if a query fails it will be retried for the configured number of attempts. Optional, defaults to false.
+#     * versions - one or more attributes of the format "version rule: "query string". Each set of version/query key pairs
+#       should evaluate to exactly one that is appropriate for the version of the server being queried. Therefor rules should
+#       be structured in such a way that only a valid query can be executed against a given version. Required.
+#   NPM mode is the only one used: https://github.com/vdurmont/semver4j
+#   NPM Versioning rules are documented here: https://github.com/npm/node-semver
+#
+#   Note to those adding entries: within each group, cat API's, json API's, and commercial, they are in alphabetical order.
+#   Please adhere to this convention when submitting pull requests.
+
+kibana_settings:
+  versions:
+    "> 6.5.0": "/api/settings"
+
+kibana_node_stats:
+  versions:
+    "> 6.5.0": "/api/stats?extended=true"
+
+kibana_actions:
+  versions:
+    "> 7.0.0": "/api/actions"
+
+kibana_detection_engine_find:
+  versions:
+    "> 7.6.0": "/api/detection_engine/rules/_find"
+
+kibana_detection_engine_privileges:
+  versions:
+    "> 7.6.0": "/api/detection_engine/privileges"
+
+kibana_detection_engine_signals:
+  versions:
+    "> 7.6.0": "/api/detection_engine/prepackaged"
+
+kibana_alerts:
+  versions:
+    "> 7.11.0": "/api/alerts/_find"
+
+kibana_task_manager_help:
+  versions:
+    "> 7.11.0": "/api/task_manager/_health"

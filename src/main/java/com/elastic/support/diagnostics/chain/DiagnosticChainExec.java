@@ -79,6 +79,34 @@ public class DiagnosticChainExec {
                 case Constants.logstashApi :
                     new RunLogstashQueries().execute(context);
                     break;
+                    
+                case Constants.kibanaLocal :
+                    new CheckKibanaVersion().execute(context);
+                    new RunKibanaQueries().execute(context);
+                    if(context.runSystemCalls){
+                        new CollectSystemCalls().execute(context);
+                        new RetrieveSystemDigest().execute(context);
+                    }
+                    if(context.dockerPresent){
+                        new CollectDockerInfo().execute(context);
+                    }
+                    break;
+
+                case Constants.kibanaRemote :
+                    new CheckKibanaVersion().execute(context);
+                    new RunKibanaQueries().execute(context);
+                    if(context.runSystemCalls){
+                        new CollectSystemCalls().execute(context);
+                    }
+                    if(context.dockerPresent){
+                        new CollectDockerInfo().execute(context);
+                    }
+                    break;
+
+                 case Constants.kibanaApi :
+                    new CheckKibanaVersion().execute(context);
+                    new RunKibanaQueries().execute(context);
+                    break;
                 }
 
             new GenerateManifest().execute(context);
