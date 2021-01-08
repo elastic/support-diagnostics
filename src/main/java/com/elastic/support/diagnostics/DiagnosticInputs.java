@@ -24,7 +24,10 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
             Constants.api,
             Constants.logstashLocal,
             Constants.logstashRemote,
-            Constants.logstashApi};
+            Constants.logstashApi,
+            Constants.kibanaApi,
+            Constants.kibanaLocal,
+            Constants.kibanaRemote};
 
     public static final String localDesc = "Node on the same host as the diagnostic utility.";
     public static final String remoteDesc = "Node on a different host than the diagnostic utility";
@@ -32,6 +35,10 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
     public static final String logstashLocalDesc = "Logstash process on the same host as the diagnostic utility.";
     public static final String logstashRemoteDesc = "Logstash on a different host than the diagnostic utility.";
     public static final String logstashApiDesc = "Logstash REST calls. No system calls. \t\t";
+    public static final String kibanaLocalDesc = "Kibana process on the same host as the diagnostic utility.";
+    public static final String kibanaRemoteDesc = "Kibana on a different host than the diagnostic utility.";
+    public static final String kibanaApiDesc = "Kibana REST calls. No system calls. \t\t";
+
 
     public static final String[]
             diagnosticTypeEntries = {
@@ -40,14 +47,19 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
             Constants.api + " - " + apiDesc,
             Constants.logstashLocal + " - " + logstashLocalDesc,
             Constants.logstashRemote + " - " + logstashRemoteDesc,
-            Constants.logstashApi + " - " + logstashApiDesc};
+            Constants.logstashApi + " - " + logstashApiDesc,
+            Constants.kibanaApi + " - " + kibanaApiDesc,
+            Constants.kibanaRemote + " - " + kibanaRemoteDesc,
+            Constants.kibanaLocal + " - " + kibanaLocalDesc};
 
     public static final String[]
             diagnosticTypeEntriesDocker = {
             Constants.remote + " - " + remoteDesc,
             Constants.api + " - " + apiDesc,
             Constants.logstashRemote + " - " + logstashRemoteDesc,
-            Constants.logstashApi + " - " + logstashApiDesc};
+            Constants.logstashApi + " - " + logstashApiDesc,
+            Constants.kibanaApi + " - " + kibanaApiDesc,
+            Constants.kibanaRemote + " - " + kibanaRemoteDesc};
 
 
     public static final String remoteAccessMessage =

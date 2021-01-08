@@ -18,6 +18,7 @@ public class Constants {
 
    public static final String DIAG_CONFIG = "diags.yml";
    public static final String ES_REST = "elastic-rest.yml";
+   public static final String KIBANA_REST = "kibana-rest.yml";
    public static final String LS_REST = "logstash-rest.yml";
    public static final String MONITORING_REST = "monitoring-rest.yml";
 
@@ -58,6 +59,10 @@ public class Constants {
    public static final String restInputHost = "rest:InputHost";
    public static final String systemCommands = "ssh:SystemCommand";
 
+   public final static String kibanaLocal = "kibana-local";
+   public final static String kibanaRemote = "kibana-remote";
+   public final static String kibanaApi = "kibana-api";
+   
    public static final String runningInIde = "runningInIde";
    public static final String interactiveMsg = "Command line options can be displayed with the --help argument. " +
            "Entering interactive mode.";
