@@ -18,6 +18,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ *  This class is executed as RunLogstashQueries class, we will not change the global BaseQuery structure of the code in v8.7.3.
+ *  As unit test are request, we have done some changes to the structure of this class vs RunLogstashQueries.
+ *  TODO: The RunLogstashQueries class start elements into the execute function, to be able to test the RunKibanaQueries functions I will need to create new public functions.
+ *  The right way to do is create private functions, but this functions can not be mock (with Mockito) and I don't want to use PowerMock because how the code was designed.
+ *  In the next version I will work in a new Factoy pattern to remove the workarounds that were done here to test the new Kibana code.
+ */
+
 public class RunKibanaQueries extends BaseQuery {
 
     /**
@@ -26,40 +34,42 @@ public class RunKibanaQueries extends BaseQuery {
 
     private static final Logger logger = LogManager.getLogger(BaseQuery.class);
 
-    public void execute(DiagnosticContext context) {
+    /**
+    * this private function will not be tested (on this class, this need to bested on ProcessProfileTest)
+    *
+    * @param  void
+    * @return         ProcessProfile object
+    */
+    private ProcessProfile getNodeProfile(String tempDir, String fileName) {
+        ProcessProfile nodeProfile = new ProcessProfile();
+        JsonNode nodeData = JsonYamlUtils.createJsonNodeFromFileName(tempDir, fileName);
+        nodeProfile.pid = nodeData.path("process").path("pid").asText();
+        nodeProfile.os = SystemUtils.parseOperatingSystemName(nodeData.path("os").path("platform").asText());
+        nodeProfile.javaPlatform = getJavaPlatformOs(nodeProfile.os);
 
-        try {
-            RestClient client = ResourceCache.getRestClient(Constants.restInputHost);
+        return nodeProfile;
+    }
 
-            List<RestEntry> queries = new ArrayList<>();
-            queries.addAll(context.elasticRestCalls.values());
-        
-            runQueries(client, queries, context.tempDir, 0, 0);
-            // Get the information we need to run system calls. It's easier to just get it off disk after all the REST calls run.
-            ProcessProfile nodeProfile = new ProcessProfile();
-            context.targetNode = nodeProfile;
-            ///api/stats?extended=true
-            JsonNode nodeData = JsonYamlUtils.createJsonNodeFromFileName(context.tempDir, "kibana_node_stats.json");
-            nodeProfile.pid = nodeData.path("process").path("pid").asText();
+    /**
+    * this private function will not be tested (on this class, this need to bested on JavaPlatformTest)
+    *
+    * @param  String
+    * @return         JavaPlatform object
+    */
+    private JavaPlatform getJavaPlatformOs(String nodeProfileOs) {
+        JavaPlatform javaPlatformOs = new JavaPlatform(nodeProfileOs);
+        return javaPlatformOs;
+    }
 
-            nodeProfile.os = SystemUtils.parseOperatingSystemName(nodeData.path("os").path("platform").asText());
-            nodeProfile.javaPlatform = new JavaPlatform(nodeProfile.os);
-            if (StringUtils.isEmpty(nodeProfile.pid) || nodeProfile.pid.equals("1")) {
-                context.dockerPresent = true;
-                context.runSystemCalls = false;
-            }
-            // Create and cache the system command type we need, local or remote...
-            SystemCommand syscmd = null;
-            switch (context.diagnosticInputs.diagType) {
-                case Constants.kibanaRemote:
-                    String targetOS;
-                    if(context.dockerPresent){
-                        targetOS = Constants.linuxPlatform;
-                    }
-                    else{
-                        targetOS = nodeProfile.os;
-                    }
-                    syscmd = new RemoteSystem(
+    /**
+    * this private function will not be tested (on this class, this need to bested on RemoteSystemTest)
+    *
+    * @param  String targetOS
+    * @param  DiagnosticContext context
+    * @return         RemoteSystem object
+    */
+    private RemoteSystem getRemoteSystem(String targetOS, DiagnosticContext context) {
+        RemoteSystem syscmd = new RemoteSystem(
                             targetOS,
                             context.diagnosticInputs.remoteUser,
                             context.diagnosticInputs.remotePassword,
@@ -71,29 +81,126 @@ public class RunKibanaQueries extends BaseQuery {
                             context.diagnosticInputs.trustRemote,
                             context.diagnosticInputs.isSudo
                     );
-                    ResourceCache.addSystemCommand(Constants.systemCommands, syscmd);
-                    break;
+        ResourceCache.addSystemCommand(Constants.systemCommands, syscmd);
+        return syscmd;
+    }
 
-                case Constants.kibanaLocal:
-                    if (context.dockerPresent) {
-                        syscmd = new LocalSystem(SystemUtils.parseOperatingSystemName(SystemProperties.osName));
-                    } else {
-                        syscmd = new LocalSystem(nodeProfile.os);
-                    }
-                    ResourceCache.addSystemCommand(Constants.systemCommands, syscmd);
+    /**
+    * this private function will not be tested (on this class, this need to bested on LocalSystemTest)
+    *
+    * @param  String osName
+    * @return         LocalSystem object
+    */
+    private LocalSystem getLocalSystem(String osName, Boolean parseOperatingSystem) {
+        if (parseOperatingSystem == true) {
+            osName = SystemUtils.parseOperatingSystemName(SystemProperties.osName);
+        }
+        LocalSystem syscmd = new LocalSystem(osName);
+        ResourceCache.addSystemCommand(Constants.systemCommands, syscmd);
+        return syscmd;
+    }
 
-                    break;
 
-                default:
-                    // If it's not one of the above types it shouldn't be here but try to keep going...
-                    context.runSystemCalls = false;
-                    throw new RuntimeException("Host/Platform check error.");
-            }
+    /**
+    * this public function is a workaround so we can test the main execute function
+    *
+    * @param  String
+    * @return         JavaPlatform object
+    */
+    public int runBasicQueries(RestClient client, DiagnosticContext context) {
 
+        int totalRetries = 0;
+        List<RestEntry> queries = new ArrayList<>();
+        queries.addAll(context.elasticRestCalls.values());
+        totalRetries = runQueries(client, queries, context.tempDir, 0, 0);
+
+        return totalRetries;
+    }
+
+
+    /**
+    * this public function is a workaround so we can test the main execute function
+    *
+    * @param  String
+    * @return         SystemCommand
+    */
+    public SystemCommand execSystemCommands(DiagnosticContext context) {
+
+        // Get the information we need to run system calls. It's easier to just get it off disk after all the REST calls run.
+        //ProcessProfile nodeProfile = new ProcessProfile();
+        //context.targetNode = nodeProfile;
+        // ProcessProfile nodeProfile = getNodeProfile();
+        // context.targetNode = nodeProfile;
+        
+        //The API that has this information is /api/stats?extended=true
+        //JsonNode nodeData = JsonYamlUtils.createJsonNodeFromFileName(context.tempDir, "kibana_node_stats.json");
+        ProcessProfile nodeProfile = getNodeProfile(context.tempDir, "kibana_node_stats.json");
+        // nodeProfile.pid = nodeData.path("process").path("pid").asText();
+
+        // nodeProfile.os = SystemUtils.parseOperatingSystemName(nodeData.path("os").path("platform").asText());
+        // //nodeProfile.javaPlatform = new JavaPlatform(nodeProfile.os);
+        // nodeProfile.javaPlatform = getJavaPlatformOs(nodeProfile.os);
+
+        if (StringUtils.isEmpty(nodeProfile.pid) || nodeProfile.pid.equals("1")) {
+            context.dockerPresent = true;
+            context.runSystemCalls = false;
+        }
+        // Create and cache the system command type we need, local or remote...
+        SystemCommand syscmd = null;
+        switch (context.diagnosticInputs.diagType) {
+            case Constants.kibanaRemote:
+                String targetOS;
+                if(context.dockerPresent){
+                    targetOS = Constants.linuxPlatform;
+                }
+                else{
+                    targetOS = nodeProfile.os;
+                }
+                
+                syscmd = getRemoteSystem(targetOS, context);
+                break;
+
+            case Constants.kibanaLocal:
+                if (context.dockerPresent) {
+                    syscmd = getLocalSystem("docker", true);
+                } else {
+                    syscmd = getLocalSystem(nodeProfile.os, false);
+                }
+                break;
+
+            default:
+                // If it's not one of the above types it shouldn't be here but try to keep going...
+                context.runSystemCalls = false;
+                throw new RuntimeException("Host/Platform check error.");
+        }
+        return syscmd;
+    }
+
+    /**
+    * One of the requirements was test this new Kibana code.
+    * I splitted the "execute" function as in other examples (RunLogstashQueries) uses many static calls
+    * and create many new objects, make it difficult to mock and test.
+    * To be able to test the code without changing the global structure I splitted in smallest functions.
+    * Most of the new functions are public so I'm able to test it (Private if the test need to be done in a different class).
+    * When we will have more Unit test, the test for some functions here will be redundant and the public functions workaround will not needed anymore, 
+    * e.g. createJsonNodeFromFileName, this can be tested on the JsonYamlUtilsTest file (not existing in v8.1.2).
+    * 
+    *
+    * @param  DiagnosticContext context
+    * @return         JavaPlatform object
+    */
+    public void execute(DiagnosticContext context) {
+
+        try {
+            RestClient client       = ResourceCache.getRestClient(Constants.restInputHost);
+            int totalRetries        = runBasicQueries(client, context);
+            execSystemCommands(context);
 
         } catch (Throwable t) {
             logger.error( "Kibana Query error:", t);
             throw new DiagnosticException(String.format("Error obtaining Kibana output and/or process id - will bypass the rest of processing.. %s", Constants.CHECK_LOG));
         }
     }
+
+
 }

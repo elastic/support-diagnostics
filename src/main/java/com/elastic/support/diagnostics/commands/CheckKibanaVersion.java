@@ -62,6 +62,9 @@ public class CheckKibanaVersion implements Command {
             RestEntryConfig builder = new RestEntryConfig(version);
             Map restCalls = JsonYamlUtils.readYamlFromClasspath(Constants.KIBANA_REST, true);
 
+            logger.info(Constants.CONSOLE, restCalls);
+            logger.info(Constants.CONSOLE, "Run basic queries for Kibana: {}", restCalls);
+
             context.elasticRestCalls = builder.buildEntryMap(restCalls);
 
         } catch (DiagnosticException de) {
@@ -78,8 +81,6 @@ public class CheckKibanaVersion implements Command {
                 throw new DiagnosticException( res.formatStatusMessage( "Could not retrieve the Kibana version - unable to continue."));
             }
             String result = res.toString();
-            logger.info(Constants.CONSOLE, "result:");
-            logger.info(Constants.CONSOLE, result);
             JsonNode root = JsonYamlUtils.createJsonNodeFromString(result);
             String version = root.path("settings").path("kibana").path("version").asText();
             logger.info(Constants.CONSOLE, String.format("Kibana Version is :%s", version));
