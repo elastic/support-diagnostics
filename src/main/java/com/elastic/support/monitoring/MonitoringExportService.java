@@ -87,7 +87,7 @@ public class MonitoringExportService implements BaseService {
                     logger.info(Constants.CONSOLE,  "Entered cluster id not found - unexpected exception. Please enure you have a valid cluster_uuid for the monitored clusters. Check diagnostics.log for more details.");
                     logger.error( de);
             }
-            logger.error(Constants.CONSOLE, "Cannot contiue processing. Exiting {}", Constants.CHECK_LOG);
+            logger.error(Constants.CONSOLE, "Cannot continue processing. Exiting {}", Constants.CHECK_LOG);
         } catch (Throwable t) {
             logger.error( "Unexpected error occurred", t);
             logger.error(Constants.CONSOLE, "Unexpected error. {}", Constants.CHECK_LOG);
