@@ -18,7 +18,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.*;
 import org.apache.http.client.methods.*;
@@ -37,7 +36,6 @@ import static org.mockserver.model.HttpResponse.response;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class TestRunKibanaQueries {
 
-	// private final Logger logger = LoggerFactory.getLogger(TestRunKibanaQueries.class);
 	private static final Logger logger = LogManager.getLogger(RestClient.class);
     private ClientAndServer mockServer;
     private RestClient httpRestClient, httpsRestClient;
@@ -158,7 +156,7 @@ public class TestRunKibanaQueries {
     }
 
     @Test
-	public void testExecSystemCommands() {
+	public void testExecSystemLocalCommands() {
 
 		DiagnosticContext context = initializeKibana("6.5.0");
     	int totalRetries = new RunKibanaQueries().runBasicQueries(httpRestClient, context);
