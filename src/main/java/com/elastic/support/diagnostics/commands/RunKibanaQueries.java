@@ -7,6 +7,7 @@ import com.elastic.support.diagnostics.ProcessProfile;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.rest.RestClient;
 import com.elastic.support.rest.RestEntry;
+import com.elastic.support.rest.RestResult;
 import com.elastic.support.rest.RestEntryConfig;
 import com.elastic.support.util.*;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -89,6 +90,7 @@ public class RunKibanaQueries extends BaseQuery {
     * this private function will not be tested (on this class, this need to bested on LocalSystemTest)
     *
     * @param  String osName
+    * @param  Boolean parseOperatingSystem
     * @return         LocalSystem object
     */
     private LocalSystem getLocalSystem(String osName, Boolean parseOperatingSystem) {
@@ -104,42 +106,73 @@ public class RunKibanaQueries extends BaseQuery {
     /**
     * this public function is a workaround so we can test the main execute function
     *
-    * @param  String
-    * @return         JavaPlatform object
+    * @param  RestClient client
+    * @param  DiagnosticContext context
+    * @return int
     */
     public int runBasicQueries(RestClient client, DiagnosticContext context) {
 
         int totalRetries = 0;
         List<RestEntry> queries = new ArrayList<>();
-        queries.addAll(context.elasticRestCalls.values());
+        
+        for (Map.Entry<String, RestEntry> entry : context.elasticRestCalls.entrySet()) {
+
+            String actionName = entry.getValue().getName().toString();
+            if (actionName.equals("kibana_alerts") || actionName.equals("kibana_detection_engine_find")) {
+                getAllAlerts(client, queries, context.perPage, entry.getValue());
+            } else {
+                queries.add(entry.getValue());
+            }
+        }
         totalRetries = runQueries(client, queries, context.tempDir, 0, 0);
 
         return totalRetries;
     }
 
 
+    public void getAllAlerts(RestClient client, List<RestEntry> queries, double perPage, RestEntry action) {
+        // get the values needed to the pagination.
+        RestResult res = client.execQuery(String.format("%s?per_page=1", action.getUrl()));
+        if (! res.isValid()) {
+            throw new DiagnosticException( res.formatStatusMessage( "Could not retrieve Kibana API pagination - unable to continue."));
+        }
+        String result   = res.toString();
+        JsonNode root   = JsonYamlUtils.createJsonNodeFromString(result);
+        double total    = root.path("total").intValue();
+        if (total > 0 && perPage > 0) {
+            // Get the first actions page
+            queries.add(getNewEntryPage(perPage, 1, action));
+            // If there is more pages add the new queries
+            if (perPage < total) {
+                double numberPages = Math.ceil(total/perPage);
+                for (int i = 2; i <= numberPages; i++) {
+                    queries.add(getNewEntryPage(perPage, i, action));
+                }
+            }
+        }
+    }
+
+    /**
+    * function that will get the page and the number of events per page to create URI for the _find APIs
+    *
+    * @param  int perPage
+    * @param  int page
+    * @return RestEntry
+    */
+    private RestEntry getNewEntryPage(double perPage, int page, RestEntry action) {
+        return new RestEntry(String.format("%s_%s", action.getName(), page), "", ".json", false, String.format("%s?per_page=%s&page=%s", action.getUrl(), perPage, page), false);
+    }
+
+
     /**
     * this public function is a workaround so we can test the main execute function
     *
-    * @param  String
+    * @param  DiagnosticContext
     * @return         SystemCommand
     */
     public SystemCommand execSystemCommands(DiagnosticContext context) {
 
-        // Get the information we need to run system calls. It's easier to just get it off disk after all the REST calls run.
-        //ProcessProfile nodeProfile = new ProcessProfile();
-        //context.targetNode = nodeProfile;
-        // ProcessProfile nodeProfile = getNodeProfile();
-        // context.targetNode = nodeProfile;
-        
-        //The API that has this information is /api/stats?extended=true
-        //JsonNode nodeData = JsonYamlUtils.createJsonNodeFromFileName(context.tempDir, "kibana_node_stats.json");
         ProcessProfile nodeProfile = getNodeProfile(context.tempDir, "kibana_node_stats.json");
-        // nodeProfile.pid = nodeData.path("process").path("pid").asText();
-
-        // nodeProfile.os = SystemUtils.parseOperatingSystemName(nodeData.path("os").path("platform").asText());
-        // //nodeProfile.javaPlatform = new JavaPlatform(nodeProfile.os);
-        // nodeProfile.javaPlatform = getJavaPlatformOs(nodeProfile.os);
 
         if (StringUtils.isEmpty(nodeProfile.pid) || nodeProfile.pid.equals("1")) {
             context.dockerPresent = true;
@@ -168,10 +201,10 @@ public class RunKibanaQueries extends BaseQuery {
                 }
                 break;
 
-            default:
+/*            default:
                 // If it's not one of the above types it shouldn't be here but try to keep going...
                 context.runSystemCalls = false;
-                throw new RuntimeException("Host/Platform check error.");
+                throw new RuntimeException("Host/Platform check error.");*/
         }
         return syscmd;
     }
@@ -192,6 +225,7 @@ public class RunKibanaQueries extends BaseQuery {
     public void execute(DiagnosticContext context) {
 
         try {
+            context.perPage         = 100;
             RestClient client       = ResourceCache.getRestClient(Constants.restInputHost);
             int totalRetries        = runBasicQueries(client, context);
             execSystemCommands(context);
