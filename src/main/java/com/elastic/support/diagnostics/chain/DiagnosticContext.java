@@ -15,6 +15,7 @@ public class DiagnosticContext {
    public boolean runSystemCalls = true;
    public boolean isAuthorized = true;
    public boolean dockerPresent = false;
+   public int perPage = 0;
 
    public String clusterName = "";
    public String tempDir = "";

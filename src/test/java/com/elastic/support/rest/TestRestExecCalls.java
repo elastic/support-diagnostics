@@ -17,6 +17,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import com.elastic.support.rest.RestClient;
+import com.elastic.support.rest.RestEntry;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockserver.integration.ClientAndServer.startClientAndServer;
@@ -45,33 +47,50 @@ public class TestRestExecCalls {
         mockServer.stop();
     }
 
-/*
+
     @BeforeEach
     public void setup() {
+        
+         httpRestClient = RestClient.getClient(
+            "localhost", 
+            9880, 
+            "http",
+            "elastic",
+            "elastic",
+            "",
+            0,
+            "",
+            "",
+            "",
+            "",
+            true,
+           3000,
+           3000,
+           3000);
 
-        httpRestClient = builder
-                .setPooledConnections(true)
-                .setSocketTimeout(30000)
-                .setConnectTimeout(30000)
-                .setRequestTimeout(30000)
-                .setHost("localhost")
-                .setPort(9880)
-                .setScheme("http")
-                .setUser("elastic")
-                .setPassword("elastic")
-                .build();
+        // httpRestClient = builder
+        //         .setPooledConnections(true)
+        //         .setSocketTimeout(30000)
+        //         .setConnectTimeout(30000)
+        //         .setRequestTimeout(30000)
+        //         .setHost("localhost")
+        //         .setPort(9880)
+        //         .setScheme("http")
+        //         .setUser("elastic")
+        //         .setPassword("elastic")
+        //         .build();
 
-        httpsRestClient = builder
-                .setPooledConnections(true)
-                .setSocketTimeout(30000)
-                .setConnectTimeout(30000)
-                .setRequestTimeout(30000)
-                .setHost("localhost")
-                .setPort(9880)
-                .setScheme("https")
-                .setUser("elastic")
-                .setPassword("elastic")
-                .build();
+        // httpsRestClient = builder
+        //         .setPooledConnections(true)
+        //         .setSocketTimeout(30000)
+        //         .setConnectTimeout(30000)
+        //         .setRequestTimeout(30000)
+        //         .setHost("localhost")
+        //         .setPort(9880)
+        //         .setScheme("https")
+        //         .setUser("elastic")
+        //         .setPassword("elastic")
+        //         .build();
 
         tempDir.mkdir();
 
@@ -85,7 +104,7 @@ public class TestRestExecCalls {
 
     }
 
-    @Test
+   /* @Test
     public void testSimpleQuery() {
 
         mockServer
@@ -154,9 +173,9 @@ public class TestRestExecCalls {
         assertEquals(200, result.getStatus());
         assertEquals("some_response_body", result.toString());
 
-    }
+    }*/
 
-    @Test
+   /* @Test
     public void testFailThenSucceed() {
 
         RunClusterQueries cmd = new RunClusterQueries();
@@ -196,9 +215,9 @@ public class TestRestExecCalls {
         assertTrue( fileExistsWithText(targetFilename, "node_response_body"));
 
 
-    }
+    }*/
 
-    @Test
+    /*@Test
     public void testRetryAllFail() {
 
         RunClusterQueries cmd = new RunClusterQueries();
@@ -225,9 +244,9 @@ public class TestRestExecCalls {
         assertEquals(4, totalRetries);
         assertTrue( fileExistsWithText(targetFilename, "error_response_body"));
 
-    }
+    }*/
 
-    @Test
+   /* @Test
     public void testAuthFailure() {
 
         RunClusterQueries cmd = new RunClusterQueries();
@@ -254,7 +273,7 @@ public class TestRestExecCalls {
         String targetFilename = temp + SystemProperties.fileSeparator + "nodes.json";
         assertTrue( fileExistsWithText(targetFilename, "autherror_response_body"));
 
-    }
+    }*/
 
 
     private boolean fileExistsWithText(String filename, String compare){
@@ -269,6 +288,6 @@ public class TestRestExecCalls {
 
         return true;
     }
-*/
+
 
 }

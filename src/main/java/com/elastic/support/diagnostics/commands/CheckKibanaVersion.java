@@ -62,7 +62,7 @@ public class CheckKibanaVersion implements Command {
             RestEntryConfig builder = new RestEntryConfig(version);
             Map restCalls = JsonYamlUtils.readYamlFromClasspath(Constants.KIBANA_REST, true);
 
-            logger.info(Constants.CONSOLE, restCalls);
+            // logger.info(Constants.CONSOLE, restCalls);
             logger.info(Constants.CONSOLE, "Run basic queries for Kibana: {}", restCalls);
 
             context.elasticRestCalls = builder.buildEntryMap(restCalls);

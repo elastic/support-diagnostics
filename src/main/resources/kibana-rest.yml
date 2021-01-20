@@ -24,24 +24,24 @@ kibana_node_stats:
 
 kibana_actions:
   versions:
-    "> 7.0.0": "/api/actions"
+    ">= 7.0.0": "/api/actions"
 
 kibana_detection_engine_find:
   versions:
-    "> 7.6.0": "/api/detection_engine/rules/_find"
+    ">= 7.6.0": "/api/detection_engine/rules/_find"
 
 kibana_detection_engine_privileges:
   versions:
-    "> 7.6.0": "/api/detection_engine/privileges"
+    ">= 7.6.0": "/api/detection_engine/privileges"
 
 kibana_detection_engine_signals:
   versions:
-    "> 7.6.0": "/api/detection_engine/prepackaged"
+    "> 7.10.0": "/api/detection_engine/prepackaged"
 
 kibana_alerts:
   versions:
-    "> 7.11.0": "/api/alerts/_find"
+    ">= 7.9.0": "/api/alerts/_find"
 
 kibana_task_manager_help:
   versions:
-    "> 7.11.0": "/api/task_manager/_health"
+    ">= 7.11.0": "/api/task_manager/_health"
