@@ -38,11 +38,14 @@ public class RunKibanaQueries extends BaseQuery {
     /**
     * this private function will not be tested (on this class, this need to bested on ProcessProfileTest)
     *
-    * @param  void
+    * @param  String tempDir
+    * @param  String fileName
+    * @param  DiagnosticContext context
     * @return         ProcessProfile object
     */
-    private ProcessProfile getNodeProfile(String tempDir, String fileName) {
+    private ProcessProfile getNodeProfile(String tempDir, String fileName, DiagnosticContext context) {
         ProcessProfile nodeProfile = new ProcessProfile();
+        context.targetNode = nodeProfile;
         JsonNode nodeData = JsonYamlUtils.createJsonNodeFromFileName(tempDir, fileName);
         nodeProfile.pid = nodeData.path("process").path("pid").asText();
         nodeProfile.os = SystemUtils.parseOperatingSystemName(nodeData.path("os").path("platform").asText());
@@ -172,7 +175,7 @@ public class RunKibanaQueries extends BaseQuery {
     */
     public SystemCommand execSystemCommands(DiagnosticContext context) {
 
-        ProcessProfile nodeProfile = getNodeProfile(context.tempDir, "kibana_node_stats.json");
+        ProcessProfile nodeProfile = getNodeProfile(context.tempDir, "kibana_node_stats.json", context);
 
         if (StringUtils.isEmpty(nodeProfile.pid) || nodeProfile.pid.equals("1")) {
             context.dockerPresent = true;
