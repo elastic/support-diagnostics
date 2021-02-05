@@ -179,7 +179,7 @@ cluster_settings_defaults:
 cluster_state:
   retry: true
   versions:
-    ">= 0.9.0": "/_cluster/state?pretty&human"
+    ">= 0.9.0": "/_cluster/state?human"
 
 cluster_stats:
   versions:
@@ -223,8 +223,8 @@ licenses:
 
 mapping:
   versions:
-    ">= 0.9.0 < 7.7.0": "/_mapping?pretty"
-    ">= 7.7.0": "/_mapping?pretty&expand_wildcards=all"
+    ">= 0.9.0 < 7.7.0": "/_mapping"
+    ">= 7.7.0": "/_mapping?expand_wildcards=all"
 
 master:
   versions:
