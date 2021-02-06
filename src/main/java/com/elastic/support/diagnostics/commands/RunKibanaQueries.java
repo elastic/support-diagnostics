@@ -20,11 +20,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- *  This class is executed as RunLogstashQueries class, we will not change the global BaseQuery structure of the code in v8.7.3.
+ *  This class is executed as RunKibanaQueries class, we will not change the global BaseQuery structure of the code in v8.7.3.
  *  As unit test are request, we have done some changes to the structure of this class vs RunLogstashQueries.
- *  TODO: The RunLogstashQueries class start elements into the execute function, to be able to test the RunKibanaQueries functions I will need to create new public functions.
- *  The right way to do is create private functions, but this functions can not be mock (with Mockito) and I don't want to use PowerMock because how the code was designed.
- *  In the next version I will work in a new Factoy pattern to remove the workarounds that were done here to test the new Kibana code.
+ *  TODO: To be able to test the RunKibanaQueries functions I will need to split the execute function and create new public or private functions.
+ *  In the next version we will need to work in a different pattern to remove the workarounds that were done here to test the new Kibana code.
  */
 
 public class RunKibanaQueries extends BaseQuery {
@@ -36,7 +35,7 @@ public class RunKibanaQueries extends BaseQuery {
     private static final Logger logger = LogManager.getLogger(BaseQuery.class);
 
     /**
-    * this private function will not be tested (on this class, this need to bested on ProcessProfileTest)
+    * Create a new ProcessProfile object and extract the information from fileName to get PID, OS and javaPlatform
     *
     * @param  String tempDir
     * @param  String fileName
@@ -55,9 +54,9 @@ public class RunKibanaQueries extends BaseQuery {
     }
 
     /**
-    * this private function will not be tested (on this class, this need to bested on JavaPlatformTest)
+    * this private function will create a new JavaPlatform object
     *
-    * @param  String
+    * @param  String nodeProfileOs
     * @return         JavaPlatform object
     */
     private JavaPlatform getJavaPlatformOs(String nodeProfileOs) {
@@ -66,7 +65,7 @@ public class RunKibanaQueries extends BaseQuery {
     }
 
     /**
-    * this private function will not be tested (on this class, this need to bested on RemoteSystemTest)
+    * this private function will create new object RemoteSystem
     *
     * @param  String targetOS
     * @param  DiagnosticContext context
@@ -90,7 +89,8 @@ public class RunKibanaQueries extends BaseQuery {
     }
 
     /**
-    * this private function will not be tested (on this class, this need to bested on LocalSystemTest)
+    * On this function we will get create an LocalSystem object
+    * depending the parseOperatingSystem value it will override or not the value of osName with the constant SystemProperties.osName
     *
     * @param  String osName
     * @param  Boolean parseOperatingSystem
@@ -107,7 +107,11 @@ public class RunKibanaQueries extends BaseQuery {
 
 
     /**
-    * this public function is a workaround so we can test the main execute function
+    * CheckKibanaVersion (executed before) defined/set the context.elasticRestCalls.
+    * here we will loop and create a List of RestEntry with the queries/APIs that need to be executed
+    * You have two APIs that work differently and and may have or not many pages, so we use the getAllPages function
+    * runQueries called in this function create a json file for each RestEntry set on the 'queries' variable.
+    * Public function so we can test it.
     *
     * @param  RestClient client
     * @param  DiagnosticContext context
@@ -122,7 +126,7 @@ public class RunKibanaQueries extends BaseQuery {
 
             String actionName = entry.getValue().getName().toString();
             if (actionName.equals("kibana_alerts") || actionName.equals("kibana_detection_engine_find")) {
-                getAllAlerts(client, queries, context.perPage, entry.getValue());
+                getAllPages(client, queries, context.perPage, entry.getValue());
             } else {
                 queries.add(entry.getValue());
             }
@@ -133,7 +137,20 @@ public class RunKibanaQueries extends BaseQuery {
     }
 
 
-    public void getAllAlerts(RestClient client, List<RestEntry> queries, double perPage, RestEntry action) {
+    /**
+    * On this function we will use the RestEntry action object to get the URL and execute the API one first time
+    * to get the total of events defined in Kibana for that API.
+    * Once we have the total of event we can calculate the number of pages/call we will need to execute
+    * then we call getNewEntryPage to create a new RestEntry for each page.
+    *
+    * @param  RestClient client
+    * @param  List<RestEntry> queries
+    * @param  double perPage - This is the number of docusment we reques to the API (set to 100 in execute func / or n in unit test)
+    * @param  RestEntry action
+    *
+    * @return         void
+    */
+    public void getAllPages(RestClient client, List<RestEntry> queries, double perPage, RestEntry action) {
         // get the values needed to the pagination.
         RestResult res = client.execQuery(String.format("%s?per_page=1", action.getUrl()));
         if (! res.isValid()) {
@@ -156,10 +173,11 @@ public class RunKibanaQueries extends BaseQuery {
     }
 
     /**
-    * function that will get the page and the number of events per page to create URI for the _find APIs
+    * create a new RestEntry page for the original RestEntry action 
     *
     * @param  int perPage
     * @param  int page
+    * @param  RestEntry action
     * @return RestEntry
     */
     private RestEntry getNewEntryPage(double perPage, int page, RestEntry action) {
@@ -168,10 +186,13 @@ public class RunKibanaQueries extends BaseQuery {
 
 
     /**
-    * this public function is a workaround so we can test the main execute function
+    * This function is executed **after** runBasicQueries
+    * Extract the information on the kibana_node_stats.json with getNodeProfile function.
+    * Within the function getRemoteSystem or getLocalSystem we set ResourceCache.addSystemCommand
+    * Return will be used as workaround to Unit test. Will be replaced in v9
     *
     * @param  DiagnosticContext
-    * @return         SystemCommand
+    * @return SystemCommand
     */
     public SystemCommand execSystemCommands(DiagnosticContext context) {
 
@@ -203,11 +224,6 @@ public class RunKibanaQueries extends BaseQuery {
                     syscmd = getLocalSystem(nodeProfile.os, false);
                 }
                 break;
-
-/*            default:
-                // If it's not one of the above types it shouldn't be here but try to keep going...
-                context.runSystemCalls = false;
-                throw new RuntimeException("Host/Platform check error.");*/
         }
         return syscmd;
     }

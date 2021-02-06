@@ -85,6 +85,7 @@ public class DiagnosticChainExec {
                     new RunKibanaQueries().execute(context);
                     if(context.runSystemCalls){
                         new CollectSystemCalls().execute(context);
+                        new CollectKibanaLogs().execute(context);
                         new RetrieveSystemDigest().execute(context);
                     }
                     if(context.dockerPresent){
@@ -97,6 +98,7 @@ public class DiagnosticChainExec {
                     new RunKibanaQueries().execute(context);
                     if(context.runSystemCalls){
                         new CollectSystemCalls().execute(context);
+                        new CollectKibanaLogs().execute(context);
                     }
                     if(context.dockerPresent){
                         new CollectDockerInfo().execute(context);
