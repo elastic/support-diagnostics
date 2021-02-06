@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import com.elastic.support.rest.RestClient;
 import com.elastic.support.rest.RestEntry;
+import org.mockserver.configuration.ConfigurationProperties;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockserver.integration.ClientAndServer.startClientAndServer;
@@ -40,6 +41,10 @@ public class TestRestExecCalls {
     @BeforeAll
     public void globalSetup() {
         mockServer = startClientAndServer(9880);
+        // mockserver by default is in verboce mode (useful when creating new test), move it to warning.
+        ConfigurationProperties.disableSystemOut(true);
+        ConfigurationProperties.logLevel("WARN");
+
     }
 
     @AfterAll
@@ -51,7 +56,7 @@ public class TestRestExecCalls {
     @BeforeEach
     public void setup() {
         
-         httpRestClient = RestClient.getClient(
+        httpRestClient = RestClient.getClient(
             "localhost", 
             9880, 
             "http",
@@ -67,30 +72,22 @@ public class TestRestExecCalls {
            3000,
            3000,
            3000);
-
-        // httpRestClient = builder
-        //         .setPooledConnections(true)
-        //         .setSocketTimeout(30000)
-        //         .setConnectTimeout(30000)
-        //         .setRequestTimeout(30000)
-        //         .setHost("localhost")
-        //         .setPort(9880)
-        //         .setScheme("http")
-        //         .setUser("elastic")
-        //         .setPassword("elastic")
-        //         .build();
-
-        // httpsRestClient = builder
-        //         .setPooledConnections(true)
-        //         .setSocketTimeout(30000)
-        //         .setConnectTimeout(30000)
-        //         .setRequestTimeout(30000)
-        //         .setHost("localhost")
-        //         .setPort(9880)
-        //         .setScheme("https")
-        //         .setUser("elastic")
-        //         .setPassword("elastic")
-        //         .build();
+        httpsRestClient = RestClient.getClient(
+            "localhost", 
+            9880, 
+            "https",
+            "elastic",
+            "elastic",
+            "",
+            0,
+            "",
+            "",
+            "",
+            "",
+            true,
+           3000,
+           3000,
+           3000);
 
         tempDir.mkdir();
 
@@ -104,7 +101,7 @@ public class TestRestExecCalls {
 
     }
 
-   /* @Test
+    @Test
     public void testSimpleQuery() {
 
         mockServer
@@ -173,14 +170,14 @@ public class TestRestExecCalls {
         assertEquals(200, result.getStatus());
         assertEquals("some_response_body", result.toString());
 
-    }*/
+    }
 
-   /* @Test
+    @Test
     public void testFailThenSucceed() {
 
         RunClusterQueries cmd = new RunClusterQueries();
         List<RestEntry> entries = new ArrayList<>();
-        entries.add(new RestEntry("nodes", "", ".json", true, "/_nodes?pretty"));
+        entries.add(new RestEntry("nodes", "", ".json", true, "/_nodes?pretty", false));
         mockServer
                 .when(
                         request()
@@ -215,14 +212,14 @@ public class TestRestExecCalls {
         assertTrue( fileExistsWithText(targetFilename, "node_response_body"));
 
 
-    }*/
+    }
 
-    /*@Test
+    @Test
     public void testRetryAllFail() {
 
         RunClusterQueries cmd = new RunClusterQueries();
         List<RestEntry> entries = new ArrayList<>();
-        entries.add(new RestEntry("nodes", "", ".json", true, "/_nodes?pretty"));
+        entries.add(new RestEntry("nodes", "", ".json", true, "/_nodes?pretty", false));
         mockServer
                 .when(
                         request()
@@ -244,14 +241,15 @@ public class TestRestExecCalls {
         assertEquals(4, totalRetries);
         assertTrue( fileExistsWithText(targetFilename, "error_response_body"));
 
-    }*/
+    }
 
-   /* @Test
+
+    @Test
     public void testAuthFailure() {
 
         RunClusterQueries cmd = new RunClusterQueries();
         List<RestEntry> entries = new ArrayList<>();
-        entries.add(new RestEntry("nodes", "", ".json", true, "/_nodes?pretty"));
+        entries.add(new RestEntry("nodes", "", ".json", true, "/_nodes?pretty", false));
 
         mockServer
                 .when(
@@ -273,7 +271,7 @@ public class TestRestExecCalls {
         String targetFilename = temp + SystemProperties.fileSeparator + "nodes.json";
         assertTrue( fileExistsWithText(targetFilename, "autherror_response_body"));
 
-    }*/
+    }
 
 
     private boolean fileExistsWithText(String filename, String compare){
