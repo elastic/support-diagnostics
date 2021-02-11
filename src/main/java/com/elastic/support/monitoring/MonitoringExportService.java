@@ -111,7 +111,7 @@ public class MonitoringExportService extends ElasticRestClientService {
                     logger.info(Constants.CONSOLE,  "Entered cluster id not found - unexpected exception. Please enure you have a valid cluster_uuid for the monitored clusters. Check diagnostics.log for more details.");
                     logger.error( de);
             }
-            logger.error(Constants.CONSOLE, "Cannot contiue processing. Exiting {}", Constants.CHECK_LOG);
+            logger.error(Constants.CONSOLE, "Cannot continue processing. Exiting {}", Constants.CHECK_LOG);
         } catch (IOException e) {
             logger.error(Constants.CONSOLE, "Access issue with temp directory", e);
             throw new RuntimeException("Issue with creating temp directory - see logs for details.");
