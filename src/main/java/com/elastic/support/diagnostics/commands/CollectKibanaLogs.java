@@ -43,7 +43,7 @@ public  class CollectKibanaLogs implements Command {
             logger.info(Constants.CONSOLE, "There was an issue in setting up system logs collection - bypassing. {}", Constants.CHECK_LOG);
             return;
         }
-        // the defaults are only set for RPM / Debian or Homebrew 
+        // the defaults are only set for RPM / Debian or Homebrew, in windows we can not collect any Kibana logs.
         if (context.targetNode.os.equals(Constants.winPlatform)) {
             logger.info(Constants.CONSOLE, "Kibana logs can not be collected for Windows, the log path is not shared in the Kibana APIs and there is no defaults.");
             return;
