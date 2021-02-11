@@ -162,11 +162,21 @@ public class SystemUtils {
         return dtf.format(ZonedDateTime.now());
     }
 
+    /**
+    * This function is key for two types or execution remote and local.
+    * to collect some system data or logs we need to be able to know the OS where the process is running
+    * Logstash is not using this as we only collect the API data, no system data collected on the servers.
+    * "win32" is used by Kibana API as OS name.
+    *
+    * @param  String osName , this value is provided by the Elasticsearch nodes or Kibana stats API
+    *
+    * @return         String
+    */
     public static String parseOperatingSystemName(String osName){
 
         osName = osName.toLowerCase();
 
-        if (osName.contains("windows")) {
+        if (osName.contains("windows") || osName.contains("win32")) {
             return Constants.winPlatform;
 
         } else if (osName.contains("linux")) {

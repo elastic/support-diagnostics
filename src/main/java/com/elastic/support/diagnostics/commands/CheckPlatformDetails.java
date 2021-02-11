@@ -187,7 +187,7 @@ public class CheckPlatformDetails implements Command {
         return targetNode;
     }
 
-    private List<ProcessProfile> getNodeNetworkAndLogInfo(JsonNode nodesInfo) {
+    protected List<ProcessProfile> getNodeNetworkAndLogInfo(JsonNode nodesInfo) {
 
         List<ProcessProfile> nodeNetworkInfo = new ArrayList<>();
 
