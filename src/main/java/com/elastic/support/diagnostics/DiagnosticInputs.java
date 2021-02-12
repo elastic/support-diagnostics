@@ -101,7 +101,7 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
 
     public final static String  typeDescription = "Enter the number of the diagnostic type to run.";
     public final static String  remoteUserDescription = "User account to be used for running system commands and obtaining logs. This account must have sufficient authority to run the commands and access the logs.";
-    public final static String  remotePasswordDescription = "Password for the remote login.";
+    public final static String  remotePasswordDescription = "Password for the remote login:";
     public final static String  sshKeyFileDescription= "File containing keys for remote host authentication.";
     public final static String  sshKeyFIlePassphraseDescription= "Passphrase for the keyfile if required.";
     public final static String  trustRemoteDescription = "Bypass the known hosts file and trust the specified remote server. Defaults to false.";
