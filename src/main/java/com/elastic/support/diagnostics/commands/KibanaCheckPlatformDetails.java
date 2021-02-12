@@ -133,13 +133,13 @@ public class KibanaCheckPlatformDetails extends CheckPlatformDetails {
 
 
     /**
-    * Map Kibana / stats API results to the ProcessProfile object.
+    * Map Kibana / stats API results to the ProcessProfile object. Workaround to be able to test this function.
     *
     * @param  JsonNode nodesInfo
     *
     * @return         List<ProcessProfile>
     */
-    protected List<ProcessProfile> getNodeNetworkAndLogInfo(JsonNode nodesInfo) {
+    public List<ProcessProfile> getNodeNetworkAndLogInfo(JsonNode nodesInfo) {
 
         List<ProcessProfile> nodeNetworkInfo = new ArrayList<>();
         try {
@@ -152,7 +152,7 @@ public class KibanaCheckPlatformDetails extends CheckPlatformDetails {
             }
 
             diagNode.networkHost = nodesInfo.path("kibana").path("host").asText();
-            diagNode.host = (nodesInfo.path("host").asText());
+            diagNode.host = nodesInfo.path("kibana").path("host").asText();
 
             String nodeOs = nodesInfo.path("os").path("platform").asText().toLowerCase();
             diagNode.os = SystemUtils.parseOperatingSystemName(nodeOs);
@@ -171,7 +171,7 @@ public class KibanaCheckPlatformDetails extends CheckPlatformDetails {
     }
 
     /**
-    * Kibana is working in single mode, so the targer node will be the only host stored on the nodeProfiles List.
+    * Kibana is working in single mode, so the target node will be the only host stored on the nodeProfiles List.
     *
     * @param  String host
     * @param  List<ProcessProfile> nodeProfiles
