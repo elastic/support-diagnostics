@@ -276,10 +276,6 @@ templates:
   versions:
     ">= 0.9.0": "/_template?pretty"
 
-index_templates:
-  versions:
-    ">= 7.8.0": "/_index_template?pretty"
-
 version:
   retry: true
   versions:
