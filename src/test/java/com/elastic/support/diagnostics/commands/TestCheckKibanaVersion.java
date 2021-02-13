@@ -90,4 +90,62 @@ public class TestCheckKibanaVersion {
         // the version 6.5.0 was defined on the json object on the mockServer boby.
    		assertEquals("6.5.0", version.getValue());
     }
+
+
+    /**
+     * version is Mandatory as we use the version to define the APIs that will be executed
+     */
+    @Test
+    public void testQueriesForKibanaEmptyVersion() {
+        // the body is different here than in the previous test
+        // HERE we have removed the version from the JSON response to trigger the expection
+        mockServer
+                .when(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/api/settings")
+                )
+                .respond(
+                        response()
+                                .withBody("{\"cluster_uuid\":\"RLtzkhfBRUadN4WZ8fnnog\",\"settings\":{\"xpack\":{\"default_admin_email\":null},\"kibana\":{\"uuid\":\"a4f369ef-fecd-46b7-8b16-c6c3f885d9ec\",\"name\":\"13d5e793ea51\",\"index\":\".kibana\",\"host\":\"0.0.0.0\",\"port\":18648,\"locale\":\"en\",\"transport_address\":\"0.0.0.0:18648\",\"snapshot\":false,\"status\":\"green\"}}}")
+                                .withStatusCode(200)
+                );
+
+        try {
+            Semver version = new CheckKibanaVersion().getKibanaVersion(httpRestClient);
+            // if they are more than one node in Kibana we need to throw an Exception
+            assertTrue(false);
+        } catch (RuntimeException e) {
+            assertEquals(e.getMessage(), "Kibana version format is wrong - unable to continue. ()");
+        }
+    }
+
+    /**
+     * version is Mandatory as we use the version to define the APIs that will be executed
+     * The format of our version is stable and numeric
+     */
+    @Test
+    public void testQueriesForKibanaCorruptedVersion() {
+        // the body is different here than in the previous test
+        // HERE we have removed the version from the JSON response to trigger the expection
+        mockServer
+                .when(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/api/settings")
+                )
+                .respond(
+                        response()
+                                .withBody("{\"cluster_uuid\":\"RLtzkhfBRUadN4WZ8fnnog\",\"settings\":{\"xpack\":{\"default_admin_email\":null},\"kibana\":{\"uuid\":\"a4f369ef-fecd-46b7-8b16-c6c3f885d9ec\",\"name\":\"13d5e793ea51\",\"index\":\".kibana\",\"host\":\"0.0.0.0\",\"port\":18648,\"locale\":\"en\",\"transport_address\":\"0.0.0.0:18648\",\"version\":\"a.v.c\",\"snapshot\":false,\"status\":\"green\"}}}")
+                                .withStatusCode(200)
+                );
+
+        try {
+            Semver version = new CheckKibanaVersion().getKibanaVersion(httpRestClient);
+            // if they are more than one node in Kibana we need to throw an Exception
+            assertTrue(false);
+        } catch (RuntimeException e) {
+            assertEquals(e.getMessage(), "Kibana version format is wrong - unable to continue. (a.v.c)");
+        }
+    }
 }

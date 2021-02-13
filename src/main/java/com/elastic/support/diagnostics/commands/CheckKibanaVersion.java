@@ -15,6 +15,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.vdurmont.semver4j.Semver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import java.util.Map;
 
@@ -75,6 +77,14 @@ public class CheckKibanaVersion implements Command {
         }
     }
 
+    /**
+    * Before execute the Kibana APIs, we need to know which API to execute, this will depend on the version of the Kibana version of the collected process
+    * We use Semver to help us parse the version as returned by the Kibana /api/settings.
+    *
+    * @param  RestClient client
+    *
+    * @return         Semver
+    */
     public static Semver getKibanaVersion(RestClient client){
             RestResult res = client.execQuery("/api/settings");
             if (! res.isValid()) {
@@ -84,6 +94,13 @@ public class CheckKibanaVersion implements Command {
             JsonNode root = JsonYamlUtils.createJsonNodeFromString(result);
             String version = root.path("settings").path("kibana").path("version").asText();
             logger.info(Constants.CONSOLE, String.format("Kibana Version is :%s", version));
+
+            Pattern versionPattern = Pattern.compile("([1-9]\\d*)\\.(\\d+)\\.(\\d+)?");
+            Matcher matcher = versionPattern.matcher(version);
+
+            if(!matcher.matches()) {
+                throw new DiagnosticException(String.format("Kibana version format is wrong - unable to continue. (%s)", version));
+            }
             return new Semver(version, Semver.SemverType.NPM);
     }
 
