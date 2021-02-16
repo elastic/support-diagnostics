@@ -20,10 +20,10 @@ public class CollectDockerInfo implements Command {
 
     public void execute(DiagnosticContext context) {
 
-        SystemCommand systemCommand = ResourceCache.getSystemCommand(Constants.systemCommands);
+        SystemCommand systemCommand = ResourceUtils.systemCommand;
 
         // Run the system calls first to get the host's stats
-        String targetDir = context.tempDir + SystemProperties.fileSeparator + "syscalls";
+        String targetDir = context.diagnosticInputs.tempDir + SystemProperties.fileSeparator + "syscalls";
         String pid = "1";
         String platform = Constants.linuxPlatform;
         if (systemCommand instanceof LocalSystem) {
@@ -34,7 +34,7 @@ public class CollectDockerInfo implements Command {
         Map<String, String> sysCalls = osCmds.get("sys");
         CollectSystemCalls.processCalls(targetDir, sysCalls, systemCommand, pid);
 
-        targetDir = context.tempDir + SystemProperties.fileSeparator + "docker";
+        targetDir = context.diagnosticInputs.tempDir + SystemProperties.fileSeparator + "docker";
 
         // Determine where Docker is located
         String dockerPath = getDockerPath(systemCommand, platform);

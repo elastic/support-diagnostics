@@ -39,11 +39,11 @@ public class GenerateManifest implements Command {
 
          String diagVersion = context.diagVersion;
          manifest.put(Constants.DIAG_VERSION, diagVersion);
-         manifest.put("Product Version", context.version);
+         manifest.put("productVersion", context.version);
          manifest.put("collectionDate", SystemProperties.getUtcDateTimeString());
          manifest.put("diagnosticInputs", context.diagnosticInputs.toString());
 
-         File manifestFile = new File(context.tempDir + SystemProperties.fileSeparator + "manifest.json");
+         File manifestFile = new File(context.diagnosticInputs.tempDir + SystemProperties.fileSeparator + "manifest.json");
          mapper.writeValue(manifestFile, manifest);
       } catch (Exception e) {
          logger.info(Constants.CONSOLE, "Error creating the manifest file", e);

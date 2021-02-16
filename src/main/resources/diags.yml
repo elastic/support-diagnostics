@@ -1,40 +1,48 @@
 #
-#
-#
-#
 #  The REST call settings have been moved to elastic-rest.yml and logstash-rest.yml
 #
-#
-#
-#
 
-## Should only need to change these if Github modifies something
-  ## github-settings:
-  ##   diagReleaseHost: "api.github.com"
-  ##   diagReleaseDest: "/repos/elastic/support-diagnostics/releases/latest"
-  ##   diagReleaseScheme: "https"
-  ## diagLatestRelease: "https://api.github.com/repos/elastic/support-diagnostics/releases/latest"
+## Should only need to change if Github modifies something
+  ##   diagHost: "https://api.github.com"
+  ##   diagQuery: "/repos/elastic/support-diagnostics/releases/latest"
+
+# Colon is the standard field delimiter for all concatentated strings containing
+# urls, credentials etc. If that creates a password conflict you may change it.
+# The modified value will be used for ALL concatenated string inputs.
+field-delimiter: ":"
 
 # Maximum number of log files including zip archives
 log-settings:
   maxLogs: 3
   maxGcLogs: 3
 
-# Uncomment only if modifying defaults
 rest-config:
    # timeouts in seconds
-   requestTimeout: 60
-   connectTimeout: 60
-   socketTimeout:  120
+   # timeout when requesting a connection from the connection manager
+   requestTimeout: 30
+   # timeout in milliseconds until a connection is established. A timeout value of zero is interpreted as an infinite timeout. This parameter expects a value of type java.lang.Integer. If this parameter is not set, connect operations will not time out (infinite timeout).
+   connectTimeout: 30
+   # defines the socket timeout (SO_TIMEOUT) in milliseconds, which is the timeout for waiting for data or, put differently, a maximum period inactivity between two consecutive data packets). A timeout value of zero is interpreted as an infinite timeout. This parameter expects a value of type java.lang.Integer. If this parameter is not set, read operations will not time out (infinite timeout).
+   socketTimeout:  30
+
+   # times in milliseconds
+   # Threshold to check for expired connections
+   idleExpire:     100
+
+   # For HTTP Client connection pool manager. Shouldn't need adjustment
+   # Total connections allowed
    maxTotalConn: 100
+   # Nbr connections for a particular HTTP route.
    maxConnPerRoute: 10
 
-# Number of tiems to re-attempt a rest call
+# Rest call retry settings
+# Number of tiems to re-attempt a rest call if enabled
 call-retries: 3
 
 # Time before re-attempts in milliseconnds
 pause-retries: 5000
 
+# System calls executed when running locally. Grouped by operating system.
 thread-dump:
   jstack: "jstack {{PID}}"
 
@@ -106,6 +114,7 @@ winOS:
     elastic-arc: "dir /b  /l /o:-d /a:-d {{LOGPATH}}\\{{CLUSTERNAME}}-*.log.gz"
     gc: "dir /l /b /o:-d /a:-d {{LOGPATH}}\\gc.log.*"
 
+# Docker specific calls for querying containers
 docker-container-ids: "{{dockerPath}} ps -q"
 
 docker-global:
@@ -117,18 +126,30 @@ docker-container:
   docker-top: "{{dockerPath}} top {{CONTAINER_ID}}"
   docker-inspect: "{{dockerPath}} inspect {{CONTAINER_ID}}"
 
+# Monitoring export/import settings
+# Retrieval settings for scroll
 monitoring-scroll-size: 1000
-bulk-import-size: 500
 
+# Bulk ingestion size for monitoring import
+bulk-import-size: 500
+# If failure encountered, how long to wait before retrying
+bulk-pause: 15000
+# Number of retries before continuing
+bulk-max-retries: 3
+
+# Stored in resources/monitoring-extract
 import-templates:
   - "monitoring-es-diag"
   - "monitoring-logstash-diag"
   - "metricbeat-system-diag"
 
-monitoring-extract-pattern: ".monitoring-es-7-diag-import"
-logstash-extract-pattern: ".monitoring-logstash-7-diag-import"
-metricbeat-extract-pattern: "metricbeat-7-diag-import"
+# Naming templates for imported indices
+elastic-pattern: ".monitoring-es-7-diag-import"
+logstash-pattern: ".monitoring-logstash-7-diag-import"
+metricbeat-pattern: "metricbeat-7-diag-import"
 
+# extractions that we want to insert into the
+# imported index.
 query-files:
   - general
   - index_stats
@@ -152,6 +173,7 @@ logstash-sets:
   - logstash_stats
   - logstash_state
 
+# areas to extract from
 metric-sets:
   - cpu
   - load
@@ -167,35 +189,3 @@ metric-sets:
   #- service
   #- users
 
-flight-recorder-es:
-  complete:
-    - allocation
-    - allocation_explain
-    - allocation_explain_disk
-    - cluster_settings
-    - cluster_settings_defaults
-    - cluster_stats
-    - fielddata
-    - fielddata_stats
-    - indices
-    - indices_stats
-    - licenses
-    - mapping
-    - master
-    - nodes
-    - nodes_stats
-    - nodes_usage
-    - pipelines
-    - recovery
-    - segments
-    - settings
-    - shards
-    - tasks
-    - templates
-    - ccr_stats
-    - enrich_stats
-    - ilm_status
-    - rollup_jobs
-  stability:
-    - nodes
-    - shards

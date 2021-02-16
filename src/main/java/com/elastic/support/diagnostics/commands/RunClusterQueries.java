@@ -1,13 +1,13 @@
 package com.elastic.support.diagnostics.commands;
 
 import com.elastic.support.Constants;
-import com.elastic.support.diagnostics.DiagConfig;
+import com.elastic.support.diagnostics.DiagnosticConfig;
 import com.elastic.support.diagnostics.DiagnosticException;
+import com.elastic.support.diagnostics.DiagnosticInputs;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.rest.RestClient;
 import com.elastic.support.rest.RestEntry;
-import com.elastic.support.util.ResourceCache;
-import com.elastic.support.util.SystemProperties;
+import com.elastic.support.util.ResourceUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -26,19 +26,12 @@ public class RunClusterQueries extends BaseQuery {
     public void execute(DiagnosticContext context) {
 
         try {
-            DiagConfig diagConfig = context.diagsConfig;
+            DiagnosticConfig diagnosticConfig = context.diagsConfig;
+            DiagnosticInputs inputs = context.diagnosticInputs;
             List<RestEntry> entries = new ArrayList<>();
             entries.addAll(context.elasticRestCalls.values());
-            RestClient client;
-            client = ResourceCache.getRestClient(Constants.restInputHost);
-/*            if(ResourceCache.resourceExists(Constants.restTargetHost)){
-                client = ResourceCache.getRestClient(Constants.restTargetHost);
-            }
-            else {
-                client = ResourceCache.getRestClient(Constants.restInputHost);
-            }*/
-
-            runQueries(client, entries, context.tempDir, diagConfig.callRetries, diagConfig.pauseRetries);
+            RestClient client = ResourceUtils.restClient;
+            runQueries(client, entries, inputs.tempDir, diagnosticConfig.callRetries, diagnosticConfig.pauseRetries, inputs.retryFailed);
         } catch (Throwable t) {
             logger.error( "Error executing REST queries", t);
             throw new DiagnosticException(String.format("Unrecoverable REST Query Execution error - exiting. %s", Constants.CHECK_LOG));

@@ -3,16 +3,12 @@ package com.elastic.support.monitoring;
 import com.beust.jcommander.Parameter;
 import com.elastic.support.Constants;
 import com.elastic.support.rest.ElasticRestClientInputs;
-import com.elastic.support.util.ResourceCache;
+import com.elastic.support.util.ResourceUtils;
 import com.elastic.support.util.SystemProperties;
-import com.sun.xml.bind.v2.runtime.reflect.opt.Const;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.beryx.textio.StringInputReader;
-import org.beryx.textio.TerminalProperties;
-import org.beryx.textio.TextTerminal;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -26,32 +22,35 @@ public class MonitoringExportInputs extends ElasticRestClientInputs {
     private static int defaultInterval = 6;
 
     // Start Input Fields
-    @Parameter(names = {"--id"}, description = "Required except when the list command is used: The cluster_uuid of the monitored cluster you wish to extract data for. If you do not know this you can obtain it from that cluster using <protocol>://<host>:port/ .")
+    @Parameter(names = {"-id"}, description = "Required except when the list command is used: The cluster_uuid of the monitored cluster you wish to extract data for. If you do not know this you can obtain it from that cluster using <protocol>://<host>:port/ .")
     public String clusterId;
 
-    @Parameter(names = {"--cutoffDate"}, description = "Date for the cutoff point of the extraction. Defaults to today. Must be in the 24 hour format yyyy-MM-dd.")
+    @Parameter(names = {"-cutoffDate"}, description = "Date for the cutoff point of the extraction. Defaults to today. Must be in the 24 hour format yyyy-MM-dd.")
     public String cutoffDate = DateTimeFormatter.ofPattern("yyyy-MM-dd").format(ZonedDateTime.now(ZoneId.of("+0")));;
 
-    @Parameter(names = {"--cutoffTime"}, description = "Time for the cutoff point of the data extraction. Defaults to today's current UTC time, and the starting point will be calculated as that minus the configured interval. Must be in the 24 hour format HH:mm.")
+    @Parameter(names = {"-cutoffTime"}, description = "Time for the cutoff point of the data extraction. Defaults to today's current UTC time, and the starting point will be calculated as that minus the configured interval. Must be in the 24 hour format HH:mm.")
     public String cutoffTime = DateTimeFormatter.ofPattern("HH:mm").format(ZonedDateTime.now(ZoneId.of("+0")));;;
 
-    @Parameter(names = {"--interval"}, description = "Number of hours back to collect statistics. Defaults to 6 hours, but but can be set as high as 12.")
+    @Parameter(names = {"-interval"}, description = "Number of hours back to collect statistics. Defaults to 6 hours, but but can be set as high as 12.")
     public int interval = defaultInterval;
 
-    @Parameter(names = {"--list"}, description = "List the clusters available on the monitoring cluster.")
+    @Parameter(names = {"-list"}, description = "List the clusters available on the monitoring cluster.")
     boolean listClusters = false;
 
-    @Parameter(names = {"--type"}, description = "Enter monitoring, metrics, or all.")
+    @Parameter(names = {"-type"}, description = "Enter monitoring, metrics, or all.")
     String type = "monitoring";
 
     // End Input Fields
-
 
     // Generated during the validate method for use by the query.
     public String queryStartDate;
     public String queryEndDate;
 
-    public boolean runInteractive() {
+    public MonitoringExportInputs(String delimiter){
+        super(delimiter);
+    }
+
+    public void runInteractive() {
 
         runHttpInteractive();
 
@@ -62,27 +61,27 @@ public class MonitoringExportInputs extends ElasticRestClientInputs {
 
         operation = operation.toLowerCase();
         if(operation.equals("extract")){
-            type = ResourceCache.textIO.newStringInputReader()
+            type = ResourceUtils.textIO.newStringInputReader()
                     .withInputTrimming(true)
                     .withDefaultValue("monitoring")
                     .read(SystemProperties.lineSeparator + "Enter monitoring for ES and Logstash monitoring data, metric for metricbeat system data, or all.");
 
-            clusterId = ResourceCache.textIO.newStringInputReader()
+            clusterId = ResourceUtils.textIO.newStringInputReader()
                     .withInputTrimming(true)
                     .withValueChecker((String val, String propname) -> validateCluster(val))
                     .read(SystemProperties.lineSeparator + "Enter the cluster id to for the cluster you wish to extract.");
 
-            cutoffDate = ResourceCache.textIO.newStringInputReader()
+            cutoffDate = ResourceUtils.textIO.newStringInputReader()
                     .withInputTrimming(true)
                     .withMinLength(0)
                     .read(SystemProperties.lineSeparator + "Enter the date for the cutoff point of the extraction. Defaults to today's date. Must be in the format yyyy-MM-dd.");
 
-            cutoffTime = ResourceCache.textIO.newStringInputReader()
+            cutoffTime = ResourceUtils.textIO.newStringInputReader()
                     .withInputTrimming(true)
                     .withMinLength(0)
                     .read(SystemProperties.lineSeparator + "Enter the time for the cutoff point of the extraction. Defaults to the current UTC time. Must be in the 24 hour format HH:mm.");
 
-            interval = ResourceCache.textIO.newIntInputReader()
+            interval = ResourceUtils.textIO.newIntInputReader()
                     .withInputTrimming(true)
                     .withDefaultValue(interval)
                     .withValueChecker((Integer val, String propname) -> validateInterval(val))
@@ -92,8 +91,9 @@ public class MonitoringExportInputs extends ElasticRestClientInputs {
         }
 
         runOutputDirInteractive();
+        ResourceUtils.textIO.dispose();
 
-        return true;
+
     }
 
     public List<String> parseInputs(String[] args) {

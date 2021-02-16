@@ -1,16 +1,12 @@
 package com.elastic.support.util;
 
-
 import com.elastic.support.Constants;
 import com.elastic.support.diagnostics.DiagnosticException;
-import com.elastic.support.diagnostics.DiagnosticInputs;
-import com.elastic.support.rest.RestClient;
-import com.elastic.support.rest.RestResult;
+import com.elastic.support.diagnostics.commands.GenerateManifest;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.util.SystemPropertiesPropertySource;
 
 import java.io.*;
 import java.net.InetAddress;
@@ -30,6 +26,12 @@ public class SystemUtils {
         logger.info(Constants.CONSOLE,  "Exiting...");
         System.exit(0);
     }
+
+    public static String getToolVersion() {
+        String ver = GenerateManifest.class.getPackage().getImplementationVersion();
+        return (ver != null) ? ver : Constants.runningInIde;
+    }
+
 
     public static void writeToFile(String content, String dest) {
         try {
@@ -59,11 +61,14 @@ public class SystemUtils {
     public static void nukeDirectory(String dir){
         try {
             File tmp = new File(dir);
+            if(!tmp.exists()){
+                return;
+            }
             tmp.setWritable(true, false);
             FileUtils.deleteDirectory(tmp);
             logger.info(Constants.CONSOLE,  "Deleted directory: {}.", dir);
         } catch (IOException e) {
-            logger.error(Constants.CONSOLE, "Delete of directory:{} failed. Usually this indicates a permission issue", dir, e);
+            logger.error(Constants.CONSOLE, "Delete of directory:{} failed. This may indicate a permission issue", dir, e);
         }
     }
 
