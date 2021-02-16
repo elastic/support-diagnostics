@@ -113,12 +113,6 @@ cat_shards:
 #  versions:
 #    ">= 2.0.0": "/_cat/snapshots"
 
-cat_templates:
-  extension: ".txt"
-  subdir: "cat"
-  versions:
-    ">= 7.8.0": "/_cat/templates?v"
-
 cat_thread_pool:
   extension: ".txt"
   subdir: "cat"
@@ -151,11 +145,6 @@ allocation_explain_disk:
   versions:
     ">= 5.0.0": "/_cluster/allocation/explain?include_disk_info=true&pretty"
 
-component_templates:
-  retry: true
-  versions:
-    ">= 7.8.0": "/_component_template"
-
 count:
   versions:
     ">= 2.0.0": "/_count"
@@ -179,7 +168,7 @@ cluster_settings_defaults:
 cluster_state:
   retry: true
   versions:
-    ">= 0.9.0": "/_cluster/state?human"
+    ">= 0.9.0": "/_cluster/state?pretty&human"
 
 cluster_stats:
   versions:
@@ -197,11 +186,6 @@ fielddata_stats:
   versions:
     ">= 0.9.0 < 5.0.0": "/_nodes/stats/indices/fielddata?pretty=true&fields=*"
     ">= 5.0.0": "/_nodes/stats/indices/fielddata?level=shards&pretty=true&fields=*"
-
-index_templates:
-  retry: true
-  versions:
-    ">= 7.8.0": "/_index_template"
 
 indices:
   versions:
@@ -223,8 +207,8 @@ licenses:
 
 mapping:
   versions:
-    ">= 0.9.0 < 7.7.0": "/_mapping"
-    ">= 7.7.0": "/_mapping?expand_wildcards=all"
+    ">= 0.9.0 < 7.7.0": "/_mapping?pretty"
+    ">= 7.7.0": "/_mapping?pretty&expand_wildcards=all"
 
 master:
   versions:
@@ -455,3 +439,8 @@ xpack:
   subdir: "commercial"
   versions:
     ">= 5.0.0": "/_xpack/usage?pretty&human"
+
+data_stream:
+  subdir: "commercial"
+  versions:
+    ">= 7.9.0": "/_data_stream?pretty"

@@ -68,7 +68,7 @@ public class LocalSystem extends SystemCommand {
         }
 
         return sb.toString();
-}
+    }
 
 
     @Override
@@ -83,6 +83,39 @@ public class LocalSystem extends SystemCommand {
                 logger.info("Error retrieving log: {}. Bypassing.", entry);
                 logger.error( e);
             }
+        }
+    }
+
+    /**
+    * On this function we will try to collect the journalctl logs, 
+    * Some services as Kibana installed with the RPM package will give the access to the logs using the journalctl command
+    *
+    * @param  String serviceName
+    * @param  String targetDir
+    *
+    * @return         void
+    */
+    @Override
+    public void copyLogsFromJournalctl(String serviceName, String targetDir) {
+
+        try {
+            String tempDir = "templogs";
+            String mkdir = "mkdir templogs";
+            String journalctl = " journalctl -u {{SERVICE}} > '{{TEMP}}/{{SERVICE}}.log'";
+            journalctl = journalctl.replace("{{SERVICE}}", serviceName);
+            journalctl = journalctl.replace("{{TEMP}}", tempDir);
+            runCommand(mkdir);
+            runCommand(journalctl);
+            String source = "{{TEMP}}/{{SERVICE}}.log";
+            source = source.replace("{{SERVICE}}", serviceName);
+            source = source.replace("{{TEMP}}", tempDir);
+            String target = targetDir + SystemProperties.fileSeparator + serviceName;
+            FileUtils.copyFile(new File(source), new File(target));
+            // clean up the temp logs on the remote host
+            runCommand(" rm -Rf templogs");
+        } catch (IOException e) {
+            logger.info("Error retrieving log: {}. Bypassing.", serviceName);
+            logger.error( e);
         }
     }
 
