@@ -42,7 +42,7 @@ public class MonitoringImportService  implements BaseService {
 
         }catch (Exception e){
             logger.error( "Error extracting archive or indexing results", e);
-            logger.info(Constants.CONSOLE, "Cannot contiue processing. {} \n {}", e.getMessage(), Constants.CHECK_LOG);
+            logger.info(Constants.CONSOLE, "Cannot continue processing. {} \n {}", e.getMessage(), Constants.CHECK_LOG);
         }
         finally {
         }
