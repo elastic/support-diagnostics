@@ -2,13 +2,14 @@ package com.elastic.support.diagnostics.commands;
 
 import com.elastic.support.Constants;
 import com.elastic.support.diagnostics.DiagnosticException;
+import com.elastic.support.diagnostics.DiagnosticInputs;
 import com.elastic.support.diagnostics.chain.Command;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.rest.RestClient;
 import com.elastic.support.rest.RestEntryConfig;
 import com.elastic.support.rest.RestResult;
 import com.elastic.support.util.JsonYamlUtils;
-import com.elastic.support.util.ResourceUtils;
+import com.elastic.support.util.ResourceCache;
 import com.elastic.support.util.SystemProperties;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.vdurmont.semver4j.Semver;
@@ -34,9 +35,29 @@ public class CheckElasticsearchVersion implements Command {
         // Get the version number from the JSON returned
         // by just submitting the host/port combo
         logger.info(Constants.CONSOLE, "Getting Elasticsearch Version.");
+        DiagnosticInputs inputs = context.diagnosticInputs;
 
         try {
-            context.version = getElasticsearchVersion(ResourceUtils.restClient);
+           RestClient restClient = RestClient.getClient(
+                    context.diagnosticInputs.host,
+                    context.diagnosticInputs.port,
+                    context.diagnosticInputs.scheme,
+                    context.diagnosticInputs.user,
+                    context.diagnosticInputs.password,
+                    context.diagnosticInputs.proxyHost,
+                    context.diagnosticInputs.proxyPort,
+                    context.diagnosticInputs.proxyUser,
+                    context.diagnosticInputs.proxyPassword,
+                    context.diagnosticInputs.pkiKeystore,
+                    context.diagnosticInputs.pkiKeystorePass,
+                    context.diagnosticInputs.skipVerification,
+                    context.diagsConfig.connectionTimeout,
+                    context.diagsConfig.connectionRequestTimeout,
+                    context.diagsConfig.socketTimeout);
+
+           // Add it to the global cache - automatically closed on exit.
+            ResourceCache.addRestClient(Constants.restInputHost, restClient);
+            context.version = getElasticsearchVersion(restClient);
             String version = context.version.getValue();
             RestEntryConfig builder = new RestEntryConfig(version);
             Map restCalls = JsonYamlUtils.readYamlFromClasspath(Constants.ES_REST, true);

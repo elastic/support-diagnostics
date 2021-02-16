@@ -2,7 +2,8 @@ package com.elastic.support.monitoring;
 
 import com.beust.jcommander.Parameter;
 import com.elastic.support.rest.ElasticRestClientInputs;
-import com.elastic.support.util.ResourceUtils;
+import com.elastic.support.util.ResourceCache;
+import com.elastic.support.util.SystemProperties;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -17,32 +18,36 @@ public class MonitoringImportInputs extends ElasticRestClientInputs {
 
     // Start Input Fields
 
-    @Parameter(names = {"-clustername"}, description = "Overrides the name of the imported cluster.")
+    @Parameter(names = {"--clustername"}, description = "Overrides the name of the imported cluster.")
     protected String clusterName;
 
-    @Parameter(names = {"-input"}, description = "Required: The archive that you wish to import into Elastic Monitoring. This must be in the format produced by the diagnostic export utility.")
+    @Parameter(names = {"-i", "--input"}, description = "Required: The archive that you wish to import into Elastic Monitoring. This must be in the format produced by the diagnostic export utility.")
     protected String input;
 
     // End Input Fields
 
-    public MonitoringImportInputs(String delimiter){
-        super(delimiter);
-    }
+    // Start Input Readers
 
-    public void runInteractive(){
+    protected StringInputReader proxyHostReader = ResourceCache.textIO.newStringInputReader()
+            .withInputTrimming(true)
+            .withValueChecker((String val, String propname) -> validateId(val));
 
-        clusterName = ResourceUtils.textIO.newStringInputReader()
+    // End Input Readers
+
+    public boolean runInteractive(){
+
+        clusterName = ResourceCache.textIO.newStringInputReader()
                 .withMinLength(0)
                 .read("Specify an alternate name for the imported cluster or hit enter to use original cluster name:");
 
-        input = ResourceUtils.textIO.newStringInputReader()
+        input = ResourceCache.textIO.newStringInputReader()
                 .withInputTrimming(true)
                 .withValueChecker((String val, String propname) -> validateRequiredFile(val))
                 .read("Enter the full path of the archvive you wish to import.");
 
         runHttpInteractive();
-        ResourceUtils.textIO.dispose();
 
+        return true;
     }
 
     public List<String> parseInputs(String[] args){
@@ -71,6 +76,7 @@ public class MonitoringImportInputs extends ElasticRestClientInputs {
         return "MonitoringImportInputs{" +
                 "clusterName='" + clusterName + '\'' +
                 ", input='" + input + '\'' +
+                ", proxyHostReader=" + proxyHostReader +
                 '}';
     }
 }

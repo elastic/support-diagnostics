@@ -13,7 +13,6 @@ public class Constants {
    public static final Marker CONSOLE = MarkerManager.getMarker("CONSOLE");
 
    public static final String ES_DIAG = "diagnostics";
-   public static final String ES_DIAG_TEMP = "diagnostics-temp";
    public static final String NOT_FOUND = "not found";
    public static final String CHECK_LOG = "Check diagnostics.log in the archive file for more detail.";
 
@@ -52,7 +51,6 @@ public class Constants {
 
    public final static String local =  "local";
    public final static String api = "api";
-   public final static String cloud = "cloud";
    public final static String remote = "remote";
 
    public final static String logstashLocal = "logstash-local";

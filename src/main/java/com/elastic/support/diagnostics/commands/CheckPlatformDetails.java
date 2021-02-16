@@ -5,6 +5,7 @@ import com.elastic.support.diagnostics.JavaPlatform;
 import com.elastic.support.diagnostics.ProcessProfile;
 import com.elastic.support.diagnostics.chain.Command;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
+import com.elastic.support.rest.RestClient;
 import com.elastic.support.rest.RestEntry;
 import com.elastic.support.rest.RestResult;
 import com.elastic.support.util.*;
@@ -24,11 +25,14 @@ public class CheckPlatformDetails implements Command {
     public void execute(DiagnosticContext context) {
 
         try {
+            // Cached from previous executions
+            RestClient restClient = ResourceCache.getRestClient(Constants.restInputHost);
+
             // Populate the node metadata
             Map<String, RestEntry> calls = context.elasticRestCalls;
             RestEntry entry = calls.get("nodes");
             String url = entry.getUrl().replace("?pretty", "/os,process,settings,transport,http?pretty&human");
-            RestResult result = ResourceUtils.restClient.execQuery(url);
+            RestResult result = restClient.execQuery(url);
 
             // Initialize to empty node which mimimizes NPE opportunities
             JsonNode infoNodes = JsonYamlUtils.mapper.createObjectNode();
@@ -109,7 +113,7 @@ public class CheckPlatformDetails implements Command {
                         targetOS = context.targetNode.os;
                     }
 
-                    ResourceUtils.systemCommand = new RemoteSystem(
+                    syscmd = new RemoteSystem(
                             targetOS,
                             context.diagnosticInputs.remoteUser,
                             context.diagnosticInputs.remotePassword,
@@ -121,6 +125,7 @@ public class CheckPlatformDetails implements Command {
                             context.diagnosticInputs.trustRemote,
                             context.diagnosticInputs.isSudo
                     );
+                    ResourceCache.addSystemCommand(Constants.systemCommands, syscmd);
 
                     break;
 
@@ -129,7 +134,8 @@ public class CheckPlatformDetails implements Command {
                         context.runSystemCalls = false;
 
                         // We do need a system command local to run the docker calls
-                        ResourceUtils.systemCommand =  new LocalSystem(SystemUtils.parseOperatingSystemName(SystemProperties.osName));
+                        syscmd = new LocalSystem(SystemUtils.parseOperatingSystemName(SystemProperties.osName));
+                        ResourceCache.addSystemCommand(Constants.systemCommands, syscmd);
                         break;
                     }
 
@@ -143,7 +149,9 @@ public class CheckPlatformDetails implements Command {
                     context.targetNode = findLocalTargetNode(
                             context.diagnosticInputs.host, nodeProfiles);
 
-                    ResourceUtils.systemCommand =  new LocalSystem(context.targetNode.os);
+                    syscmd = new LocalSystem(context.targetNode.os);
+                    ResourceCache.addSystemCommand(Constants.systemCommands, syscmd);
+
                     break;
 
                 default:

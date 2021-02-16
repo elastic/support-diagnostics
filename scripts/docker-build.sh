@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
-cd ../docker 
-docker build -f Dockerfile -t support-diagnostics-app .
+
+docker build -f ./docker/Dockerfile -t support-diagnostics-app .

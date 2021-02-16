@@ -26,12 +26,21 @@ public class MonitoringImportProcessor {
     RestClient client;
     MonitoringImportConfig config;
     MonitoringImportInputs inputs;
-
+    String newClusterName;
+    boolean updateClusterName = false;
 
     public MonitoringImportProcessor(MonitoringImportConfig config, MonitoringImportInputs inputs, RestClient client) {
         this.config = config;
         this.inputs = inputs;
         this.client = client;
+
+        // Check for overrides
+        if (StringUtils.isNotEmpty(inputs.clusterName)) {
+            this.newClusterName = inputs.clusterName;
+            updateClusterName = true;
+        }
+
+        checkForExtractTemplates();
     }
 
     public void exec(Vector<File> files) {
@@ -51,36 +60,24 @@ public class MonitoringImportProcessor {
 
     public void process(File file) {
 
-        String newClusterName = "";
-        boolean updateClusterName = false;
-
-        // Check for overrides
-        if (StringUtils.isNotEmpty(inputs.clusterName)) {
-            newClusterName = inputs.clusterName;
-            updateClusterName = true;
-        }
-
-        checkForExtractTemplates();
-
         logger.info(Constants.CONSOLE, "Processing: {}", file.getName());
         long eventsWritten = 0;
         String indexDate = (DateTimeFormatter.ofPattern("yyyy-MM-dd").format(ZonedDateTime.now(ZoneId.of("+0"))));
         String indexName;
 
         try (InputStream instream = new FileInputStream(file)) {
+
             if (file.getName().contains("logstash")) {
-                indexName = config.logstashPattern + "-" + indexDate;
+                indexName = config.logstashExtractIndexPattern + "-" + indexDate;
             } else if (file.getName().contains("metricbeat")) {
-                indexName = config.metricbeatPattern + "-" + indexDate;
+                indexName = config.metricbeatExtractIndexPattern + "-" + indexDate;
             } else {
-                indexName = config.elasticPattern + "-" + indexDate;
+                indexName = config.monitoringExtractIndexPattern + "-" + indexDate;
             }
 
             BufferedReader br = new BufferedReader(new InputStreamReader(instream));
             StringBuilder batchBuilder = new StringBuilder();
-            String contents= null;
-            boolean retry = false;
-            int retryCount = 1;
+            String contents;
             int batch = 0;
             Map<String, Map> inputIndex = new LinkedHashMap();
             Map<String, String> inputIndexField = new LinkedHashMap<>();
@@ -88,68 +85,53 @@ public class MonitoringImportProcessor {
             inputIndex.put("index", inputIndexField);
             String indexLine = JsonYamlUtils.mapper.writeValueAsString(inputIndex);
 
-            indexMonitoringStats:
-            while(true) {
-                // If the last one failed retry for 2 more attempts.
-                if (retry && retryCount < config.bulkMaxRetries) {
-                    // Pause it for 30 seconds to see if the cluster catches up
-                    logger.error(Constants.CONSOLE, "Failed batch write retry: {}. Waiting {} seconds to allow server to catch up.", retryCount, config.bulkPause);
-                    client.flushExpired(10L);
-                    snooze(config.bulkPause);
-                    if(writeBatch(batchBuilder, batch, eventsWritten, file.getName())){
-                        retryCount = 1;
-                        retry = false;
-                        eventsWritten += batch;
+            try {
+                while ((contents = br.readLine()) != null) {
+                    // If clustername is present and they changed it, update
+                    ObjectNode sourceObject = JsonYamlUtils.mapper.readValue(contents, ObjectNode.class);
+                    String clusterName = sourceObject.path("cluster_name").asText();
+
+                    if (updateClusterName && StringUtils.isNotEmpty(clusterName)) {
+                        sourceObject.put("cluster_name", newClusterName);
+                    }
+
+                    String altClusterName = sourceObject.path("cluster_settings").path("cluster").path("metadata").path("display_name").asText();
+                    if (StringUtils.isNotEmpty(altClusterName)) {
+                        sourceObject.with("cluster_settings").with("cluster").with("metadata").put("display_name", newClusterName);
+                    }
+
+                    String sourceLine = JsonYamlUtils.mapper.writeValueAsString(sourceObject);
+
+                    batchBuilder.append(indexLine + "\n");
+                    batchBuilder.append(sourceLine + "\n");
+
+                    // See if we need to
+                    if (batch >= config.bulkSize) {
+                        logger.info(Constants.CONSOLE, "Indexing document batch {} to {}", eventsWritten, eventsWritten + batch);
+
+                        long docsWritten = writeBatch(batchBuilder.toString(), batch);
+                        eventsWritten += docsWritten;
                         batch = 0;
                         batchBuilder.setLength(0);
-                    }
-                    else{
-                       retryCount++;
-                       continue;
+                    } else {
+                        batch++;
                     }
                 }
 
-                contents = br.readLine();
-
-                if (contents == null || batch >= config.bulkSize) {
-                    if(writeBatch(batchBuilder, batch, eventsWritten, file.getName())){
-                        eventsWritten += batch;
-                        batch = 0;
-                        batchBuilder.setLength(0);
-                    }
-                    else{
-                        retry = true;
-                        continue;
-                    }
-                    if(contents == null) {
-                        break indexMonitoringStats;
-                    }
+                // if there's anything left do the cleanup
+                if (batch > 0) {
+                    logger.info(Constants.CONSOLE, "Indexing document batch {} to {}", eventsWritten, eventsWritten + batch);
+                    long docsWritten = writeBatch(batchBuilder.toString(), batch);
+                    eventsWritten += docsWritten;
                 }
 
-                // If clustername is present and they changed it, update
-                ObjectNode sourceObject = JsonYamlUtils.mapper.readValue(contents, ObjectNode.class);
-                String clusterName = sourceObject.path("cluster_name").asText();
-
-                if (updateClusterName && StringUtils.isNotEmpty(clusterName)) {
-                    sourceObject.put("cluster_name", newClusterName);
-                }
-
-                String altClusterName = sourceObject.path("cluster_settings").path("cluster").path("metadata").path("display_name").asText();
-                if (StringUtils.isNotEmpty(altClusterName)) {
-                    sourceObject.with("cluster_settings").with("cluster").with("metadata").put("display_name", newClusterName);
-                }
-
-                String sourceLine = JsonYamlUtils.mapper.writeValueAsString(sourceObject);
-                batchBuilder.append(indexLine + "\n");
-                batchBuilder.append(sourceLine + "\n");
-                batch ++;
-
+            } catch (Throwable t) {
+                // If something goes wrong just log it and keep boing.
+                logger.error(Constants.CONSOLE, "Error processing JSON event for {}.", t);
             }
-        }
-        catch(IOException ioe) {
-            logger.error(Constants.CONSOLE, "Error processing entry - stream related error,", ioe);
-        }
-        finally {
+        } catch (Throwable t) {
+            logger.error(Constants.CONSOLE, "Error processing entry - stream related error,", t);
+        } finally {
             logger.info(Constants.CONSOLE, "{} events written from {}", eventsWritten, file.getName());
         }
 
@@ -159,32 +141,16 @@ public class MonitoringImportProcessor {
         // Nothing to do here;;
     }
 
-    private void snooze(long pause){
-        try{
-            Thread.sleep(pause);
+    private long writeBatch(String query, int size) {
+        RestResult res = new RestResult(client.execPost("_bulk", query), "_bulk");
+        if (res.getStatus() != 200) {
+            logger.error(Constants.CONSOLE, "Batch update had errors: {}  {}", res.getStatus(), res.getReason());
+            logger.error(Constants.CONSOLE, Constants.CHECK_LOG);
+            logger.error(res.toString());
+            return 0;
+        } else {
+            return size;
         }
-        catch (InterruptedException ie){
-            logger.error("Issues encountered while attempting to snooze indexing. Consider restarting the process.");
-        }
-    }
-
-    private boolean writeBatch(StringBuilder batchBuilder, int batch, long eventsWritten, String fileName) {
-        logger.info(Constants.CONSOLE, "Indexing {} document batch {} to {}", fileName, eventsWritten, eventsWritten + batch);
-
-        try {
-            RestResult res = client.execPost("/_bulk", batchBuilder.toString());
-            if (res.getStatus() != 200) {
-                logger.error(Constants.CONSOLE, "Batch update had errors: {}  {}", res.getStatus(), res.getReason());
-                logger.error(Constants.CONSOLE, Constants.CHECK_LOG);
-                logger.error(res.toString());
-                return false;
-            }
-        } catch (Exception e) {
-            logger.error("Exception during update.", e);
-            return false;
-        }
-
-        return true;
     }
 
     private void checkForExtractTemplates() {
@@ -197,7 +163,7 @@ public class MonitoringImportProcessor {
                 String path = Constants.TEMPLATE_CONFIG_PACKAGE + template + ".json";
                 File file = new File(classLoader.getResource(path).getFile());
                 String data = FileUtils.readFileToString(file, "UTF-8");
-                client.execPost("/_template/" + template, data);
+                client.execPost("_template/" + template, data);
             } catch (Exception e) {
                 logger.error("Issue checking template {}", template, e);
             }

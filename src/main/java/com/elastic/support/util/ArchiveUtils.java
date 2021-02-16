@@ -32,45 +32,27 @@ public class ArchiveUtils {
 
    private static final Logger logger = LogManager.getLogger(ArchiveUtils.class);
 
-   public static void archiveDirectory(String srcDir, String archiveName){
-      try (ZipArchiveOutputStream archive = new ZipArchiveOutputStream(new FileOutputStream(archiveName))) {
-
-         File folderToZip = new File(srcDir);
-
-         // Walk through files, folders & sub-folders.
-         Files.walk(folderToZip.toPath()).forEach(p -> {
-            File file = p.toFile();
-            if (!file.isDirectory()) {
-               String relativePath = file.getPath().replace(srcDir, "");
-               logger.debug("Zipping file - {} into archive as {}", file, relativePath);
-               ZipArchiveEntry entry_1 = new ZipArchiveEntry(file, relativePath);
-               try (FileInputStream fis = new FileInputStream(file)) {
-                  archive.putArchiveEntry(entry_1);
-                  IOUtils.copy(fis, archive);
-                  archive.closeArchiveEntry();
-               } catch (IOException e) {
-                  e.printStackTrace();
-               }
-            }
-         });
-         archive.finish();
-      } catch (IOException e) {
-         logger.error("Error creating zip from temp dir", e);
-         throw new RuntimeException("Could not create zip archive.");
+   public static void createArchive(String dir, String archiveFileName) {
+      if(! createZipArchive(dir, archiveFileName)){
+         logger.error(Constants.CONSOLE,  "Couldn't create zip archive. Trying tar.gz");
+         if(! createTarArchive(dir, archiveFileName)){
+            logger.info(Constants.CONSOLE, "Couldn't create tar.gz archive.");
+         }
       }
    }
 
-/*
-   public static boolean createZipArchive(String tempDir, String archiveFileName)  {
+   public static boolean createZipArchive(String dir, String archiveFileName)  {
 
       try {
-         File srcDir = new File(tempDir);
-         FileOutputStream fout = new FileOutputStream(archiveFileName);
+         File srcDir = new File(dir);
+         String filename = dir + "-" + archiveFileName + ".zip";
+
+         FileOutputStream fout = new FileOutputStream(filename);
          ZipArchiveOutputStream taos = new ZipArchiveOutputStream(fout);
          archiveResultsZip(archiveFileName, taos, srcDir, "", true);
          taos.close();
 
-         logger.info(Constants.CONSOLE, "Archive: " + archiveFileName + " was created");
+         logger.info(Constants.CONSOLE, "Archive: " + filename + " was created");
 
       } catch (Exception ioe) {
          logger.error( "Couldn't create archive.", ioe);
@@ -80,29 +62,54 @@ public class ArchiveUtils {
 
    }
 
-   public static void archiveResultsZip(String archiveFilename, ZipArchiveOutputStream zaos, File file, String path, boolean append) {
+   public static boolean createTarArchive(String dir, String archiveFileName) {
+
+      try {
+         File srcDir = new File(dir);
+         String filename = dir + "-" + archiveFileName + ".tar.gz";
+
+         FileOutputStream fout = new FileOutputStream(filename);
+         CompressorOutputStream cout = new GzipCompressorOutputStream(fout);
+         TarArchiveOutputStream taos = new TarArchiveOutputStream(cout);
+
+         taos.setBigNumberMode(TarArchiveOutputStream.BIGNUMBER_STAR);
+         taos.setLongFileMode(TarArchiveOutputStream.LONGFILE_GNU);
+         archiveResultsTar(archiveFileName, taos, srcDir, "", true);
+         taos.close();
+
+         logger.info(Constants.CONSOLE,  "Archive: " + filename + " was created");
+
+      } catch (Exception ioe) {
+         logger.error( "Couldn't create archive.", ioe);
+         return false;
+      }
+
+      return true;
+
+   }
+
+   public static void archiveResultsZip(String archiveFilename, ZipArchiveOutputStream taos, File file, String path, boolean append) {
       String relPath = "";
 
       try {
          if (append) {
-            //relPath = path + "/" + file.getName() + "-" + archiveFilename;
-            relPath = file.getName() + "-" + archiveFilename;
+            relPath = path + "/" + file.getName() + "-" + archiveFilename;
          } else {
             relPath = path + "/" + file.getName();
          }
          ZipArchiveEntry tae = new ZipArchiveEntry(file, relPath);
-         zaos.putArchiveEntry(tae);
+         taos.putArchiveEntry(tae);
 
          if (file.isFile()) {
             BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file));
-            IOUtils.copy(bis, zaos);
-            zaos.closeArchiveEntry();
+            IOUtils.copy(bis, taos);
+            taos.closeArchiveEntry();
             bis.close();
 
          } else if (file.isDirectory()) {
-            zaos.closeArchiveEntry();
+            taos.closeArchiveEntry();
             for (File childFile : file.listFiles()) {
-               archiveResultsZip(archiveFilename, zaos, childFile, relPath, false);
+               archiveResultsZip(archiveFilename, taos, childFile, relPath, false);
             }
          }
       } catch (IOException e) {
@@ -138,7 +145,6 @@ public class ArchiveUtils {
          logger.error(Constants.CONSOLE,"Archive Error", e);
       }
    }
-*/
 
    public static void extractArchive(String filename, String targetDir) throws Exception{
       final int bufferSize = 1024;
@@ -189,7 +195,7 @@ public class ArchiveUtils {
             }
          }
 
-         System.out.println("Data extracted from archive.");
+         System.out.println("Extract completed successfully!");
       } catch (IOException e) {
          logger.error(e);
       }

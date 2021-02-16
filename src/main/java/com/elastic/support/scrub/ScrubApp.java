@@ -1,39 +1,51 @@
 package com.elastic.support.scrub;
 
-import com.elastic.support.BaseApp;
 import com.elastic.support.Constants;
-import com.elastic.support.diagnostics.DiagnosticConfig;
+import com.elastic.support.diagnostics.DiagnosticInputs;
 import com.elastic.support.diagnostics.ShowHelpException;
-import com.elastic.support.util.*;
+import com.elastic.support.diagnostics.commands.GenerateManifest;
+import com.elastic.support.monitoring.MonitoringImportInputs;
+import com.elastic.support.monitoring.MonitoringImportService;
+import com.elastic.support.util.ResourceCache;
+import com.elastic.support.util.SystemProperties;
+import com.elastic.support.util.SystemUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Map;
+import java.util.List;
 
 
-public class ScrubApp extends BaseApp {
+public class ScrubApp {
 
     private static Logger logger = LogManager.getLogger(ScrubApp.class);
 
     public static void main(String[] args) {
 
-        ScrubInputs inputs = null;
         try {
-            Map configMap = JsonYamlUtils.readYamlFromClasspath(Constants.DIAG_CONFIG, true);
-            DiagnosticConfig config = new DiagnosticConfig(configMap);
-            inputs = new ScrubInputs(config.delimiter);
-            initInputs(args, inputs);
-            ResourceUtils.startLog(inputs.tempDir + SystemProperties.fileSeparator + "diagnostic.log");
-            new ScrubService(inputs).exec();
-            ArchiveUtils.archiveDirectory(inputs.tempDir, inputs.outputDir + SystemProperties.fileSeparator + "scrubbed-" + inputs.scrubbedFileBaseName +  ".zip");
+            ScrubInputs scrubInputs = new ScrubInputs();
+            if (args.length == 0) {
+                logger.error(Constants.CONSOLE,  Constants.interactiveMsg);
+                scrubInputs.interactive = true;
+                scrubInputs.runInteractive();
+            } else {
+                List<String> errors = scrubInputs.parseIinputs(args);
+                if (errors.size() > 0) {
+                    for (String err : errors) {
+                        logger.error(Constants.CONSOLE,  err);
+                    }
+                    scrubInputs.usage();
+                    SystemUtils.quitApp();
+                }
+            }
+            ResourceCache.terminal.dispose();
+            logger.info(Constants.CONSOLE, "Using version: {} of diagnostic-utiliy", GenerateManifest.class.getPackage().getImplementationVersion());
+            new ScrubService().exec(scrubInputs);
         } catch (ShowHelpException she){
-            inputs.usage();
             SystemUtils.quitApp();
         } catch (Exception e) {
             logger.error(Constants.CONSOLE,  "Fatal error occurred: {}. {}", e.getMessage(), Constants.CHECK_LOG);
         } finally {
-
-            ResourceUtils.closeAll();
+            ResourceCache.closeAll();
         }
     }
 

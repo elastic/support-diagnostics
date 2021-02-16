@@ -26,17 +26,12 @@ public abstract class BaseQuery implements Command {
      * cases such as the node and shard calls, a failure will result in a reattempt
      * after the configured number of seconds.
      */
-    public int runQueries(RestClient restClient, List<RestEntry> entries, String tempDir, int retries, int pause, boolean retryFailed) {
+    public int runQueries(RestClient restClient, List<RestEntry> entries, String tempDir, int retries, int pause) {
 
         // Run through the query list, first pass. If anything that's retryable failed the
         // RestEntry will be in the returned retry list.
         List<RestEntry> retryList = execQueryList(restClient, entries, tempDir);
-
         int totalRetries = retryList.size();
-
-        if(! retryFailed){
-            return totalRetries;
-        }
 
         for (int i = 0; i < retries; i++) {
             // If no failed entries are in the list, get out
