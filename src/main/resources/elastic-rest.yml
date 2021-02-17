@@ -113,6 +113,12 @@ cat_shards:
 #  versions:
 #    ">= 2.0.0": "/_cat/snapshots"
 
+cat_templates:
+  extension: ".txt"
+  subdir: "cat"
+  versions:
+    ">= 7.8.0": "/_cat/templates?v"
+
 cat_thread_pool:
   extension: ".txt"
   subdir: "cat"
@@ -145,6 +151,11 @@ allocation_explain_disk:
   versions:
     ">= 5.0.0": "/_cluster/allocation/explain?include_disk_info=true&pretty"
 
+component_templates:
+  retry: true
+  versions:
+    ">= 7.8.0": "/_component_template"
+    
 count:
   versions:
     ">= 2.0.0": "/_count"
@@ -186,6 +197,11 @@ fielddata_stats:
   versions:
     ">= 0.9.0 < 5.0.0": "/_nodes/stats/indices/fielddata?pretty=true&fields=*"
     ">= 5.0.0": "/_nodes/stats/indices/fielddata?level=shards&pretty=true&fields=*"
+
+index_templates:
+  retry: true
+  versions:
+    ">= 7.8.0": "/_index_template"
 
 indices:
   versions:
