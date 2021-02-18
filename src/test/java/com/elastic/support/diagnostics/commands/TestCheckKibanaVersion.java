@@ -26,7 +26,7 @@ import static org.mockserver.model.HttpResponse.response;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class TestCheckKibanaVersion {
 
-	private static final Logger logger = LogManager.getLogger(RestClient.class);
+    private static final Logger logger = LogManager.getLogger(RestClient.class);
     private ClientAndServer mockServer;
     private RestClient httpRestClient, httpsRestClient;
 
@@ -42,13 +42,13 @@ public class TestCheckKibanaVersion {
 
     @BeforeEach
     public void setup() {
-    	
+        
         httpRestClient = RestClient.getClient(
-        	"localhost", 
-        	9880, 
-        	"http",
-        	"elastic",
-        	"elastic",
+            "localhost",
+            9880,
+            "http",
+            "elastic",
+            "elastic",
             "",
             0,
             "",
