@@ -14,11 +14,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Iterator;
 
+import java.io.FileWriter;
+import java.io.IOException;
 /**
  *  This class is executed as RunKibanaQueries class, we will not change the global BaseQuery structure of the code in v8.7.3.
  *  As unit test are request, we have done some changes to the structure of this class vs RunLogstashQueries.
@@ -191,7 +195,7 @@ public class RunKibanaQueries extends BaseQuery {
     * Within the function getRemoteSystem or getLocalSystem we set ResourceCache.addSystemCommand
     * Return will be used as workaround to Unit test. Will be replaced in v9
     *
-    * @param  DiagnosticContext
+    * @param  DiagnosticContext context
     * @return SystemCommand
     */
     public SystemCommand execSystemCommands(DiagnosticContext context) {
@@ -228,6 +232,51 @@ public class RunKibanaQueries extends BaseQuery {
         return syscmd;
     }
 
+
+    /**
+    * We will not collect all the headerst hat are returned by the actions API (kibana_actions.json file).
+    * for troubleshooting support engineers will only need "kbn-xsrf" or "Content-Type", all the others are removed.
+    *
+    * @param  DiagnosticContext context
+    * @return void
+    */
+    public void allowedHeadersFilter(DiagnosticContext context) {
+        JsonNode actions = JsonYamlUtils.createJsonNodeFromFileName(context.tempDir, "kibana_actions.json");
+        Boolean headerRemoved = false;
+        if (actions.size() > 0) {
+            for (int i = 0; i < actions.size(); i++) {
+                JsonNode config = actions.get(i).get("config");
+                // API webhook format can change, and maybe we have a webhook without config
+                if (!(config == null || config.isNull())) {
+                    // Not all the webhook need to have headers, so we need to be sure the data was set by the customer.
+                    JsonNode headers = actions.get(i).get("config").get("headers");
+                    if (!(headers == null || headers.isNull())) {
+                        Iterator<Map.Entry<String, JsonNode>> iter = actions.get(i).get("config").get("headers").fields();
+
+                        while (iter.hasNext()) {
+                            Map.Entry<String, JsonNode> entry = iter.next();
+                            if (!entry.getKey().equals("kbn-xsrf") && !entry.getKey().equals("Content-Type")) {
+                                iter.remove();
+                                headerRemoved = true;
+                            }
+                        }
+                    }
+                }
+            }
+            if (headerRemoved == true) {
+                String fileName = context.tempDir + SystemProperties.fileSeparator + "kibana_actions.json";
+                try (FileWriter fileWriter = new FileWriter(fileName)) {
+                    fileWriter.write(actions.toPrettyString());
+                    fileWriter.flush();
+                    fileWriter.close();
+                } catch (IOException e) {
+                  new RuntimeException("Error message", e).printStackTrace();
+                }
+            }
+        }
+    }
+
+
     /**
     * One of the requirements was test this new Kibana code.
     * I splitted the "execute" function as in other examples (RunLogstashQueries) uses many static calls
@@ -247,6 +296,7 @@ public class RunKibanaQueries extends BaseQuery {
             context.perPage         = 100;
             RestClient client       = ResourceCache.getRestClient(Constants.restInputHost);
             int totalRetries        = runBasicQueries(client, context);
+            allowedHeadersFilter(context);
             execSystemCommands(context);
 
         } catch (Throwable t) {

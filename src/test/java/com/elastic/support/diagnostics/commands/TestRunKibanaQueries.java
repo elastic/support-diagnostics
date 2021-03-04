@@ -128,7 +128,7 @@ public class TestRunKibanaQueries {
 		        )
 		        .respond(
 		                response()
-		                        .withBody("[{\"id\":\"10c09567-fa28-4059-9484-aae83fa9c5ce\",\"actionTypeId\":\".webhook\",\"name\":\"rerere\",\"config\":{\"method\":\"post\",\"url\":\"https://mail.google.com/mail/u/0/#inbox\"}}]")
+		                        .withBody("[{\"id\":\"10c09567-fa28-4059-9484-aae83fa9c5ce\",\"actionTypeId\":\".webhook\",\"name\":\"rerere\",\"config\":{\"method\":\"post\",\"url\":\"https://mail.google.com/mail/u/0/#inbox\"}},{\"id\":\"eec7ee50-7129-11eb-9b41-17a1879ebc72\",\"actionTypeId\":\".webhook\",\"name\":\"webhook-auto-create-case\",\"config\":{\"method\":\"post\",\"hasAuth\":true,\"url\":\"https://7067a1cd7a8142a79ab8dec9304a5436.europe-west1.gcp.cloud.es.io/api/cases\",\"headers\":{\"kbn-xsrf\":\"kibana\",\"Content-Type\":\"application/json\"}},\"isPreconfigured\":false,\"referencedByCount\":8}]")
 		        );
 		mockServer
 		        .when(
@@ -384,4 +384,79 @@ public class TestRunKibanaQueries {
         assertEquals(username, "elastic");
     }
 
+
+    @Test
+    public void testQueriesForKibanaWithHeaders() {
+
+        DiagnosticContext context = initializeKibana("7.10.0");
+        int totalRetries = new RunKibanaQueries().runBasicQueries(httpRestClient, context);
+        new RunKibanaQueries().allowedHeadersFilter(context);
+
+        JsonNode nodeData = JsonYamlUtils.createJsonNodeFromFileName(context.tempDir, "kibana_actions.json");
+
+        JsonNode headers = nodeData.get(0).get("config").get("headers");
+        assertEquals(nodeData.get(0).path("id").asText(), "10c09567-fa28-4059-9484-aae83fa9c5ce");
+        assertTrue((headers == null || headers.isNull()));
+
+        assertEquals(nodeData.get(1).path("id").asText(), "eec7ee50-7129-11eb-9b41-17a1879ebc72");
+        assertEquals(nodeData.get(1).path("config").path("headers").size(), 2);
+        assertEquals(nodeData.get(1).path("config").path("headers").path("kbn-xsrf").asText(), "kibana");
+        assertEquals(nodeData.get(1).path("config").path("headers").path("Content-Type").asText(), "application/json");
+
+    }
+
+    @Test
+    public void testQueriesRemovingHeaders() {
+
+      mockServer
+            .when(
+                    request()
+                            .withMethod("GET")
+                            .withPath("/api/actions")
+            )
+            .respond(
+                    response()
+                            .withBody("[{\"id\":\"eec7ee50-7129-1111-9b41-17a1879ebc72\",\"actionTypeId\":\".webhook\",\"name\":\"webhook-auto-create-case\",\"config\":{\"method\":\"post\",\"hasAuth\":true,\"url\":\"https://7067a1cd7a8142a79ab8dec9304a5436.europe-west1.gcp.cloud.es.io/api/cases\",\"headers\":{\"Authorization\":\"Basic 1111\",\"customHeader\":\"CustomValue\",\"kbn-xsrf\":\"kibana\",\"Content-Type\":\"application/json\"}},\"isPreconfigured\":false,\"referencedByCount\":9}]")
+            );
+        DiagnosticContext context = initializeKibana("7.10.0");
+        int totalRetries = new RunKibanaQueries().runBasicQueries(httpRestClient, context);
+        new RunKibanaQueries().allowedHeadersFilter(context);
+
+        JsonNode nodeData = JsonYamlUtils.createJsonNodeFromFileName(context.tempDir, "kibana_actions.json");
+        String id = nodeData.get(0).path("id").asText();
+        assertEquals(id, "eec7ee50-7129-1111-9b41-17a1879ebc72");
+        assertEquals(nodeData.get(0).path("config").path("headers").size(), 2);
+        assertEquals(nodeData.get(0).path("config").path("headers").path("kbn-xsrf").asText(), "kibana");
+        assertEquals(nodeData.get(0).path("config").path("headers").path("Content-Type").asText(), "application/json");
+    }
+
+    /**
+    * This test is to be sure we have no issues in case the webhook come with no config or headers
+    */
+    @Test
+    public void testQueriesWithoutHeaders() {
+
+      mockServer
+            .when(
+                    request()
+                            .withMethod("GET")
+                            .withPath("/api/actions")
+            )
+            .respond(
+                    response()
+                            .withBody("[{\"id\":\"eec7ee50-7129-3333-9b41-17a1879ebc72\",\"actionTypeId\":\".webhook\",\"name\":\"webhook-auto-create-case\",\"test\":{\"method\":\"post\",\"hasAuth\":true,\"url\":\"https://7067a1cd7a8142a79ab8dec9304a5436.europe-west1.gcp.cloud.es.io/api/cases\",\"headers\":{\"Authorization\":\"Basic 1111\",\"customHeader\":\"CustomValue\",\"kbn-xsrf\":\"kibana\",\"Content-Type\":\"application/json\"}},\"isPreconfigured\":false,\"referencedByCount\":9}]")
+        );
+        DiagnosticContext context = initializeKibana("7.10.0");
+        int totalRetries = new RunKibanaQueries().runBasicQueries(httpRestClient, context);
+        try {
+            new RunKibanaQueries().allowedHeadersFilter(context);
+        } catch (RuntimeException e) {
+            assertTrue(false);
+        }
+        JsonNode nodeData = JsonYamlUtils.createJsonNodeFromFileName(context.tempDir, "kibana_actions.json");
+        JsonNode config = nodeData.get(0).get("config");
+        assertEquals(nodeData.get(0).path("id").asText(), "eec7ee50-7129-3333-9b41-17a1879ebc72");
+        assertTrue((config == null || config.isNull()));
+
+    }
 }
