@@ -89,7 +89,8 @@ public  class CollectKibanaLogs implements Command {
     * @param  int entries , How many time we will iterate
     * @return List<String>
     */
-    protected List<String> extractFilesFromList(String output, List<String> fileList, int entries) {
+    protected List<String> extractFilesFromList(String output, int entries) {
+        List<String> fileList = new ArrayList<>(entries);
 
         // Just in case, since NPE"s are a drag
         output = ObjectUtils.defaultIfNull(output, "");
@@ -110,7 +111,6 @@ public  class CollectKibanaLogs implements Command {
         }
 
         return fileList;
-
     }
 
 }
