@@ -21,6 +21,14 @@ import java.util.regex.Pattern;
 import java.util.Map;
 
 
+/**
+ * {@code CheckKibanaVersion} uses the REST configuration to fetch the version of
+ * Kibana from the server.
+ *
+ * If this request fails, then the rest of the diagnostic cannot process because REST
+ *  calls are setup against specific versions and, without having a version, they cannot
+ * be setup.
+ */
 public class CheckKibanaVersion implements Command {
 
     /**
