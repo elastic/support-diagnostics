@@ -84,9 +84,9 @@ public  class CollectKibanaLogs implements Command {
      /**
     * this private function will create a new JavaPlatform object
     *
-    * @param  String output , is the text returned by the ls/dir command
-    * @param  List<String> fileList , You can call this function multitple times, and add more files to the List
-    * @param  int entries , How many time we will iterate
+    * @param output is the text returned by the <code>ls</code>/<code>dir</code> command
+    * @param fileList You can call this function multitple times, and add more files to the List
+    * @param entries How many time we will iterate
     * @return List<String>
     */
     protected List<String> extractFilesFromList(String output, int entries) {
