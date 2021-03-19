@@ -92,8 +92,6 @@ public class LocalSystem extends SystemCommand {
     *
     * @param  String serviceName
     * @param  String targetDir
-    *
-    * @return         void
     */
     @Override
     public void copyLogsFromJournalctl(String serviceName, String targetDir) {

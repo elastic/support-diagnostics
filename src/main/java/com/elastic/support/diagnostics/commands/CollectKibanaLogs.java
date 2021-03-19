@@ -68,9 +68,7 @@ public  class CollectKibanaLogs implements Command {
                 logger.info(Constants.CONSOLE, "No Kibana logs could be located at the default path. Searching for Journalctl logs with kibana.service name.");
                 return;
             }
-            // Build up a list of files to copy
-            List<String> fileList = new ArrayList<>();
-            fileList = extractFilesFromList(logListing, fileList, 3);
+            List<String> fileList = extractFilesFromList(logListing, 3);
             String kibanaPath = logCalls.get("kibana-default-path");
             sysCmd.copyLogs(fileList, kibanaPath, targetDir);
             logger.info(Constants.CONSOLE, "Collecting logs from Kibana default path.");

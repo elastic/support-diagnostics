@@ -25,7 +25,14 @@ import java.util.List;
 import java.util.ArrayList;
 
 
-public class KibanaCheckPlatformDetails extends CheckPlatformDetails {
+/**
+ * {@code KibanaGetDetails} uses the network configuration defined in Kibana Stats API
+ * to connect to the Local or Remote instance.
+ *
+ * If this request fails, then the rest of the diagnostic cannot proceed, as we need to 
+ * have enough details to connect to Kibana instace.
+ */
+public class KibanaGetDetails extends CheckPlatformDetails {
 
     /**
     * Check and collect information about the platform were Kibana is installed and store it in the context
@@ -43,7 +50,7 @@ public class KibanaCheckPlatformDetails extends CheckPlatformDetails {
 
             // Populate the node metadata
             Map<String, RestEntry> calls = context.elasticRestCalls;
-            RestEntry entry = calls.get("kibana_node_stats");
+            RestEntry entry = calls.get("kibana_stats");
             RestResult result = restClient.execQuery(entry.getUrl());
 
             // Initialize to empty node which mimimizes NPE opportunities
@@ -78,8 +85,7 @@ public class KibanaCheckPlatformDetails extends CheckPlatformDetails {
                         //break;
                     }
                     else{
-                        context.targetNode = findTargetNode(
-                                context.diagnosticInputs.host, nodeProfiles);
+                        context.targetNode = findTargetNode(nodeProfiles);
                         targetOS = context.targetNode.os;
                     }
 
@@ -113,8 +119,7 @@ public class KibanaCheckPlatformDetails extends CheckPlatformDetails {
                         context.targetNode = nodeProfiles.get(0);
                     }
 
-                    context.targetNode = findTargetNode(
-                            context.diagnosticInputs.host, nodeProfiles);
+                    context.targetNode = findTargetNode(nodeProfiles);
 
                     SystemCommand syscmd = new LocalSystem(context.targetNode.os);
                     ResourceCache.addSystemCommand(Constants.systemCommands, syscmd);
@@ -141,7 +146,7 @@ public class KibanaCheckPlatformDetails extends CheckPlatformDetails {
     /**
     * Map Kibana / stats API results to the ProcessProfile object.
     *
-    * @param  nodesInfo 
+    * @param  nodesInfo all the context sent by the kibana stats API
     *
     * @return The network info as defined in the kibana stats API
     */
@@ -177,20 +182,21 @@ public class KibanaCheckPlatformDetails extends CheckPlatformDetails {
     }
 
     /**
-    * Kibana is working in single mode, so the target node will be the only host stored on the nodeProfiles List.
+    * Get the Kibana server instance's profile.
     *
-    * @param  String host
-    * @param  List<ProcessProfile> nodeProfiles
+    * @param  host
+    * @param  profiles list of network information for each kibana instance running
     *
-    * @return         String
+    * @return return the profile for the kibana process
+    * @throws RuntimeException if there is not exactly one profile.
     */
-    public ProcessProfile findTargetNode(String host, List<ProcessProfile> nodeProfiles) {
-
-        if (nodeProfiles.size() > 1) {
-            logger.error("Kibana can not run in cluster mode, API response is not for the current process");
-            throw new RuntimeException("Kibana can not run in cluster mode.");
+    public ProcessProfile findTargetNode(List<ProcessProfile> profiles) {
+        if (profiles.size() > 1) {
+            logger.error("Expected [1] Kibana process profile, but found [{}]", profiles.size());
+            throw new RuntimeException("Unable to get Kibana process profile.");
         }
-        return  nodeProfiles.get(0);
+
+        return  profiles.get(0);
     }
 
 }

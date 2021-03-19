@@ -82,7 +82,7 @@ public class DiagnosticChainExec {
                     
                 case Constants.kibanaLocal :
                     new CheckKibanaVersion().execute(context);
-                    new KibanaCheckPlatformDetails().execute(context);
+                    new KibanaGetDetails().execute(context);
                     new RunKibanaQueries().execute(context);
                     if(context.runSystemCalls){
                         new CollectSystemCalls().execute(context);
@@ -96,7 +96,7 @@ public class DiagnosticChainExec {
 
                 case Constants.kibanaRemote :
                     new CheckKibanaVersion().execute(context);
-                    new KibanaCheckPlatformDetails().execute(context);
+                    new KibanaGetDetails().execute(context);
                     new RunKibanaQueries().execute(context);
                     if(context.runSystemCalls){
                         new CollectSystemCalls().execute(context);
