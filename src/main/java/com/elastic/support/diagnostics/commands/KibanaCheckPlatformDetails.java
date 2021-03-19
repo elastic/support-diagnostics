@@ -8,13 +8,22 @@ import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.rest.RestClient;
 import com.elastic.support.rest.RestEntry;
 import com.elastic.support.rest.RestResult;
-import com.elastic.support.util.*;
+import com.elastic.support.util.JsonYamlUtils;
+import com.elastic.support.util.ResourceCache;
+import com.elastic.support.util.LocalSystem;
+import com.elastic.support.util.RemoteSystem;
+import com.elastic.support.util.SystemProperties;
+import com.elastic.support.util.SystemUtils;
+import com.elastic.support.util.SystemCommand;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.*;
+import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
+
 
 public class KibanaCheckPlatformDetails extends CheckPlatformDetails {
 
@@ -56,8 +65,6 @@ public class KibanaCheckPlatformDetails extends CheckPlatformDetails {
                 }
             }
 
-            SystemCommand syscmd = null;
-
             switch (context.diagnosticInputs.diagType) {
                 case Constants.kibanaRemote:
                     // If Docker containers flag it for no syscalls or logs
@@ -76,7 +83,7 @@ public class KibanaCheckPlatformDetails extends CheckPlatformDetails {
                         targetOS = context.targetNode.os;
                     }
 
-                    syscmd = new RemoteSystem(
+                    ResourceCache.addSystemCommand(Constants.systemCommands, new RemoteSystem(
                             targetOS,
                             context.diagnosticInputs.remoteUser,
                             context.diagnosticInputs.remotePassword,
@@ -87,8 +94,7 @@ public class KibanaCheckPlatformDetails extends CheckPlatformDetails {
                             context.diagnosticInputs.knownHostsFile,
                             context.diagnosticInputs.trustRemote,
                             context.diagnosticInputs.isSudo
-                    );
-                    ResourceCache.addSystemCommand(Constants.systemCommands, syscmd);
+                    ));
 
                     break;
 
@@ -97,7 +103,7 @@ public class KibanaCheckPlatformDetails extends CheckPlatformDetails {
                         context.runSystemCalls = false;
 
                         // We do need a system command local to run the docker calls
-                        syscmd = new LocalSystem(SystemUtils.parseOperatingSystemName(SystemProperties.osName));
+                        SystemCommand syscmd = new LocalSystem(SystemUtils.parseOperatingSystemName(SystemProperties.osName));
                         ResourceCache.addSystemCommand(Constants.systemCommands, syscmd);
                         break;
                     }
@@ -110,7 +116,7 @@ public class KibanaCheckPlatformDetails extends CheckPlatformDetails {
                     context.targetNode = findTargetNode(
                             context.diagnosticInputs.host, nodeProfiles);
 
-                    syscmd = new LocalSystem(context.targetNode.os);
+                    SystemCommand syscmd = new LocalSystem(context.targetNode.os);
                     ResourceCache.addSystemCommand(Constants.systemCommands, syscmd);
 
                     break;
@@ -135,9 +141,9 @@ public class KibanaCheckPlatformDetails extends CheckPlatformDetails {
     /**
     * Map Kibana / stats API results to the ProcessProfile object. Workaround to be able to test this function.
     *
-    * @param  JsonNode nodesInfo
+    * @param  nodesInfo 
     *
-    * @return         List<ProcessProfile>
+    * @return The network info as defined in the kibana stats API
     */
     public List<ProcessProfile> getNodeNetworkAndLogInfo(JsonNode nodesInfo) {
 

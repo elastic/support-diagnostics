@@ -20,16 +20,16 @@ import java.util.regex.Pattern;
 
 import java.util.Map;
 
-
+/**
+ * Gets the version of Kibana that is running.
+ * This also acts as a sanity check. If there are connection issues and it fails
+ * this will bet the first indication since this is lightweight enough
+ * that is should usually succeed. If we don't have a version we
+ * won't be able to generate the correct call selection later on.
+ */
 public class CheckKibanaVersion implements Command {
 
-    /**
-     * Gets the version of Kibana that is running. This also
-     * acts as a sanity check. If there are connection issues and it fails
-     * this will bet the first indication since this is lightweight enough
-     * that is should usually succeed. If we don't have a version we
-     * won't be able to generate the correct call selection later on.
-     */
+   
     private static final Logger logger = LogManager.getLogger(CheckKibanaVersion.class);
 
     public void execute(DiagnosticContext context) {
@@ -78,12 +78,12 @@ public class CheckKibanaVersion implements Command {
     }
 
     /**
-    * Before execute the Kibana APIs, we need to know which API to execute, this will depend on the version of the Kibana version of the collected process
-    * We use Semver to help us parse the version as returned by the Kibana /api/settings.
+    * Fetch the Kibana version using the {@code client}, which is used to then to determine which
+    * REST endpoints can be used from the diagnostic.
     *
-    * @param  RestClient client
-    *
-    * @return         Semver
+    * @param client The configured client to connect to Kibana.
+    * @return The Kibana version (semver).
+    * @throws DiagnosticException if the request fails or the version is invalid
     */
     public static Semver getKibanaVersion(RestClient client){
             RestResult res = client.execQuery("/api/settings");
@@ -95,7 +95,7 @@ public class CheckKibanaVersion implements Command {
             String version = root.path("settings").path("kibana").path("version").asText();
             logger.info(Constants.CONSOLE, String.format("Kibana Version is :%s", version));
 
-            Pattern versionPattern = Pattern.compile("([1-9]\\d*)\\.(\\d+)\\.(\\d+)?");
+            Pattern versionPattern = Pattern.compile("^([1-9]\\d*)\\.(\\d+)\\.(\\d+)?");
             Matcher matcher = versionPattern.matcher(version);
 
             if(!matcher.matches()) {
