@@ -126,7 +126,7 @@ public class KibanaCheckPlatformDetails extends CheckPlatformDetails {
         } catch (Exception e) {
             // Try to keep going even if this didn't work.
             logger.error(Constants.CONSOLE,"Error: {}", e.getMessage());
-            logger.error( "Error checking node metadata and deployment info.", e);
+            logger.error("Error fetching Kibana server details.", e);
             context.runSystemCalls = false;
         }
     }
@@ -188,6 +188,5 @@ public class KibanaCheckPlatformDetails extends CheckPlatformDetails {
     }
 
 }
-
 
 
