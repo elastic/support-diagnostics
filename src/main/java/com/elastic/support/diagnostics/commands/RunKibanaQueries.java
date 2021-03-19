@@ -191,7 +191,7 @@ public class RunKibanaQueries extends BaseQuery {
 
     /**
     * This function is executed **after** runBasicQueries
-    * Extract the information on the kibana_node_stats.json with getNodeProfile function.
+    * Extract the information on the kibana_stats.json with getNodeProfile function.
     * Within the function getRemoteSystem or getLocalSystem we set ResourceCache.addSystemCommand
     * Return will be used as workaround to Unit test. Will be replaced in v9
     *
@@ -200,7 +200,7 @@ public class RunKibanaQueries extends BaseQuery {
     */
     public SystemCommand execSystemCommands(DiagnosticContext context) {
 
-        ProcessProfile nodeProfile = getNodeProfile(context.tempDir, "kibana_node_stats.json", context);
+        ProcessProfile nodeProfile = getNodeProfile(context.tempDir, "kibana_stats.json", context);
 
         if (StringUtils.isEmpty(nodeProfile.pid) || nodeProfile.pid.equals("1")) {
             context.dockerPresent = true;

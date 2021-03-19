@@ -18,7 +18,7 @@ kibana_settings:
   versions:
     ">= 6.5.0": "/api/settings"
 
-kibana_node_stats:
+kibana_stats:
   versions:
     ">= 6.5.0": "/api/stats?extended=true"
 

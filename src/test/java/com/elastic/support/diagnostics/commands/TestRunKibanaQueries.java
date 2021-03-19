@@ -261,7 +261,7 @@ public class TestRunKibanaQueries {
 
     	String[] pathnames;
     	pathnames = tempDir.list();
-    	String[] kList = new String[]{"kibana_node_stats.json", "kibana_settings.json"};
+    	String[] kList = new String[]{"kibana_stats.json", "kibana_settings.json"};
     	List<String> list = Arrays.asList(kList);
 
         for (String pathname : pathnames) {
@@ -272,7 +272,7 @@ public class TestRunKibanaQueries {
         }
         assertEquals(list.size(), 2);
 
-        JsonNode nodeData = JsonYamlUtils.createJsonNodeFromFileName(context.tempDir, "kibana_node_stats.json");
+        JsonNode nodeData = JsonYamlUtils.createJsonNodeFromFileName(context.tempDir, "kibana_stats.json");
         String pid = nodeData.path("process").path("pid").asText();
         String os = nodeData.path("os").path("platform").asText();
         String osParsed = SystemUtils.parseOperatingSystemName(nodeData.path("os").path("platform").asText());
@@ -295,7 +295,7 @@ public class TestRunKibanaQueries {
 
     	String[] pathnames;
     	pathnames = tempDir.list();
-    	String[] kList = new String[]{"kibana_node_stats.json", "kibana_settings.json"};
+    	String[] kList = new String[]{"kibana_stats.json", "kibana_settings.json"};
     	List<String> list = Arrays.asList(kList);
 
         // For each pathname in the pathnames array
@@ -322,11 +322,10 @@ public class TestRunKibanaQueries {
 
     	String[] pathnames;
     	pathnames = tempDir.list();
-    	String[] kList = new String[]{"kibana_node_stats.json", 
+    	String[] kList = new String[]{"kibana_stats.json", 
     									"kibana_settings.json", 
     									"kibana_detection_engine_signals.json", 
-    									"kibana_actions.json", 
-    									"kibana_node_stats.json", 
+    									"kibana_actions.json",  
     									"kibana_detection_engine_privileges.json", 
     									"kibana_task_manager_help.json", 
     									"kibana_detection_engine_find_1.json", 
@@ -341,7 +340,7 @@ public class TestRunKibanaQueries {
             // logger.info(Constants.CONSOLE, pathname);
         	assertTrue(list.contains(pathname));
         }
-        assertEquals(list.size(), 11);
+        assertEquals(list.size(), 10);
 
         JsonNode nodeData = JsonYamlUtils.createJsonNodeFromFileName(context.tempDir, "kibana_alerts_1.json");
         String page1 = nodeData.path("page").asText();
@@ -367,7 +366,7 @@ public class TestRunKibanaQueries {
         assertEquals(page4, "2");
    		assertEquals(total4, "4");
 
-   		JsonNode nodeData5 = JsonYamlUtils.createJsonNodeFromFileName(context.tempDir, "kibana_node_stats.json");
+   		JsonNode nodeData5 = JsonYamlUtils.createJsonNodeFromFileName(context.tempDir, "kibana_stats.json");
         String pid = nodeData5.path("process").path("pid").asText();
         String os = nodeData5.path("os").path("platform").asText();
         String osParsed = SystemUtils.parseOperatingSystemName(nodeData5.path("os").path("platform").asText());
