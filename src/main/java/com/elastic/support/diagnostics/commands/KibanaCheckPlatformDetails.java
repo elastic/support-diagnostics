@@ -164,7 +164,7 @@ public class KibanaCheckPlatformDetails extends CheckPlatformDetails {
 
             nodeNetworkInfo.add(diagNode);
         } catch (Exception e) {
-            logger.error( "Error extracting node network addresses from nodes output", e);
+            logger.error("Error extracting Kibana network addresses from stats output", e);
         }
 
         return nodeNetworkInfo;
@@ -188,4 +188,3 @@ public class KibanaCheckPlatformDetails extends CheckPlatformDetails {
     }
 
 }
-
