@@ -190,7 +190,7 @@ public class CheckPlatformDetails implements Command {
     /**
     * Map and extract information for Elasticsearch API / nodes API.
     *
-    * @param  JsonNode nodesInfo
+    * @param nodesInfo JSON representing <code>GET /_nodes</code>
     *
     * @return         List<ProcessProfile>
     */
@@ -339,6 +339,5 @@ public class CheckPlatformDetails implements Command {
     }
 
 }
-
 
 
