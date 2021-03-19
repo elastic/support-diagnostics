@@ -34,10 +34,10 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
     public static final String apiDesc = "Elasticsearch REST API calls, no system calls or logs.";
     public static final String logstashLocalDesc = "Logstash process on the same host as the diagnostic utility.";
     public static final String logstashRemoteDesc = "Logstash on a different host than the diagnostic utility.";
-    public static final String logstashApiDesc = "Logstash REST calls. No system calls. \t\t";
+    public static final String logstashApiDesc = "Logstash REST calls. No system calls.";
     public static final String kibanaLocalDesc = "Kibana process on the same host as the diagnostic utility.";
     public static final String kibanaRemoteDesc = "Kibana on a different host than the diagnostic utility.";
-    public static final String kibanaApiDesc = "Kibana REST calls. No system calls. \t\t";
+    public static final String kibanaApiDesc = "Kibana REST calls. No system calls.";
 
 
     public static final String[]
