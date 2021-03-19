@@ -133,7 +133,7 @@ public class KibanaCheckPlatformDetails extends CheckPlatformDetails {
 
 
     /**
-    * Map Kibana / stats API results to the ProcessProfile object. Workaround to be able to test this function.
+    * Map Kibana / stats API results to the ProcessProfile object.
     *
     * @param  JsonNode nodesInfo
     *
@@ -188,5 +188,4 @@ public class KibanaCheckPlatformDetails extends CheckPlatformDetails {
     }
 
 }
-
 
