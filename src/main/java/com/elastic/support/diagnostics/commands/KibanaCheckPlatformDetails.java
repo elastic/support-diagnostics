@@ -132,14 +132,14 @@ public class KibanaCheckPlatformDetails extends CheckPlatformDetails {
         } catch (Exception e) {
             // Try to keep going even if this didn't work.
             logger.error(Constants.CONSOLE,"Error: {}", e.getMessage());
-            logger.error( "Error checking node metadata and deployment info.", e);
+            logger.error("Error fetching Kibana server details.", e);
             context.runSystemCalls = false;
         }
     }
 
 
     /**
-    * Map Kibana / stats API results to the ProcessProfile object. Workaround to be able to test this function.
+    * Map Kibana / stats API results to the ProcessProfile object.
     *
     * @param  nodesInfo 
     *
@@ -170,7 +170,7 @@ public class KibanaCheckPlatformDetails extends CheckPlatformDetails {
 
             nodeNetworkInfo.add(diagNode);
         } catch (Exception e) {
-            logger.error( "Error extracting node network addresses from nodes output", e);
+            logger.error("Error extracting Kibana network addresses from stats output", e);
         }
 
         return nodeNetworkInfo;
@@ -194,6 +194,3 @@ public class KibanaCheckPlatformDetails extends CheckPlatformDetails {
     }
 
 }
-
-
-

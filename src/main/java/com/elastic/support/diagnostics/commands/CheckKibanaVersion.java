@@ -20,12 +20,14 @@ import java.util.regex.Pattern;
 
 import java.util.Map;
 
+
 /**
- * Gets the version of Kibana that is running.
- * This also acts as a sanity check. If there are connection issues and it fails
- * this will bet the first indication since this is lightweight enough
- * that is should usually succeed. If we don't have a version we
- * won't be able to generate the correct call selection later on.
+ * {@code CheckKibanaVersion} uses the REST configuration to fetch the version of
+ * Kibana from the server.
+ *
+ * If this request fails, then the rest of the diagnostic cannot process because REST
+ *  calls are setup against specific versions and, without having a version, they cannot
+ * be setup.
  */
 public class CheckKibanaVersion implements Command {
 

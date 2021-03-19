@@ -31,8 +31,8 @@ public class Constants {
    public static final int DEEFAULT_HTTPS_PORT = 443;
    public static final int DEEFAULT_PROXY_PORT = 8080;
 
-   public static final int LOGSTASH_PORT = 9600;
    public static final int KIBANA_PORT = 5601;
+   public static final int LOGSTASH_PORT = 9600;
    public static final String[] LOCAL_ADDRESSES = {"127.0.0.1","localhost", "[::1]"};
    public static final List<String> localAddressList = Arrays.asList(LOCAL_ADDRESSES);
    public static final String UTF_8 = "UTF-8";

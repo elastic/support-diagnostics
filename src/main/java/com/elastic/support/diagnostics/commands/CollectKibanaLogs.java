@@ -35,7 +35,6 @@ public  class CollectKibanaLogs implements Command {
     * We will get the information fron the DiagnosticContext to extract and copy the logs from Local or Remote system.
     *
     * @param  DiagnosticContext context
-    * @return void
     */
     public void execute(DiagnosticContext context) {
         // If we hit a snafu earlier in determining the details on where and how to run, then just get out.
@@ -84,12 +83,13 @@ public  class CollectKibanaLogs implements Command {
      /**
     * this private function will create a new JavaPlatform object
     *
-    * @param  String output , is the text returned by the ls/dir command
-    * @param  List<String> fileList , You can call this function multitple times, and add more files to the List
-    * @param  int entries , How many time we will iterate
+    * @param output is the text returned by the <code>ls</code>/<code>dir</code> command
+    * @param fileList You can call this function multitple times, and add more files to the List
+    * @param entries How many time we will iterate
     * @return List<String>
     */
-    protected List<String> extractFilesFromList(String output, List<String> fileList, int entries) {
+    protected List<String> extractFilesFromList(String output, int entries) {
+        List<String> fileList = new ArrayList<>(entries);
 
         // Just in case, since NPE"s are a drag
         output = ObjectUtils.defaultIfNull(output, "");
@@ -110,7 +110,6 @@ public  class CollectKibanaLogs implements Command {
         }
 
         return fileList;
-
     }
 
 }
