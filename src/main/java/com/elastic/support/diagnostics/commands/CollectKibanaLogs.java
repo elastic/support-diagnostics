@@ -35,7 +35,6 @@ public  class CollectKibanaLogs implements Command {
     * We will get the information fron the DiagnosticContext to extract and copy the logs from Local or Remote system.
     *
     * @param  DiagnosticContext context
-    * @return void
     */
     public void execute(DiagnosticContext context) {
         // If we hit a snafu earlier in determining the details on where and how to run, then just get out.
