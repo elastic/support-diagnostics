@@ -299,8 +299,8 @@ public class RunKibanaQueries extends BaseQuery {
             allowedHeadersFilter(context);
             execSystemCommands(context);
 
-        } catch (Throwable t) {
-            logger.error( "Kibana Query error:", t);
+        } catch (Exception e) {
+            logger.error("Kibana Query error:", e);
             throw new DiagnosticException(String.format("Error obtaining Kibana output and/or process id - will bypass the rest of processing.. %s", Constants.CHECK_LOG));
         }
     }
