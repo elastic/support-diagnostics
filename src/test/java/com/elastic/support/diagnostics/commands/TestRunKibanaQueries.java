@@ -112,9 +112,6 @@ public class TestRunKibanaQueries {
 		                request()
 		                        .withMethod("GET")
 		                        .withPath("/api/stats")
-		                        .withQueryStringParameters(
-		                                new Parameter("extended", "true")
-		                        )
 		        )
 		        .respond(
 		                response()

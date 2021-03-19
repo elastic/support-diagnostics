@@ -75,7 +75,11 @@ public class CheckKibanaVersion implements Command {
             throw de;
         } catch (Exception e) {
             logger.error( "Unanticipated error:", e);
-            throw new DiagnosticException(String.format("Could not retrieve the Kibana version due to a system or network error - unable to continue. %s%s%s", e.getMessage(), SystemProperties.lineSeparator, Constants.CHECK_LOG));
+            String errorLog = "Could't retrieve Kibana version due to a system or network error. %s%s%s";
+            errorLog = String.format(errorLog, e.getMessage(),
+                                    SystemProperties.lineSeparator,
+                                    Constants.CHECK_LOG);
+            throw new DiagnosticException(errorLog);
         }
     }
 

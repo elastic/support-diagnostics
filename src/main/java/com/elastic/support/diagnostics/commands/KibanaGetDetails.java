@@ -4,6 +4,7 @@ import com.elastic.support.Constants;
 import com.elastic.support.diagnostics.JavaPlatform;
 import com.elastic.support.diagnostics.ProcessProfile;
 import com.elastic.support.diagnostics.commands.CheckPlatformDetails;
+import com.elastic.support.diagnostics.DiagnosticException;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.rest.RestClient;
 import com.elastic.support.rest.RestEntry;
@@ -35,37 +36,26 @@ import java.util.ArrayList;
 public class KibanaGetDetails extends CheckPlatformDetails {
 
     /**
-    * Check and collect information about the platform were Kibana is installed and store it in the context
-    *
-    * @param  DiagnosticContext context
-    *
-    * @return         List<ProcessProfile>
+    * Collect server details from Kibana using the configured {@code context}, and store
+    * updated details back into the {@code context}.
+
+    * @param  context
     */
     @Override
     public void execute(DiagnosticContext context) {
 
         try {
-            // Cached from previous executions
-            RestClient restClient = ResourceCache.getRestClient(Constants.restInputHost);
+            final JsonNode infoProcess = getStats(context);
 
-            // Populate the node metadata
-            Map<String, RestEntry> calls = context.elasticRestCalls;
-            RestEntry entry = calls.get("kibana_stats");
-            RestResult result = restClient.execQuery(entry.getUrl());
+            context.clusterName = infoProcess.path("kibana").path("name").asText();
 
-            // Initialize to empty node which mimimizes NPE opportunities
-            JsonNode infoNodes = JsonYamlUtils.mapper.createObjectNode();
-            if (result.getStatus() == 200) {
-                infoNodes = JsonYamlUtils.createJsonNodeFromString(result.toString());
-            }
+            List<ProcessProfile> profiles = getNodeNetworkAndLogInfo(infoProcess);
 
-            context.clusterName = infoNodes.path("kibana").path("name").asText();
-
-            List<ProcessProfile> nodeProfiles = getNodeNetworkAndLogInfo(infoNodes);
+            IsRunningInDocker(context, profiles);
 
             // See if this cluster is dockerized - if so, don't bother checking for a master to go to
             // because the port information in its output is not reliable.
-            for (ProcessProfile profile : nodeProfiles) {
+            for (ProcessProfile profile : profiles) {
                 if (profile.isDocker) {
                     context.dockerPresent = true;
                     break;
@@ -85,7 +75,7 @@ public class KibanaGetDetails extends CheckPlatformDetails {
                         //break;
                     }
                     else{
-                        context.targetNode = findTargetNode(nodeProfiles);
+                        context.targetNode = findTargetNode(profiles);
                         targetOS = context.targetNode.os;
                     }
 
@@ -115,11 +105,11 @@ public class KibanaGetDetails extends CheckPlatformDetails {
                     }
 
                     // Kibana is not working in cluster mode, so there is only one nodeprofile
-                    if (nodeProfiles.size() == 1) {
-                        context.targetNode = nodeProfiles.get(0);
+                    if (profiles.size() == 1) {
+                        context.targetNode = profiles.get(0);
                     }
 
-                    context.targetNode = findTargetNode(nodeProfiles);
+                    context.targetNode = findTargetNode(profiles);
 
                     SystemCommand syscmd = new LocalSystem(context.targetNode.os);
                     ResourceCache.addSystemCommand(Constants.systemCommands, syscmd);
@@ -190,6 +180,26 @@ public class KibanaGetDetails extends CheckPlatformDetails {
     * @return return the profile for the kibana process
     * @throws RuntimeException if there is not exactly one profile.
     */
+    private void IsRunningInDocker(DiagnosticContext context, List<ProcessProfile> profiles) {
+        // See if this process is dockerized - if so, don't bother checking for a master to go to
+        // because the port information in its output is not reliable.
+        for (ProcessProfile profile : profiles) {
+            if (profile.isDocker) {
+                context.dockerPresent = true;
+                break;
+            }
+        }
+    }
+
+    /**
+    * Get the Kibana server instance's profile.
+    *
+    * @param  host
+    * @param  profiles list of network information for each kibana instance running
+    *
+    * @return return the profile for the kibana process
+    * @throws RuntimeException if there is not exactly one profile.
+    */
     public ProcessProfile findTargetNode(List<ProcessProfile> profiles) {
         if (profiles.size() > 1) {
             logger.error("Expected [1] Kibana process profile, but found [{}]", profiles.size());
@@ -197,6 +207,31 @@ public class KibanaGetDetails extends CheckPlatformDetails {
         }
 
         return  profiles.get(0);
+    }
+
+    /**
+     * Fetch the Kibana Stats JSON payload from the Kibana server.
+     *
+     * @param context The current diagnostic context
+     * @return Never {@code null}.
+     * @throws DiagnosticContext if Kibana responds with a non-200 response
+    */
+    public JsonNode getStats(DiagnosticContext context) {
+
+        RestClient restClient = ResourceCache.getRestClient(Constants.restInputHost);
+        String url = context.elasticRestCalls.get("kibana_stats").getUrl();
+        RestResult result = restClient.execQuery(url);
+
+        if (result.getStatus() != 200) {
+            throw new DiagnosticException(
+                String.format(
+                    "Kibana responded with [%d] for [%s]. Unable to proceed.",
+                    result.getStatus(), url
+                )
+            );
+        }
+
+        return JsonYamlUtils.createJsonNodeFromString(result.toString());
     }
 
 }

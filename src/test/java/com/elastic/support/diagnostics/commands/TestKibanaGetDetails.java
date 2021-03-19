@@ -28,6 +28,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Arrays;
 import java.util.List;
 import com.elastic.support.diagnostics.commands.KibanaGetDetails;
+import com.elastic.support.util.ResourceCache;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockserver.integration.ClientAndServer.startClientAndServer;
@@ -37,6 +38,44 @@ import static org.mockserver.model.HttpResponse.response;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class TestKibanaGetDetails {
 
+    private ClientAndServer mockServer;
+    private RestClient httpRestClient, httpsRestClient;
+
+    @BeforeAll
+    public void globalSetup() {
+        mockServer = startClientAndServer(9880);
+    }
+
+    @AfterAll
+    public void globalTeardoown() {
+        mockServer.stop();
+    }
+
+    @BeforeEach
+    public void setup() {
+        
+        httpRestClient = RestClient.getClient(
+            "localhost", 
+            9880, 
+            "http",
+            "elastic",
+            "elastic",
+            "",
+            0,
+            "",
+            "",
+            "",
+            "",
+            true,
+           3000,
+           3000,
+           3000);
+    }
+
+    @AfterEach
+    public void tearDown() {
+        mockServer.reset();
+    }
 
     @Test
     public void testGetNodeNetworkAndLogInfo() {
@@ -102,6 +141,36 @@ public class TestKibanaGetDetails {
             assertTrue(false);
         } catch (RuntimeException e) {
             assertEquals(e.getMessage(), "Unable to get Kibana process profile.");
+        }
+    }
+
+    @Test
+    public void testFunctionGetStats() {
+
+        mockServer
+                .when(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/api/stats")
+                )
+                .respond(
+                        response()
+                            .withBody("{\"process\":{\"memory\":{\"heap\":{\"total_bytes\":470466560,\"used_bytes\":343398224,\"size_limit\":1740165498},\"resident_set_size_bytes\":587878400},\"pid\":32,\"event_loop_delay\":0.280181884765625,\"uptime_ms\":97230924},\"os\":{\"platform\":\"linux\",\"platform_release\":\"linux-4.15.0-1032-gcp\",\"load\":{\"1m\":1.37451171875,\"5m\":1.43408203125,\"15m\":1.34375},\"memory\":{\"total_bytes\":147879931904,\"free_bytes\":45620334592,\"used_bytes\":102259597312},\"uptime_ms\":18093713000,\"distro\":\"Centos\",\"distro_release\":\"Centos-7.8.2003\"},\"requests\":{\"disconnects\":0,\"total\":1,\"status_codes\":{\"302\":1}},\"concurrent_connections\":8,\"timestamp\":\"2021-01-06T01:35:11.324Z\",\"kibana\":{\"uuid\":\"a4f369ef-fecd-46b7-8b16-c6c3f885d9ec\",\"name\":\"13d5e793ea51\",\"index\":\".kibana\",\"host\":\"0.0.0.0\",\"locale\":\"en\",\"transport_address\":\"0.0.0.0:18648\",\"version\":\"7.9.0\",\"snapshot\":false,\"status\":\"green\"},\"last_updated\":\"2021-01-06T01:35:15.911Z\",\"collection_interval_ms\":5000,\"cluster_uuid\":\"RfBRUssssadN4WZssnnog\"}")
+                            .withStatusCode(401)
+                );
+
+        ResourceCache.addRestClient(Constants.restInputHost, httpRestClient);
+        DiagnosticContext context = new DiagnosticContext();
+        Map restCalls = JsonYamlUtils.readYamlFromClasspath(Constants.KIBANA_REST, true);
+        RestEntryConfig builder = new RestEntryConfig("7.10.0");
+        Map<String, RestEntry> entries = builder.buildEntryMap(restCalls);
+        context.elasticRestCalls = entries;
+
+        KibanaGetDetails testClass = new KibanaGetDetails();
+        try {
+            testClass.getStats(context);
+        } catch (DiagnosticException e) {
+            assertEquals(e.getMessage(), "Kibana responded with [401] for [/api/stats]. Unable to proceed.");
         }
     }
 }

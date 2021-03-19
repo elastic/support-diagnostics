@@ -20,7 +20,7 @@ kibana_settings:
 
 kibana_stats:
   versions:
-    ">= 6.5.0": "/api/stats?extended=true"
+    ">= 6.5.0": "/api/stats"
 
 kibana_actions:
   versions:
