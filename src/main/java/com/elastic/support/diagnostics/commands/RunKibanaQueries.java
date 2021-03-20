@@ -262,7 +262,6 @@ public class RunKibanaQueries extends BaseQuery {
                 try (FileWriter fileWriter = new FileWriter(fileName)) {
                     fileWriter.write(actions.toPrettyString());
                     fileWriter.flush();
-                    fileWriter.close();
                 } catch (IOException e) {
                   logger.error("Unexpected error while writing [kibana_actions.json]", e);
                 }
