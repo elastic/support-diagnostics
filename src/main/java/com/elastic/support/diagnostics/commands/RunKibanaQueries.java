@@ -29,7 +29,7 @@ import java.io.IOException;
  */
 public class RunKibanaQueries extends BaseQuery {
 
-    private static final Logger logger = LogManager.getLogger(BaseQuery.class);
+    private static final Logger logger = LogManager.getLogger(RunKibanaQueries.class);
 
     /**
     * Create a new ProcessProfile object and extract the information from fileName to get PID, OS and javaPlatform
