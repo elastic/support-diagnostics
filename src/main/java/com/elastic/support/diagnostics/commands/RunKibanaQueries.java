@@ -175,7 +175,7 @@ public class RunKibanaQueries extends BaseQuery {
     * @param  RestEntry action
     * @return RestEntry
     */
-    private RestEntry getNewEntryPage(double perPage, int page, RestEntry action) {
+    private RestEntry getNewEntryPage(int perPage, int page, RestEntry action) {
         return new RestEntry(String.format("%s_%s", action.getName(), page), "", ".json", false, String.format("%s?per_page=%s&page=%s", action.getUrl(), perPage, page), false);
     }
 
