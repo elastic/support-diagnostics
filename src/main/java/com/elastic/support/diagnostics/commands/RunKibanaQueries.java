@@ -184,7 +184,6 @@ public class RunKibanaQueries extends BaseQuery {
     * This function is executed **after** runBasicQueries
     * Extract the information on the kibana_node_stats.json with getNodeProfile function.
     * Within the function getRemoteSystem or getLocalSystem we set ResourceCache.addSystemCommand
-    * Return will be used as workaround to Unit test. Will be replaced in v9
     *
     * @param  DiagnosticContext context
     * @return SystemCommand
