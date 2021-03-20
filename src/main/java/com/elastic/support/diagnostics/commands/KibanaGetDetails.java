@@ -38,7 +38,6 @@ public class KibanaGetDetails extends CheckPlatformDetails {
     /**
     * Collect server details from Kibana using the configured {@code context}, and store
     * updated details back into the {@code context}.
-
     * @param  context
     */
     @Override
@@ -52,15 +51,6 @@ public class KibanaGetDetails extends CheckPlatformDetails {
             List<ProcessProfile> profiles = getNodeNetworkAndLogInfo(infoProcess);
 
             IsRunningInDocker(context, profiles);
-
-            // See if this cluster is dockerized - if so, don't bother checking for a master to go to
-            // because the port information in its output is not reliable.
-            for (ProcessProfile profile : profiles) {
-                if (profile.isDocker) {
-                    context.dockerPresent = true;
-                    break;
-                }
-            }
 
             switch (context.diagnosticInputs.diagType) {
                 case Constants.kibanaRemote:
@@ -136,30 +126,30 @@ public class KibanaGetDetails extends CheckPlatformDetails {
     /**
     * Map Kibana / stats API results to the ProcessProfile object.
     *
-    * @param  nodesInfo all the context sent by the kibana stats API
+    * @param  processInfo all the context sent by the kibana stats API
     *
     * @return The network info as defined in the kibana stats API
     */
-    public List<ProcessProfile> getNodeNetworkAndLogInfo(JsonNode nodesInfo) {
+    public List<ProcessProfile> getNodeNetworkAndLogInfo(JsonNode processInfo) {
 
         List<ProcessProfile> nodeNetworkInfo = new ArrayList<>();
         try {
             ProcessProfile diagNode = new ProcessProfile();
-            diagNode.name = nodesInfo.path("kibana").path("name").asText();
-            diagNode.pid = nodesInfo.path("process").path("pid").asText();
+            diagNode.name = processInfo.path("kibana").path("name").asText();
+            diagNode.pid = processInfo.path("process").path("pid").asText();
 
             if (diagNode.pid.equals("1")) {
                 diagNode.isDocker = true;
             }
 
-            diagNode.networkHost = nodesInfo.path("kibana").path("host").asText();
-            diagNode.host = nodesInfo.path("kibana").path("host").asText();
+            diagNode.networkHost = processInfo.path("kibana").path("host").asText();
+            diagNode.host = processInfo.path("kibana").path("host").asText();
 
-            String nodeOs = nodesInfo.path("os").path("platform").asText().toLowerCase();
+            String nodeOs = processInfo.path("os").path("platform").asText().toLowerCase();
             diagNode.os = SystemUtils.parseOperatingSystemName(nodeOs);
             diagNode.javaPlatform = new JavaPlatform(diagNode.os);
 
-            String httpPublishAddr = nodesInfo.path("kibana").path("transport_address").asText();
+            String httpPublishAddr = processInfo.path("kibana").path("transport_address").asText();
             diagNode.httpPublishAddr = httpPublishAddr.substring(0, httpPublishAddr.indexOf(":"));
             diagNode.httpPort = Integer.parseInt(httpPublishAddr.substring(httpPublishAddr.indexOf(":") + 1));
 
@@ -186,7 +176,7 @@ public class KibanaGetDetails extends CheckPlatformDetails {
         for (ProcessProfile profile : profiles) {
             if (profile.isDocker) {
                 context.dockerPresent = true;
-                break;
+                return;
             }
         }
     }
