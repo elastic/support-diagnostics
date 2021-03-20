@@ -261,7 +261,7 @@ public class RunKibanaQueries extends BaseQuery {
                     fileWriter.flush();
                     fileWriter.close();
                 } catch (IOException e) {
-                  new RuntimeException("Error message", e).printStackTrace();
+                  logger.error("Unexpected error while writing [kibana_actions.json]", e);
                 }
             }
         }
