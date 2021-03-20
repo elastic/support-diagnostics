@@ -245,7 +245,9 @@ public class RunKibanaQueries extends BaseQuery {
 
                         while (iter.hasNext()) {
                             Map.Entry<String, JsonNode> entry = iter.next();
-                            if (!entry.getKey().equals("kbn-xsrf") && !entry.getKey().equals("Content-Type")) {
+                            String key = entry.getKey().toLowerCase();
+
+                            if (!key.equals("kbn-xsrf") && !key.equals("content-type")) {
                                 iter.remove();
                                 headerRemoved = true;
                             }
@@ -253,12 +255,13 @@ public class RunKibanaQueries extends BaseQuery {
                     }
                 }
             }
+
+            // If any headers were removed, we need to rewrite the file to remove them
             if (headerRemoved == true) {
                 String fileName = context.tempDir + SystemProperties.fileSeparator + "kibana_actions.json";
                 try (FileWriter fileWriter = new FileWriter(fileName)) {
                     fileWriter.write(actions.toPrettyString());
                     fileWriter.flush();
-                    fileWriter.close();
                 } catch (IOException e) {
                   logger.error("Unexpected error while writing [kibana_actions.json]", e);
                 }
