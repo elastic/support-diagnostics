@@ -155,7 +155,7 @@ public class RunKibanaQueries extends BaseQuery {
         }
         String result   = res.toString();
         JsonNode root   = JsonYamlUtils.createJsonNodeFromString(result);
-        double total    = root.path("total").intValue();
+        int total       = root.path("total").intValue();
         if (total > 0 && perPage > 0) {
             // Get the first actions page
             queries.add(getNewEntryPage(perPage, 1, action));
