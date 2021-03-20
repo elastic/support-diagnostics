@@ -32,7 +32,7 @@ public class RunKibanaQueries extends BaseQuery {
     private static final Logger logger = LogManager.getLogger(RunKibanaQueries.class);
 
     /**
-    * Create a new ProcessProfile object and extract the information from fileName to get PID, OS and javaPlatform
+    * Create a new ProcessProfile object and extract the information from fileName to get PID and OS.
     *
     * @param  String tempDir
     * @param  String fileName
