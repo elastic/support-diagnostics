@@ -245,7 +245,9 @@ public class RunKibanaQueries extends BaseQuery {
 
                         while (iter.hasNext()) {
                             Map.Entry<String, JsonNode> entry = iter.next();
-                            if (!entry.getKey().equals("kbn-xsrf") && !entry.getKey().equals("Content-Type")) {
+                            String key = entry.getKey().toLowerCase();
+
+                            if (!key.equals("kbn-xsrf") && !key.equals("content-type")) {
                                 iter.remove();
                                 headerRemoved = true;
                             }
