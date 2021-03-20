@@ -23,13 +23,10 @@ import java.util.Iterator;
 
 import java.io.FileWriter;
 import java.io.IOException;
-/**
- *  This class is executed as RunKibanaQueries class, we will not change the global BaseQuery structure of the code in v8.7.3.
- *  As unit test are request, we have done some changes to the structure of this class vs RunLogstashQueries.
- *  TODO: To be able to test the RunKibanaQueries functions I will need to split the execute function and create new public or private functions.
- *  In the next version we will need to work in a different pattern to remove the workarounds that were done here to test the new Kibana code.
- */
 
+/**
+ * RunKibanaQueries executes the version-dependent REST API calls against Kibana.
+ */
 public class RunKibanaQueries extends BaseQuery {
 
     /**
