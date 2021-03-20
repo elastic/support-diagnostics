@@ -168,7 +168,7 @@ public class RunKibanaQueries extends BaseQuery {
     }
 
     /**
-    * create a new RestEntry page for the original RestEntry action 
+    * Get a new `RestEntry` with the proper querystring parameters for paging.
     *
     * @param  int perPage
     * @param  int page
