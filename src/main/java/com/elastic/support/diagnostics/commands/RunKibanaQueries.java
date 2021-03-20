@@ -29,10 +29,6 @@ import java.io.IOException;
  */
 public class RunKibanaQueries extends BaseQuery {
 
-    /**
-     * Executes the REST calls for Kibana
-     */
-
     private static final Logger logger = LogManager.getLogger(BaseQuery.class);
 
     /**
