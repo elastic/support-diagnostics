@@ -46,25 +46,25 @@ public class RunKibanaQueries extends BaseQuery {
     * @param  DiagnosticContext context
     * @return         ProcessProfile object
     */
-    private ProcessProfile getNodeProfile(String tempDir, String fileName, DiagnosticContext context) {
-        ProcessProfile nodeProfile = new ProcessProfile();
-        context.targetNode = nodeProfile;
+    private ProcessProfile getProfile(String tempDir, String fileName, DiagnosticContext context) {
+        ProcessProfile profile = new ProcessProfile();
+        context.targetNode = profile;
         JsonNode nodeData = JsonYamlUtils.createJsonNodeFromFileName(tempDir, fileName);
-        nodeProfile.pid = nodeData.path("process").path("pid").asText();
-        nodeProfile.os = SystemUtils.parseOperatingSystemName(nodeData.path("os").path("platform").asText());
-        nodeProfile.javaPlatform = getJavaPlatformOs(nodeProfile.os);
+        profile.pid = nodeData.path("process").path("pid").asText();
+        profile.os = SystemUtils.parseOperatingSystemName(nodeData.path("os").path("platform").asText());
+        profile.javaPlatform = getJavaPlatformOs(profile.os);
 
-        return nodeProfile;
+        return profile;
     }
 
     /**
     * this private function will create a new JavaPlatform object
     *
-    * @param  String nodeProfileOs
+    * @param  String profileOs
     * @return         JavaPlatform object
     */
-    private JavaPlatform getJavaPlatformOs(String nodeProfileOs) {
-        JavaPlatform javaPlatformOs = new JavaPlatform(nodeProfileOs);
+    private JavaPlatform getJavaPlatformOs(String profileOs) {
+        JavaPlatform javaPlatformOs = new JavaPlatform(profileOs);
         return javaPlatformOs;
     }
 
@@ -191,7 +191,7 @@ public class RunKibanaQueries extends BaseQuery {
 
     /**
     * This function is executed **after** runBasicQueries
-    * Extract the information on the kibana_stats.json with getNodeProfile function.
+    * Extract the information on the kibana_stats.json with getProfile function.
     * Within the function getRemoteSystem or getLocalSystem we set ResourceCache.addSystemCommand
     * Return will be used as workaround to Unit test. Will be replaced in v9
     *
@@ -200,9 +200,9 @@ public class RunKibanaQueries extends BaseQuery {
     */
     public SystemCommand execSystemCommands(DiagnosticContext context) {
 
-        ProcessProfile nodeProfile = getNodeProfile(context.tempDir, "kibana_stats.json", context);
+        ProcessProfile profile = getProfile(context.tempDir, "kibana_stats.json", context);
 
-        if (StringUtils.isEmpty(nodeProfile.pid) || nodeProfile.pid.equals("1")) {
+        if (StringUtils.isEmpty(profile.pid) || profile.pid.equals("1")) {
             context.dockerPresent = true;
             context.runSystemCalls = false;
         }
@@ -215,7 +215,7 @@ public class RunKibanaQueries extends BaseQuery {
                     targetOS = Constants.linuxPlatform;
                 }
                 else{
-                    targetOS = nodeProfile.os;
+                    targetOS = profile.os;
                 }
                 
                 syscmd = getRemoteSystem(targetOS, context);
@@ -225,7 +225,7 @@ public class RunKibanaQueries extends BaseQuery {
                 if (context.dockerPresent) {
                     syscmd = getLocalSystem("docker", true);
                 } else {
-                    syscmd = getLocalSystem(nodeProfile.os, false);
+                    syscmd = getLocalSystem(profile.os, false);
                 }
                 break;
         }
