@@ -144,8 +144,6 @@ public class RunKibanaQueries extends BaseQuery {
     * @param  List<RestEntry> queries
     * @param  double perPage - This is the number of docusment we reques to the API (set to 100 in execute func / or n in unit test)
     * @param  RestEntry action
-    *
-    * @return         void
     */
     public void getAllPages(RestClient client, List<RestEntry> queries, double perPage, RestEntry action) {
         // get the values needed to the pagination.
