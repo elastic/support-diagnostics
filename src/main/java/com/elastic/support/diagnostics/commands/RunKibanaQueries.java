@@ -159,7 +159,7 @@ public class RunKibanaQueries extends BaseQuery {
             queries.add(getNewEntryPage(perPage, 1, action));
             // If there is more pages add the new queries
             if (perPage < total) {
-                double numberPages = Math.ceil(total/perPage);
+                int numberPages = (int)Math.ceil(total / perPage);
                 for (int i = 2; i <= numberPages; i++) {
                     queries.add(getNewEntryPage(perPage, i, action));
                 }
