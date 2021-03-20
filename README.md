@@ -410,9 +410,9 @@ Executing against a cloud cluster. Note that in this case we use 9243 for the po
 
 ##### The Config Directory
 
-All configuration used by the utility is located the config _/config_ under the folder created when the diagnostic utility was unzipped. These can be modified to change some behaviors in the diagnostic utility.
-The \*-rest.yml files all contain queries that executed against the cluster being diagnosed. They are versioned, the the Elasticsearch calls have additional modifiers that can be used to further
-customize the retrievals. The diags.yml file has generalized configuration information, and scrub.yml can be used to drive the sanitization function.
+All configuration used by the utility is located on the  `/config` under the folder created when the diagnostic utility was unzipped. These can be modified to change some behaviors in the diagnostic utility.
+
+The `*-rest.yml` files all contain queries that are executed against the cluster being diagnosed. They are versioned and the Elasticsearch calls have additional modifiers that can be used to further customize the retrievals. The `diags.yml` file has generalized configuration information and `scrub.yml` can be used to drive the sanitization (scrub) function.
 
 ##### Removing Or Modifying Calls
 
