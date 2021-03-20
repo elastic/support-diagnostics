@@ -292,7 +292,7 @@ public class RunKibanaQueries extends BaseQuery {
 
         } catch (Exception e) {
             logger.error("Kibana Query error:", e);
-            throw new DiagnosticException(String.format("Error obtaining Kibana output and/or process id - will bypass the rest of processing.. %s", Constants.CHECK_LOG));
+            throw new DiagnosticException(String.format("Error obtaining Kibana output and/or process id - will bypass the rest of processing. %s", Constants.CHECK_LOG));
         }
     }
 
