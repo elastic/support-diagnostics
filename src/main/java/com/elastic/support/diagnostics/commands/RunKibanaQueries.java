@@ -23,23 +23,16 @@ import java.util.Iterator;
 
 import java.io.FileWriter;
 import java.io.IOException;
-/**
- *  This class is executed as RunKibanaQueries class, we will not change the global BaseQuery structure of the code in v8.7.3.
- *  As unit test are request, we have done some changes to the structure of this class vs RunLogstashQueries.
- *  TODO: To be able to test the RunKibanaQueries functions I will need to split the execute function and create new public or private functions.
- *  In the next version we will need to work in a different pattern to remove the workarounds that were done here to test the new Kibana code.
- */
 
+/**
+ * RunKibanaQueries executes the version-dependent REST API calls against Kibana.
+ */
 public class RunKibanaQueries extends BaseQuery {
 
-    /**
-     * Executes the REST calls for Kibana
-     */
-
-    private static final Logger logger = LogManager.getLogger(BaseQuery.class);
+    private static final Logger logger = LogManager.getLogger(RunKibanaQueries.class);
 
     /**
-    * Create a new ProcessProfile object and extract the information from fileName to get PID, OS and javaPlatform
+    * Create a new ProcessProfile object and extract the information from fileName to get PID and OS.
     *
     * @param  String tempDir
     * @param  String fileName
@@ -151,8 +144,6 @@ public class RunKibanaQueries extends BaseQuery {
     * @param  List<RestEntry> queries
     * @param  double perPage - This is the number of docusment we reques to the API (set to 100 in execute func / or n in unit test)
     * @param  RestEntry action
-    *
-    * @return         void
     */
     public void getAllPages(RestClient client, List<RestEntry> queries, double perPage, RestEntry action) {
         // get the values needed to the pagination.
@@ -162,13 +153,13 @@ public class RunKibanaQueries extends BaseQuery {
         }
         String result   = res.toString();
         JsonNode root   = JsonYamlUtils.createJsonNodeFromString(result);
-        double total    = root.path("total").intValue();
+        int total       = root.path("total").intValue();
         if (total > 0 && perPage > 0) {
             // Get the first actions page
             queries.add(getNewEntryPage(perPage, 1, action));
             // If there is more pages add the new queries
             if (perPage < total) {
-                double numberPages = Math.ceil(total/perPage);
+                int numberPages = (int)Math.ceil(total / perPage);
                 for (int i = 2; i <= numberPages; i++) {
                     queries.add(getNewEntryPage(perPage, i, action));
                 }
@@ -177,14 +168,14 @@ public class RunKibanaQueries extends BaseQuery {
     }
 
     /**
-    * create a new RestEntry page for the original RestEntry action 
+    * Get a new `RestEntry` with the proper querystring parameters for paging.
     *
     * @param  int perPage
     * @param  int page
     * @param  RestEntry action
     * @return RestEntry
     */
-    private RestEntry getNewEntryPage(double perPage, int page, RestEntry action) {
+    private RestEntry getNewEntryPage(int perPage, int page, RestEntry action) {
         return new RestEntry(String.format("%s_%s", action.getName(), page), "", ".json", false, String.format("%s?per_page=%s&page=%s", action.getUrl(), perPage, page), false);
     }
 
@@ -193,7 +184,6 @@ public class RunKibanaQueries extends BaseQuery {
     * This function is executed **after** runBasicQueries
     * Extract the information on the kibana_stats.json with getProfile function.
     * Within the function getRemoteSystem or getLocalSystem we set ResourceCache.addSystemCommand
-    * Return will be used as workaround to Unit test. Will be replaced in v9
     *
     * @param  DiagnosticContext context
     * @return SystemCommand
@@ -270,7 +260,7 @@ public class RunKibanaQueries extends BaseQuery {
                     fileWriter.flush();
                     fileWriter.close();
                 } catch (IOException e) {
-                  new RuntimeException("Error message", e).printStackTrace();
+                  logger.error("Unexpected error while writing [kibana_actions.json]", e);
                 }
             }
         }
@@ -301,7 +291,7 @@ public class RunKibanaQueries extends BaseQuery {
 
         } catch (Exception e) {
             logger.error("Kibana Query error:", e);
-            throw new DiagnosticException(String.format("Error obtaining Kibana output and/or process id - will bypass the rest of processing.. %s", Constants.CHECK_LOG));
+            throw new DiagnosticException(String.format("Error obtaining Kibana output and/or process id - will bypass the rest of processing. %s", Constants.CHECK_LOG));
         }
     }
 
