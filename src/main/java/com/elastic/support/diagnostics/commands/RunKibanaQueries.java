@@ -253,6 +253,8 @@ public class RunKibanaQueries extends BaseQuery {
                     }
                 }
             }
+
+            // If any headers were removed, we need to rewrite the file to remove them
             if (headerRemoved == true) {
                 String fileName = context.tempDir + SystemProperties.fileSeparator + "kibana_actions.json";
                 try (FileWriter fileWriter = new FileWriter(fileName)) {
