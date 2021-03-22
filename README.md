@@ -59,9 +59,9 @@ The application can be run from any directory on the machine. It does not requir
 
 - JDK - Oracle or OpenJDK, 1.8-13.
   - The IBM JDK is not supported due to JSSE related issues that can cause TLS errors.
-  - **Important Note For Elasticsearch Version 7:** Elasticsearch now includes a bundled JVM that is used by default. For the diagnostic to retrieve thread dumps via Jstack it must be executed with the same JVM that was used to run Elasticsearch. The diagnostic utility will attempt to find the location of the JVM that was used to run the process it is interrogating. If it is unable to do so, you may need to manually configure the location by setting JAVA_HOME to the directory containing the /bin directory for the included JDK. For example, <path to Elasticsearch 7 deployment>/jdk/Contents/Home.
-- The system user account for that host(not the elasticsearch login) must have sufficient authorization to run these commands and access the logs(usually in /var/log/elasticsearch) in order to obtain a full collection of diagnostics.
-- If you are authenticating using the built in Xpack security, the supplied user id must have permission to execute the diagnostic URL's. The superuser role is recommended unless you are familar enough with the calls being made to tailor your own accounts and roles.
+  - **Important Note For Elasticsearch Version 7:** Elasticsearch now includes a bundled JVM that is used by default. For the diagnostic to retrieve thread dumps via  `Jstack` it must be executed with the same JVM that was used to run Elasticsearch. The diagnostic utility will attempt to find the location of the JVM that was used to run the process it is interrogating. If it is unable to do so, you may need to manually configure the location by setting `JAVA_HOME` to the directory containing the `/bin` directory for the included JDK. For example, `<path to Elasticsearch 7 deployment>/jdk/Contents/Home`.
+- The system user account for that host(not the elasticsearch login) must have sufficient authorization to run these commands and access the logs (usually in `/var/log/elasticsearch`) in order to obtain a full collection of diagnostics.
+- If you are authenticating using the built in Security, the supplied user id must have permission to execute the diagnostic URL's. The superuser role is recommended unless you are familar enough with the calls being made to tailor your own accounts and roles.
 
 ### Downloading And Installing
 
@@ -89,7 +89,7 @@ The application can be run from any directory on the machine. It does not requir
 
 ### Interactive Mode - For Those Who Don't Like To Read Documentation
 
-If you are in a rush and don't mind going through a Q&A process you can execute the diagnostic with no options. It will then enter interactive mode and walk you through the process of executing with the proper options. Simply execute `diagnostics.sh` or `diagnostics.bat`. Previous versions of the diagnostic required you to be in the installation directory but you should now be able to run it from anywhere on the installed host. Assuming of course that the proper permissions exist. Symlinks are **not** currently supported however, so keep that in mind when setting up your installation.
+If you are in a rush and don't mind going through a Q&A process you can execute the diagnostic with no options. It will then enter interactive mode and walk you through the process of executing with the proper options. Simply execute `./diagnostics.sh` or `diagnostics.bat`. Previous versions of the diagnostic required you to be in the installation directory but you should now be able to run it from anywhere on the installed host. Assuming of course that the proper permissions exist. Symlinks are **not** currently supported however, so keep that in mind when setting up your installation.
 
 ### Running From The Command Line
 
@@ -254,7 +254,7 @@ If you use a PKI store to authenticate to your Elasticsearch cluster you may use
 
  </table>
 
-#### Http Proxy Options
+#### HTTP Proxy Options
 
 When running the diagnostic from a workstation you may encounter issues with HTTP proxies used to shield internal machines from the internet. In most cases you will probably not require more than a hostname/IP and a port.
 
@@ -410,9 +410,9 @@ Executing against a cloud cluster. Note that in this case we use 9243 for the po
 
 ##### The Config Directory
 
-All configuration used by the utility is located the config _/config_ under the folder created when the diagnostic utility was unzipped. These can be modified to change some behaviors in the diagnostic utility.
-The \*-rest.yml files all contain queries that executed against the cluster being diagnosed. They are versioned, the the Elasticsearch calls have additional modifiers that can be used to further
-customize the retrievals. The diags.yml file has generalized configuration information, and scrub.yml can be used to drive the sanitization function.
+All configuration used by the utility is located on the  `/config` under the folder created when the diagnostic utility was unzipped. These can be modified to change some behaviors in the diagnostic utility.
+
+The `*-rest.yml` files all contain queries that are executed against the cluster being diagnosed. They are versioned and the Elasticsearch calls have additional modifiers that can be used to further customize the retrievals. The `diags.yml` file has generalized configuration information and `scrub.yml` can be used to drive the sanitization (scrub) function.
 
 ##### Removing Or Modifying Calls
 
@@ -456,19 +456,19 @@ In some cases the information collected by the diagnostic may have content that 
 
 It is run via a separate execution script, and can process any valid Elasticsearch cluster diagnostic archive produced by Support Diagnostics 6.4 or greater. It can also process a single file. It does not need to be run on the same host that produced the diagnostic. Or by the same version number that produced the archive as long as it is a supported version. Logstash diagnostics are not supported at this time, although you may process those using the single file by file functionality for each entry.
 
-It will go through each file line by line checking the content. If you are only concerned about IP addresses, you do not have to configure anything. **_The utility will automatically obfuscate all node id's node names, IPv4, IPv6 and MAC addresses._** It is important to note this because as it does this, it will generate a new random IP value and cache it to use every time it encounters that same IP later on. So that the same obfuscated value will be consistent across diagnostic files. This ensures that you can differentiate between occurrences of discrete nodes in the cluster. If you replace all the IP addresses with a global XXX.XXX.XXX.XXX mask you will lose the ability to see which node did what.
+It will go through each file line by line checking the content. If you are only concerned about IP addresses, you do not have to configure anything. **_The utility will automatically obfuscate all node id's node names, IPv4, IPv6 and MAC addresses._** It is important to note this because as it does this, it will generate a new random IP value and cache it to use every time it encounters that same IP later on. So that the same obfuscated value will be consistent across diagnostic files. This ensures that you can differentiate between occurrences of discrete nodes in the cluster. If you replace all the IP addresses with a global `XXX.XXX.XXX.XXX` mask you will lose the ability to see which node did what.
 
 After it has checked for IP and MAC addresses it will use any configured tokens. If you include a configuration file of supplied string tokens, any occurrence of that token will be replaced with a generated replacement. As with IP's this will be consistent from file to file but not between runs. It supports explicit string literal replacement or regexes that match a broader set of criteria. An example configuration file (`scrub.yml`) is included in the root installation directory as an example for creating your own tokens.
 
 ### Running The Sanitizer
 
 - Start with a generated diagnostic archive from Support Diagnostics 6.4 or later and an installation of the latest diagnostic utility.
-- Add any tokens for text you wish to conceal to your config file. The utility will look for a file named `scrub.yml` located in the /config directory within the unzipped uutility dir. It must reside in this location.
-- Run the utility, inputing the full absolute path the archive, directory, or single file you wish to process. Options are described below.
-- The sanitization process will check for the number of processors on the host it is run on and create a worker per processor to distribute the load. If you wish to override this it can be done via the command line --workers option.
+- Add any tokens for text you wish to conceal to your config file. The utility will look for a file named `scrub.yml` located in the `/config` directory within the unzipped utility directory. It **must** reside in this location.
+- Run the `scrub` utility (`scrub.sh` or `scrub.bat`), providing the full absolute path for the archive, directory, or single file you wish to process. Options are described below.
+- The sanitization process will check for the number of processors on the host it is run on and create a worker per processor to distribute the load. If you wish to override this it can be done via the command line `--workers` option.
 - If you are processing a large cluster's diagnostic, this may take a while to run, and you may need to use the `DIAG_JAVA_OPTS` environment variable to increase the size of the Java heap if processing is extremely slow or you see OutOfMemoryExceptions.
-- You can bypass specified files from processing, remove specified files from the sanitized archive altogether, and include or exclude certain file types from sanitization on a token by token basis. See the scrub file for examples.
-- When running against a standard diagnostic package, it will re-archive the file with "scrubbed-" prepended to the name. Single files and directories will be enclosed within a new archive .
+- You can bypass specified files from processing, remove specified files from the sanitized archive altogether, and include or exclude certain file types from sanitization on a token by token basis. See the `scrub` file for examples.
+- When running against a standard diagnostic package, it will re-archive the file with `scrubbed-` prepended to the name. Single files and directories will be enclosed within a new archive .
 
 #### Sanitization Options
 
@@ -536,11 +536,11 @@ Time series data will be availalble if Elasticsearch Monitoring is enabled, but 
 
 This utility allows you to extract a subset of monitoring data for interval of up to 12 hours at a time. It will package this into a tar.gz file, much like the current diagnostic. After it is uploaded, a support engineer can import that data into their own monitoring cluster so it can be investigated outside of a screen share, and be easily viewed by other engineers and developers. It has the advantage of providing a view of the cluster state prior to when an issue occurred so that a better idea of what led up to the issue can be gained.
 
-Not all the information contained in the standard diagnostic is going to be available in the monitoring extraction. That is because it does not collect the same quanity of data. But what it does have should be sufficient to see a numnber of important trends, particularly when investigating peformance related issues.
+Not all the information contained in the standard diagnostic is going to be available in the monitoring extraction. That is because it does not collect the same quantity of data. But what it does have should be sufficient to see a number of important trends, particularly when investigating peformance related issues.
 
 It does not need to be run on a host with Elasticsearch installed. A local workstation with network access to the monitoring cluster is sufficient. It can either be installed directory or run from a Docker container.
 
-You can collect statistics for only one cluster at a time, and it is necessary to specify a cluster id when running the utility. If you are not sure of the cluster id, running with only the target host, login credentials, and --list parameter will display a listing of availble clusters that are being monitored in that instance.
+You can collect statistics for only one cluster at a time, and it is necessary to specify a cluster id when running the utility. If you are not sure of the cluster id, running with only the target host, login credentials, and `--list` parameter will display a listing of availble clusters that are being monitored in that instance.
 
 ### Running The Extract
 
