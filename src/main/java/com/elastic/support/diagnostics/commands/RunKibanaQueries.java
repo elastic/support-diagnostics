@@ -33,11 +33,10 @@ public class RunKibanaQueries extends BaseQuery {
 
     /**
     * Create a new ProcessProfile object and extract the information from fileName to get PID and OS.
-    *
-    * @param  String tempDir
-    * @param  String fileName
-    * @param  DiagnosticContext context
-    * @return         ProcessProfile object
+    * @param  tempDir
+    * @param  fileName
+    * @param  context
+    * @return the object that consolidate the process information
     */
     private ProcessProfile getProfile(String tempDir, String fileName, DiagnosticContext context) {
         ProcessProfile profile = new ProcessProfile();
@@ -45,61 +44,8 @@ public class RunKibanaQueries extends BaseQuery {
         JsonNode nodeData = JsonYamlUtils.createJsonNodeFromFileName(tempDir, fileName);
         profile.pid = nodeData.path("process").path("pid").asText();
         profile.os = SystemUtils.parseOperatingSystemName(nodeData.path("os").path("platform").asText());
-        profile.javaPlatform = getJavaPlatformOs(profile.os);
 
         return profile;
-    }
-
-    /**
-    * this private function will create a new JavaPlatform object
-    *
-    * @param  String profileOs
-    * @return         JavaPlatform object
-    */
-    private JavaPlatform getJavaPlatformOs(String profileOs) {
-        JavaPlatform javaPlatformOs = new JavaPlatform(profileOs);
-        return javaPlatformOs;
-    }
-
-    /**
-    * this private function will create new object RemoteSystem
-    *
-    * @param  String targetOS
-    * @param  DiagnosticContext context
-    * @return         RemoteSystem object
-    */
-    private RemoteSystem getRemoteSystem(String targetOS, DiagnosticContext context) {
-        RemoteSystem syscmd = new RemoteSystem(
-                            targetOS,
-                            context.diagnosticInputs.remoteUser,
-                            context.diagnosticInputs.remotePassword,
-                            context.diagnosticInputs.host,
-                            context.diagnosticInputs.remotePort,
-                            context.diagnosticInputs.keyfile,
-                            context.diagnosticInputs.pkiKeystorePass,
-                            context.diagnosticInputs.knownHostsFile,
-                            context.diagnosticInputs.trustRemote,
-                            context.diagnosticInputs.isSudo
-                    );
-        ResourceCache.addSystemCommand(Constants.systemCommands, syscmd);
-        return syscmd;
-    }
-
-    /**
-    * On this function we will get create an LocalSystem object
-    * depending the parseOperatingSystem value it will override or not the value of osName with the constant SystemProperties.osName
-    *
-    * @param  String osName
-    * @param  Boolean parseOperatingSystem
-    * @return         LocalSystem object
-    */
-    private LocalSystem getLocalSystem(String osName, Boolean parseOperatingSystem) {
-        if (parseOperatingSystem == true) {
-            osName = SystemUtils.parseOperatingSystemName(SystemProperties.osName);
-        }
-        LocalSystem syscmd = new LocalSystem(osName);
-        ResourceCache.addSystemCommand(Constants.systemCommands, syscmd);
-        return syscmd;
     }
 
 
@@ -108,11 +54,10 @@ public class RunKibanaQueries extends BaseQuery {
     * here we will loop and create a List of RestEntry with the queries/APIs that need to be executed
     * You have two APIs that work differently and and may have or not many pages, so we use the getAllPages function
     * runQueries called in this function create a json file for each RestEntry set on the 'queries' variable.
-    * Public function so we can test it.
     *
-    * @param  RestClient client
-    * @param  DiagnosticContext context
-    * @return int
+    * @param  client
+    * @param  context
+    * @return Number of HTTP request that will be executed.
     */
     public int runBasicQueries(RestClient client, DiagnosticContext context) {
 
@@ -140,12 +85,12 @@ public class RunKibanaQueries extends BaseQuery {
     * Once we have the total of event we can calculate the number of pages/call we will need to execute
     * then we call getNewEntryPage to create a new RestEntry for each page.
     *
-    * @param  RestClient client
-    * @param  List<RestEntry> queries
-    * @param  double perPage - This is the number of docusment we reques to the API (set to 100 in execute func / or n in unit test)
-    * @param  RestEntry action
+    * @param  client
+    * @param  queries
+    * @param  perPage  Number of docusment we reques to the API
+    * @param  action Kibana API name we are running
     */
-    public void getAllPages(RestClient client, List<RestEntry> queries, double perPage, RestEntry action) {
+    public void getAllPages(RestClient client, List<RestEntry> queries, int perPage, RestEntry action) {
         // get the values needed to the pagination.
         RestResult res = client.execQuery(String.format("%s?per_page=1", action.getUrl()));
         if (! res.isValid()) {
@@ -168,12 +113,12 @@ public class RunKibanaQueries extends BaseQuery {
     }
 
     /**
-    * Get a new `RestEntry` with the proper querystring parameters for paging.
+    * create a new `RestEntry` with the proper querystring parameters for paging.
     *
-    * @param  int perPage
-    * @param  int page
-    * @param  RestEntry action
-    * @return RestEntry
+    * @param  perPage how many events need to be retreived in the response
+    * @param  page the apge we are requesting
+    * @param  action Kibana API name we are running
+    * @return new object with the API and params that need to be executed.
     */
     private RestEntry getNewEntryPage(int perPage, int page, RestEntry action) {
         return new RestEntry(String.format("%s_%s", action.getName(), page), "", ".json", false, String.format("%s?per_page=%s&page=%s", action.getUrl(), perPage, page), false);
@@ -181,12 +126,24 @@ public class RunKibanaQueries extends BaseQuery {
 
 
     /**
+    * create a LocalSystem object as Kibana is running in a docker container
+    *
+    * @return LocalSytem that will allow us to communicate with docker
+    */
+    private LocalSystem getDockerSystem() {
+        String osName = SystemUtils.parseOperatingSystemName(SystemProperties.osName);
+        LocalSystem syscmd = new LocalSystem(osName);
+        ResourceCache.addSystemCommand(Constants.systemCommands, syscmd);
+        return syscmd;
+    }
+
+    /**
     * This function is executed **after** runBasicQueries
     * Extract the information on the kibana_stats.json with getProfile function.
-    * Within the function getRemoteSystem or getLocalSystem we set ResourceCache.addSystemCommand
+    * set the ResourceCache.addSystemCommand according tp the OS 
     *
-    * @param  DiagnosticContext context
-    * @return SystemCommand
+    * @param  context
+    * @return according with the type of diagnostic return the system command
     */
     public SystemCommand execSystemCommands(DiagnosticContext context) {
 
@@ -208,14 +165,14 @@ public class RunKibanaQueries extends BaseQuery {
                     targetOS = profile.os;
                 }
                 
-                syscmd = getRemoteSystem(targetOS, context);
+                syscmd = ResourceCache.getSystemCommand(Constants.systemCommands);
                 break;
 
             case Constants.kibanaLocal:
                 if (context.dockerPresent) {
-                    syscmd = getLocalSystem("docker", true);
+                    syscmd = getDockerSystem();
                 } else {
-                    syscmd = getLocalSystem(profile.os, false);
+                    syscmd = ResourceCache.getSystemCommand(Constants.systemCommands);
                 }
                 break;
         }
@@ -228,60 +185,57 @@ public class RunKibanaQueries extends BaseQuery {
     * for troubleshooting support engineers will only need "kbn-xsrf" or "Content-Type", all the others are removed.
     *
     * @param  DiagnosticContext context
-    * @return void
     */
-    public void allowedHeadersFilter(DiagnosticContext context) {
-        JsonNode actions = JsonYamlUtils.createJsonNodeFromFileName(context.tempDir, "kibana_actions.json");
-        Boolean headerRemoved = false;
-        if (actions.size() > 0) {
-            for (int i = 0; i < actions.size(); i++) {
-                JsonNode config = actions.get(i).get("config");
-                // API webhook format can change, and maybe we have a webhook without config
-                if (!(config == null || config.isNull())) {
-                    // Not all the webhook need to have headers, so we need to be sure the data was set by the customer.
-                    JsonNode headers = actions.get(i).get("config").get("headers");
-                    if (!(headers == null || headers.isNull())) {
-                        Iterator<Map.Entry<String, JsonNode>> iter = actions.get(i).get("config").get("headers").fields();
+    public void filterActionsHeaders(DiagnosticContext context) {
 
-                        while (iter.hasNext()) {
-                            Map.Entry<String, JsonNode> entry = iter.next();
-                            String key = entry.getKey().toLowerCase();
+        try {
+            JsonNode actions = JsonYamlUtils.createJsonNodeFromFileName(context.tempDir, "kibana_actions.json");
+            Boolean headerRemoved = false;
+            if (actions.size() > 0) {
+                for (int i = 0; i < actions.size(); i++) {
+                    JsonNode config = actions.get(i).get("config");
+                    // API webhook format can change, and maybe we have a webhook without config
+                    if (!(config == null || config.isNull())) {
+                        // Not all the webhook need to have headers, so we need to be sure the data was set by the customer.
+                        JsonNode headers = actions.get(i).get("config").get("headers");
+                        if (!(headers == null || headers.isNull())) {
+                            Iterator<Map.Entry<String, JsonNode>> iter = actions.get(i).get("config").get("headers").fields();
 
-                            if (!key.equals("kbn-xsrf") && !key.equals("content-type")) {
-                                iter.remove();
-                                headerRemoved = true;
+                            while (iter.hasNext()) {
+                                Map.Entry<String, JsonNode> entry = iter.next();
+                                String key = entry.getKey().toLowerCase();
+
+                                if (!key.equals("kbn-xsrf") && !key.equals("content-type")) {
+                                    iter.remove();
+                                    headerRemoved = true;
+                                }
                             }
                         }
                     }
                 }
-            }
 
-            // If any headers were removed, we need to rewrite the file to remove them
-            if (headerRemoved == true) {
-                String fileName = context.tempDir + SystemProperties.fileSeparator + "kibana_actions.json";
-                try (FileWriter fileWriter = new FileWriter(fileName)) {
-                    fileWriter.write(actions.toPrettyString());
-                    fileWriter.flush();
-                } catch (IOException e) {
-                  logger.error("Unexpected error while writing [kibana_actions.json]", e);
+                // If any headers were removed, we need to rewrite the file to remove them
+                if (headerRemoved == true) {
+                    String fileName = context.tempDir + SystemProperties.fileSeparator + "kibana_actions.json";
+                    try (FileWriter fileWriter = new FileWriter(fileName)) {
+                        fileWriter.write(actions.toPrettyString());
+                        fileWriter.flush();
+                    } catch (IOException e) {
+                      logger.error("Unexpected error while writing [kibana_actions.json]", e);
+                    }
                 }
             }
+        } catch (RuntimeException e) {
+            logger.error("Kibana actions file is empty, we have nothing to filter.", e);
         }
     }
 
 
     /**
-    * One of the requirements was test this new Kibana code.
-    * I splitted the "execute" function as in other examples (RunLogstashQueries) uses many static calls
-    * and create many new objects, make it difficult to mock and test.
-    * To be able to test the code without changing the global structure I splitted in smallest functions.
-    * Most of the new functions are public so I'm able to test it (Private if the test need to be done in a different class).
-    * When we will have more Unit test, the test for some functions here will be redundant and the public functions workaround will not needed anymore, 
-    * e.g. createJsonNodeFromFileName, this can be tested on the JsonYamlUtilsTest file (not existing in v8.1.2).
-    * 
+    * According with the version we will run the Kibana APIs, and store the data.
+    * We will also try to collect the sysstat for the OS and the kibana logs if possible.
     *
-    * @param  DiagnosticContext context
-    * @return         JavaPlatform object
+    * @param  context
     */
     public void execute(DiagnosticContext context) {
 
@@ -289,7 +243,7 @@ public class RunKibanaQueries extends BaseQuery {
             context.perPage         = 100;
             RestClient client       = ResourceCache.getRestClient(Constants.restInputHost);
             int totalRetries        = runBasicQueries(client, context);
-            allowedHeadersFilter(context);
+            filterActionsHeaders(context);
             execSystemCommands(context);
 
         } catch (Exception e) {

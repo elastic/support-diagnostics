@@ -2,7 +2,6 @@ package com.elastic.support.diagnostics.commands;
 
 import com.elastic.support.Constants;
 import com.elastic.support.diagnostics.ProcessProfile;
-import com.elastic.support.diagnostics.JavaPlatform;
 import com.elastic.support.diagnostics.chain.Command;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.util.ResourceCache;
@@ -21,12 +20,14 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * This class is executed as CollectKibanaLogs class.
- * The logs in Kibana are not placed always in the same place, if you use RPM to install it logs will be accesible with journalctl
- * But if you use the debian package the logs will be in /var/log/kibana/, and if you install it manually or in Windows the default will be stdout.
- * The Kibana API do not expose where the logs are stored, so we will try in /var/log/kibana/ if not we will check journalctl, and if any of those work we will not collect any logs file.
-*/
-
+ * CollectKibanaLogs tries to collect the Kibana logs.
+ *
+ * Kibana writes logs to different locations based on how it is installed (i.e., RPM, Windows, etc).
+ * This does a best effort to load the logs, but a custom log path cannot be loaded because
+ * the Kibana server does not have any API that reports the path.
+ *
+ * Note: This only works when running locally on the server.
+ */
 public  class CollectKibanaLogs implements Command {
 
     private static final Logger logger = LogManager.getLogger(CollectLogs.class);
@@ -51,8 +52,8 @@ public  class CollectKibanaLogs implements Command {
         SystemCommand sysCmd = ResourceCache.getSystemCommand(Constants.systemCommands);
         String targetDir = context.tempDir + SystemProperties.fileSeparator + "logs";
         ProcessProfile targetNode = context.targetNode;
-        JavaPlatform javaPlatform = targetNode.javaPlatform;
-        Map<String, Map<String, String>> osCmds = context.diagsConfig.getSysCalls(javaPlatform.platform);
+
+        Map<String, Map<String, String>> osCmds = context.diagsConfig.getSysCalls(context.targetNode.os);
         Map<String, String> logCalls = osCmds.get("logs");
 
         try{
@@ -78,8 +79,8 @@ public  class CollectKibanaLogs implements Command {
         }
     }
 
-     /**
-    * this private function will create a new JavaPlatform object
+    /**
+    * According with the OS response, read and extract the content for the logs files.
     *
     * @param output is the text returned by the <code>ls</code>/<code>dir</code> command
     * @param fileList You can call this function multitple times, and add more files to the List

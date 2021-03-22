@@ -179,7 +179,7 @@ public class TestRunKibanaQueries {
                                 .withPath("/api/alerts/_find")
                                 .withQueryStringParameters(
 		                                new Parameter("page", "1"),
-		                                new Parameter("per_page", "2.0")
+		                                new Parameter("per_page", "2")
 		                        )
                 )
                 .respond(
@@ -194,7 +194,7 @@ public class TestRunKibanaQueries {
                                 .withPath("/api/alerts/_find")
                                 .withQueryStringParameters(
 		                                new Parameter("page", "2"),
-		                                new Parameter("per_page", "2.0")
+		                                new Parameter("per_page", "2")
 		                        )
                 )
                 .respond(
@@ -224,7 +224,7 @@ public class TestRunKibanaQueries {
                                 .withPath("/api/detection_engine/rules/_find")
                                 .withQueryStringParameters(
 		                                new Parameter("page", "1"),
-		                                new Parameter("per_page", "2.0")
+		                                new Parameter("per_page", "2")
 		                        )
                 )
                 .respond(
@@ -239,7 +239,7 @@ public class TestRunKibanaQueries {
                                 .withPath("/api/detection_engine/rules/_find")
                                 .withQueryStringParameters(
 		                                new Parameter("page", "2"),
-		                                new Parameter("per_page", "2.0")
+		                                new Parameter("per_page", "2")
 		                        )
                 )
                 .respond(
@@ -285,7 +285,7 @@ public class TestRunKibanaQueries {
     }
 
     @Test
-	public void testExecSystemLocalCommands() {
+	public void testSixversion() {
 
 		DiagnosticContext context = initializeKibana("6.5.0");
     	int totalRetries = new RunKibanaQueries().runBasicQueries(httpRestClient, context);
@@ -300,14 +300,6 @@ public class TestRunKibanaQueries {
         	assertTrue(list.contains(pathname));
         }
         assertEquals(list.size(), 2);
-
-		context.diagnosticInputs = new DiagnosticInputs();
-		context.diagnosticInputs.diagType = Constants.kibanaLocal;
-		context.tempDir = tempDir.getPath();
-		context.dockerPresent = false;
-		SystemCommand syscmd = null;
-		syscmd = new RunKibanaQueries().execSystemCommands(context);
-		assertTrue(syscmd instanceof LocalSystem);
 
 	}
 
@@ -333,8 +325,8 @@ public class TestRunKibanaQueries {
 
         for (String pathname : pathnames) {
         	// if this Unit test fail, you can use this two logger to see the error file name
-            // logger.info(Constants.CONSOLE, "pathnames.");
-            // logger.info(Constants.CONSOLE, pathname);
+            logger.info(Constants.CONSOLE, "pathnames.");
+            logger.info(Constants.CONSOLE, pathname);
         	assertTrue(list.contains(pathname));
         }
         assertEquals(list.size(), 10);
@@ -386,7 +378,7 @@ public class TestRunKibanaQueries {
 
         DiagnosticContext context = initializeKibana("7.10.0");
         int totalRetries = new RunKibanaQueries().runBasicQueries(httpRestClient, context);
-        new RunKibanaQueries().allowedHeadersFilter(context);
+        new RunKibanaQueries().filterActionsHeaders(context);
 
         JsonNode nodeData = JsonYamlUtils.createJsonNodeFromFileName(context.tempDir, "kibana_actions.json");
 
@@ -416,7 +408,7 @@ public class TestRunKibanaQueries {
             );
         DiagnosticContext context = initializeKibana("7.10.0");
         int totalRetries = new RunKibanaQueries().runBasicQueries(httpRestClient, context);
-        new RunKibanaQueries().allowedHeadersFilter(context);
+        new RunKibanaQueries().filterActionsHeaders(context);
 
         JsonNode nodeData = JsonYamlUtils.createJsonNodeFromFileName(context.tempDir, "kibana_actions.json");
         String id = nodeData.get(0).path("id").asText();
@@ -445,7 +437,7 @@ public class TestRunKibanaQueries {
         DiagnosticContext context = initializeKibana("7.10.0");
         int totalRetries = new RunKibanaQueries().runBasicQueries(httpRestClient, context);
         try {
-            new RunKibanaQueries().allowedHeadersFilter(context);
+            new RunKibanaQueries().filterActionsHeaders(context);
         } catch (RuntimeException e) {
             assertTrue(false);
         }

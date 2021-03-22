@@ -1,7 +1,6 @@
 package com.elastic.support.diagnostics.commands;
 
 import com.elastic.support.Constants;
-import com.elastic.support.diagnostics.JavaPlatform;
 import com.elastic.support.diagnostics.ProcessProfile;
 import com.elastic.support.diagnostics.commands.CheckPlatformDetails;
 import com.elastic.support.diagnostics.DiagnosticException;
@@ -147,7 +146,6 @@ public class KibanaGetDetails extends CheckPlatformDetails {
 
             String nodeOs = processInfo.path("os").path("platform").asText().toLowerCase();
             diagNode.os = SystemUtils.parseOperatingSystemName(nodeOs);
-            diagNode.javaPlatform = new JavaPlatform(diagNode.os);
 
             String httpPublishAddr = processInfo.path("kibana").path("transport_address").asText();
             diagNode.httpPublishAddr = httpPublishAddr.substring(0, httpPublishAddr.indexOf(":"));
