@@ -166,11 +166,10 @@ public class SystemUtils {
     * This function is key for two types or execution remote and local.
     * to collect some system data or logs we need to be able to know the OS where the process is running
     * Logstash is not using this as we only collect the API data, no system data collected on the servers.
-    * "win32" is used by Kibana API as OS name.
     *
-    * @param  String osName , this value is provided by the Elasticsearch nodes or Kibana stats API
+    * @param  osName value provided by the Elasticsearch nodes API or Kibana stats API
     *
-    * @return         String
+    * @return the OS name, as defined in our Constants
     */
     public static String parseOperatingSystemName(String osName){
 

@@ -50,68 +50,16 @@ public class KibanaGetDetails extends CheckPlatformDetails {
             List<ProcessProfile> profiles = getNodeNetworkAndLogInfo(infoProcess);
 
             IsRunningInDocker(context, profiles);
+            // depending on the DiagType context values we will set local or remote
+            isKibanaRemoteSystem(context, profiles);
+            isKibanaLocalSystem(context, profiles);
 
-            switch (context.diagnosticInputs.diagType) {
-                case Constants.kibanaRemote:
-                    // If Docker containers flag it for no syscalls or logs
-                    String targetOS;
-                    if (context.dockerPresent) {
-                        context.runSystemCalls = false;
-                        // We really don't have any way of really knowing
-                        // what the enclosing platform is. So this may fail...
-                        logger.warn(Constants.CONSOLE, "Docker containers detected on remote platform - unable to determine host OS. Linux will be used but if another operating system is present the Docker diagnostic calls may fail.");
-                        targetOS = Constants.linuxPlatform;
-                        //break;
-                    }
-                    else{
-                        context.targetNode = findTargetNode(profiles);
-                        targetOS = context.targetNode.os;
-                    }
-
-                    ResourceCache.addSystemCommand(Constants.systemCommands, new RemoteSystem(
-                            targetOS,
-                            context.diagnosticInputs.remoteUser,
-                            context.diagnosticInputs.remotePassword,
-                            context.diagnosticInputs.host,
-                            context.diagnosticInputs.remotePort,
-                            context.diagnosticInputs.keyfile,
-                            context.diagnosticInputs.keyfilePassword,
-                            context.diagnosticInputs.knownHostsFile,
-                            context.diagnosticInputs.trustRemote,
-                            context.diagnosticInputs.isSudo
-                    ));
-
-                    break;
-
-                case Constants.kibanaLocal:
-                    if(context.dockerPresent){
-                        context.runSystemCalls = false;
-
-                        // We do need a system command local to run the docker calls
-                        SystemCommand syscmd = new LocalSystem(SystemUtils.parseOperatingSystemName(SystemProperties.osName));
-                        ResourceCache.addSystemCommand(Constants.systemCommands, syscmd);
-                        break;
-                    }
-
-                    // Kibana is not working in cluster mode, so there is only one nodeprofile
-                    if (profiles.size() == 1) {
-                        context.targetNode = profiles.get(0);
-                    }
-
-                    context.targetNode = findTargetNode(profiles);
-
-                    SystemCommand syscmd = new LocalSystem(context.targetNode.os);
-                    ResourceCache.addSystemCommand(Constants.systemCommands, syscmd);
-
-                    break;
-
-                default:
-                    // If it's not one of the above types it shouldn't be here but try to keep going...
-                    context.runSystemCalls = false;
-                    logger.warn(Constants.CONSOLE, "Error occurred checking the network hosts information. Bypassing system calls.");
-                    throw new RuntimeException("Host/Platform check error.");
-
-            }
+           if (context.targetNode == null) {
+                // If it's not one of the above types it shouldn't be here but try to keep going...
+                context.runSystemCalls = false;
+                logger.warn(Constants.CONSOLE, "Error occurred checking the network hosts information. Bypassing system calls.");
+                throw new RuntimeException("Host/Platform check error.");
+           }
 
         } catch (Exception e) {
             // Try to keep going even if this didn't work.
@@ -119,6 +67,78 @@ public class KibanaGetDetails extends CheckPlatformDetails {
             logger.error("Error fetching Kibana server details.", e);
             context.runSystemCalls = false;
         }
+    }
+
+
+     /**
+    * If Kibana process is running on a remote server 
+    * we need to check if is a docker process or if is running as any other process
+    * Then create a remote system to request the Kibana process
+    *
+    * @param  context
+    * @param  profiles
+    */
+    private void isKibanaRemoteSystem(DiagnosticContext context, List<ProcessProfile> profiles) {
+        if (!context.diagnosticInputs.diagType.equals(Constants.kibanaRemote)) {
+            return;
+        }
+        // If Docker containers flag it for no syscalls or logs
+        String targetOS;
+        if (context.dockerPresent) {
+            context.runSystemCalls = false;
+            // We really don't have any way of really knowing
+            // what the enclosing platform is. So this may fail...
+            logger.warn(Constants.CONSOLE, "Docker detected on remote platform. Linux will be used but if another operating system is present the diagnostic calls may fail.");
+            targetOS = Constants.linuxPlatform;
+        }
+        else{
+            context.targetNode = findTargetNode(profiles);
+            targetOS = context.targetNode.os;
+        }
+
+        ResourceCache.addSystemCommand(Constants.systemCommands, new RemoteSystem(
+                targetOS,
+                context.diagnosticInputs.remoteUser,
+                context.diagnosticInputs.remotePassword,
+                context.diagnosticInputs.host,
+                context.diagnosticInputs.remotePort,
+                context.diagnosticInputs.keyfile,
+                context.diagnosticInputs.keyfilePassword,
+                context.diagnosticInputs.knownHostsFile,
+                context.diagnosticInputs.trustRemote,
+                context.diagnosticInputs.isSudo
+        ));
+    }
+
+
+    /**
+    * If Kibana process is running on the same server 
+    * add a loca system command to be able to execute the API requests
+    *
+    * @param  context
+    * @param  profiles
+    */
+    private void isKibanaLocalSystem(DiagnosticContext context, List<ProcessProfile> profiles) {
+        if (!context.diagnosticInputs.diagType.equals(Constants.kibanaLocal)) {
+            return;
+        }
+        if(context.dockerPresent){
+            context.runSystemCalls = false;
+            // We do need a system command local to run the docker calls
+            SystemCommand syscmd = new LocalSystem(SystemUtils.parseOperatingSystemName(SystemProperties.osName));
+            ResourceCache.addSystemCommand(Constants.systemCommands, syscmd);
+            return;
+        }
+
+        // Kibana is not working in cluster mode, so there is only one nodeprofile
+        if (profiles.size() == 1) {
+            context.targetNode = profiles.get(0);
+        }
+
+        context.targetNode = findTargetNode(profiles);
+
+        SystemCommand syscmd = new LocalSystem(context.targetNode.os);
+        ResourceCache.addSystemCommand(Constants.systemCommands, syscmd);
     }
 
 
