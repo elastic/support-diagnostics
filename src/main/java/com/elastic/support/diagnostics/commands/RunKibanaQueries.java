@@ -41,9 +41,9 @@ public class RunKibanaQueries extends BaseQuery {
     private ProcessProfile getProfile(String tempDir, String fileName, DiagnosticContext context) {
         ProcessProfile profile = new ProcessProfile();
         context.targetNode = profile;
-        JsonNode nodeData = JsonYamlUtils.createJsonNodeFromFileName(tempDir, fileName);
-        profile.pid = nodeData.path("process").path("pid").asText();
-        profile.os = SystemUtils.parseOperatingSystemName(nodeData.path("os").path("platform").asText());
+        JsonNode kibanaData = JsonYamlUtils.createJsonNodeFromFileName(tempDir, fileName);
+        profile.pid = kibanaData.path("process").path("pid").asText();
+        profile.os = SystemUtils.parseOperatingSystemName(kibanaData.path("os").path("platform").asText());
 
         return profile;
     }

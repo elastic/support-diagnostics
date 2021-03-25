@@ -20,13 +20,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * CollectKibanaLogs tries to collect the Kibana logs.
- *
- * Kibana writes logs to different locations based on how it is installed (i.e., RPM, Windows, etc).
- * This does a best effort to load the logs, but a custom log path cannot be loaded because
- * the Kibana server does not have any API that reports the path.
- *
- * Note: This only works when running locally on the server.
+ * Kibana do not provide any API that expose the logs path
+ * This class will check if the logs are in the default path and if they are collect them.
+ * 
  */
 public  class CollectKibanaLogs implements Command {
 
