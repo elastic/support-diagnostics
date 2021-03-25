@@ -1,108 +1,108 @@
- - [Support Diagnostics Utility](#support-diagnostics-utility)
-   - [Overview - What It Does](#overview---what-it-does)
-   - [Installation And Setup](#installation-and-setup)
-     - [Run Requirements](#run-requirements)
-     - [Downloading And Installing](#downloading-and-installing)
-     - [Building From Source](#building-from-source)
-     - [Creating A Docker Image](#creating-a-docker-image)
-   - [Running The Diagnostic Utility](#running-the-diagnostic-utility)
-     - [Interactive Mode - For Those Who Don't Like To Read Documentation](#interactive-mode---for-those-who-dont-like-to-read-documentation)
-     - [Running From The Command Line](#running-from-the-command-line)
-       - [Diagnostic Types](#diagnostic-types)
-       - [Standard Options](#standard-options)
-       - [PKI Authentication Options](#pki-authentication-options)
-       - [Http Proxy Options](#http-proxy-options)
-       - [Remote Execution Options](#remote-execution-options)
-       - [Usage Examples](#usage-examples)
-       - [Customizing What Is Collected](#customizing-what-is-collected)
-           - [The Config Directory](#the-config-directory)
-           - [Removing Or Modifying Calls](#removing-or-modifying-calls)
-           - [Preventing Retries](#preventing-retries)
-       - [Executing Scripted Runs](#executing-scripted-runs)
-   - [Docker](#docker)
-     - [Elasticsearch Deployed In Docker Containers](#elasticsearch-deployed-in-docker-containers)
-     - [Running From A Docker Container](#running-from-a-docker-container)
-   - [File Sanitization Utility](#file-sanitization-utility)
-     - [Overview - How Sanitization Works](#overview---how-sanitization-works)
-     - [Running The Santizer](#running-the-santizer)
-       - [Sanitization Options](#sanitization-options)
-       - [Sanitization Examples](#sanitization-examples)
-   - [Extracting Time Series Diagnostics From Monitoring](#extracting-time-series-diagnostics-from-monitoring)
-     - [Monitoring Extract Overview](#monitoring-extract-overview)
-     - [Running The Extract](#running-the-extract)
-     - [Monitoring Extract Options](#monitoring-extract-options)
-     - [Monitoring Extract Examples](#monitoring-extract-examples)
-   - [Importing Extracted Monitoring Data](#importing-extracted-monitoring-data)
-     - [Monitoring Import Overview](#monitoring-import-overview)
-     - [Running The Monitoring Data Import](#running-the-monitoring-data-import)
-     - [Monitoring Data Import Options](#monitoring-data-import-options)
-     - [Monitoring Import Examples](#monitoring-import-examples)
-   - [Standard Diagnostic Troubleshooting](#standard-diagnostic-troubleshooting)
- 
- # Support Diagnostics Utility
- 
- [Click here for the latest version of the Support Diagnostics Utility](https://github.com/elastic/support-diagnostics/releases/latest)
- 
- The support diagnostic utility is a Java application that can interrogate a running Elasticsearch cluster, Kibana or Logstash process to obtain data about the state of the cluster at that point in time. It is compatible with all versions of Elasticsearch (including alpha, beta and release candidates), and for Logstash versions greater than v5, and for Kibana greater than v6.5.  The release version of the diagnostic is independent of the Elasticsearch, Kibana or Logstash version it is being run against. If it cannot match the targeted version it will attempt to run calls from the latest configured release. Linux, OSX, or Windows platforms are all supported, and it can be run as a standalone utility or from within a Docker container.
+- [Support Diagnostics Utility](#support-diagnostics-utility)
+  - [Overview - What It Does](#overview---what-it-does)
+  - [Installation And Setup](#installation-and-setup)
+    - [Run Requirements](#run-requirements)
+    - [Downloading And Installing](#downloading-and-installing)
+    - [Building From Source](#building-from-source)
+    - [Creating A Docker Image](#creating-a-docker-image)
+  - [Running The Diagnostic Utility](#running-the-diagnostic-utility)
+    - [Interactive Mode - For Those Who Don't Like To Read Documentation](#interactive-mode---for-those-who-dont-like-to-read-documentation)
+    - [Running From The Command Line](#running-from-the-command-line)
+      - [Diagnostic Types](#diagnostic-types)
+      - [Standard Options](#standard-options)
+      - [PKI Authentication Options](#pki-authentication-options)
+      - [Http Proxy Options](#http-proxy-options)
+      - [Remote Execution Options](#remote-execution-options)
+      - [Usage Examples](#usage-examples)
+      - [Customizing What Is Collected](#customizing-what-is-collected)
+        - [The Config Directory](#the-config-directory)
+        - [Removing Or Modifying Calls](#removing-or-modifying-calls)
+        - [Preventing Retries](#preventing-retries)
+      - [Executing Scripted Runs](#executing-scripted-runs)
+  - [Docker](#docker)
+    - [Elasticsearch Deployed In Docker Containers](#elasticsearch-deployed-in-docker-containers)
+    - [Running From A Docker Container](#running-from-a-docker-container)
+  - [File Sanitization Utility](#file-sanitization-utility)
+    - [Overview - How Sanitization Works](#overview---how-sanitization-works)
+    - [Running The Santizer](#running-the-santizer)
+      - [Sanitization Options](#sanitization-options)
+      - [Sanitization Examples](#sanitization-examples)
+  - [Extracting Time Series Diagnostics From Monitoring](#extracting-time-series-diagnostics-from-monitoring)
+    - [Monitoring Extract Overview](#monitoring-extract-overview)
+    - [Running The Extract](#running-the-extract)
+    - [Monitoring Extract Options](#monitoring-extract-options)
+    - [Monitoring Extract Examples](#monitoring-extract-examples)
+  - [Importing Extracted Monitoring Data](#importing-extracted-monitoring-data)
+    - [Monitoring Import Overview](#monitoring-import-overview)
+    - [Running The Monitoring Data Import](#running-the-monitoring-data-import)
+    - [Monitoring Data Import Options](#monitoring-data-import-options)
+    - [Monitoring Import Examples](#monitoring-import-examples)
+  - [Standard Diagnostic Troubleshooting](#standard-diagnostic-troubleshooting)
 
- ## Overview - What It Does
- 
- When the utility runs it will first check to see if there is a more current version and display an alert message if it is out of date. From there it will connect to the host input in the command line parameters, autheticate if necessary, check the Elasticsearch version, and get a listing of available nodes and their configurations. From there it will run a series of REST API calls specific to the version that was found. If the node configuration info shows a master with an HTTP listener configured all the REST calls will be run against that master. Otherwise the node on the host that was input will be used.  
- 
- Once the REST calls are complete, system calls such as top, netstat, iostat, etc. will be run against the specified host for the appropriate input diagnostic type selected. See specific documentation for more details on those type options. It will also collect logs from the node on the targeted host unless it is in REST API only mode.  
- 
- The application can be run from any directory on the machine.  It does not require installation to a specific location, and the only requirement is that the user has read access to the Elasticsearch artifacts, write access to the chosen output directory, and sufficient disk space for the generated archive.
- 
- ## Installation And Setup
- 
- ### Run Requirements
- 
- - JDK - Oracle or OpenJDK, 1.8-13.
-    - The IBM JDK is not supported due to JSSE related issues that can cause TLS errors.
-    - **Important Note For Elasticsearch Version 7:** Elasticsearch now includes a bundled JVM that is used by default. For the diagnostic to retrieve thread dumps via Jstack it must be executed with the same JVM that was used to run Elasticsearch. The diagnostic utility will attempt to find the location of the JVM that was used to run the process it is interrogating. If it is unable to do so, you may need to manually configure the location by setting JAVA_HOME to the directory containing the /bin directory for the included JDK. For example, <path to Elasticsearch 7 deployment>/jdk/Contents/Home.
- - The system user account for that host(not the elasticsearch login) must have sufficient authorization to run these commands and access the logs(usually in /var/log/elasticsearch) in order to obtain a full collection of diagnostics.  
- - If you are authenticating using the built in Xpack security, the supplied user id must have permission to execute the diagnostic URL's. The superuser role is recommended unless you are familar enough with the calls being made to tailor your own accounts and roles.
- 
- ### Downloading And Installing
- 
- - Locate the [latest release](https://github.com/elastic/support-diagnostics/releases/latest)
- - Select the zip file labeled support-diagnostic-XX.XX.XX-dist.zip to download the binary files. **_Do not select the zip or tar files labeled: 'Source code'._** These do not contain compiled runtimes and will generate errors if you attempt to use the scripts contained in them.
- - Unzip the downloaded file into the directory you intend to run from. This can be on the same host as the as the Elasticsearch, Kibana or Logstash host you wish to interrogate, or on a remote server or workstation. You can also run it from within a Docker container(see further instructions down for generating an image).
- 
- ### Building From Source
- 
- - Clone or download the Github repo. In order to clone the repo you must have Git installed and running. See the instructions appropriate for your operating system.
- - Make sure you have a 1.8 JDK or greater. It **must** be a JDK, not a JRE or you will not be able to compile.
- - Set the `JAVA_HOME` environment variable to point to your JDK installation.
- - Make sure a recent version of Maven is installed on the build machine.
- - Create a `MAVEN_HOME` directory pointing to the location you've unzipped it to.
- - `cd` to the top level repo directory and type `mvn package`.
- - The release artifacts will be contained in the `target` directory.
- 
- ### Creating A Docker Image
- 
- - This procedure is currently only available on the Linux and OSX platform.
- - You must have Docker installed on the same host as the downloaded utility.
- - From the directory created by unarchiving the utility execute `docker-build.sh` This will create the Docker image - see run instructions for more information on running the utility from a container.
- 
- ## Running The Diagnostic Utility
- 
- ### Interactive Mode - For Those Who Don't Like To Read Documentation  
- 
- If you are in a rush and don't mind going through a Q&A process you can execute the diagnostic with no options. It will then enter interactive mode and walk you through the process of executing with the proper options. Simply execute `diagnostics.sh` or `diagnostics.bat`. Previous versions of the diagnostic required you to be in the installation directory but you should now be able to run it from anywhere on the installed host. Assuming of course that the proper permissions exist. Symlinks are **not** currently supported however, so keep that in mind when setting up your installation.  
- 
- ### Running From The Command Line  
- 
- - Input parameters may be specified in any order.
- - As previously stated, to ensure that all artifacts are collected it is recommended that you run the tool with elevated privileges. This means sudo on Linux type platforms and via an Administor Prompt in Windows. This is not set in stone, and is entirely dependent upon the privileges of the account running the diagnostic. Logs can be especially problematic to collect on Linux systems where Elasticsearch was installed via a package manager. When determining how to run, it is suggested you try copying one or more log files from the configured log directory to the user home of the running account. If that works you probably have sufficient authority to run without sudo or the administrative role.
- - An archive with the format `<diagnostic type>-diagnostics`-`<DateTimeStamp>`.tar.gz will be created in the working directory or an output directory you have specified.
- - A truststore does not need to be specified - it's assumed you are running this against a node that you set up and if you didn't trust it you wouldn't be running this.
- - You can specify additional Java options such as a higher `-Xmx` value by setting them via the environment variable: `DIAG_JAVA_OPTS`.
- 
- #### Diagnostic Types
- 
- Elasticseach, Kibana and Logstash each have three distinct execution modes available when running the diagnostic.
- 
+# Support Diagnostics Utility
+
+[Click here for the latest version of the Support Diagnostics Utility](https://github.com/elastic/support-diagnostics/releases/latest)
+
+The support diagnostic utility is a Java application that can interrogate a running Elasticsearch cluster or Logstash process to obtain data about the state of the cluster at that point in time. It is compatible with all versions of Elasticsearch (including alpha, beta and release candidates), and for Logstash versions greater than 5.0, and for Kibana v6.5+. The release version of the diagnostic is independent of the Elasticsearch, Kibana or Logstash version it is being run against. If it cannot match the targeted version it will attempt to run calls from the latest configured release. Linux, OSX, or Windows platforms are all supported, and it can be run as a standalone utility or from within a Docker container.
+
+## Overview - What It Does
+
+When the utility runs it will first check to see if there is a more current version and display an alert message if it is out of date. From there it will connect to the host input in the command line parameters, autheticate if necessary, check the Elasticsearch version, and get a listing of available nodes and their configurations. From there it will run a series of REST API calls specific to the version that was found. If the node configuration info shows a master with an HTTP listener configured all the REST calls will be run against that master. Otherwise the node on the host that was input will be used.
+
+Once the REST calls are complete, system calls such as top, netstat, iostat, etc. will be run against the specified host for the appropriate input diagnostic type selected. See specific documentation for more details on those type options. It will also collect logs from the node on the targeted host unless it is in REST API only mode.
+
+The application can be run from any directory on the machine. It does not require installation to a specific location, and the only requirement is that the user has read access to the Elasticsearch artifacts, write access to the chosen output directory, and sufficient disk space for the generated archive.
+
+## Installation And Setup
+
+### Run Requirements
+
+- JDK - Oracle or OpenJDK, 1.8-13.
+  - The IBM JDK is not supported due to JSSE related issues that can cause TLS errors.
+  - **Important Note For Elasticsearch Version 7:** Elasticsearch now includes a bundled JVM that is used by default. For the diagnostic to retrieve thread dumps via Jstack it must be executed with the same JVM that was used to run Elasticsearch. The diagnostic utility will attempt to find the location of the JVM that was used to run the process it is interrogating. If it is unable to do so, you may need to manually configure the location by setting JAVA_HOME to the directory containing the /bin directory for the included JDK. For example, <path to Elasticsearch 7 deployment>/jdk/Contents/Home.
+- The system user account for that host(not the elasticsearch login) must have sufficient authorization to run these commands and access the logs(usually in /var/log/elasticsearch) in order to obtain a full collection of diagnostics.
+- If you are authenticating using the built in Xpack security, the supplied user id must have permission to execute the diagnostic URL's. The superuser role is recommended unless you are familar enough with the calls being made to tailor your own accounts and roles.
+
+### Downloading And Installing
+
+- Locate the [latest release](https://github.com/elastic/support-diagnostics/releases/latest)
+- Select the zip file labeled support-diagnostic-XX.XX.XX-dist.zip to download the binary files. **_Do not select the zip or tar files labeled: 'Source code'._** These do not contain compiled runtimes and will generate errors if you attempt to use the scripts contained in them.
+- Unzip the downloaded file into the directory you intend to run from. This can be on the same host as the as the Elasticsearch, Kibana or Logstash host you wish to interrogate, or on a remote server or workstation. You can also run it from within a Docker container(see further instructions down for generating an image).
+
+### Building From Source
+
+- Clone or download the Github repo. In order to clone the repo you must have Git installed and running. See the instructions appropriate for your operating system.
+- Make sure you have a 1.8 JDK or greater. It **must** be a JDK, not a JRE or you will not be able to compile.
+- Set the `JAVA_HOME` environment variable to point to your JDK installation.
+- Make sure a recent version of Maven is installed on the build machine.
+- Create a `MAVEN_HOME` directory pointing to the location you've unzipped it to.
+- `cd` to the top level repo directory and type `mvn package`.
+- The release artifacts will be contained in the `target` directory.
+
+### Creating A Docker Image
+
+- This procedure is currently only available on the Linux and OSX platform.
+- You must have Docker installed on the same host as the downloaded utility.
+- From the directory created by unarchiving the utility execute `docker-build.sh` This will create the Docker image - see run instructions for more information on running the utility from a container.
+
+## Running The Diagnostic Utility
+
+### Interactive Mode - For Those Who Don't Like To Read Documentation
+
+If you are in a rush and don't mind going through a Q&A process you can execute the diagnostic with no options. It will then enter interactive mode and walk you through the process of executing with the proper options. Simply execute `diagnostics.sh` or `diagnostics.bat`. Previous versions of the diagnostic required you to be in the installation directory but you should now be able to run it from anywhere on the installed host. Assuming of course that the proper permissions exist. Symlinks are **not** currently supported however, so keep that in mind when setting up your installation.
+
+### Running From The Command Line
+
+- Input parameters may be specified in any order.
+- As previously stated, to ensure that all artifacts are collected it is recommended that you run the tool with elevated privileges. This means sudo on Linux type platforms and via an Administor Prompt in Windows. This is not set in stone, and is entirely dependent upon the privileges of the account running the diagnostic. Logs can be especially problematic to collect on Linux systems where Elasticsearch was installed via a package manager. When determining how to run, it is suggested you try copying one or more log files from the configured log directory to the user home of the running account. If that works you probably have sufficient authority to run without sudo or the administrative role.
+- An archive with the format `<diagnostic type>-diagnostics`-`<DateTimeStamp>`.tar.gz will be created in the working directory or an output directory you have specified.
+- A truststore does not need to be specified - it's assumed you are running this against a node that you set up and if you didn't trust it you wouldn't be running this.
+- You can specify additional Java options such as a higher `-Xmx` value by setting them via the environment variable: `DIAG_JAVA_OPTS`.
+
+#### Diagnostic Types
+
+Elasticseach, Kibana, and Logstash each have three distinct execution modes available when running the diagnostic.
+
  <table>
  <thead>
    <tr>
@@ -149,7 +149,6 @@
    <td width="70%" align="left" valign="top">Collects the REST API information only from a running Logstash process. Similar to the Elasticsearch type.
    </td>
  </tr>
-
  <tr>
    <td width="30%" align="left" valign="top">kibana-local</td>
    <td width="70%" align="left" valign="top">Similar to Elasticsearch local mode, this runs against a Kibana process running on the same host as the installed diagnostic utility. Retrieves Kibana REST API dignostic information as well as the output from the same system calls and the logs if stored in the default path `var/log/kibana` or in the `journalctl` for linux and mac.
@@ -373,39 +372,39 @@ Because there is no native equivalent of ssh or sftp on Windows, this functional
    <td width="50%" align="left" valign="top">Use when the ssh port of the remote host is set to something other than 22. Usually not necessary.</td>
    <td width="30%" align="left" valign="top"></td>
  </tr>
- 
- </table>  
- 
- #### Usage Examples  
- 
- _NOTE: Windows users use .\diagnostics.bat instead of ./diagnostics.sh_  
- 
- Local or remote host, default port, no security or TLS  
- 
-   ```$xslt
-   sudo ./diagnostics.sh --host localhost  
-   sudo ./diagnostics.sh --host 10.0.0.20
-   ```  
- 
- Basic Auth with and without TLS
-   
-   ```$xslt
-   sudo ./diagnostics.sh --host myhost.mycompany.com -u someuser -p  
-   sudo ./diagnostics.sh --host 10.0.0.20 -u someuser --password --ssl  
-   ```
- 
-  Running the api type to suppress system call and log collection and explicitly configuring an output directory.
- 
-   ```$xslt
-   sudo ./diagnostics.sh --host localhost --type api -o /home/user1/diag-out
-   ```
- 
- Executing Logstash diagnostics with a non-default port  
- 
-   ```$xslt
-   sudo ./diagnostics.sh --host 10.0.0.20 --type logstash-local --port 9607 
-   ```
- 
+
+ </table>
+
+#### Usage Examples
+
+_NOTE: Windows users use .\diagnostics.bat instead of ./diagnostics.sh_
+
+Local or remote host, default port, no security or TLS
+
+```$xslt
+sudo ./diagnostics.sh --host localhost
+sudo ./diagnostics.sh --host 10.0.0.20
+```
+
+Basic Auth with and without TLS
+
+```$xslt
+sudo ./diagnostics.sh --host myhost.mycompany.com -u someuser -p
+sudo ./diagnostics.sh --host 10.0.0.20 -u someuser --password --ssl
+```
+
+Running the api type to suppress system call and log collection and explicitly configuring an output directory.
+
+```$xslt
+sudo ./diagnostics.sh --host localhost --type api -o /home/user1/diag-out
+```
+
+Executing Logstash diagnostics with a non-default port
+
+```$xslt
+sudo ./diagnostics.sh --host 10.0.0.20 --type logstash-local --port 9607
+```
+
 Executing Kibana diagnostics in the same server where kibana is running
  
    ```$xslt
@@ -418,91 +417,90 @@ Running the kibana-api type to suppress system call and log collection and expli
    sudo ./diagnostics.sh --host 2775abprd8230d55d11e5edc86752260dd.us-east-1.aws.found.io --port 9243 --type kibana-api -u elastic --password --ssl -o /home/user1/diag-out
    ```
  
- Executing against a remote host with full collection, using sudo, and enabling trust where there's no known host entry. Note that the diagnostic is not executed via sudo because all the privileged access is on a different host.  
- 
-   ```$xslt  
-   ./diagnostics.sh --host 10.0.0.20 --type remote -u someuser --password --ssl --remoteUser someuser --remotePass --trustRemote --sudo`
-   ```
- 
- Executing against a remote host, full collection, using an ssh public key file and bypassing the diagnostics version check.
- 
-   ```$xslt
-   ./diagnostics.sh --host 10.0.0.20 --type remote -u someuser --password --ssl --remoteUser someuser --keyFile "~.ssh/es_rsa" --bypassDiagVerify
-   ```  
-  
- Executing against a cloud cluster. Note that in this case we use 9243 for the port, disable host name verification and force the type to strictly api calls.
-  
-   ```$xslt
-   ./diagnostics.sh --host 2775abprd8230d55d11e5edc86752260dd.us-east-1.aws.found.io -u elastic -p --port 9243 --ssl --type api --noVerify
-   ```
+Executing against a remote host with full collection, using sudo, and enabling trust where there's no known host entry. Note that the diagnostic is not executed via sudo because all the privileged access is on a different host.
 
-    
- #### Customizing What Is Collected
- 
- ##### The Config Directory
- 
- All configuration used by the utility is located the config _/config_ under the folder created when the diagnostic utility was unzipped. These can be modified to change some behaviors in the diagnostic utility. 
- The *-rest.yml files all contain queries that executed against the cluster being diagnosed. They are versioned, the the Elasticsearch calls have additional modifiers that can be used to further
- customize the retrievals. The diags.yml file has generalized configuration information, and scrub.yml can be used to drive the sanitization function.  
- 
- ##### Removing Or Modifying Calls
- 
- To prevent a call from being executed or modify the results via the syntax, simple comment out, remove or change the entry. You can also add a completely different entry. Make sure that the key 
- you use for that call does not overlap with another one already used. The file name of the output that will be packaged in the diag will be derived from that key.
- 
- ##### Preventing Retries
- 
- At times you may want to compress the time frames for a diagnostic run and do not want multiple retry attempts if the first one fails. These will only be executed if a REST call within the 
- configuration file has a _retry: true_ parameter in its configuration. If this setting exists simply comment it out or set it to false to disable the retry.
-   
- #### Executing Scripted Runs
- 
- Executing the diagnostic via a script passing in all parameters at a time but passwords must currently be sent in via plain text so it is not recommended unless you have the proper security mechanisms in place to safeguard your credentials. The parameters:<br/> --passwordText, --pkiPassText, --proxyPassText, --pkiPassText, --remotePassText, and --keyFilePassText can be used instead of their switch parameter equivalents to send in a value rather than prompt for a masked password. These are not displayed via the help or on the command line options table because we do not encourage their use unless you absolutely need to have this functionality.
- 
- ## Docker
- 
- ### Elasticsearch Deployed In Docker Containers
- 
- During execution, the diagnostic will attempt to determine whether any of the nodes in the cluster are running within Docker containers, particularly the node targeted via the host name. If one or more nodes on that targeted host are running in Docker containers, an additional set of Docker specific diagnostics such as inspect, top, and info, as well as obtaining the logs. This will be done for every discovered container on the host(not just ones containing Elasticsearch). In addition, when it is possible to determine if the calls are valid, the utility will also attempt to make the usual system calls to the host OS running the containers.  
- 
- If errors occur when attempting to obtain diagnostics from Elasticsearch nodes, Kibana or Logstash processes running within Docker containers, consider running with the --type api, logstash-api or , kibana-api to verify that the configuration is not causing issues with the system call or log extraction modules in the diagnostic. This should allow the REST API subset to be successfully collected.
- 
- ### Running From A Docker Container
- 
- When the diagnostic is deployed within a Docker container it will recognize the enclosing environment and disable the types local, local-kibana and local-logstash. These modes of operation require the diagnostic to verify that it is running on the same host as the process it is investigating because of the ways in which system calls and file operations are handled. Docker containers muddy the waters, so to speak, in this case making this difficult if not impossible. So for the sake of reliability, once the diagnostic is deployed within Docker it will always function as if it were a remote component. The only options available will be remote, logstash-remote, kibana-remote, remote, and api.
- 
- There are a number of options for interacting with applications running within Docker containers. The easiest way to run the diagnostic is simply to perform a `docker run -it` which opens a pseudo TTY. At that point you can interface with the diagnostic in the same way as you would when it was directly installed on the host. If you look in the _/docker_ directory in the diagnostic distribution you will find a sample script named `diagnostic-container-exec.sh` that contains an example of how to do this.  
- 
-   ```$xslt
-   docker run -it -v ~/docker-diagnostic-output:/diagnostic-output  support-diagnostics-app  bash
-   ```
-   
- For the diagnostic to work seamlessly from within a container, there must be a consistent location where files can be written. The default location when the diagnostic detects that it is deployed in Docker will be a volume named _diagnostic-output_. If you examine the above script you will notice that it mounts that volume to a local directory on the host where the diagnostic loaded Docker container resides. In this case it is a folder named _docker-diagnostic-output_ in the home directory of the user account running the script. Temp files and the eventual diagnostic archive will be written to this location. You may change the volume if you adjust the explicit output directory whenever you run the diagnostic, but given that you are mapping the volume to local storage that creates a possible failure point. Therefore it's recommended you leave the _diagnostic-output_ volume name _as is_ and simply adjust the local mapping.
- 
- ## File Sanitization Utility
- 
- ### Overview - How Sanitization Works  
-   
- In some cases the information collected by the diagnostic may have content that cannot be viewed by those outside the organization. IP addresses and host names, for instance. The diagnostic contains functionality that allows one to replace this content with values they choose contained in a configuration file. It will process a diagnostic archive file by file, replacing the entries in the config with a configured substitute value.  
-   
- It is run via a separate execution script, and can process any valid Elasticsearch cluster diagnostic archive produced by Support Diagnostics 6.4 or greater. It can also process a single file. It does not need to be run on the same host that produced the diagnostic. Or by the same version number that produced the archive as long as it is a supported version. Kibana and Logstash diagnostics are not supported at this time, although you may process those using the single file by file functionality for each entry.  
- 
- It will go through each file line by line checking the content. If you are only concerned about IP addresses, you do not have to configure anything.  **_The utility will automatically obfuscate all node id's node names, IPv4, IPv6 and MAC addresses._** It is important to note this because as it does this, it will generate a new random IP value and cache it to use every time it encounters that same IP later on. So that the same obfuscated value will be consistent across diagnostic files. This ensures that you can differentiate between occurrences of discrete nodes in the cluster. If you replace all the IP addresses with a global XXX.XXX.XXX.XXX mask you will lose the ability to see which node did what.
- 
- After it has checked for IP and MAC addresses it will use any configured tokens. If you include a configuration file of supplied string tokens, any occurrence of that token will be replaced with a generated replacement. As with IP's this will be consistent from file to file but not between runs. It supports explicit string literal replacement or regexes that match a broader set of criteria. An example configuration file (`scrub.yml`) is included in the root installation directory as an example for creating your own tokens.
- 
- ### Running The Sanitizer
- 
- - Start with a generated diagnostic archive from Support Diagnostics 6.4 or later and an installation of the latest diagnostic utility.
- - Add any tokens for text you wish to conceal to your config file. The utility will look for a file named `scrub.yml` located in the /config directory within the unzipped uutility dir. It must reside in this location.
- - Run the utility, inputing the full absolute path the archive, directory, or single file you wish to process. Options are described below.
- - The sanitization process will check for the number of processors on the host it is run on and create a worker per processor to distribute the load. If you wish to override this it can be done via the command line --workers option.
- - If you are processing a large cluster's diagnostic, this may take a while to run, and you may need to use the `DIAG_JAVA_OPTS` environment variable to increase the size of the Java heap if processing is extremely slow or you see OutOfMemoryExceptions.
- - You can bypass specified files from processing, remove specified files from the sanitized archive altogether, and include or exclude certain file types from sanitization on a token by token basis. See the scrub file for examples.
- - When running against a standard diagnostic package, it will re-archive the file with "scrubbed-" prepended to the  name.  Single files and directories will be enclosed within a new archive .  
- 
- #### Sanitization Options
- 
+```$xslt
+./diagnostics.sh --host 10.0.0.20 --type remote -u someuser --password --ssl --remoteUser someuser --remotePass --trustRemote --sudo`
+```
+
+Executing against a remote host, full collection, using an ssh public key file and bypassing the diagnostics version check.
+
+```$xslt
+./diagnostics.sh --host 10.0.0.20 --type remote -u someuser --password --ssl --remoteUser someuser --keyFile "~.ssh/es_rsa" --bypassDiagVerify
+```
+
+Executing against a cloud cluster. Note that in this case we use 9243 for the port, disable host name verification and force the type to strictly api calls.
+
+```$xslt
+./diagnostics.sh --host 2775abprd8230d55d11e5edc86752260dd.us-east-1.aws.found.io -u elastic -p --port 9243 --ssl --type api --noVerify
+```
+
+#### Customizing What Is Collected
+
+##### The Config Directory
+
+All configuration used by the utility is located the config _/config_ under the folder created when the diagnostic utility was unzipped. These can be modified to change some behaviors in the diagnostic utility.
+The \*-rest.yml files all contain queries that executed against the cluster being diagnosed. They are versioned, the the Elasticsearch calls have additional modifiers that can be used to further
+customize the retrievals. The diags.yml file has generalized configuration information, and scrub.yml can be used to drive the sanitization function.
+
+##### Removing Or Modifying Calls
+
+To prevent a call from being executed or modify the results via the syntax, simple comment out, remove or change the entry. You can also add a completely different entry. Make sure that the key
+you use for that call does not overlap with another one already used. The file name of the output that will be packaged in the diag will be derived from that key.
+
+##### Preventing Retries
+
+At times you may want to compress the time frames for a diagnostic run and do not want multiple retry attempts if the first one fails. These will only be executed if a REST call within the
+configuration file has a _retry: true_ parameter in its configuration. If this setting exists simply comment it out or set it to false to disable the retry.
+
+#### Executing Scripted Runs
+
+Executing the diagnostic via a script passing in all parameters at a time but passwords must currently be sent in via plain text so it is not recommended unless you have the proper security mechanisms in place to safeguard your credentials. The parameters:<br/> --passwordText, --pkiPassText, --proxyPassText, --pkiPassText, --remotePassText, and --keyFilePassText can be used instead of their switch parameter equivalents to send in a value rather than prompt for a masked password. These are not displayed via the help or on the command line options table because we do not encourage their use unless you absolutely need to have this functionality.
+
+## Docker
+
+### Elasticsearch Deployed In Docker Containers
+
+During execution, the diagnostic will attempt to determine whether any of the nodes in the cluster are running within Docker containers, particularly the node targeted via the host name. If one or more nodes on that targeted host are running in Docker containers, an additional set of Docker specific diagnostics such as inspect, top, and info, as well as obtaining the logs. This will be done for every discovered container on the host(not just ones containing Elasticsearch). In addition, when it is possible to determine if the calls are valid, the utility will also attempt to make the usual system calls to the host OS running the containers.
+
+If errors occur when attempting to obtain diagnostics from Elasticsearch nodes, Kibana or Logstash processes running within Docker containers, consider running with the --type api, logstash-api or kibana-api to verify that the configuration is not causing issues with the system call or log extraction modules in the diagnostic. This should allow the REST API subset to be successfully collected.
+
+### Running From A Docker Container
+
+When the diagnostic is deployed within a Docker container it will recognize the enclosing environment and disable the types local, local-kibana, and local-logstash. These modes of operation require the diagnostic to verify that it is running on the same host as the process it is investigating because of the ways in which system calls and file operations are handled. Docker containers muddy the waters, so to speak, in this case making this difficult if not impossible. So for the sake of reliability, once the diagnostic is deployed within Docker it will always function as if it were a remote component. The only options available will be remote, kibana-remote, logstash-remote, remote, and api.
+
+There are a number of options for interacting with applications running within Docker containers. The easiest way to run the diagnostic is simply to perform a `docker run -it` which opens a pseudo TTY. At that point you can interface with the diagnostic in the same way as you would when it was directly installed on the host. If you look in the _/docker_ directory in the diagnostic distribution you will find a sample script named `diagnostic-container-exec.sh` that contains an example of how to do this.
+
+```$xslt
+docker run -it -v ~/docker-diagnostic-output:/diagnostic-output  support-diagnostics-app  bash
+```
+
+For the diagnostic to work seamlessly from within a container, there must be a consistent location where files can be written. The default location when the diagnostic detects that it is deployed in Docker will be a volume named _diagnostic-output_. If you examine the above script you will notice that it mounts that volume to a local directory on the host where the diagnostic loaded Docker container resides. In this case it is a folder named _docker-diagnostic-output_ in the home directory of the user account running the script. Temp files and the eventual diagnostic archive will be written to this location. You may change the volume if you adjust the explicit output directory whenever you run the diagnostic, but given that you are mapping the volume to local storage that creates a possible failure point. Therefore it's recommended you leave the _diagnostic-output_ volume name _as is_ and simply adjust the local mapping.
+
+## File Sanitization Utility
+
+### Overview - How Sanitization Works
+
+In some cases the information collected by the diagnostic may have content that cannot be viewed by those outside the organization. IP addresses and host names, for instance. The diagnostic contains functionality that allows one to replace this content with values they choose contained in a configuration file. It will process a diagnostic archive file by file, replacing the entries in the config with a configured substitute value.
+
+It is run via a separate execution script, and can process any valid Elasticsearch cluster diagnostic archive produced by Support Diagnostics 6.4 or greater. It can also process a single file. It does not need to be run on the same host that produced the diagnostic. Or by the same version number that produced the archive as long as it is a supported version. Kibana and Logstash diagnostics are not supported at this time, although you may process those using the single file by file functionality for each entry.
+
+It will go through each file line by line checking the content. If you are only concerned about IP addresses, you do not have to configure anything. **_The utility will automatically obfuscate all node id's node names, IPv4, IPv6 and MAC addresses._** It is important to note this because as it does this, it will generate a new random IP value and cache it to use every time it encounters that same IP later on. So that the same obfuscated value will be consistent across diagnostic files. This ensures that you can differentiate between occurrences of discrete nodes in the cluster. If you replace all the IP addresses with a global XXX.XXX.XXX.XXX mask you will lose the ability to see which node did what.
+
+After it has checked for IP and MAC addresses it will use any configured tokens. If you include a configuration file of supplied string tokens, any occurrence of that token will be replaced with a generated replacement. As with IP's this will be consistent from file to file but not between runs. It supports explicit string literal replacement or regexes that match a broader set of criteria. An example configuration file (`scrub.yml`) is included in the root installation directory as an example for creating your own tokens.
+
+### Running The Sanitizer
+
+- Start with a generated diagnostic archive from Support Diagnostics 6.4 or later and an installation of the latest diagnostic utility.
+- Add any tokens for text you wish to conceal to your config file. The utility will look for a file named `scrub.yml` located in the /config directory within the unzipped uutility dir. It must reside in this location.
+- Run the utility, inputing the full absolute path the archive, directory, or single file you wish to process. Options are described below.
+- The sanitization process will check for the number of processors on the host it is run on and create a worker per processor to distribute the load. If you wish to override this it can be done via the command line --workers option.
+- If you are processing a large cluster's diagnostic, this may take a while to run, and you may need to use the `DIAG_JAVA_OPTS` environment variable to increase the size of the Java heap if processing is extremely slow or you see OutOfMemoryExceptions.
+- You can bypass specified files from processing, remove specified files from the sanitized archive altogether, and include or exclude certain file types from sanitization on a token by token basis. See the scrub file for examples.
+- When running against a standard diagnostic package, it will re-archive the file with "scrubbed-" prepended to the name. Single files and directories will be enclosed within a new archive .
+
+#### Sanitization Options
+
  <table>
  <thead>
    <tr >
