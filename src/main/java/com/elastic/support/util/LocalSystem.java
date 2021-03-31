@@ -111,7 +111,7 @@ public class LocalSystem extends SystemCommand {
             String target = targetDir + SystemProperties.fileSeparator + serviceName;
             FileUtils.copyFile(new File(source), new File(target));
             // clean up the temp logs on the remote host
-            runCommand(" rm -Rf templogs");
+            runCommand("rm -Rf templogs");
         } catch (IOException e) {
             logger.info("Error retrieving log: {}. Bypassing.", serviceName);
             logger.error( e);
