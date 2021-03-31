@@ -35,10 +35,10 @@ import java.util.ArrayList;
 public class KibanaGetDetails extends CheckPlatformDetails {
 
     /**
-    * Collect server details from Kibana using the configured {@code context}, and store
-    * updated details back into the {@code context}.
-    * @param  context
-    */
+     * Collect server details from Kibana using the configured {@code context}, and store
+     * updated details back into the {@code context}.
+     * @param context The diagnostic context
+     */
     @Override
     public void execute(DiagnosticContext context) {
 
