@@ -111,12 +111,12 @@ public class KibanaGetDetails extends CheckPlatformDetails {
 
 
     /**
-    * If Kibana process is running on the same server 
-    * add a loca system command to be able to execute the API requests
-    *
-    * @param  context
-    * @param  profiles
-    */
+     * If Kibana process is running on the same server 
+     * add a loca system command to be able to execute the API requests
+     *
+     * @param  context
+     * @param  profiles
+     */
     private void isKibanaLocalSystem(DiagnosticContext context, List<ProcessProfile> profiles) {
         if (!context.diagnosticInputs.diagType.equals(Constants.kibanaLocal)) {
             return;
