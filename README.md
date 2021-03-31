@@ -463,7 +463,7 @@ Executing the diagnostic via a script passing in all parameters at a time but pa
 
 During execution, the diagnostic will attempt to determine whether any of the nodes in the cluster are running within Docker containers, particularly the node targeted via the host name. If one or more nodes on that targeted host are running in Docker containers, an additional set of Docker specific diagnostics such as inspect, top, and info, as well as obtaining the logs. This will be done for every discovered container on the host(not just ones containing Elasticsearch). In addition, when it is possible to determine if the calls are valid, the utility will also attempt to make the usual system calls to the host OS running the containers.
 
-If errors occur when attempting to obtain diagnostics from Elasticsearch nodes, Kibana or Logstash processes running within Docker containers, consider running with the --type api, logstash-api or kibana-api to verify that the configuration is not causing issues with the system call or log extraction modules in the diagnostic. This should allow the REST API subset to be successfully collected.
+If errors occur when attempting to obtain diagnostics from Elasticsearch nodes, Kibana, or Logstash processes running within Docker containers, consider running with the `--type` set to `api`, `logstash-api`, or `kibana-api` to verify that the configuration is not causing issues with the system call or log extraction modules in the diagnostic. This should allow the REST API subset to be successfully collected.
 
 ### Running From A Docker Container
 
