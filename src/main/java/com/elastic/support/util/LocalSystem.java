@@ -98,7 +98,7 @@ public class LocalSystem extends SystemCommand {
 
         String tempDir = "templogs";
         String mkdir = "mkdir templogs";
-        String journalctl = " journalctl -u {{SERVICE}} > '{{TEMP}}/{{SERVICE}}.log'";
+        String journalctl = "journalctl -u {{SERVICE}} > '{{TEMP}}/{{SERVICE}}.log'";
         journalctl = journalctl.replace("{{SERVICE}}", serviceName);
         journalctl = journalctl.replace("{{TEMP}}", tempDir);
 
