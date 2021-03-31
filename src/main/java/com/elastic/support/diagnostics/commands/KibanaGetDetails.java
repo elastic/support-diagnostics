@@ -222,7 +222,7 @@ public class KibanaGetDetails extends CheckPlatformDetails {
      * @param context The current diagnostic context
      * @return Never {@code null}.
      * @throws DiagnosticContext if Kibana responds with a non-200 response
-    */
+     */
     public JsonNode getStats(DiagnosticContext context) {
 
         RestClient restClient = ResourceCache.getRestClient(Constants.restInputHost);
