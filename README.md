@@ -405,7 +405,7 @@ Executing Logstash diagnostics with a non-default port
 sudo ./diagnostics.sh --host 10.0.0.20 --type logstash-local --port 9607
 ```
 
-Executing Kibana diagnostics in the same server where kibana is running
+Executing Kibana diagnostics locally from the same server where Kibana is running
  
    ```$xslt
    sudo ./diagnostics.sh --host localhost --port 5601 --type kibana-local
