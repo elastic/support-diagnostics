@@ -411,7 +411,7 @@ Executing Kibana diagnostics in the same server where kibana is running
    sudo ./diagnostics.sh --host localhost --port 5601 --type kibana-local
    ```
 
-Running the kibana-api type to suppress system call and log collection and explicitly configuring an output directory (this is also the option that need bo used when collecting the diagnotic for Kibana in **Elastic cloud**).
+Running the `kibana-api` type to suppress system call and log collection and explicitly configuring an output directory (this is also the option that needs to be used when collecting the diagnostic for Kibana in **Elastic Cloud**).
  
    ```$xslt
    sudo ./diagnostics.sh --host 2775abprd8230d55d11e5edc86752260dd.us-east-1.aws.found.io --port 9243 --type kibana-api -u elastic --password --ssl -o /home/user1/diag-out
