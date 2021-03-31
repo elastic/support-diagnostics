@@ -178,14 +178,13 @@ public class KibanaGetDetails extends CheckPlatformDetails {
     }
 
     /**
-    * Get the Kibana server instance's profile.
-    *
-    * @param  host
-    * @param  profiles list of network information for each kibana instance running
-    *
-    * @return return the profile for the kibana process
-    * @throws RuntimeException if there is not exactly one profile.
-    */
+     * Get the Kibana server instance's profile.
+     *
+     * @param  host
+     * @param  profiles list of network information for each kibana instance running
+     * @return return the profile for the kibana process
+     * @throws RuntimeException if there is not exactly one profile.
+     */
     private void IsRunningInDocker(DiagnosticContext context, List<ProcessProfile> profiles) {
         // See if this process is dockerized - if so, don't bother checking for a master to go to
         // because the port information in its output is not reliable.
