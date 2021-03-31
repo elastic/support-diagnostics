@@ -143,12 +143,11 @@ public class KibanaGetDetails extends CheckPlatformDetails {
 
 
     /**
-    * Map Kibana / stats API results to the ProcessProfile object.
-    *
-    * @param  processInfo all the context sent by the kibana stats API
-    *
-    * @return The network info as defined in the kibana stats API
-    */
+     * Map Kibana / stats API results to the ProcessProfile object.
+     *
+     * @param  processInfo all the context sent by the kibana stats API
+     * @return The network info as defined in the kibana stats API
+     */
     public List<ProcessProfile> getNodeNetworkAndLogInfo(JsonNode processInfo) {
 
         List<ProcessProfile> nodeNetworkInfo = new ArrayList<>();
