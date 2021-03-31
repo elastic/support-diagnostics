@@ -149,8 +149,8 @@ public class KibanaGetDetails extends CheckPlatformDetails {
      * @return The network info as defined in the kibana stats API
      */
     public List<ProcessProfile> getNodeNetworkAndLogInfo(JsonNode processInfo) {
-
         List<ProcessProfile> nodeNetworkInfo = new ArrayList<>();
+
         try {
             ProcessProfile diagNode = new ProcessProfile();
             diagNode.name = processInfo.path("kibana").path("name").asText();
