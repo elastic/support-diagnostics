@@ -197,14 +197,12 @@ public class KibanaGetDetails extends CheckPlatformDetails {
     }
 
     /**
-    * Get the Kibana server instance's profile.
-    *
-    * @param  host
-    * @param  profiles list of network information for each kibana instance running
-    *
-    * @return return the profile for the kibana process
-    * @throws RuntimeException if there is not exactly one profile.
-    */
+     * Get the Kibana server instance's profile.
+     *
+     * @param profiles list of network information for each kibana instance running
+     * @return The first profile.
+     * @throws RuntimeException if there is not exactly one profile.
+     */
     public ProcessProfile findTargetNode(List<ProcessProfile> profiles) {
         if (profiles.size() > 1) {
             logger.error("Expected [1] Kibana process profile, but found [{}]", profiles.size());
