@@ -45,7 +45,7 @@ public class CollectSystemCalls implements Command {
             // Get the configurations for that platoform's sys calls.
             Map<String, String> sysCalls = osCmds.get("sys");
             processCalls(targetDir, sysCalls, sysCmd, pid);
-            logger.info( Constants.CONSOLE, "First set of system calls executed.");
+            logger.info(Constants.CONSOLE, "First set of system calls executed.");
             // This should give us the full path to the java executable that
             // was used to start Elasticsearch
             Map<String, String> javaCalls = osCmds.get("java");
