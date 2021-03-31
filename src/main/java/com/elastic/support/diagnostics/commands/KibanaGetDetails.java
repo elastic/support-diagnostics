@@ -69,15 +69,14 @@ public class KibanaGetDetails extends CheckPlatformDetails {
         }
     }
 
-
-     /**
-    * If Kibana process is running on a remote server 
-    * we need to check if is a docker process or if is running as any other process
-    * Then create a remote system to request the Kibana process
-    *
-    * @param  context
-    * @param  profiles
-    */
+    /**
+     * If Kibana process is running on a remote server 
+     * we need to check if is a docker process or if is running as any other process
+     * Then create a remote system to request the Kibana process
+     *
+     * @param  context
+     * @param  profiles
+     */
     private void isKibanaRemoteSystem(DiagnosticContext context, List<ProcessProfile> profiles) {
         if (!context.diagnosticInputs.diagType.equals(Constants.kibanaRemote)) {
             return;
