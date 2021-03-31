@@ -214,8 +214,7 @@ public class RemoteSystem extends SystemCommand {
             channelSftp.exit();
 
             // clean up the temp logs on the remote host
-            runCommand(" rm -Rf templogs");
-
+            runCommand("rm -Rf templogs");
         } catch (Exception e) {
             logger.info(Constants.CONSOLE, "Error occurred copying remote logfiles. {}", Constants.CHECK_LOG);
             logger.error( e);
