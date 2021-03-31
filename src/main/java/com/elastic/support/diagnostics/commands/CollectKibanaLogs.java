@@ -81,7 +81,7 @@ public  class CollectKibanaLogs implements Command {
     * @param output is the text returned by the <code>ls</code>/<code>dir</code> command
     * @param fileList You can call this function multitple times, and add more files to the List
     * @param entries How many time we will iterate
-    * @return List<String>
+    * @return Never {@code null}. Always the number specified by {@code entries}.
     */
     protected List<String> extractFilesFromList(String output, int entries) {
         List<String> fileList = new ArrayList<>(entries);
