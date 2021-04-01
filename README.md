@@ -407,15 +407,15 @@ sudo ./diagnostics.sh --host 10.0.0.20 --type logstash-local --port 9607
 
 Executing Kibana diagnostics locally from the same server where Kibana is running
  
-   ```$xslt
-   sudo ./diagnostics.sh --host localhost --port 5601 --type kibana-local
-   ```
+```$xslt
+sudo ./diagnostics.sh --host localhost --port 5601 --type kibana-local
+```
 
 Running the `kibana-api` type to suppress system call and log collection and explicitly configuring an output directory (this is also the option that needs to be used when collecting the diagnostic for Kibana in **Elastic Cloud**).
  
-   ```$xslt
-   sudo ./diagnostics.sh --host 2775abprd8230d55d11e5edc86752260dd.us-east-1.aws.found.io --port 9243 --type kibana-api -u elastic --password --ssl -o /home/user1/diag-out
-   ```
+```$xslt
+sudo ./diagnostics.sh --host 2775abprd8230d55d11e5edc86752260dd.us-east-1.aws.found.io --port 9243 --type kibana-api -u elastic --password --ssl -o /home/user1/diag-out
+```
  
 Executing against a remote host with full collection, using sudo, and enabling trust where there's no known host entry. Note that the diagnostic is not executed via sudo because all the privileged access is on a different host.
 
