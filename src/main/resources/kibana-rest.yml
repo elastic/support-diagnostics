@@ -14,17 +14,13 @@
 #   Note to those adding entries: within each group, cat API's, json API's, and commercial, they are in alphabetical order.
 #   Please adhere to this convention when submitting pull requests.
 
-kibana_settings:
-  versions:
-    ">= 6.5.0": "/api/settings"
-
-kibana_stats:
-  versions:
-    ">= 6.5.0": "/api/stats"
-
 kibana_actions:
   versions:
     ">= 7.0.0": "/api/actions"
+
+kibana_alerts:
+  versions:
+    ">= 7.9.0": "/api/alerts/_find"
 
 kibana_detection_engine_find:
   versions:
@@ -38,9 +34,13 @@ kibana_detection_engine_signals:
   versions:
     "> 7.10.0": "/api/detection_engine/prepackaged"
 
-kibana_alerts:
+kibana_settings:
   versions:
-    ">= 7.9.0": "/api/alerts/_find"
+    ">= 6.5.0": "/api/settings"
+
+kibana_stats:
+  versions:
+    ">= 6.5.0": "/api/stats"
 
 kibana_task_manager_help:
   versions:
