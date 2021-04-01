@@ -418,7 +418,7 @@ public class TestRunKibanaQueries {
         assertEquals(nodeData.get(0).path("config").path("headers").path("Content-Type").asText(), "application/json");
     }
 
-    /**
+   /**
     * This test is to be sure we have no issues in case the webhook come with no config or headers
     */
     @Test

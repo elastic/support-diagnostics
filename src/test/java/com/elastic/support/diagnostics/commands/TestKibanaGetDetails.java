@@ -113,7 +113,7 @@ public class TestKibanaGetDetails {
         assertEquals(testedNodeProfiles.isDocker, true);
     }
 
-    /**
+   /**
     * Kibana is working in single mode, so the target node will be the only host stored on the nodeProfiles List
     * if they are two nodes is an error.
     *

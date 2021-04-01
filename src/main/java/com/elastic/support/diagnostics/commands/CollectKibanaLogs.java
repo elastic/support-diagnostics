@@ -28,7 +28,7 @@ public  class CollectKibanaLogs implements Command {
 
     private static final Logger logger = LogManager.getLogger(CollectLogs.class);
 
-    /**
+   /**
     * We will get the information fron the DiagnosticContext to extract and copy the logs from Local or Remote system.
     *
     * @param  DiagnosticContext context
@@ -75,7 +75,7 @@ public  class CollectKibanaLogs implements Command {
         }
     }
 
-    /**
+   /**
     * According with the OS response, read and extract the content for the logs files.
     *
     * @param output is the text returned by the <code>ls</code>/<code>dir</code> command

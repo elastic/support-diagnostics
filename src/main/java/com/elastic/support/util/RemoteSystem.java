@@ -185,12 +185,12 @@ public class RemoteSystem extends SystemCommand {
         }
     }
 
-    /**
+   /**
     * Some services as Kibana installed with the RPM package will give the access to the logs using the journalctl command
     * We will create a temperory file to copy those logs, then move them to the calling host.
     *
-    * @param  serviceName
-    * @param  targetDir
+    * @param  serviceName service name defined by RPM
+    * @param  targetDir temporary path where the data need to be stored
     */
     @Override
     public void copyLogsFromJournalctl(String serviceName, String targetDir) {

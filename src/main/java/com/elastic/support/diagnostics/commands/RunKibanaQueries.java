@@ -31,11 +31,11 @@ public class RunKibanaQueries extends BaseQuery {
 
     private static final Logger logger = LogManager.getLogger(RunKibanaQueries.class);
 
-    /**
+   /**
     * Create a new ProcessProfile object and extract the information from fileName to get PID and OS.
-    * @param  tempDir
-    * @param  fileName
-    * @param  context
+    * @param  tempDir where is the temporary data stored
+    * @param  fileName of the API content required, for more information check the kibana-rest.ymal
+    * @param  context The current diagnostic context as set in the DiagnosticService class
     * @return the object that consolidate the process information
     */
     private ProcessProfile getProfile(String tempDir, String fileName, DiagnosticContext context) {
@@ -49,14 +49,14 @@ public class RunKibanaQueries extends BaseQuery {
     }
 
 
-    /**
+   /**
     * CheckKibanaVersion (executed before) defined/set the context.elasticRestCalls.
     * here we will loop and create a List of RestEntry with the queries/APIs that need to be executed
     * You have two APIs that work differently and and may have or not many pages, so we use the getAllPages function
     * runQueries called in this function create a json file for each RestEntry set on the 'queries' variable.
     *
-    * @param  client
-    * @param  context
+    * @param  client the configured client to connect to Kibana.
+    * @param  context  The current diagnostic context as set in the DiagnosticService class
     * @return Number of HTTP request that will be executed.
     */
     public int runBasicQueries(RestClient client, DiagnosticContext context) {
@@ -79,14 +79,14 @@ public class RunKibanaQueries extends BaseQuery {
     }
 
 
-    /**
+   /**
     * On this function we will use the RestEntry action object to get the URL and execute the API one first time
     * to get the total of events defined in Kibana for that API.
     * Once we have the total of event we can calculate the number of pages/call we will need to execute
     * then we call getNewEntryPage to create a new RestEntry for each page.
     *
-    * @param  client
-    * @param  queries
+    * @param  client the configured client to connect to Kibana.
+    * @param  queries we will store the list of queries that need to be executed 
     * @param  perPage  Number of docusment we reques to the API
     * @param  action Kibana API name we are running
     */
@@ -112,7 +112,7 @@ public class RunKibanaQueries extends BaseQuery {
         }
     }
 
-    /**
+   /**
     * create a new `RestEntry` with the proper querystring parameters for paging.
     *
     * @param  perPage how many events need to be retreived in the response
@@ -125,7 +125,7 @@ public class RunKibanaQueries extends BaseQuery {
     }
 
 
-    /**
+   /**
     * create a LocalSystem object as Kibana is running in a docker container
     *
     * @return LocalSytem that will allow us to communicate with docker
@@ -137,12 +137,12 @@ public class RunKibanaQueries extends BaseQuery {
         return syscmd;
     }
 
-    /**
+   /**
     * This function is executed **after** runBasicQueries
     * Extract the information on the kibana_stats.json with getProfile function.
     * set the ResourceCache.addSystemCommand according tp the OS 
     *
-    * @param  context
+    * @param  context The current diagnostic context as set in the DiagnosticService class
     * @return according with the type of diagnostic return the system command
     */
     public SystemCommand execSystemCommands(DiagnosticContext context) {
@@ -180,11 +180,11 @@ public class RunKibanaQueries extends BaseQuery {
     }
 
 
-    /**
+   /**
     * We will not collect all the headerst hat are returned by the actions API (kibana_actions.json file).
     * for troubleshooting support engineers will only need "kbn-xsrf" or "Content-Type", all the others are removed.
     *
-    * @param  DiagnosticContext context
+    * @param  context The current diagnostic context as set in the DiagnosticService class
     */
     public void filterActionsHeaders(DiagnosticContext context) {
 
@@ -231,11 +231,11 @@ public class RunKibanaQueries extends BaseQuery {
     }
 
 
-    /**
+   /**
     * According with the version we will run the Kibana APIs, and store the data.
     * We will also try to collect the sysstat for the OS and the kibana logs if possible.
     *
-    * @param  context
+    * @param  context The current diagnostic context as set in the DiagnosticService class
     */
     public void execute(DiagnosticContext context) {
 

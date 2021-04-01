@@ -83,7 +83,7 @@ public class CheckKibanaVersion implements Command {
         }
     }
 
-    /**
+   /**
     * Fetch the Kibana version using the {@code client}, which is used to then to determine which
     * REST endpoints can be used from the diagnostic.
     *

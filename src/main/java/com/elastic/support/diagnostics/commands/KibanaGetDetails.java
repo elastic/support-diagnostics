@@ -74,8 +74,8 @@ public class KibanaGetDetails extends CheckPlatformDetails {
      * we need to check if is a docker process or if is running as any other process
      * Then create a remote system to request the Kibana process
      *
-     * @param  context
-     * @param  profiles
+     * @param  context The current diagnostic context as set in the DiagnosticService class
+     * @param  profiles list of network information for each kibana instance running
      */
     private void isKibanaRemoteSystem(DiagnosticContext context, List<ProcessProfile> profiles) {
         if (!context.diagnosticInputs.diagType.equals(Constants.kibanaRemote)) {
@@ -114,8 +114,8 @@ public class KibanaGetDetails extends CheckPlatformDetails {
      * If Kibana process is running on the same server 
      * add a loca system command to be able to execute the API requests
      *
-     * @param  context
-     * @param  profiles
+     * @param  context The current diagnostic context as set in the DiagnosticService class
+     * @param  profiles list of network information for each kibana instance running
      */
     private void isKibanaLocalSystem(DiagnosticContext context, List<ProcessProfile> profiles) {
         if (!context.diagnosticInputs.diagType.equals(Constants.kibanaLocal)) {

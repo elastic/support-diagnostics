@@ -253,7 +253,7 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
 
     }
 
-    /**
+   /**
     * Elasticsearch, Kibana and Logstash have default port, on this function we set the default for Kibana or Logstash in case the port is not defined during the execution
     * port variable, is a public int defined in the parent class to 9200 if not defined during the execution
     *

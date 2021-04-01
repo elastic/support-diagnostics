@@ -187,7 +187,7 @@ public class CheckPlatformDetails implements Command {
         return targetNode;
     }
 
-    /**
+   /**
     * Map and extract information for Elasticsearch API / nodes API.
     *
     * @param nodesInfo JSON representing <code>GET /_nodes</code>

@@ -162,7 +162,7 @@ public class SystemUtils {
         return dtf.format(ZonedDateTime.now());
     }
 
-    /**
+   /**
     * This function is key for two types or execution remote and local.
     * to collect some system data or logs we need to be able to know the OS where the process is running
     * Logstash is not using this as we only collect the API data, no system data collected on the servers.
