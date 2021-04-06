@@ -185,6 +185,47 @@ public class RemoteSystem extends SystemCommand {
         }
     }
 
+   /**
+    * Some services as Kibana installed with the RPM package will give the access to the logs using the journalctl command
+    * We will create a temperory file to copy those logs, then move them to the calling host.
+    *
+    * @param  serviceName service name defined by RPM
+    * @param  targetDir temporary path where the data need to be stored
+    */
+    @Override
+    public void copyLogsFromJournalctl(String serviceName, String targetDir) {
+
+        ChannelSftp channelSftp = null;
+        String tempDir = "templogs";
+        String mkdir = "mkdir templogs";
+        String journalctl = "journalctl -u {{SERVICE}} > '{{TEMP}}/{{SERVICE}}.log'";
+        journalctl = journalctl.replace("{{SERVICE}}", serviceName);
+        journalctl = journalctl.replace("{{TEMP}}", tempDir);
+       
+        try {
+            runCommand(mkdir);
+            runCommand(journalctl);
+
+            // Now they have been moved from the log directory into the temp dir created in the user's home
+            // we can move them to the the calling host. It should pull them all in one pass.
+            channelSftp = (ChannelSftp) session.openChannel("sftp");
+            channelSftp.connect();
+            channelSftp.get("templogs/*", targetDir);
+            channelSftp.exit();
+
+            // clean up the temp logs on the remote host
+            runCommand("rm -Rf templogs");
+        } catch (Exception e) {
+            logger.info(Constants.CONSOLE, "Error occurred copying remote logfiles. {}", Constants.CHECK_LOG);
+            logger.error( e);
+        } finally {
+            if(channelSftp != null && channelSftp.isConnected()){
+                channelSftp.disconnect();
+            }
+        }
+    }
+
+
     private String scrubCommandText(String command){
         // If we had to pipe in suoo information with the command remove it before
         // displaying the command status.

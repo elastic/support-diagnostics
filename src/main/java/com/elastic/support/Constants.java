@@ -18,6 +18,7 @@ public class Constants {
 
    public static final String DIAG_CONFIG = "diags.yml";
    public static final String ES_REST = "elastic-rest.yml";
+   public static final String KIBANA_REST = "kibana-rest.yml";
    public static final String LS_REST = "logstash-rest.yml";
    public static final String MONITORING_REST = "monitoring-rest.yml";
 
@@ -30,6 +31,7 @@ public class Constants {
    public static final int DEEFAULT_HTTPS_PORT = 443;
    public static final int DEEFAULT_PROXY_PORT = 8080;
 
+   public static final int KIBANA_PORT = 5601;
    public static final int LOGSTASH_PORT = 9600;
    public static final String[] LOCAL_ADDRESSES = {"127.0.0.1","localhost", "[::1]"};
    public static final List<String> localAddressList = Arrays.asList(LOCAL_ADDRESSES);
@@ -58,6 +60,10 @@ public class Constants {
    public static final String restInputHost = "rest:InputHost";
    public static final String systemCommands = "ssh:SystemCommand";
 
+   public final static String kibanaLocal = "kibana-local";
+   public final static String kibanaRemote = "kibana-remote";
+   public final static String kibanaApi = "kibana-api";
+   
    public static final String runningInIde = "runningInIde";
    public static final String interactiveMsg = "Command line options can be displayed with the --help argument. " +
            "Entering interactive mode.";

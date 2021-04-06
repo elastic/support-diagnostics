@@ -460,3 +460,8 @@ xpack:
   subdir: "commercial"
   versions:
     ">= 5.0.0": "/_xpack/usage?pretty&human"
+
+data_stream:
+  subdir: "commercial"
+  versions:
+    ">= 7.9.0": "/_data_stream?pretty"

@@ -32,13 +32,20 @@ public class CollectSystemCalls implements Command {
         String pid = context.targetNode.pid;
         ProcessProfile targetNode = context.targetNode;
         JavaPlatform javaPlatform = targetNode.javaPlatform;
-        Map<String, Map<String, String>> osCmds = context.diagsConfig.getSysCalls(javaPlatform.platform);
+        String platform = "";
+        if (javaPlatform == null) {
+            platform = context.targetNode.os;
+        } else {
+            platform = javaPlatform.platform;
+
+        }
+        Map<String, Map<String, String>> osCmds = context.diagsConfig.getSysCalls(platform);
 
         try {
             // Get the configurations for that platoform's sys calls.
             Map<String, String> sysCalls = osCmds.get("sys");
             processCalls(targetDir, sysCalls, sysCmd, pid);
-
+            logger.info(Constants.CONSOLE, "First set of system calls executed.");
             // This should give us the full path to the java executable that
             // was used to start Elasticsearch
             Map<String, String> javaCalls = osCmds.get("java");

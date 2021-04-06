@@ -43,7 +43,7 @@
 
 [Click here for the latest version of the Support Diagnostics Utility](https://github.com/elastic/support-diagnostics/releases/latest)
 
-The support diagnostic utility is a Java application that can interrogate a running Elasticsearch cluster or Logstash process to obtain data about the state of the cluster at that point in time. It is compatible with all versions of Elasticsearch (including alpha, beta and release candidates), and for Logstash versions greater than 5.0. The release version of the diagnostic is independent of the Elasticsearch or Logstash version it is being run against. If it cannot match the targeted version it will attempt to run calls from the latest configured release. Linux, OSX, or Windows platforms are all supported, and it can be run as a standalone utility or from within a Docker container.
+The support diagnostic utility is a Java application that can interrogate a running Elasticsearch cluster or Logstash process to obtain data about the state of the cluster at that point in time. It is compatible with all versions of Elasticsearch (including alpha, beta and release candidates), and for Logstash versions greater than 5.0, and for Kibana v6.5+. The release version of the diagnostic is independent of the Elasticsearch, Kibana or Logstash version it is being run against. If it cannot match the targeted version it will attempt to run calls from the latest configured release. Linux, OSX, or Windows platforms are all supported, and it can be run as a standalone utility or from within a Docker container.
 
 ## Overview - What It Does
 
@@ -67,7 +67,7 @@ The application can be run from any directory on the machine. It does not requir
 
 - Locate the [latest release](https://github.com/elastic/support-diagnostics/releases/latest)
 - Select the zip file labeled support-diagnostic-XX.XX.XX-dist.zip to download the binary files. **_Do not select the zip or tar files labeled: 'Source code'._** These do not contain compiled runtimes and will generate errors if you attempt to use the scripts contained in them.
-- Unzip the downloaded file into the directory you intend to run from. This can be on the same host as the as the Elasticsearch or Logstash host you wish to interrogate, or on a remote server or workstation. You can also run it from within a Docker container(see further instructions down for generating an image).
+- Unzip the downloaded file into the directory you intend to run from. This can be on the same host as the as the Elasticsearch, Kibana or Logstash host you wish to interrogate, or on a remote server or workstation. You can also run it from within a Docker container(see further instructions down for generating an image).
 
 ### Building From Source
 
@@ -101,7 +101,7 @@ If you are in a rush and don't mind going through a Q&A process you can execute 
 
 #### Diagnostic Types
 
-Elasticseach and Logstash each have three distinct execution modes available when running the diagnostic.
+Elasticseach, Kibana, and Logstash each have three distinct execution modes available when running the diagnostic.
 
  <table>
  <thead>
@@ -149,6 +149,23 @@ Elasticseach and Logstash each have three distinct execution modes available whe
    <td width="70%" align="left" valign="top">Collects the REST API information only from a running Logstash process. Similar to the Elasticsearch type.
    </td>
  </tr>
+ <tr>
+   <td width="30%" align="left" valign="top">kibana-local</td>
+   <td width="70%" align="left" valign="top">Similar to Elasticsearch local mode, this runs against a Kibana process running on the same host as the installed diagnostic utility. Retrieves Kibana REST API dignostic information as well as the output from the same system calls and the logs if stored in the default path `var/log/kibana` or in the `journalctl` for linux and mac.
+   </td>
+ </tr>
+ 
+ <tr>
+   <td width="30%" align="left" valign="top">kibana-remote</td>
+   <td width="70%" align="left" valign="top">Queries a Kibana processes running on a different host than the utility. Similar to the Elasticsearch remote option. Collects the same artifacts as the kibana-local option.
+   </td>
+ </tr>
+ 
+ <tr>
+   <td width="30%" align="left" valign="top">kibana-api</td>
+   <td width="70%" align="left" valign="top">Collects the REST API information only from a running Kibana process. Similar to the Elasticsearch type (This is the method that need to be used when collecting the data for Kibana in **Elastic cloud**).
+   </td>
+ </tr>
  </table>
 
 #### Standard Options
@@ -184,8 +201,8 @@ Elasticseach and Logstash each have three distinct execution modes available whe
 
  <tr>
    <td width="20%" align="left" valign="top" >--type  </td>
-   <td width="50%" align="left" valign="top"> The diagnostic mode to execute. Valid types are local, remote, api, logstash, log stash-local, or log stash-api. See the documentation for additional descriptions of the diagnostic modes. Default value is local.</td>
-   <td width="30%" align="left" valign="top">--type local<br/> --type remote<br/> --type api<br/> --type logstash-local<br/> --type logstash-remote<br/>--type logstash-api</td>
+   <td width="50%" align="left" valign="top"> The diagnostic mode to execute. Valid types are local, remote, api, logstash-remote, logstash-local, or logstash-api, kibana-remote, kibana-local, or kibana-api. See the documentation for additional descriptions of the diagnostic modes. Default value is local.</td>
+   <td width="30%" align="left" valign="top">--type local<br/> --type remote<br/> --type api<br/> --type logstash-local<br/> --type logstash-remote<br/>--type logstash-api<br/>--type kibana-remote<br/>--type kibana-local<br/>--type kibana-api</td>
  </tr>
 
  <tr>
@@ -388,6 +405,18 @@ Executing Logstash diagnostics with a non-default port
 sudo ./diagnostics.sh --host 10.0.0.20 --type logstash-local --port 9607
 ```
 
+Executing Kibana diagnostics locally from the same server where Kibana is running
+ 
+```$xslt
+sudo ./diagnostics.sh --host localhost --port 5601 --type kibana-local
+```
+
+Running the `kibana-api` type to suppress system call and log collection and explicitly configuring an output directory (this is also the option that needs to be used when collecting the diagnostic for Kibana in **Elastic Cloud**).
+ 
+```$xslt
+sudo ./diagnostics.sh --host 2775abprd8230d55d11e5edc86752260dd.us-east-1.aws.found.io --port 9243 --type kibana-api -u elastic --password --ssl -o /home/user1/diag-out
+```
+ 
 Executing against a remote host with full collection, using sudo, and enabling trust where there's no known host entry. Note that the diagnostic is not executed via sudo because all the privileged access is on a different host.
 
 ```$xslt
@@ -434,11 +463,11 @@ Executing the diagnostic via a script passing in all parameters at a time but pa
 
 During execution, the diagnostic will attempt to determine whether any of the nodes in the cluster are running within Docker containers, particularly the node targeted via the host name. If one or more nodes on that targeted host are running in Docker containers, an additional set of Docker specific diagnostics such as inspect, top, and info, as well as obtaining the logs. This will be done for every discovered container on the host(not just ones containing Elasticsearch). In addition, when it is possible to determine if the calls are valid, the utility will also attempt to make the usual system calls to the host OS running the containers.
 
-If errors occur when attempting to obtain diagnostics from Elasticsearch nodes or Logstash processes running within Docker containers, consider running with the --type api, logstash-api to verify that the configuration is not causing issues with the system call or log extraction modules in the diagnostic. This should allow the REST API subset to be successfully collected.
+If errors occur when attempting to obtain diagnostics from Elasticsearch nodes, Kibana, or Logstash processes running within Docker containers, consider running with the `--type` set to `api`, `logstash-api`, or `kibana-api` to verify that the configuration is not causing issues with the system call or log extraction modules in the diagnostic. This should allow the REST API subset to be successfully collected.
 
 ### Running From A Docker Container
 
-When the diagnostic is deployed within a Docker container it will recognize the enclosing environment and disable the types local and local-logstash. These modes of operation require the diagnostic to verify that it is running on the same host as the process it is investigating because of the ways in which system calls and file operations are handled. Docker containers muddy the waters, so to speak, in this case making this difficult if not impossible. So for the sake of reliability, once the diagnostic is deployed within Docker it will always function as if it were a remote component. The only options available will be remote, logstash-remote, remote, and api.
+When the diagnostic is deployed within a Docker container it will recognize the enclosing environment and disable the types `local`, `local-kibana`, and `local-logstash`. These modes of operation require the diagnostic to verify that it is running on the same host as the process it is investigating because of the ways in which system calls and file operations are handled. Docker containers muddy the waters, so to speak, in this case making this difficult if not impossible. So for the sake of reliability, once the diagnostic is deployed within Docker it will always function as if it were a remote component. The only options available will be `kibana-remote`, `logstash-remote`, `remote`, and `api`.
 
 There are a number of options for interacting with applications running within Docker containers. The easiest way to run the diagnostic is simply to perform a `docker run -it` which opens a pseudo TTY. At that point you can interface with the diagnostic in the same way as you would when it was directly installed on the host. If you look in the _/docker_ directory in the diagnostic distribution you will find a sample script named `diagnostic-container-exec.sh` that contains an example of how to do this.
 
@@ -454,7 +483,7 @@ For the diagnostic to work seamlessly from within a container, there must be a c
 
 In some cases the information collected by the diagnostic may have content that cannot be viewed by those outside the organization. IP addresses and host names, for instance. The diagnostic contains functionality that allows one to replace this content with values they choose contained in a configuration file. It will process a diagnostic archive file by file, replacing the entries in the config with a configured substitute value.
 
-It is run via a separate execution script, and can process any valid Elasticsearch cluster diagnostic archive produced by Support Diagnostics 6.4 or greater. It can also process a single file. It does not need to be run on the same host that produced the diagnostic. Or by the same version number that produced the archive as long as it is a supported version. Logstash diagnostics are not supported at this time, although you may process those using the single file by file functionality for each entry.
+It is run via a separate execution script, and can process any valid Elasticsearch cluster diagnostic archive produced by Support Diagnostics 6.4 or greater. It can also process a single file. It does not need to be run on the same host that produced the diagnostic. Or by the same version number that produced the archive as long as it is a supported version. Kibana and Logstash diagnostics are not supported at this time, although you may process those using the single file by file functionality for each entry.
 
 It will go through each file line by line checking the content. If you are only concerned about IP addresses, you do not have to configure anything. **_The utility will automatically obfuscate all node id's node names, IPv4, IPv6 and MAC addresses._** It is important to note this because as it does this, it will generate a new random IP value and cache it to use every time it encounters that same IP later on. So that the same obfuscated value will be consistent across diagnostic files. This ensures that you can differentiate between occurrences of discrete nodes in the cluster. If you replace all the IP addresses with a global `XXX.XXX.XXX.XXX` mask you will lose the ability to see which node did what.
 

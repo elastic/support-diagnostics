@@ -24,14 +24,21 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
             Constants.api,
             Constants.logstashLocal,
             Constants.logstashRemote,
-            Constants.logstashApi};
+            Constants.logstashApi,
+            Constants.kibanaApi,
+            Constants.kibanaLocal,
+            Constants.kibanaRemote};
 
     public static final String localDesc = "Node on the same host as the diagnostic utility.";
     public static final String remoteDesc = "Node on a different host than the diagnostic utility";
     public static final String apiDesc = "Elasticsearch REST API calls, no system calls or logs.";
     public static final String logstashLocalDesc = "Logstash process on the same host as the diagnostic utility.";
     public static final String logstashRemoteDesc = "Logstash on a different host than the diagnostic utility.";
-    public static final String logstashApiDesc = "Logstash REST calls. No system calls. \t\t";
+    public static final String logstashApiDesc = "Logstash REST calls. No system calls.";
+    public static final String kibanaLocalDesc = "Kibana process on the same host as the diagnostic utility.";
+    public static final String kibanaRemoteDesc = "Kibana on a different host than the diagnostic utility.";
+    public static final String kibanaApiDesc = "Kibana REST calls. No system calls.";
+
 
     public static final String[]
             diagnosticTypeEntries = {
@@ -40,14 +47,19 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
             Constants.api + " - " + apiDesc,
             Constants.logstashLocal + " - " + logstashLocalDesc,
             Constants.logstashRemote + " - " + logstashRemoteDesc,
-            Constants.logstashApi + " - " + logstashApiDesc};
+            Constants.logstashApi + " - " + logstashApiDesc,
+            Constants.kibanaApi + " - " + kibanaApiDesc,
+            Constants.kibanaRemote + " - " + kibanaRemoteDesc,
+            Constants.kibanaLocal + " - " + kibanaLocalDesc};
 
     public static final String[]
             diagnosticTypeEntriesDocker = {
             Constants.remote + " - " + remoteDesc,
             Constants.api + " - " + apiDesc,
             Constants.logstashRemote + " - " + logstashRemoteDesc,
-            Constants.logstashApi + " - " + logstashApiDesc};
+            Constants.logstashApi + " - " + logstashApiDesc,
+            Constants.kibanaApi + " - " + kibanaApiDesc,
+            Constants.kibanaRemote + " - " + kibanaRemoteDesc};
 
 
     public static final String remoteAccessMessage =
@@ -89,7 +101,7 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
 
     public final static String  typeDescription = "Enter the number of the diagnostic type to run.";
     public final static String  remoteUserDescription = "User account to be used for running system commands and obtaining logs. This account must have sufficient authority to run the commands and access the logs.";
-    public final static String  remotePasswordDescription = "Password for the remote login.";
+    public final static String  remotePasswordDescription = "Password for the remote login:";
     public final static String  sshKeyFileDescription= "File containing keys for remote host authentication.";
     public final static String  sshKeyFIlePassphraseDescription= "Passphrase for the keyfile if required.";
     public final static String  trustRemoteDescription = "Bypass the known hosts file and trust the specified remote server. Defaults to false.";
@@ -241,12 +253,20 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
 
     }
 
-    public List<String> setDefaultPortForDiagType(String val) {
-        // Check the diag type and reset the default port value if
-        // it is a Logstash diag.
-        if (val.toLowerCase().contains("logstash")) {
-            if (port == 9200) {
+   /**
+    * Elasticsearch, Kibana and Logstash have default port, on this function we set the default for Kibana or Logstash in case the port is not defined during the execution
+    * port variable, is a public int defined in the parent class to 9200 if not defined during the execution
+    *
+    * @param type type of diagnostic
+    *
+    */
+    public List<String> setDefaultPortForDiagType(String type) {
+        if (port == 9200) {
+            final String value = type.toLowerCase();
+            if (value.contains("logstash")) {
                 port = Constants.LOGSTASH_PORT;
+            } else if (value.contains("kibana")) {
+                port = Constants.KIBANA_PORT;
             }
         }
         return null;

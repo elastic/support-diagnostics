@@ -187,7 +187,13 @@ public class CheckPlatformDetails implements Command {
         return targetNode;
     }
 
-    private List<ProcessProfile> getNodeNetworkAndLogInfo(JsonNode nodesInfo) {
+   /**
+    * Map and extract information for Elasticsearch API / nodes API.
+    *
+    * @param nodesInfo JSON representing <code>GET /_nodes</code>
+    * @return Never {@code null}. Can be empty if no nodes are defined.
+    */
+    public List<ProcessProfile> getNodeNetworkAndLogInfo(JsonNode nodesInfo) {
 
         List<ProcessProfile> nodeNetworkInfo = new ArrayList<>();
 
@@ -332,6 +338,4 @@ public class CheckPlatformDetails implements Command {
     }
 
 }
-
-
 
