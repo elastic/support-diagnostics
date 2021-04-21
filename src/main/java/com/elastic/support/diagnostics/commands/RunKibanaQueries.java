@@ -97,8 +97,7 @@ public class RunKibanaQueries extends BaseQuery {
         String baseUrl = url.substring(4, url.length());
         String baseName = action.getName();
 
-        spaces.forEach((n) -> {
-            String spaceId = n.replace("\"","");
+        spaces.forEach((spaceId) -> {
             if (!spaceId.equals("default")) {
                 String apiUrl = String.format("/s/%s/api"+ baseUrl, spaceId);
                 action.setUrl(apiUrl);
@@ -179,7 +178,7 @@ public class RunKibanaQueries extends BaseQuery {
                             // Not all the webhook need to have headers, so we need to be sure the data was set by the customer.
                             String name = space.get("id").toString();
                             if (!(name.equals(null) || name.equals(""))) {
-                                this.allSpaces.add(name);
+                                this.allSpaces.add(name.replace("\"",""));
                             }
                         }
                     }
