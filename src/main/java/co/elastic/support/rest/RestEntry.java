@@ -36,6 +36,14 @@ public class RestEntry {
         return url;
     }
 
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public String subdir = SystemProperties.fileSeparator;
 
     public String getSubdir() {
@@ -57,7 +65,24 @@ public class RestEntry {
     public boolean showErrors = true;
 
 
-
+   /**
+    * Creates and returns a copy of this object.
+    *
+    * @return a new RestEntry object independent of this one.
+    */
+    @Override
+    public Object clone() {
+        try {
+            return (RestEntry) super.clone();
+        } catch (CloneNotSupportedException e) {
+            return new RestEntry(this.getName(),
+                                this.getSubdir(),
+                                this.getExtension(),
+                                this.isRetry(),
+                                this.getUrl(),
+                                this.showErrors);
+        }
+    }
 
 
 }

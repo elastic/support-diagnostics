@@ -22,6 +22,10 @@ kibana_alerts:
   versions:
     ">= 7.9.0": "/api/alerts/_find"
 
+kibana_alerts_health:
+  versions:
+    ">= 7.11.0": "/api/alerts/_health"
+
 kibana_detection_engine_find:
   versions:
     ">= 7.6.0": "/api/detection_engine/rules/_find"
@@ -30,18 +34,14 @@ kibana_detection_engine_privileges:
   versions:
     ">= 7.6.0": "/api/detection_engine/privileges"
 
-kibana_detection_engine_signals:
-  versions:
-    "> 7.10.0": "/api/detection_engine/prepackaged"
-
 kibana_settings:
   versions:
     ">= 6.5.0": "/api/settings"
 
 kibana_stats:
   versions:
-    ">= 6.5.0": "/api/stats"
+    ">= 6.5.0": "/api/stats?extended=true"
 
-kibana_task_manager_help:
+kibana_task_manager_health:
   versions:
     ">= 7.11.0": "/api/task_manager/_health"
