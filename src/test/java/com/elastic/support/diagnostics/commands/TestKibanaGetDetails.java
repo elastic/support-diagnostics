@@ -152,6 +152,9 @@ public class TestKibanaGetDetails {
                         request()
                                 .withMethod("GET")
                                 .withPath("/api/stats")
+                                .withQueryStringParameters(
+                                        new Parameter("extended", "true")
+                                )
                 )
                 .respond(
                         response()
@@ -170,7 +173,7 @@ public class TestKibanaGetDetails {
         try {
             testClass.getStats(context);
         } catch (DiagnosticException e) {
-            assertEquals(e.getMessage(), "Kibana responded with [401] for [/api/stats]. Unable to proceed.");
+            assertEquals(e.getMessage(), "Kibana responded with [401] for [/api/stats?extended=true]. Unable to proceed.");
         }
     }
 }

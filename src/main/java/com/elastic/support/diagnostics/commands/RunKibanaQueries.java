@@ -30,6 +30,8 @@ import java.io.IOException;
 public class RunKibanaQueries extends BaseQuery {
 
     private static final Logger logger = LogManager.getLogger(RunKibanaQueries.class);
+    // list of spaces defined in Kibana
+    private List<String> allSpaces = new ArrayList<>();
 
    /**
     * Create a new ProcessProfile object and extract the information from fileName to get PID and OS.
@@ -60,15 +62,17 @@ public class RunKibanaQueries extends BaseQuery {
     * @return Number of HTTP request that will be executed.
     */
     public int runBasicQueries(RestClient client, DiagnosticContext context) {
-
         int totalRetries = 0;
         List<RestEntry> queries = new ArrayList<>();
         
         for (Map.Entry<String, RestEntry> entry : context.elasticRestCalls.entrySet()) {
 
             String actionName = entry.getValue().getName().toString();
-            if (actionName.equals("kibana_alerts") || actionName.equals("kibana_detection_engine_find")) {
-                getAllPages(client, queries, context.perPage, entry.getValue());
+            if (actionName.equals("kibana_alerts") ||
+                actionName.equals("kibana_actions") || 
+                actionName.equals("kibana_alerts_health") || 
+                actionName.equals("kibana_detection_engine_find")) {
+                runActionsBySpace(client, queries, context.perPage, entry.getValue());
             } else {
                 queries.add(entry.getValue());
             }
@@ -76,6 +80,40 @@ public class RunKibanaQueries extends BaseQuery {
         totalRetries = runQueries(client, queries, context.tempDir, 0, 0);
 
         return totalRetries;
+    }
+
+   /**
+    * Add a new RestEntry action for each API and space
+    * we will also update the URL and name with the space id
+    *
+    * @param  client the configured client to connect to Kibana.
+    * @param  queries we will store the list of queries that need to be executed
+    * @param  perPage  Number of docusment we reques to the API
+    * @param  action Kibana API name we are running
+    */
+    private void runActionsBySpace(RestClient client, List<RestEntry> queries, int perPage, RestEntry action) {
+        List<String> spaces = getAllSpaces(client);
+        String url = action.getUrl();
+        String baseUrl = url.substring(4, url.length());
+        String baseName = action.getName();
+
+        spaces.forEach((n) -> {
+            String spaceId = n.replace("\"","");
+            if (!spaceId.equals("default")) {
+                String apiUrl = String.format("/s/%s/api"+ baseUrl, spaceId);
+                action.setUrl(apiUrl);
+            }
+            //we need to create a new RestEntry for each space id.
+            RestEntry copyAction = (RestEntry) action.clone();
+
+            if (copyAction.getUrl().contains("/_find")) {
+                getAllPages(client, queries, perPage, copyAction, spaceId);
+            } else {
+                String actionName = baseName + "_" + spaceId;
+                copyAction.setName(actionName);
+                queries.add(copyAction);
+            }
+        });
     }
 
 
@@ -90,26 +128,69 @@ public class RunKibanaQueries extends BaseQuery {
     * @param  perPage  Number of docusment we reques to the API
     * @param  action Kibana API name we are running
     */
-    public void getAllPages(RestClient client, List<RestEntry> queries, int perPage, RestEntry action) {
+    public void getAllPages(RestClient client, List<RestEntry> queries, int perPage, RestEntry action, String spaceId) {
         // get the values needed to the pagination.
         RestResult res = client.execQuery(String.format("%s?per_page=1", action.getUrl()));
-        if (! res.isValid()) {
-            throw new DiagnosticException( res.formatStatusMessage( "Could not retrieve Kibana API pagination - unable to continue."));
+        if (!res.isValid()) {
+            throw new DiagnosticException(res.formatStatusMessage(
+                "Could not retrieve Kibana API pagination - unable to continue. "+action.getUrl()
+                ));
         }
         String result   = res.toString();
         JsonNode root   = JsonYamlUtils.createJsonNodeFromString(result);
         int total       = root.path("total").intValue();
         if (total > 0 && perPage > 0) {
             // Get the first actions page
-            queries.add(getNewEntryPage(perPage, 1, action));
+            queries.add(getNewEntryPage(perPage, 1, action, spaceId));
             // If there is more pages add the new queries
             if (perPage < total) {
                 int numberPages = (int)Math.ceil(total / perPage);
                 for (int i = 2; i <= numberPages; i++) {
-                    queries.add(getNewEntryPage(perPage, i, action));
+                    queries.add(getNewEntryPage(perPage, i, action, spaceId));
                 }
             }
         }
+    }
+
+
+   /**
+    * Retrieve all kibana spaces available for current process/instance
+    * the results are stored in a global vairable, we do this to cache the result
+    * the objective is to reduce the executions of the spaces API
+    *
+    * @param client the configured client to connect to Kibana.
+    * @return all the spaces name.
+    */
+    private List<String> getAllSpaces(RestClient client) {
+
+        // by default Kibana has one space, if allSpaces is empty it means we have not yet run this API.
+        if (this.allSpaces.size() <= 0) {
+            RestResult res = client.execQuery("/api/spaces/space");
+            if (!res.isValid()) {
+                logger.error("Could not retrieve Kibana spaces, we will collect data only for default space.");
+            } else {
+                String result   = res.toString();
+                JsonNode spaces   = JsonYamlUtils.createJsonNodeFromString(result);
+                if (spaces.size() > 0) {
+                    for (int i = 0; i < spaces.size(); i++) {
+                        JsonNode space = spaces.get(i);
+                        // API webhook format can change, and maybe we have a webhook without config
+                        if (!(space == null || space.isNull())) {
+                            // Not all the webhook need to have headers, so we need to be sure the data was set by the customer.
+                            String name = space.get("id").toString();
+                            if (!(name.equals(null) || name.equals(""))) {
+                                this.allSpaces.add(name);
+                            }
+                        }
+                    }
+                }
+            }
+            //if we can not find any space, set the default space id
+            if (this.allSpaces.size() <= 0) {
+                this.allSpaces.add("default");
+            }
+        }
+        return this.allSpaces;
     }
 
    /**
@@ -118,10 +199,11 @@ public class RunKibanaQueries extends BaseQuery {
     * @param  perPage how many events need to be retreived in the response
     * @param  page the apge we are requesting
     * @param  action Kibana API name we are running
+    * @param  spaceId Space id where the object was defined
     * @return new object with the API and params that need to be executed.
     */
-    private RestEntry getNewEntryPage(int perPage, int page, RestEntry action) {
-        return new RestEntry(String.format("%s_%s", action.getName(), page), "", ".json", false, String.format("%s?per_page=%s&page=%s", action.getUrl(), perPage, page), false);
+    private RestEntry getNewEntryPage(int perPage, int page, RestEntry action, String spaceId) {
+        return new RestEntry(String.format("%s_%s_%s", action.getName(), spaceId, page), "", ".json", false, String.format("%s?per_page=%s&page=%s", action.getUrl(), perPage, page), false);
     }
 
 
@@ -184,50 +266,57 @@ public class RunKibanaQueries extends BaseQuery {
     * We will not collect all the headerst hat are returned by the actions API (kibana_actions.json file).
     * for troubleshooting support engineers will only need "kbn-xsrf" or "Content-Type", all the others are removed.
     *
-    * @param  context The current diagnostic context as set in the DiagnosticService class
+    * @param client the configured client to connect to Kibana.
+    * @param context The current diagnostic context as set in the DiagnosticService class
     */
-    public void filterActionsHeaders(DiagnosticContext context) {
+    public void filterActionsHeaders(RestClient client, DiagnosticContext context) {
 
-        try {
-            JsonNode actions = JsonYamlUtils.createJsonNodeFromFileName(context.tempDir, "kibana_actions.json");
-            Boolean headerRemoved = false;
-            if (actions.size() > 0) {
-                for (int i = 0; i < actions.size(); i++) {
-                    JsonNode config = actions.get(i).get("config");
-                    // API webhook format can change, and maybe we have a webhook without config
-                    if (!(config == null || config.isNull())) {
-                        // Not all the webhook need to have headers, so we need to be sure the data was set by the customer.
-                        JsonNode headers = actions.get(i).get("config").get("headers");
-                        if (!(headers == null || headers.isNull())) {
-                            Iterator<Map.Entry<String, JsonNode>> iter = actions.get(i).get("config").get("headers").fields();
+        List<String> spaces = getAllSpaces(client);
 
-                            while (iter.hasNext()) {
-                                Map.Entry<String, JsonNode> entry = iter.next();
-                                String key = entry.getKey().toLowerCase();
+        spaces.forEach((spaceId) -> {
+            try {
+                JsonNode actions = JsonYamlUtils.createJsonNodeFromFileName(context.tempDir,
+                                                                    "kibana_actions_"+ spaceId +".json");
+                Boolean headerRemoved = false;
+                if (actions.size() > 0) {
+                    for (int i = 0; i < actions.size(); i++) {
 
-                                if (!key.equals("kbn-xsrf") && !key.equals("content-type")) {
-                                    iter.remove();
-                                    headerRemoved = true;
+                        JsonNode config = actions.get(i).get("config");
+                        // API webhook format can change, and maybe we have a webhook without config
+                        if (!(config == null || config.isNull())) {
+                            // Not all the webhook need to have headers, so we need to be sure the data was set by the customer.
+                            JsonNode headers = actions.get(i).get("config").get("headers");
+                            if (!(headers == null || headers.isNull())) {
+                                Iterator<Map.Entry<String, JsonNode>> iter = actions.get(i).get("config").get("headers").fields();
+
+                                while (iter.hasNext()) {
+                                    Map.Entry<String, JsonNode> entry = iter.next();
+                                    String key = entry.getKey().toLowerCase();
+
+                                    if (!key.equals("kbn-xsrf") && !key.equals("content-type")) {
+                                        iter.remove();
+                                        headerRemoved = true;
+                                    }
                                 }
                             }
                         }
                     }
-                }
 
-                // If any headers were removed, we need to rewrite the file to remove them
-                if (headerRemoved == true) {
-                    String fileName = context.tempDir + SystemProperties.fileSeparator + "kibana_actions.json";
-                    try (FileWriter fileWriter = new FileWriter(fileName)) {
-                        fileWriter.write(actions.toPrettyString());
-                        fileWriter.flush();
-                    } catch (IOException e) {
-                      logger.error("Unexpected error while writing [kibana_actions.json]", e);
+                    // If any headers were removed, we need to rewrite the file to remove them
+                    if (headerRemoved == true) {
+                        String fileName = context.tempDir + SystemProperties.fileSeparator + "kibana_actions_"+ spaceId +".json";
+                        try (FileWriter fileWriter = new FileWriter(fileName)) {
+                            fileWriter.write(actions.toPrettyString());
+                            fileWriter.flush();
+                        } catch (IOException e) {
+                          logger.error("Unexpected error while writing [kibana_actions_"+ spaceId +".json]", e);
+                        }
                     }
                 }
+            } catch (RuntimeException e) {
+                logger.error("Kibana actions file is empty, we have nothing to filter.", e);
             }
-        } catch (RuntimeException e) {
-            logger.error("Kibana actions file is empty, we have nothing to filter.", e);
-        }
+        });
     }
 
 
@@ -243,7 +332,7 @@ public class RunKibanaQueries extends BaseQuery {
             context.perPage         = 100;
             RestClient client       = ResourceCache.getRestClient(Constants.restInputHost);
             int totalRetries        = runBasicQueries(client, context);
-            filterActionsHeaders(context);
+            filterActionsHeaders(client, context);
             execSystemCommands(context);
 
         } catch (Exception e) {
