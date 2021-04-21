@@ -394,6 +394,11 @@ rollup_index_caps:
     ">= 6.5.0 < 7.0.0": "/*/_xpack/rollup/data"
     ">= 7.0.0": "/*/_rollup/data"
 
+searchable_snapshots_cache_stats:
+  subdir: "commercial"
+  versions:
+    ">= 7.13.0": "/_searchable_snapshots/cache/stats?pretty&human"
+
 security_priv:
   subdir: "commercial"
   versions:
