@@ -23,14 +23,14 @@ public class ArchiveUtils {
 
    private static final Logger logger = LogManager.getLogger(ArchiveUtils.class);
 
-   public static void createArchive(String dir, String archiveFileName) throws DiagnosticException {
+   public static File createArchive(String dir, String archiveFileName) throws DiagnosticException {
       try {
-         createZipArchive(dir, archiveFileName);
+         return createZipArchive(dir, archiveFileName);
       } catch (Exception zipException) {
          logger.info(Constants.CONSOLE, "Couldn't create zip archive. Trying tar.gz");
 
          try {
-            createTarArchive(dir, archiveFileName);
+            return createTarArchive(dir, archiveFileName);
          } catch (Exception tarException) {
             logger.info(Constants.CONSOLE, "Couldn't create tar.gz archive.");
             tarException.addSuppressed(zipException);
@@ -39,22 +39,24 @@ public class ArchiveUtils {
       }
    }
 
-   public static void createZipArchive(String dir, String archiveFileName) throws IOException {
+   public static File createZipArchive(String dir, String archiveFileName) throws IOException {
       File srcDir = new File(dir);
       String filename = dir + "-" + archiveFileName + ".zip";
-
+      File file = new File(filename);
       FileOutputStream fout = new FileOutputStream(filename);
       ZipArchiveOutputStream taos = new ZipArchiveOutputStream(fout);
       archiveResultsZip(archiveFileName, taos, srcDir, "", true);
       taos.close();
 
       logger.info(Constants.CONSOLE, "Archive: " + filename + " was created");
+
+      return file;
    }
 
-   public static void createTarArchive(String dir, String archiveFileName)throws IOException {
+   public static File createTarArchive(String dir, String archiveFileName) throws IOException {
       File srcDir = new File(dir);
       String filename = dir + "-" + archiveFileName + ".tar.gz";
-
+      File file = new File(filename);
       FileOutputStream fout = new FileOutputStream(filename);
       CompressorOutputStream cout = new GzipCompressorOutputStream(fout);
       TarArchiveOutputStream taos = new TarArchiveOutputStream(cout);
@@ -65,6 +67,8 @@ public class ArchiveUtils {
       taos.close();
 
       logger.info(Constants.CONSOLE,  "Archive: " + filename + " was created");
+
+      return file;
    }
 
    public static void archiveResultsZip(String archiveFilename, ZipArchiveOutputStream taos, File file, String path, boolean append) {

@@ -19,8 +19,7 @@ public class DiagnosticService extends ElasticRestClientService {
 
     private Logger logger = LogManager.getLogger(DiagnosticService.class);
 
-    public void exec(DiagnosticInputs inputs, DiagConfig config) throws DiagnosticException {
-
+    public File exec(DiagnosticInputs inputs, DiagConfig config) throws DiagnosticException {
         DiagnosticContext ctx = new DiagnosticContext();
         ctx.diagsConfig = config;
         ctx.diagnosticInputs = inputs;
@@ -81,7 +80,8 @@ public class DiagnosticService extends ElasticRestClientService {
 
             checkAuthLevel(ctx.diagnosticInputs.user, ctx.isAuthorized);
             closeLogs();
-            createArchive(ctx.tempDir);
+
+            return createArchive(ctx.tempDir);
         } finally {
             SystemUtils.nukeDirectory(ctx.tempDir);
             ResourceCache.closeAll();
