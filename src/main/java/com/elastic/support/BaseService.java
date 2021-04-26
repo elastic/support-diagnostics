@@ -1,5 +1,6 @@
 package com.elastic.support;
 
+import com.elastic.support.diagnostics.DiagnosticException;
 import com.elastic.support.util.ArchiveUtils;
 import com.elastic.support.util.SystemProperties;
 import org.apache.logging.log4j.Level;
@@ -70,18 +71,9 @@ public abstract  class BaseService {
 
     }
 
-    public void createArchive(String tempDir) {
-
+    public void createArchive(String tempDir) throws DiagnosticException {
         logger.info(Constants.CONSOLE, "Archiving diagnostic results.");
-
-        try {
-            String archiveFilename = SystemProperties.getFileDateString();
-            ArchiveUtils archiveUtils = new ArchiveUtils();
-            archiveUtils.createArchive(tempDir, archiveFilename);
-
-        } catch (Exception ioe) {
-            logger.info("Couldn't create archive. {}", ioe);
-        }
+        ArchiveUtils.createArchive(tempDir, SystemProperties.getFileDateString());
     }
 
 }
