@@ -129,7 +129,7 @@ public class ArchiveUtils {
       }
    }
 
-   public static void extractArchive(String filename, String targetDir) throws Exception{
+   public static void extractArchive(String filename, String targetDir) throws IOException {
       final int bufferSize = 1024;
       ArchiveInputStream ais = null;
       try  {

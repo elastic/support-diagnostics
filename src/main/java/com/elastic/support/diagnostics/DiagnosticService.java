@@ -79,10 +79,10 @@ public class DiagnosticService extends ElasticRestClientService {
             }
 
             checkAuthLevel(ctx.diagnosticInputs.user, ctx.isAuthorized);
-            closeLogs();
 
             return createArchive(ctx.tempDir);
         } finally {
+            closeLogs();
             SystemUtils.nukeDirectory(ctx.tempDir);
             ResourceCache.closeAll();
         }
