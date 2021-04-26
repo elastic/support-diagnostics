@@ -12,7 +12,7 @@ public class DiagnosticChainExec {
 
     private static Logger logger = LogManager.getLogger(DiagnosticChainExec.class);
 
-    public static void runDiagnostic(DiagnosticContext context, String type) {
+    public static void runDiagnostic(DiagnosticContext context, String type) throws DiagnosticException {
 
         try {
             new CheckDiagnosticVersion().execute(context);
@@ -114,9 +114,6 @@ public class DiagnosticChainExec {
                 }
 
             new GenerateManifest().execute(context);
-
-        } catch (DiagnosticException de) {
-            throw de;
         }
         catch (Throwable t){
             logger.error( "Unexpected error", t);

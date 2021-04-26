@@ -132,7 +132,7 @@ public class MonitoringExportService extends ElasticRestClientService {
         outputAvailableClusters(clusters);
     }
 
-    private void validateClusterId(String clusterId, MonitoringExportConfig config, RestClient client, String monitoringUri) {
+    private void validateClusterId(String clusterId, MonitoringExportConfig config, RestClient client, String monitoringUri) throws DiagnosticException {
         String clusterIdQuery = config.queries.get("cluster_id_check");
         clusterIdQuery = clusterIdQuery.replace("{{clusterId}}", clusterId);
 
