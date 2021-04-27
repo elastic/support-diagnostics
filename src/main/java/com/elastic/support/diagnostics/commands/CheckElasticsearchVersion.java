@@ -30,7 +30,7 @@ public class CheckElasticsearchVersion implements Command {
      */
     private static final Logger logger = LogManager.getLogger(CheckElasticsearchVersion.class);
 
-    public void execute(DiagnosticContext context) {
+    public void execute(DiagnosticContext context) throws DiagnosticException {
 
         // Get the version number from the JSON returned
         // by just submitting the host/port combo
@@ -63,16 +63,13 @@ public class CheckElasticsearchVersion implements Command {
             Map restCalls = JsonYamlUtils.readYamlFromClasspath(Constants.ES_REST, true);
 
             context.elasticRestCalls = builder.buildEntryMap(restCalls);
-
-        } catch (DiagnosticException de) {
-            throw de;
         } catch (Exception e) {
             logger.error( "Unanticipated error:", e);
             throw new DiagnosticException(String.format("Could not retrieve the Elasticsearch version due to a system or network error - unable to continue. %s%s%s", e.getMessage(), SystemProperties.lineSeparator, Constants.CHECK_LOG));
         }
     }
 
-    public static Semver getElasticsearchVersion(RestClient client){
+    public static Semver getElasticsearchVersion(RestClient client) throws DiagnosticException {
             RestResult res = client.execQuery("/");
             if (! res.isValid()) {
                 throw new DiagnosticException( res.formatStatusMessage( "Could not retrieve the Elasticsearch version - unable to continue."));

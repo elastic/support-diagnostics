@@ -34,7 +34,7 @@ public class RemoteSystem extends SystemCommand {
                         String keyFilePass,
                         String knownHostsFile,
                         boolean trustRemote,
-                        boolean isSudo){
+                        boolean isSudo) throws DiagnosticException {
 
         this.osName = osName;
 

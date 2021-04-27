@@ -23,7 +23,7 @@ public class RunClusterQueries extends BaseQuery {
 
     private static final Logger logger = LogManager.getLogger(RunClusterQueries.class);
 
-    public void execute(DiagnosticContext context) {
+    public void execute(DiagnosticContext context) throws DiagnosticException {
 
         try {
             DiagConfig diagConfig = context.diagsConfig;

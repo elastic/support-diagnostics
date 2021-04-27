@@ -2,6 +2,7 @@ package com.elastic.support.scrub;
 
 import com.elastic.support.BaseService;
 import com.elastic.support.Constants;
+import com.elastic.support.diagnostics.DiagnosticException;
 import com.elastic.support.util.*;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipFile;
@@ -18,15 +19,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-
 public class ScrubService extends BaseService {
 
     private Logger logger = LogManager.getLogger(ScrubService.class);
 
-    public void exec(ScrubInputs inputs) {
+    public File exec(ScrubInputs inputs) throws DiagnosticException {
         ExecutorService executorService = null;
         String scrubDir = "";
-
 
         try {
             scrubDir = inputs.outputDir + SystemProperties.fileSeparator + "scrubbed-" + inputs.scrubbedFileBaseName;
@@ -85,11 +84,9 @@ public class ScrubService extends BaseService {
             });
 
             // Finish up by zipping it.
-            createArchive(scrubDir);
-
-        } catch (Throwable t) {
-            logger.error("Error occurred: ", t);
-            logger.error(Constants.CONSOLE, "Issue encountered during scrub processing. {}.", Constants.CHECK_LOG);
+            return createArchive(scrubDir);
+        } catch (Throwable throwable) {
+            throw new DiagnosticException("Could not scrub archive", throwable);
         } finally {
             executorService.shutdown();
             closeLogs();

@@ -1,6 +1,7 @@
-package com.elastic.support.diagnostics;
+package com.elastic.support.diagnostics.commands;
 
 import com.elastic.support.Constants;
+import com.elastic.support.diagnostics.DiagnosticException;
 import com.elastic.support.util.*;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
@@ -284,7 +285,7 @@ public class TestRunKibanaQueries {
     }
 
     @Test
-    public void testQueriesForKibana() {
+    public void testQueriesForKibana() throws DiagnosticException {
 
         DiagnosticContext context = initializeKibana("6.5.0");
         int totalRetries = new RunKibanaQueries().runBasicQueries(httpRestClient, context);
@@ -318,7 +319,7 @@ public class TestRunKibanaQueries {
     }
 
     @Test
-    public void testSixversion() {
+    public void testSixversion() throws DiagnosticException {
 
         DiagnosticContext context = initializeKibana("6.5.0");
         int totalRetries = new RunKibanaQueries().runBasicQueries(httpRestClient, context);
@@ -337,7 +338,7 @@ public class TestRunKibanaQueries {
     }
 
     @Test
-    public void testQueriesForKibana711() {
+    public void testQueriesForKibana711() throws DiagnosticException {
 
         DiagnosticContext context = initializeKibana("7.11.0");
         int totalRetries = new RunKibanaQueries().runBasicQueries(httpRestClient, context);
@@ -407,7 +408,7 @@ public class TestRunKibanaQueries {
 
 
     @Test
-    public void testQueriesForKibanaWithHeaders() {
+    public void testQueriesForKibanaWithHeaders() throws DiagnosticException {
 
         DiagnosticContext context = initializeKibana("7.10.0");
         int totalRetries = new RunKibanaQueries().runBasicQueries(httpRestClient, context);
@@ -427,7 +428,7 @@ public class TestRunKibanaQueries {
     }
 
     @Test
-    public void testQueriesRemovingHeaders() {
+    public void testQueriesRemovingHeaders() throws DiagnosticException {
 
       mockServer
             .when(
@@ -457,7 +458,7 @@ public class TestRunKibanaQueries {
     * this way the code will search for config and it will not be there.
     */
     @Test
-    public void testQueriesWithoutHeaders() {
+    public void testQueriesWithoutHeaders() throws DiagnosticException {
 
       mockServer
             .when(

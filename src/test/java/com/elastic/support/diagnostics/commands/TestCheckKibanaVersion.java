@@ -1,6 +1,7 @@
-package com.elastic.support.diagnostics;
+package com.elastic.support.diagnostics.commands;
 
 import com.elastic.support.Constants;
+import com.elastic.support.diagnostics.DiagnosticException;
 import com.elastic.support.util.*;
 import org.junit.jupiter.api.Test;
 import com.elastic.support.diagnostics.commands.CheckKibanaVersion;
@@ -84,7 +85,7 @@ public class TestCheckKibanaVersion {
     }
 
     @Test
-    public void testQueriesForKibana() {
+    public void testQueriesForKibana() throws DiagnosticException {
 		initializeKibana();
         Semver version = new CheckKibanaVersion().getKibanaVersion(httpRestClient);
         // the version 6.5.0 was defined on the json object on the mockServer boby.
@@ -115,7 +116,7 @@ public class TestCheckKibanaVersion {
             Semver version = new CheckKibanaVersion().getKibanaVersion(httpRestClient);
             // if they are more than one node in Kibana we need to throw an Exception
             assertTrue(false);
-        } catch (RuntimeException e) {
+        } catch (DiagnosticException e) {
             assertEquals(e.getMessage(), "Kibana version format is wrong - unable to continue. ()");
         }
     }
@@ -144,7 +145,7 @@ public class TestCheckKibanaVersion {
             Semver version = new CheckKibanaVersion().getKibanaVersion(httpRestClient);
             // if they are more than one node in Kibana we need to throw an Exception
             assertTrue(false);
-        } catch (RuntimeException e) {
+        } catch (DiagnosticException e) {
             assertEquals(e.getMessage(), "Kibana version format is wrong - unable to continue. (a.v.c)");
         }
     }
@@ -173,7 +174,7 @@ public class TestCheckKibanaVersion {
             Semver version = new CheckKibanaVersion().getKibanaVersion(httpRestClient);
             // if they are more than one node in Kibana we need to throw an Exception
             assertTrue(false);
-        } catch (RuntimeException e) {
+        } catch (DiagnosticException e) {
             assertEquals(e.getMessage(), "Kibana version format is wrong - unable to continue. (test-6.5.1)");
         }
     }

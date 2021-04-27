@@ -77,7 +77,7 @@ public class KibanaGetDetails extends CheckPlatformDetails {
      * @param  context The current diagnostic context as set in the DiagnosticService class
      * @param  profiles list of network information for each kibana instance running
      */
-    private void isKibanaRemoteSystem(DiagnosticContext context, List<ProcessProfile> profiles) {
+    private void isKibanaRemoteSystem(DiagnosticContext context, List<ProcessProfile> profiles) throws DiagnosticException {
         if (!context.diagnosticInputs.diagType.equals(Constants.kibanaRemote)) {
             return;
         }
@@ -219,7 +219,7 @@ public class KibanaGetDetails extends CheckPlatformDetails {
      * @return Never {@code null}.
      * @throws DiagnosticContext if Kibana responds with a non-200 response
      */
-    public JsonNode getStats(DiagnosticContext context) {
+    public JsonNode getStats(DiagnosticContext context) throws DiagnosticException {
 
         RestClient restClient = ResourceCache.getRestClient(Constants.restInputHost);
         String url = context.elasticRestCalls.get("kibana_stats").getUrl();

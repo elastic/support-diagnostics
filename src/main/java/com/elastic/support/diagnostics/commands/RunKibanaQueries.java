@@ -61,7 +61,8 @@ public class RunKibanaQueries extends BaseQuery {
     * @param  context  The current diagnostic context as set in the DiagnosticService class
     * @return Number of HTTP request that will be executed.
     */
-    public int runBasicQueries(RestClient client, DiagnosticContext context) {
+    public int runBasicQueries(RestClient client, DiagnosticContext context) throws DiagnosticException {
+
         int totalRetries = 0;
         List<RestEntry> queries = new ArrayList<>();
         
@@ -127,7 +128,7 @@ public class RunKibanaQueries extends BaseQuery {
     * @param  perPage  Number of docusment we reques to the API
     * @param  action Kibana API name we are running
     */
-    public void getAllPages(RestClient client, List<RestEntry> queries, int perPage, RestEntry action, String spaceId) {
+    public void getAllPages(RestClient client, List<RestEntry> queries, int perPage, RestEntry action, String spaceId)  throws DiagnosticException {
         // get the values needed to the pagination.
         RestResult res = client.execQuery(String.format("%s?per_page=1", action.getUrl()));
         if (!res.isValid()) {
@@ -325,7 +326,7 @@ public class RunKibanaQueries extends BaseQuery {
     *
     * @param  context The current diagnostic context as set in the DiagnosticService class
     */
-    public void execute(DiagnosticContext context) {
+    public void execute(DiagnosticContext context) throws DiagnosticException {
 
         try {
             context.perPage         = 100;

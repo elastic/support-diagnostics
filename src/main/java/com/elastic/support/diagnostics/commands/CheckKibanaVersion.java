@@ -34,7 +34,7 @@ public class CheckKibanaVersion implements Command {
    
     private static final Logger logger = LogManager.getLogger(CheckKibanaVersion.class);
 
-    public void execute(DiagnosticContext context) {
+    public void execute(DiagnosticContext context) throws DiagnosticException {
 
         // Get the version number from the JSON returned
         // by just submitting the host/port combo
@@ -70,9 +70,6 @@ public class CheckKibanaVersion implements Command {
             logger.info(Constants.CONSOLE, "Run basic queries for Kibana: {}", restCalls);
 
             context.elasticRestCalls = builder.buildEntryMap(restCalls);
-
-        } catch (DiagnosticException de) {
-            throw de;
         } catch (Exception e) {
             logger.error( "Unanticipated error:", e);
             String errorLog = "Could't retrieve Kibana version due to a system or network error. %s%s%s";
@@ -91,7 +88,7 @@ public class CheckKibanaVersion implements Command {
     * @return The Kibana version (semver).
     * @throws DiagnosticException if the request fails or the version is invalid
     */
-    public static Semver getKibanaVersion(RestClient client){
+    public static Semver getKibanaVersion(RestClient client) throws DiagnosticException {
             RestResult res = client.execQuery("/api/settings");
             if (! res.isValid()) {
                 throw new DiagnosticException(res.formatStatusMessage("Could not retrieve the Kibana version - unable to continue."));
