@@ -27,52 +27,55 @@ public class RetrieveSystemDigest implements Command {
     private final Logger logger = LogManager.getLogger(RetrieveSystemDigest.class);
 
     public void execute(DiagnosticContext context) {
-
         try {
             SystemInfo si = new SystemInfo();
             HardwareAbstractionLayer hal = si.getHardware();
             OperatingSystem os = si.getOperatingSystem();
             File sysFileJson = new File(context.tempDir + SystemProperties.fileSeparator + "system-digest.json");
-            OutputStream outputStreamJson = new FileOutputStream(sysFileJson);
-            BufferedWriter jsonWriter = new BufferedWriter(new OutputStreamWriter(outputStreamJson));
-            String jsonInfo = si.toPrettyJSON();
-            jsonWriter.write(jsonInfo);
-            jsonWriter.close();
+
+            try (
+                OutputStream outputStreamJson = new FileOutputStream(sysFileJson);
+                BufferedWriter jsonWriter = new BufferedWriter(new OutputStreamWriter(outputStreamJson));
+            ) {
+                String jsonInfo = si.toPrettyJSON();
+                jsonWriter.write(jsonInfo);
+            }
 
             File sysFile = new File(context.tempDir + SystemProperties.fileSeparator + "system-digest.txt");
-            OutputStream outputStream = new FileOutputStream(sysFile);
-            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream));
 
-            printComputerSystem(writer, hal.getComputerSystem());
-            writer.newLine();
+            try (
+                OutputStream outputStream = new FileOutputStream(sysFile);
+                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream));
+            ) {
+                printComputerSystem(writer, hal.getComputerSystem());
+                writer.newLine();
 
-            printProcessor(writer, hal.getProcessor());
-            writer.newLine();
+                printProcessor(writer, hal.getProcessor());
+                writer.newLine();
 
-            printMemory(writer, hal.getMemory());
-            writer.newLine();
+                printMemory(writer, hal.getMemory());
+                writer.newLine();
 
-            printCpu(writer, hal.getProcessor());
-            writer.newLine();
+                printCpu(writer, hal.getProcessor());
+                writer.newLine();
 
-            printProcesses(writer, os, hal.getMemory());
-            writer.newLine();
+                printProcesses(writer, os, hal.getMemory());
+                writer.newLine();
 
-            printDisks(writer, hal.getDiskStores());
-            writer.newLine();
+                printDisks(writer, hal.getDiskStores());
+                writer.newLine();
 
-            printFileSystem(writer, os.getFileSystem());
-            writer.newLine();
+                printFileSystem(writer, os.getFileSystem());
+                writer.newLine();
 
-            printNetworkInterfaces(writer, hal.getNetworkIFs());
-            writer.newLine();
+                printNetworkInterfaces(writer, hal.getNetworkIFs());
+                writer.newLine();
 
-            printNetworkParameters(writer, os.getNetworkParams());
-            writer.newLine();
+                printNetworkParameters(writer, os.getNetworkParams());
+                writer.newLine();
+            }
 
-            writer.close();
             logger.info("Finished querying SysInfo.");
-
         } catch (final Exception e) {
             logger.info("Failed saving system-digest.txt file.", e);
         }

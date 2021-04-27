@@ -147,7 +147,7 @@ public class TestKibanaGetDetails {
     }
 
     @Test
-    public void testFunctionGetStats() {
+    public void testFunctionGetStats() throws DiagnosticException {
 
         mockServer
                 .when(

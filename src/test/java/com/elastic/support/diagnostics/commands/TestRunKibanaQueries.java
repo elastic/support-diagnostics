@@ -84,7 +84,7 @@ public class TestRunKibanaQueries {
 
     }
 
-    private DiagnosticContext initializeKibana(String version) {
+    private DiagnosticContext initializeKibana(String version) throws DiagnosticException {
 
     	DiagnosticContext context = new DiagnosticContext();
     	RestEntryConfig builder = new RestEntryConfig(version);

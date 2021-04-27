@@ -1,5 +1,6 @@
 package com.elastic.support.rest;
 
+import com.elastic.support.diagnostics.DiagnosticException;
 import com.elastic.support.util.JsonYamlUtils;
 import com.vdurmont.semver4j.Semver;
 import org.apache.logging.log4j.LogManager;
@@ -17,7 +18,7 @@ public class TestRestConfigFileValidity {
     protected static Semver sem= new Semver("9.9.999", Semver.SemverType.NPM);
 
     @Test
-    public void validateElasticConfigVersioning(){
+    public void validateElasticConfigVersioning() throws DiagnosticException {
         // validates whether each set of version entries has exactly one valid outcome.
         Map<String, Object> restEntriesConfig = JsonYamlUtils.readYamlFromClasspath("elastic-rest.yml", true);
         validateEntries(restEntriesConfig);

@@ -42,20 +42,6 @@ public class SystemUtils {
         }
     }
 
-    public static void streamClose(String path, InputStream instream) {
-
-        if (instream != null) {
-            try {
-                instream.close();
-            } catch (Throwable t) {
-                logger.error(Constants.CONSOLE, "Error encountered when attempting to close file {}", path);
-            }
-        } else {
-            logger.error(Constants.CONSOLE, "Error encountered when attempting to close file: null InputStream {}", path);
-        }
-
-    }
-
     public static void nukeDirectory(String dir){
         try {
             File tmp = new File(dir);
