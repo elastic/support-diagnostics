@@ -1,91 +1,74 @@
 package com.elastic.support.util;
 
 import com.elastic.support.Constants;
+import com.elastic.support.diagnostics.DiagnosticException;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
-import org.apache.commons.compress.archivers.ArchiveOutputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
-import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.apache.commons.compress.compressors.CompressorOutputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.apache.commons.io.*;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Vector;
 
 
 public class ArchiveUtils {
 
    private static final Logger logger = LogManager.getLogger(ArchiveUtils.class);
 
-   public static void createArchive(String dir, String archiveFileName) {
-      if(! createZipArchive(dir, archiveFileName)){
-         logger.error(Constants.CONSOLE,  "Couldn't create zip archive. Trying tar.gz");
-         if(! createTarArchive(dir, archiveFileName)){
+   public static File createArchive(String dir, String archiveFileName) throws DiagnosticException {
+      try {
+         return createZipArchive(dir, archiveFileName);
+      } catch (Exception zipException) {
+         logger.info(Constants.CONSOLE, "Couldn't create zip archive. Trying tar.gz");
+
+         try {
+            return createTarArchive(dir, archiveFileName);
+         } catch (Exception tarException) {
             logger.info(Constants.CONSOLE, "Couldn't create tar.gz archive.");
+            tarException.addSuppressed(zipException);
+            throw new DiagnosticException("Couldn't create zip and tar.gz archives.", tarException);
          }
       }
    }
 
-   public static boolean createZipArchive(String dir, String archiveFileName)  {
+   public static File createZipArchive(String dir, String archiveFileName) throws IOException {
+      File srcDir = new File(dir);
+      String filename = dir + "-" + archiveFileName + ".zip";
+      File file = new File(filename);
+      FileOutputStream fout = new FileOutputStream(filename);
+      ZipArchiveOutputStream taos = new ZipArchiveOutputStream(fout);
+      archiveResultsZip(archiveFileName, taos, srcDir, "", true);
+      taos.close();
 
-      try {
-         File srcDir = new File(dir);
-         String filename = dir + "-" + archiveFileName + ".zip";
+      logger.info(Constants.CONSOLE, "Archive: " + filename + " was created");
 
-         FileOutputStream fout = new FileOutputStream(filename);
-         ZipArchiveOutputStream taos = new ZipArchiveOutputStream(fout);
-         archiveResultsZip(archiveFileName, taos, srcDir, "", true);
-         taos.close();
-
-         logger.info(Constants.CONSOLE, "Archive: " + filename + " was created");
-
-      } catch (Exception ioe) {
-         logger.error( "Couldn't create archive.", ioe);
-         return false;
-      }
-      return true;
-
+      return file;
    }
 
-   public static boolean createTarArchive(String dir, String archiveFileName) {
+   public static File createTarArchive(String dir, String archiveFileName) throws IOException {
+      File srcDir = new File(dir);
+      String filename = dir + "-" + archiveFileName + ".tar.gz";
+      File file = new File(filename);
+      FileOutputStream fout = new FileOutputStream(filename);
+      CompressorOutputStream cout = new GzipCompressorOutputStream(fout);
+      TarArchiveOutputStream taos = new TarArchiveOutputStream(cout);
 
-      try {
-         File srcDir = new File(dir);
-         String filename = dir + "-" + archiveFileName + ".tar.gz";
+      taos.setBigNumberMode(TarArchiveOutputStream.BIGNUMBER_STAR);
+      taos.setLongFileMode(TarArchiveOutputStream.LONGFILE_GNU);
+      archiveResultsTar(archiveFileName, taos, srcDir, "", true);
+      taos.close();
 
-         FileOutputStream fout = new FileOutputStream(filename);
-         CompressorOutputStream cout = new GzipCompressorOutputStream(fout);
-         TarArchiveOutputStream taos = new TarArchiveOutputStream(cout);
+      logger.info(Constants.CONSOLE,  "Archive: " + filename + " was created");
 
-         taos.setBigNumberMode(TarArchiveOutputStream.BIGNUMBER_STAR);
-         taos.setLongFileMode(TarArchiveOutputStream.LONGFILE_GNU);
-         archiveResultsTar(archiveFileName, taos, srcDir, "", true);
-         taos.close();
-
-         logger.info(Constants.CONSOLE,  "Archive: " + filename + " was created");
-
-      } catch (Exception ioe) {
-         logger.error( "Couldn't create archive.", ioe);
-         return false;
-      }
-
-      return true;
-
+      return file;
    }
 
    public static void archiveResultsZip(String archiveFilename, ZipArchiveOutputStream taos, File file, String path, boolean append) {
@@ -146,7 +129,7 @@ public class ArchiveUtils {
       }
    }
 
-   public static void extractArchive(String filename, String targetDir) throws Exception{
+   public static void extractArchive(String filename, String targetDir) throws IOException {
       final int bufferSize = 1024;
       ArchiveInputStream ais = null;
       try  {

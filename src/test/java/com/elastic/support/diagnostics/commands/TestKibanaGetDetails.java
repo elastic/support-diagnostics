@@ -1,6 +1,8 @@
-package com.elastic.support.diagnostics;
+package com.elastic.support.diagnostics.commands;
 
 import com.elastic.support.Constants;
+import com.elastic.support.diagnostics.DiagnosticException;
+import com.elastic.support.diagnostics.ProcessProfile;
 import com.elastic.support.util.*;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;

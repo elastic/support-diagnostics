@@ -38,7 +38,7 @@ public class JavaPlatform {
         }
     }
 
-    public String extractJdkPath(String processList) {
+    public String extractJdkPath(String processList) throws DiagnosticException {
 
         String line;
         try (BufferedReader br = new BufferedReader(new StringReader(processList))) {

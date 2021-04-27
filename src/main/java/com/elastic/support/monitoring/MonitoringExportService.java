@@ -29,8 +29,7 @@ public class MonitoringExportService extends ElasticRestClientService {
     private static final String SCROLL_ID = "{ \"scroll_id\" : \"{{scrollId}}\" }";
     private Logger logger = LogManager.getLogger(MonitoringExportService.class);
 
-    public void execExtract(MonitoringExportInputs inputs) {
-
+    public void execExtract(MonitoringExportInputs inputs) throws DiagnosticException {
         // Initialize outside the block for Exception handling
         RestClient client = null;
         MonitoringExportConfig config = null;
@@ -132,7 +131,7 @@ public class MonitoringExportService extends ElasticRestClientService {
         outputAvailableClusters(clusters);
     }
 
-    private void validateClusterId(String clusterId, MonitoringExportConfig config, RestClient client, String monitoringUri) {
+    private void validateClusterId(String clusterId, MonitoringExportConfig config, RestClient client, String monitoringUri) throws DiagnosticException {
         String clusterIdQuery = config.queries.get("cluster_id_check");
         clusterIdQuery = clusterIdQuery.replace("{{clusterId}}", clusterId);
 

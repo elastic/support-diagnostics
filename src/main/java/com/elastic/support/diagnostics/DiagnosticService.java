@@ -11,6 +11,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -18,8 +19,7 @@ public class DiagnosticService extends ElasticRestClientService {
 
     private Logger logger = LogManager.getLogger(DiagnosticService.class);
 
-    public void exec(DiagnosticInputs inputs, DiagConfig config) {
-
+    public File exec(DiagnosticInputs inputs, DiagConfig config) throws DiagnosticException {
         DiagnosticContext ctx = new DiagnosticContext();
         ctx.diagsConfig = config;
         ctx.diagnosticInputs = inputs;
@@ -50,8 +50,15 @@ public class DiagnosticService extends ElasticRestClientService {
             ctx.tempDir = outputDir + SystemProperties.fileSeparator + inputs.diagType + "-" + Constants.ES_DIAG;
             logger.info(Constants.CONSOLE, "{}Creating temp directory: {}", SystemProperties.lineSeparator, ctx.tempDir);
 
-            FileUtils.deleteDirectory(new File(ctx.tempDir));
-            Files.createDirectories(Paths.get(ctx.tempDir));
+            try {
+                FileUtils.deleteDirectory(new File(ctx.tempDir));
+                Files.createDirectories(Paths.get(ctx.tempDir));
+            }
+            catch (IOException ioe) {
+                logger.error("Temp directory error", ioe);
+                logger.info(Constants.CONSOLE, String.format("Issue with creating temp directory. %s", Constants.CHECK_LOG));
+                throw new DiagnosticException("Could not create temporary directory", ioe);
+            }
 
             // Modify the log file setup since we're going to package it with the diagnostic.
             // The log4 configuration file sets up 2 loggers, one strictly for the console and a file log in the working directory to handle
@@ -71,16 +78,11 @@ public class DiagnosticService extends ElasticRestClientService {
                 logger.info(Constants.CONSOLE, "Identified Docker installations - bypassed log collection and some system calls.");
             }
 
-           checkAuthLevel(ctx.diagnosticInputs.user, ctx.isAuthorized);
+            checkAuthLevel(ctx.diagnosticInputs.user, ctx.isAuthorized);
 
-        } catch (DiagnosticException de) {
-            logger.error(Constants.CONSOLE, de.getMessage());
-        } catch (Throwable t) {
-            logger.error( "Temp directory error", t);
-            logger.info(Constants.CONSOLE, String.format("Issue with creating temp directory. %s", Constants.CHECK_LOG));
+            return createArchive(ctx.tempDir);
         } finally {
             closeLogs();
-            createArchive(ctx.tempDir);
             SystemUtils.nukeDirectory(ctx.tempDir);
             ResourceCache.closeAll();
         }

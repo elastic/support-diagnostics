@@ -31,7 +31,7 @@ public class SystemUtils {
         System.exit(0);
     }
 
-    public static void writeToFile(String content, String dest) {
+    public static void writeToFile(String content, String dest) throws DiagnosticException {
         try {
             logger.info(Constants.CONSOLE,  "Writing to {}", dest);
             File outFile = new File(dest);

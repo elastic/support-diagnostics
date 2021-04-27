@@ -26,7 +26,7 @@ public class RunLogstashQueries extends BaseQuery {
 
     private static final Logger logger = LogManager.getLogger(BaseQuery.class);
 
-    public void execute(DiagnosticContext context) {
+    public void execute(DiagnosticContext context) throws DiagnosticException {
 
         try {
             RestClient client = ResourceCache.getRestClient(Constants.restInputHost);
