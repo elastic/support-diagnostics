@@ -24,9 +24,8 @@ public class MonitoringImportService extends ElasticRestClientService {
     private Logger logger = LogManager.getLogger(MonitoringImportService.class);
     private static final String SCROLL_ID = "{ \"scroll_id\" : \"{{scrollId}}\" }";
 
-    void execImport(MonitoringImportInputs inputs){
-
-        Map configMap = JsonYamlUtils.readYamlFromClasspath(Constants.DIAG_CONFIG, true);
+    void execImport(MonitoringImportInputs inputs) throws DiagnosticException {
+        Map<String, Object> configMap = JsonYamlUtils.readYamlFromClasspath(Constants.DIAG_CONFIG, true);
         MonitoringImportConfig config = new MonitoringImportConfig(configMap);
 
         try (RestClient client = getClient(inputs, config)){

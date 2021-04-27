@@ -39,39 +39,42 @@ public class ArchiveUtils {
       }
    }
 
-   public static File createZipArchive(String dir, String archiveFileName) throws IOException {
+   private static File createZipArchive(String dir, String archiveFileName) throws IOException {
       File srcDir = new File(dir);
       String filename = dir + "-" + archiveFileName + ".zip";
       File file = new File(filename);
-      FileOutputStream fout = new FileOutputStream(filename);
-      ZipArchiveOutputStream taos = new ZipArchiveOutputStream(fout);
-      archiveResultsZip(archiveFileName, taos, srcDir, "", true);
-      taos.close();
 
-      logger.info(Constants.CONSOLE, "Archive: " + filename + " was created");
-
-      return file;
+      try (
+         FileOutputStream fout = new FileOutputStream(filename);
+         ZipArchiveOutputStream taos = new ZipArchiveOutputStream(fout)
+      ) {
+         archiveResultsZip(archiveFileName, taos, srcDir, "", true);
+         logger.info(Constants.CONSOLE, "Archive: " + filename + " was created");
+         return file;
+      }
    }
 
-   public static File createTarArchive(String dir, String archiveFileName) throws IOException {
+   private static File createTarArchive(String dir, String archiveFileName) throws IOException {
       File srcDir = new File(dir);
       String filename = dir + "-" + archiveFileName + ".tar.gz";
       File file = new File(filename);
-      FileOutputStream fout = new FileOutputStream(filename);
-      CompressorOutputStream cout = new GzipCompressorOutputStream(fout);
-      TarArchiveOutputStream taos = new TarArchiveOutputStream(cout);
 
-      taos.setBigNumberMode(TarArchiveOutputStream.BIGNUMBER_STAR);
-      taos.setLongFileMode(TarArchiveOutputStream.LONGFILE_GNU);
-      archiveResultsTar(archiveFileName, taos, srcDir, "", true);
-      taos.close();
+      try (
+         FileOutputStream fout = new FileOutputStream(filename);
+         CompressorOutputStream cout = new GzipCompressorOutputStream(fout);
+         TarArchiveOutputStream taos = new TarArchiveOutputStream(cout)
+      ) {
+         taos.setBigNumberMode(TarArchiveOutputStream.BIGNUMBER_STAR);
+         taos.setLongFileMode(TarArchiveOutputStream.LONGFILE_GNU);
+         archiveResultsTar(archiveFileName, taos, srcDir, "", true);
 
-      logger.info(Constants.CONSOLE,  "Archive: " + filename + " was created");
+         logger.info(Constants.CONSOLE,  "Archive: " + filename + " was created");
 
-      return file;
+         return file;
+      }
    }
 
-   public static void archiveResultsZip(String archiveFilename, ZipArchiveOutputStream taos, File file, String path, boolean append) {
+   private static void archiveResultsZip(String archiveFilename, ZipArchiveOutputStream taos, File file, String path, boolean append) {
       String relPath = "";
 
       try {
@@ -84,11 +87,10 @@ public class ArchiveUtils {
          taos.putArchiveEntry(tae);
 
          if (file.isFile()) {
-            BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file));
-            IOUtils.copy(bis, taos);
-            taos.closeArchiveEntry();
-            bis.close();
-
+            try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file))) {
+               IOUtils.copy(bis, taos);
+               taos.closeArchiveEntry();
+            }
          } else if (file.isDirectory()) {
             taos.closeArchiveEntry();
             for (File childFile : file.listFiles()) {
@@ -100,7 +102,7 @@ public class ArchiveUtils {
       }
    }
 
-   public static void archiveResultsTar(String archiveFilename, TarArchiveOutputStream taos, File file, String path, boolean append) {
+   private static void archiveResultsTar(String archiveFilename, TarArchiveOutputStream taos, File file, String path, boolean append) {
       String relPath = "";
 
       try {
@@ -113,13 +115,13 @@ public class ArchiveUtils {
          taos.putArchiveEntry(tae);
 
          if (file.isFile()) {
-            BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file));
-            IOUtils.copy(bis, taos);
-            taos.closeArchiveEntry();
-            bis.close();
-
+            try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file))) {
+               IOUtils.copy(bis, taos);
+               taos.closeArchiveEntry();
+            }
          } else if (file.isDirectory()) {
             taos.closeArchiveEntry();
+
             for (File childFile : file.listFiles()) {
                archiveResultsTar(archiveFilename, taos, childFile, relPath, false);
             }
@@ -183,7 +185,9 @@ public class ArchiveUtils {
          logger.error(e);
       }
       finally {
-         ais.close();
+         if (ais != null) {
+            ais.close();
+         }
       }
    }
 

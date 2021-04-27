@@ -1,5 +1,6 @@
 package com.elastic.support.util;
 
+import com.elastic.support.diagnostics.DiagnosticException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -17,7 +18,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
-
 
 public class JsonYamlUtils {
 
@@ -57,9 +57,7 @@ public class JsonYamlUtils {
    }
 
    public static JsonNode createJsonNodeFromClasspath(String path) {
-      try {
-         InputStream is;
-         is = JsonYamlUtils.class.getClassLoader().getResourceAsStream(path);
+      try (InputStream is = JsonYamlUtils.class.getClassLoader().getResourceAsStream(path)) {
          String nodeString = new String(IOUtils.toByteArray(is));
          ObjectMapper mapper = new ObjectMapper();
          return mapper.readTree(nodeString);
@@ -74,56 +72,54 @@ public class JsonYamlUtils {
          DumperOptions options = new DumperOptions();
          options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
          Yaml yaml = new Yaml(options);
-         FileWriter writer = new FileWriter(path);
-         yaml.dump(tree, writer);
+         try (FileWriter writer = new FileWriter(path)) {
+            yaml.dump(tree, writer);
+         }
       } catch (IOException e) {
          logger.info("Error writing YAML to: {}", path);
          throw new RuntimeException(e);
       }
    }
 
-   public static Map readYamlFromClasspath(String path, boolean isBlock)  {
-      try {
+   public static Map<String, Object> readYamlFromClasspath(String path, boolean isBlock) throws DiagnosticException {
+      try (
          InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(path);
-         Map doc = JsonYamlUtils.readYaml(inputStream, isBlock);
-         SystemUtils.streamClose(path, inputStream);
-         return doc;
-      } catch (Exception e) {
+      ) {
+         return JsonYamlUtils.readYaml(inputStream, isBlock);
+      }
+      catch (Exception e) {
          logger.info("Error reading YAML from {}", path);
-         throw new RuntimeException(e);
+         throw new DiagnosticException("Error reading YAML file",e);
       }
    }
 
-   public static Map readYamlFromPath(String path, boolean isBlock) throws Exception {
-      File fl = FileUtils.getFile(path);
-      InputStream inputStream = new FileInputStream(fl);
-      Map doc = JsonYamlUtils.readYaml(inputStream, isBlock);
-      SystemUtils.streamClose(path, inputStream);
-      return doc;
-   }
-
-   public static Map readYaml(InputStream in, boolean isBlock) throws Exception {
-      Map doc = null;
-
-      try {
-         DumperOptions options = new DumperOptions();
-         if (isBlock) {
-            options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-         }
-
-         Yaml yaml = new Yaml(options);
-         doc = (Map) yaml.load(in);
-
-      } catch (Exception e) {
-         logger.info("Error encountered retrieving yml file.", e);
+   public static Map readYamlFromPath(String path, boolean isBlock) throws DiagnosticException {
+      try (
+         InputStream inputStream = new FileInputStream(FileUtils.getFile(path))
+      ) {
+         return JsonYamlUtils.readYaml(inputStream, isBlock);
       }
-      finally {
-         return nullSafeYamlMap(doc);
+      catch (Exception e) {
+         logger.info("Error reading YAML from {}", path);
+         throw new DiagnosticException("Error reading YAML file",e);
       }
    }
 
-   public static Map flattenYaml(Map map) {
-      Map result = new LinkedHashMap<>();
+   public static Map<String, Object> readYaml(InputStream in, boolean isBlock) {
+      DumperOptions options = new DumperOptions();
+
+      if (isBlock) {
+         options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+      }
+
+      Yaml yaml = new Yaml(options);
+      Map<String, Object> doc = yaml.load(in);
+
+      return nullSafeYamlMap(doc);
+}
+
+   public static Map<String, Object> flattenYaml(Map<String, Object> map) {
+      Map<String, Object> result = new LinkedHashMap<>();
       buildFlattenedMap(result, map, null);
       return result;
    }
@@ -145,11 +141,10 @@ public class JsonYamlUtils {
       }
    }
 
-   public static void buildFlattenedMap(Map result, Map source, String path) {
+   public static void buildFlattenedMap(Map<String, Object> result, Map<String, Object> source, String path) {
+      for (Map.Entry<String, Object> entry : source.entrySet()) {
+         String key = entry.getKey();
 
-      Set<Map.Entry<Object, Object>> entries = source.entrySet();
-      for (Map.Entry<Object, Object> entry : entries) {
-         String key = entry.getKey().toString();
          if (StringUtils.isNoneEmpty(path)) {
             if (key.startsWith("[")) {
                key = path + key;
@@ -157,12 +152,15 @@ public class JsonYamlUtils {
                key = path + "." + key;
             }
          }
+
          Object value = entry.getValue();
+
          if (value instanceof String) {
             result.put(key, value);
          } else if (value instanceof Map) {
             // Need a compound key
-            Map map = (Map) value;
+            @SuppressWarnings("unchecked")
+            Map<String, Object> map = (Map<String, Object>) value;
             buildFlattenedMap(result, map, key);
          //} else if (value instanceof List) {
          //   result.put(key, value);
@@ -181,10 +179,11 @@ public class JsonYamlUtils {
       }
    }
 
-   private static Map nullSafeYamlMap(Map doc){
+   private static Map<String, Object> nullSafeYamlMap(Map<String, Object> doc){
       if (doc == null){
-         doc = new HashMap();
+         doc = new HashMap<>();
       }
+
       return doc;
    }
 

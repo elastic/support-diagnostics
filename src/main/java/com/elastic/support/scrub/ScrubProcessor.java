@@ -1,6 +1,7 @@
 package com.elastic.support.scrub;
 
 import com.elastic.support.Constants;
+import com.elastic.support.diagnostics.DiagnosticException;
 import com.elastic.support.util.JsonYamlUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.commons.lang3.ObjectUtils;
@@ -33,8 +34,7 @@ public class ScrubProcessor {
 
 
 
-    public ScrubProcessor(String nodes) {
-
+    public ScrubProcessor(String nodes) throws DiagnosticException {
         this();
 
         if (StringUtils.isNotEmpty(nodes)) {
@@ -42,9 +42,9 @@ public class ScrubProcessor {
         }
     }
 
-    public ScrubProcessor() {
-        scrubConfig =
-                JsonYamlUtils.readYamlFromClasspath("scrub.yml", false);
+    public ScrubProcessor() throws DiagnosticException {
+        scrubConfig = JsonYamlUtils.readYamlFromClasspath("scrub.yml", false);
+
         Collection auto = (Collection) scrubConfig.get("auto-scrub");
         if (auto != null) {
             autoScrub.addAll(auto);
