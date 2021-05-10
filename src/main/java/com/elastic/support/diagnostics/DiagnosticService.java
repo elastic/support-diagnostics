@@ -23,6 +23,7 @@ public class DiagnosticService extends ElasticRestClientService {
         DiagnosticContext ctx = new DiagnosticContext();
         ctx.diagsConfig = config;
         ctx.diagnosticInputs = inputs;
+        File file;
 
         try(
                 RestClient esRestClient = RestClient.getClient(
@@ -79,12 +80,13 @@ public class DiagnosticService extends ElasticRestClientService {
             }
 
             checkAuthLevel(ctx.diagnosticInputs.user, ctx.isAuthorized);
-
-            return createArchive(ctx.tempDir);
         } finally {
             closeLogs();
+            file = createArchive(ctx.tempDir);
             SystemUtils.nukeDirectory(ctx.tempDir);
             ResourceCache.closeAll();
         }
+
+        return file;
     }
 }
