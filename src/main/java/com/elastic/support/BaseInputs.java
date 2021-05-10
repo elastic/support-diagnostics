@@ -152,7 +152,7 @@ public abstract class BaseInputs {
             }
         }
 
-        return Collections.singletonList("Provided archive type" + archiveType + " is not supported.");
+        return Collections.singletonList("Provided archive type [" + archiveType + "] is not supported.");
     }
 
     public List<String> validateFile(String val) {

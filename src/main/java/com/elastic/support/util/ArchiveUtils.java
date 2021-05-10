@@ -48,7 +48,7 @@ public class ArchiveUtils {
             try {
                return createTarArchive(dir, archiveFileName);
             } catch (IOException ioe) {
-               throw new DiagnosticException("Couldn't create tar archive.", ioe);
+               throw new DiagnosticException("Couldn't create tar.gz archive.", ioe);
             }
          default:
             try {
@@ -234,6 +234,5 @@ public class ArchiveUtils {
    }
 
 }
-
 
 
