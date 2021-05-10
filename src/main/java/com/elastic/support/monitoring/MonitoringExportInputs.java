@@ -132,7 +132,7 @@ public class MonitoringExportInputs extends ElasticRestClientInputs {
             return Collections.singletonList("Invalid Date or Time format. Please enter the date in format YYYY-MM-dd HH:mm");
         }
 
-        return emptyList;
+        return null;
     }
 
     public List<String> validateCluster(String val){
