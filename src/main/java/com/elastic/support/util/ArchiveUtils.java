@@ -18,24 +18,52 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import java.io.*;
 
-
 public class ArchiveUtils {
+
+   public enum ArchiveType {
+      ZIP, TAR, ANY;
+
+      public static ArchiveType fromString(String name) {
+         for (ArchiveType type : ArchiveType.values()) {
+            if (type.name().equalsIgnoreCase(name)) {
+               return type;
+            }
+         }
+
+         return ANY;
+      }
+   }
 
    private static final Logger logger = LogManager.getLogger(ArchiveUtils.class);
 
-   public static File createArchive(String dir, String archiveFileName) throws DiagnosticException {
-      try {
-         return createZipArchive(dir, archiveFileName);
-      } catch (Exception zipException) {
-         logger.info(Constants.CONSOLE, "Couldn't create zip archive. Trying tar.gz");
+   public static File createArchive(String dir, String archiveFileName, ArchiveType type) throws DiagnosticException {
+      switch (type) {
+         case ZIP:
+            try {
+               return createZipArchive(dir, archiveFileName);
+            } catch (IOException ioe) {
+               throw new DiagnosticException("Couldn't create zip archive.", ioe);
+            }
+         case TAR:
+            try {
+               return createTarArchive(dir, archiveFileName);
+            } catch (IOException ioe) {
+               throw new DiagnosticException("Couldn't create tar archive.", ioe);
+            }
+         default:
+            try {
+               return createZipArchive(dir, archiveFileName);
+            } catch (IOException zipException) {
+               logger.info(Constants.CONSOLE, "Couldn't create zip archive. Trying tar.gz");
 
-         try {
-            return createTarArchive(dir, archiveFileName);
-         } catch (Exception tarException) {
-            logger.info(Constants.CONSOLE, "Couldn't create tar.gz archive.");
-            tarException.addSuppressed(zipException);
-            throw new DiagnosticException("Couldn't create zip and tar.gz archives.", tarException);
-         }
+               try {
+                  return createTarArchive(dir, archiveFileName);
+               } catch (Exception tarException) {
+                  logger.info(Constants.CONSOLE, "Couldn't create tar.gz archive.");
+                  tarException.addSuppressed(zipException);
+                  throw new DiagnosticException("Couldn't create zip and tar.gz archives.", tarException);
+               }
+            }
       }
    }
 

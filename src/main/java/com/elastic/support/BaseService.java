@@ -2,6 +2,7 @@ package com.elastic.support;
 
 import com.elastic.support.diagnostics.DiagnosticException;
 import com.elastic.support.util.ArchiveUtils;
+import com.elastic.support.util.ArchiveUtils.ArchiveType;
 import com.elastic.support.util.SystemProperties;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -72,9 +73,9 @@ public abstract  class BaseService {
 
     }
 
-    public File createArchive(String tempDir) throws DiagnosticException {
+    public File createArchive(String tempDir, ArchiveType archiveType) throws DiagnosticException {
         logger.info(Constants.CONSOLE, "Archiving diagnostic results.");
-        return ArchiveUtils.createArchive(tempDir, SystemProperties.getFileDateString());
+        return ArchiveUtils.createArchive(tempDir, SystemProperties.getFileDateString(), archiveType);
     }
 
 }
