@@ -3,8 +3,6 @@ package com.elastic.support.diagnostics;
 import com.elastic.support.Constants;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import java.io.BufferedReader;
-import java.io.StringReader;
 
 public class JavaPlatform {
 
@@ -16,7 +14,6 @@ public class JavaPlatform {
     public String javac = "javac";
 
     public JavaPlatform(String osName){
-
         switch (osName){
             case Constants.linuxPlatform:
                 this.platform = Constants.linuxPlatform;
@@ -38,41 +35,12 @@ public class JavaPlatform {
         }
     }
 
-    public String extractJdkPath(String processList) throws DiagnosticException {
-
-        String line;
-        try (BufferedReader br = new BufferedReader(new StringReader(processList))) {
-            while ((line = br.readLine()) != null) {
-                if (line.contains(javaExecutable) && line.contains("-Des.")) {
-                    String javaHome =  extractJavaHome(line);
-                }
-                else {
-                    continue;
-                }
-            }
-        } catch (Exception e) {
-            logger.error( "Error obtaining the path for the JDK", e);
-        }
-
-        // If we got this far we couldn't find a JDK
-        logger.info(Constants.CONSOLE, "Could not locate the location of the java executable used to launch Elasticsearch");
-        throw new DiagnosticException("JDK not found.");
-    }
-
     public String extractJavaHome(String jdkProcessString){
-
         // After the preceding cols are stripped, truncate the output behind the path to the executable.
         int jpathIndex = jdkProcessString.indexOf(javaExecutable);
         javaHome = jdkProcessString.substring(0, jpathIndex);
 
         return javaHome;
-    }
-
-    public boolean isJdkPresent(String result){
-        if(result.contains(javac)){
-            return true;
-        }
-        return false;
     }
 
 }
