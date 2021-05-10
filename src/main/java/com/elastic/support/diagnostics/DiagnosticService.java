@@ -5,7 +5,10 @@ import com.elastic.support.Constants;
 import com.elastic.support.diagnostics.chain.DiagnosticChainExec;
 import com.elastic.support.diagnostics.chain.DiagnosticContext;
 import com.elastic.support.rest.RestClient;
-import com.elastic.support.util.*;
+import com.elastic.support.util.ArchiveUtils.ArchiveType;
+import com.elastic.support.util.ResourceCache;
+import com.elastic.support.util.SystemProperties;
+import com.elastic.support.util.SystemUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -82,7 +85,7 @@ public class DiagnosticService extends ElasticRestClientService {
             checkAuthLevel(ctx.diagnosticInputs.user, ctx.isAuthorized);
         } finally {
             closeLogs();
-            file = createArchive(ctx.tempDir);
+            file = createArchive(ctx.tempDir, ArchiveType.fromString(inputs.archiveType));
             SystemUtils.nukeDirectory(ctx.tempDir);
             ResourceCache.closeAll();
         }

@@ -4,6 +4,7 @@ import com.elastic.support.BaseService;
 import com.elastic.support.Constants;
 import com.elastic.support.diagnostics.DiagnosticException;
 import com.elastic.support.util.*;
+import com.elastic.support.util.ArchiveUtils.ArchiveType;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.apache.commons.io.FileUtils;
@@ -84,7 +85,7 @@ public class ScrubService extends BaseService {
             });
 
             // Finish up by zipping it.
-            return createArchive(scrubDir);
+            return createArchive(scrubDir, ArchiveType.fromString(inputs.archiveType));
         } catch (Throwable throwable) {
             throw new DiagnosticException("Could not scrub archive", throwable);
         } finally {

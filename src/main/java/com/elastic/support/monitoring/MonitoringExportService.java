@@ -4,10 +4,8 @@ import com.elastic.support.Constants;
 import com.elastic.support.diagnostics.DiagnosticException;
 import com.elastic.support.diagnostics.commands.CheckElasticsearchVersion;
 import com.elastic.support.rest.*;
-import com.elastic.support.util.JsonYamlUtils;
-import com.elastic.support.util.ResourceCache;
-import com.elastic.support.util.SystemProperties;
-import com.elastic.support.util.SystemUtils;
+import com.elastic.support.util.*;
+import com.elastic.support.util.ArchiveUtils.ArchiveType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -120,7 +118,7 @@ public class MonitoringExportService extends ElasticRestClientService {
         } finally {
             ResourceCache.textIO.dispose();
             closeLogs();
-            createArchive(tempDir);
+            createArchive(tempDir, ArchiveUtils.ArchiveType.fromString(inputs.archiveType));
             client.close();
             SystemUtils.nukeDirectory(tempDir);
         }
