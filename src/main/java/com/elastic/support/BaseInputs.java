@@ -3,6 +3,7 @@ package com.elastic.support;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.elastic.support.diagnostics.ShowHelpException;
+import com.elastic.support.util.ArchiveUtils.ArchiveType;
 import com.elastic.support.util.ResourceCache;
 import com.elastic.support.util.SystemProperties;
 
@@ -23,6 +24,7 @@ public abstract class BaseInputs {
     private static final Logger logger = LogManager.getLogger(BaseInputs.class);
     public static final String outputDirDescription = "Fully qualified path to an output directory. If it does not exist the diagnostic will attempt to create it. If not specified the diagnostic directory will be used: ";
     public static final String bypassDiagVerifyDescription = "Bypass the diagnostic version check. Use when internet outbound HTTP access is blocked by a firewall.";
+    public static final String archiveTypeDescription = "Output file type. Choose between: 'zip', 'tar' or 'any'. 'any' will try to zip first and fallback to tar if the zip fails. Defaults to any.";
     protected List<String> emptyList = new ArrayList<>();
     protected JCommander jCommander;
 
@@ -39,6 +41,9 @@ public abstract class BaseInputs {
     // Stop the diag from checking itself for latest version.
     @Parameter(names = {"--bypassDiagVerify"}, description = bypassDiagVerifyDescription)
     public boolean bypassDiagVerify = false;
+
+    @Parameter(names = {"--archiveType"}, description = archiveTypeDescription)
+    public String archiveType = "any";
 
     // End Input Fields
 
@@ -79,8 +84,12 @@ public abstract class BaseInputs {
             throw new ShowHelpException();
         }
 
-        return ObjectUtils.defaultIfNull(validateDir(outputDir), emptyList);
+        List<String> errors = new ArrayList<>();
 
+        errors.addAll(ObjectUtils.defaultIfNull(validateDir(outputDir), emptyList));
+        errors.addAll(ObjectUtils.defaultIfNull(validateArchiveType(archiveType), emptyList));
+
+        return errors;
     }
 
     public void usage(){
@@ -97,9 +106,17 @@ public abstract class BaseInputs {
                 .withMinLength(0)
                 .withValueChecker(( String val, String propname) -> validateOutputDirectory(val))
                 .read(SystemProperties.lineSeparator + outputDirDescription);
-        if(StringUtils.isNotEmpty(output)){
+
+        if (StringUtils.isNotEmpty(output)){
             outputDir = output;
         }
+
+        archiveType = ResourceCache.textIO.newStringInputReader()
+                .withDefaultValue(archiveType)
+                .withIgnoreCase()
+                .withInputTrimming(true)
+                .withValueChecker(( String val, String propname) -> validateArchiveType(val))
+                .read(SystemProperties.lineSeparator + outputDirDescription);
     }
 
     public List<String> validatePort(int val){
@@ -126,6 +143,16 @@ public abstract class BaseInputs {
 
         return null;
 
+    }
+
+    public List<String> validateArchiveType(String archiveType) {
+        for (ArchiveType type : ArchiveType.values()) {
+            if (type.name().equalsIgnoreCase(archiveType)) {
+                return null;
+            }
+        }
+
+        return Collections.singletonList("Provided archive type [" + archiveType + "] is not supported.");
     }
 
     public List<String> validateFile(String val) {
