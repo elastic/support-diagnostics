@@ -239,7 +239,7 @@ Elasticseach, Kibana, and Logstash each have three distinct execution modes avai
 
 <tr>
    <td width="20%" align="left" valign="top">--archiveType</td>
-   <td width="50%" align="left" valign="top">File type that will be used to compress the output directory. Choose between: `zip`, `tar` or `any`. `any` will try to zip first and fallback to tar if the zip fails. Defaults to `any`.</td>
+   <td width="50%" align="left" valign="top">File type that will be used to compress the output directory. Choose between: `zip`, `tar` or `any`. `any` will try to `zip` first and fallback to `tar` if the `zip` fails. Defaults to `any`.</td>
    <td width="30%" align="left" valign="top">--archiveType zip</td>
  </tr>
 
