@@ -237,6 +237,12 @@ Elasticseach, Kibana, and Logstash each have three distinct execution modes avai
    <td width="30%" align="left" valign="top">-o "/User/someuser/diagnostics" <br/> -o "C:\temp\My Diagnostics"</td>
  </tr>
 
+<tr>
+   <td width="20%" align="left" valign="top">--archiveType</td>
+   <td width="50%" align="left" valign="top">File type that will be used to compress the output directory. Choose between: `zip`, `tar` or `any`. `any` will try to zip first and fallback to tar if the zip fails. Defaults to `any`.</td>
+   <td width="30%" align="left" valign="top">--archiveType zip</td>
+ </tr>
+
  <tr>
    <td width="20%" align="left" valign="top">--bypassDiagVerify</td>
    <td width="50%" align="left" valign="top">Turn off the internal check where the diagnostic queries Github to see if there is a newer version available. Useful in air gapped environments with no internet access. Default value is false</td>
