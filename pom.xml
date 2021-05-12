@@ -7,6 +7,15 @@
     <version>8.1.4</version>
     <packaging>jar</packaging>
     <name>Support Diagnostics Utilities</name>
+
+    <licenses>
+        <license>
+            <name>Elastic License</name>
+            <url>https://www.elastic.co/licensing/elastic-license</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <log4j.version>2.13.2</log4j.version>
