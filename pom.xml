@@ -7,6 +7,7 @@
     <version>8.1.4</version>
     <packaging>jar</packaging>
     <name>Support Diagnostics Utilities</name>
+    <inceptionYear>2014</inceptionYear>
 
     <licenses>
         <license>
