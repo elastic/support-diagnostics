@@ -1,0 +1,148 @@
+import org.gradle.crypto.checksum.Checksum
+
+plugins {
+    id 'java'
+    id 'maven-publish'
+    id 'java-library-distribution'
+    id 'org.gradle.crypto.checksum' version '1.1.0'
+}
+
+repositories {
+   mavenCentral()
+}
+
+sourceSets {
+    test {
+        java.srcDir file('src/test/java/')
+        resources.srcDir 'src/test/resources'
+    }
+}
+
+dependencies {
+    implementation 'org.apache.httpcomponents:httpclient:4.5.10'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.10.1'
+    implementation 'org.apache.logging.log4j:log4j-api:2.13.2'
+    implementation 'org.apache.logging.log4j:log4j-core:2.13.2'
+    implementation 'org.apache.logging.log4j:log4j-slf4j-impl:2.13.2'
+    implementation 'org.apache.logging.log4j:log4j-jcl:2.13.2'
+    implementation 'com.beust:jcommander:1.78'
+    implementation 'org.yaml:snakeyaml:1.24'
+    implementation 'commons-io:commons-io:2.6'
+    implementation 'org.apache.commons:commons-compress:1.20'
+    implementation 'org.apache.commons:commons-lang3:3.9'
+    implementation 'commons-beanutils:commons-beanutils:1.9.4'
+    implementation 'com.github.oshi:oshi-json:3.13.4'
+    implementation 'com.jcraft:jsch:0.1.55'
+    implementation 'com.vdurmont:semver4j:3.1.0'
+    implementation 'org.beryx:text-io:3.4.0'
+    implementation 'jline:jline:2.14.6'
+    implementation 'javax.xml.bind:jaxb-api:2.4.0-b180830.0359'
+    implementation 'com.sun.xml.bind:jaxb-core:2.3.0.1'
+    implementation 'com.sun.xml.bind:jaxb-impl:2.3.2'
+    testImplementation 'org.junit.platform:junit-platform-launcher:1.5.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.5.2'
+    testImplementation 'org.junit.vintage:junit-vintage-engine:5.5.2'
+    testImplementation 'org.junit.platform:junit-platform-surefire-provider:1.3.2'
+    testImplementation 'org.mock-server:mockserver-netty:5.5.1'
+}
+
+group = 'com.elasticsearch'
+version = '8.1.4'
+description = 'Support Diagnostics Utilities'
+sourceCompatibility = '1.8'
+
+configurations.all {
+}
+
+compileJava {
+    sourceCompatibility = '1.8'
+    targetCompatibility = '1.8'
+    options.warnings = true
+    options.deprecation = true
+    options.verbose = true
+    options.fork = true
+}
+
+compileTestJava {
+    sourceCompatibility = '1.8'
+    targetCompatibility = '1.8'
+    options.warnings = true
+    options.deprecation = true
+    options.verbose = true
+    options.fork = true
+}
+
+
+jar {
+    manifest {
+        attributes("Implementation-Title": 'Support Diagnostics Utilities Gradle Process',"Implementation-Version": project.version)
+    }
+    exclude('**/*.xml','**/*.json')
+}
+
+task jarWithDeps(dependsOn: 'jar', type: Copy) {
+    def conf = configurations.runtimeClasspath
+    from conf.allDependencies.collect { conf.files(it) }
+    into "${project.buildDir}/lib"
+}
+
+distributions {
+   main {
+       contents {
+           from('${project.basedir}/docker') {
+               include '*'
+               into './docker'
+           }
+           from('${project.basedir}/scripts') {
+               include '*'
+               into '.'
+           }
+           from('${project.basedir}') {
+               include 'readme.md'
+               into '.'
+           }
+           from ('${project.basedir}/src/main/resources') {
+               include '**/*'
+               into './config'
+           }
+           from ('${project.buildDir}') {
+               include 'support-diagnostics-*.jar'
+               into './lib'
+           }
+           from ('${project.buildDir}/lib') {
+               include '*'
+               into './lib'
+           }
+       }
+   }
+}
+
+task createChecksums(type: Checksum, dependsOn: build) {
+    files = fileTree(dir: "${project.buildDir}")
+    algorithm = Checksum.Algorithm.SHA256
+}
+
+
+
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from(components.java)
+        }
+    }
+}
+
+test{
+    useJUnitPlatform()
+
+    testClassesDirs = sourceSets.test.output
+    classpath = sourceSets.test.runtimeClasspath
+    reports {
+        html.enabled = true
+    }
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
