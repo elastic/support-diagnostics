@@ -57,7 +57,7 @@ The application can be run from any directory on the machine. It does not requir
 
 ## License
 
-This softare is licensed under [Elastic License v2](https://www.elastic.co/licensing/elastic-license).
+This software is licensed under [Elastic License v2](https://www.elastic.co/licensing/elastic-license).
 
 ## Installation And Setup
 
