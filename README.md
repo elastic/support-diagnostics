@@ -1,5 +1,6 @@
 - [Support Diagnostics Utility](#support-diagnostics-utility)
   - [Overview - What It Does](#overview---what-it-does)
+  - [License](#license)
   - [Installation And Setup](#installation-and-setup)
     - [Run Requirements](#run-requirements)
     - [Downloading And Installing](#downloading-and-installing)
@@ -52,6 +53,11 @@ When the utility runs it will first check to see if there is a more current vers
 Once the REST calls are complete, system calls such as top, netstat, iostat, etc. will be run against the specified host for the appropriate input diagnostic type selected. See specific documentation for more details on those type options. It will also collect logs from the node on the targeted host unless it is in REST API only mode.
 
 The application can be run from any directory on the machine. It does not require installation to a specific location, and the only requirement is that the user has read access to the Elasticsearch artifacts, write access to the chosen output directory, and sufficient disk space for the generated archive.
+
+
+## License
+
+This software is licensed under [Elastic License v2](https://www.elastic.co/licensing/elastic-license).
 
 ## Installation And Setup
 
