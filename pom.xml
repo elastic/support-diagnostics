@@ -7,6 +7,16 @@
     <version>8.1.4</version>
     <packaging>jar</packaging>
     <name>Support Diagnostics Utilities</name>
+    <inceptionYear>2014</inceptionYear>
+
+    <licenses>
+        <license>
+            <name>Elastic License</name>
+            <url>https://www.elastic.co/licensing/elastic-license</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <log4j.version>2.13.2</log4j.version>
@@ -213,6 +223,7 @@
                     </execution>
                 </executions>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -316,6 +327,50 @@
                         <algorithm>SHA-1</algorithm>
                     </algorithms>
                 </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>4.1</version>
+                <configuration>
+                    <licenseSets>
+                        <licenseSet>
+                            <header>HEADER.txt</header>
+                            <includes>
+                                <include>**/*.java</include>
+                            </includes>
+                        </licenseSet>
+                    </licenseSets>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>add-license-header</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>format</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.jasig.maven</groupId>
+                <artifactId>maven-notice-plugin</artifactId>
+                <version>1.1.0</version>
+                <configuration>
+                    <fileName>NOTICE.txt</fileName>
+                    <noticeTemplate>${project.basedir}/NOTICE.template</noticeTemplate>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>update-notice</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
 
             <plugin>

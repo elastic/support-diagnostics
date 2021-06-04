@@ -27,7 +27,9 @@
             <directory>${project.basedir}</directory>
             <outputDirectory>.</outputDirectory>
             <includes>
-                <include>readme.md</include>
+                <include>LICENSE.txt</include>
+                <include>NOTICE.txt</include>
+                <include>README.md</include>
             </includes>
         </fileSet>
 
