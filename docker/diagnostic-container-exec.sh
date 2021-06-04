@@ -8,4 +8,4 @@
 # write to a different location. Be sure that this target folder has sufficient permissions
 # to create the output files.
 #
-docker run -it -v ~/docker-diagnostic-output:/diagnostic-output  support-diagnostics-app  bash
+docker run -it -v ~/docker-diagnostic-output:/diagnostic-output support-diagnostics-app  bash
