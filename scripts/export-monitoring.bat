@@ -24,6 +24,6 @@ if not defined DIAG_JAVA_OPTIONS (
   set DIAG_JAVA_OPTIONS=-Xmx2000m
 )
 
-"%JAVA_EXEC%" %DIAG_JAVA_OPTIONS% -cp %diagpath%\config;%diagpath%\lib\* com.elastic.support.monitoring.MonitoringExportApp %*
+"%JAVA_EXEC%" %DIAG_JAVA_OPTIONS% -cp %diagpath%\config;%diagpath%\lib\* co.elastic.support.monitoring.MonitoringExportApp %*
 
 endlocal

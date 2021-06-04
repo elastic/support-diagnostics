@@ -23,5 +23,5 @@ This is a tool used by the Elastic Support team to collect the necessary data to
     </orderEntry>
     ```
 * Using the `Run` menu and select `Edit Configurations...`. Use the `+` to add an `Application` configuration.
-  * Main class: `com.elastic.support.diagnostics.DiagnosticApp`
+  * Main class: `co.elastic.support.diagnostics.DiagnosticApp`
   * Program arguments (example): `-o ~/tmp/diag-output -h localhost -u elastic --ptp changeme`. Put whatever arguments you would like to run the application with as default.

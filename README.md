@@ -66,7 +66,7 @@ The application can be run from any directory on the machine. It does not requir
 ### Downloading And Installing
 
 - Locate the [latest release](https://github.com/elastic/support-diagnostics/releases/latest)
-- Select the zip file labeled support-diagnostic-XX.XX.XX-dist.zip to download the binary files. **_Do not select the zip or tar files labeled: 'Source code'._** These do not contain compiled runtimes and will generate errors if you attempt to use the scripts contained in them.
+- Select the zip file labeled diagnostics-XX.XX.XX-dist.zip to download the binary files. **_Do not select the zip or tar files labeled: 'Source code'._** These do not contain compiled runtimes and will generate errors if you attempt to use the scripts contained in them.
 - Unzip the downloaded file into the directory you intend to run from. This can be on the same host as the as the Elasticsearch, Kibana or Logstash host you wish to interrogate, or on a remote server or workstation. You can also run it from within a Docker container(see further instructions down for generating an image).
 
 ### Building From Source
@@ -478,7 +478,7 @@ When the diagnostic is deployed within a Docker container it will recognize the 
 There are a number of options for interacting with applications running within Docker containers. The easiest way to run the diagnostic is simply to perform a `docker run -it` which opens a pseudo TTY. At that point you can interface with the diagnostic in the same way as you would when it was directly installed on the host. If you look in the _/docker_ directory in the diagnostic distribution you will find a sample script named `diagnostic-container-exec.sh` that contains an example of how to do this.
 
 ```$xslt
-docker run -it -v ~/docker-diagnostic-output:/diagnostic-output  support-diagnostics-app  bash
+docker run -it -v ~/docker-diagnostic-output:/diagnostic-output support-diagnostics-app  bash
 ```
 
 For the diagnostic to work seamlessly from within a container, there must be a consistent location where files can be written. The default location when the diagnostic detects that it is deployed in Docker will be a volume named _diagnostic-output_. If you examine the above script you will notice that it mounts that volume to a local directory on the host where the diagnostic loaded Docker container resides. In this case it is a folder named _docker-diagnostic-output_ in the home directory of the user account running the script. Temp files and the eventual diagnostic archive will be written to this location. You may change the volume if you adjust the explicit output directory whenever you run the diagnostic, but given that you are mapping the volume to local storage that creates a possible failure point. Therefore it's recommended you leave the _diagnostic-output_ volume name _as is_ and simply adjust the local mapping.

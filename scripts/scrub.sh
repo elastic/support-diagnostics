@@ -28,4 +28,4 @@ fi
 [[ ${DIAG_JAVA_OPTS} == "" ]] && export DIAG_JAVA_OPTS="-Xms8g -Xmx8g"
 
 echo "Using ${DIAG_JAVA_OPTS} ${DIAG_DEBUG_OPTS} for options."
-"$JAVA" $DIAG_JAVA_OPTS ${DIAG_DEBUG_OPTS} -cp ${scriptDir}/config:${scriptDir}/lib/*  com.elastic.support.scrub.ScrubApp "$@"
+"$JAVA" $DIAG_JAVA_OPTS ${DIAG_DEBUG_OPTS} -cp ${scriptDir}/config:${scriptDir}/lib/* co.elastic.support.scrub.ScrubApp "$@"
