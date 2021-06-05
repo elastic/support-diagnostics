@@ -1,116 +1,79 @@
-  import org.gradle.crypto.checksum.Checksum
+import org.gradle.crypto.checksum.Checksum
 
-  plugins {
-      id 'java'
-      id 'java-library-distribution'
-      id 'maven-publish'
-      id 'org.gradle.crypto.checksum' version '1.1.0'
+plugins {
+  id 'java'
+  id 'java-library-distribution'
+  id 'maven-publish'
+  id 'org.gradle.crypto.checksum' version '1.1.0'
+}
+
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  implementation 'com.beust:jcommander:1.78'
+  implementation 'com.fasterxml.jackson.core:jackson-databind:2.10.1'
+  implementation 'com.github.oshi:oshi-json:3.13.4'
+  implementation 'com.jcraft:jsch:0.1.55'
+  implementation 'com.sun.xml.bind:jaxb-core:2.3.0.1'
+  implementation 'com.sun.xml.bind:jaxb-impl:2.3.2'
+  implementation 'com.vdurmont:semver4j:3.1.0'
+  implementation 'commons-beanutils:commons-beanutils:1.9.4'
+  implementation 'commons-io:commons-io:2.6'
+  implementation 'javax.xml.bind:jaxb-api:2.4.0-b180830.0359'
+  implementation 'jline:jline:2.14.6'
+  implementation 'org.apache.commons:commons-compress:1.20'
+  implementation 'org.apache.commons:commons-lang3:3.9'
+  implementation 'org.apache.httpcomponents:httpclient:4.5.10'
+  implementation 'org.apache.logging.log4j:log4j-api:2.13.2'
+  implementation 'org.apache.logging.log4j:log4j-core:2.13.2'
+  implementation 'org.apache.logging.log4j:log4j-jcl:2.13.2'
+  implementation 'org.apache.logging.log4j:log4j-slf4j-impl:2.13.2'
+  implementation 'org.beryx:text-io:3.4.0'
+  implementation 'org.yaml:snakeyaml:1.24'
+
+  testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
+  testImplementation 'org.mock-server:mockserver-netty:5.11.2'
+  testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.2'
+
+}
+
+group = 'com.elasticsearch'
+description = 'Support Diagnostics Utilities'
+sourceCompatibility = '1.8'
+
+jar {
+  manifest {
+    attributes(
+      "Implementation-Title": 'Support Diagnostics Utilities Gradle Process',
+       "Implementation-Version": project.version
+      )
   }
+    exclude('**/*.xml','**/*.json')
+}
 
-  repositories {
-     mavenCentral()
+task createChecksums(type: Checksum, dependsOn: build) {
+  algorithm = Checksum.Algorithm.SHA256
+  files = fileTree(dir: "${project.buildDir}")
+}
+
+publishing {
+  publications {
+    maven(MavenPublication) {
+      from(components.java)
+    }
   }
+}
 
-  dependencies {
-      implementation 'com.beust:jcommander:1.78'
-      implementation 'com.fasterxml.jackson.core:jackson-databind:2.10.1'
-      implementation 'com.github.oshi:oshi-json:3.13.4'
-      implementation 'com.jcraft:jsch:0.1.55'
-      implementation 'com.sun.xml.bind:jaxb-core:2.3.0.1'
-      implementation 'com.sun.xml.bind:jaxb-impl:2.3.2'
-      implementation 'com.vdurmont:semver4j:3.1.0'
-      implementation 'commons-beanutils:commons-beanutils:1.9.4'
-      implementation 'commons-io:commons-io:2.6'
-      implementation 'javax.xml.bind:jaxb-api:2.4.0-b180830.0359'
-      implementation 'jline:jline:2.14.6'
-      implementation 'org.apache.commons:commons-compress:1.20'
-      implementation 'org.apache.commons:commons-lang3:3.9'
-      implementation 'org.apache.httpcomponents:httpclient:4.5.10'
-      implementation 'org.apache.logging.log4j:log4j-api:2.13.2'
-      implementation 'org.apache.logging.log4j:log4j-core:2.13.2'
-      implementation 'org.apache.logging.log4j:log4j-jcl:2.13.2'
-      implementation 'org.apache.logging.log4j:log4j-slf4j-impl:2.13.2'
-      implementation 'org.beryx:text-io:3.4.0'
-      implementation 'org.yaml:snakeyaml:1.24'
+test {
+  useJUnitPlatform()
+}
 
-      testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
-      testImplementation 'org.mock-server:mockserver-netty:5.11.2'
-      testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.2'
-
-  }
-
-  group = 'com.elasticsearch'
-  description = 'Support Diagnostics Utilities'
+tasks.withType(JavaCompile) {
+  options.deprecation = true
+  options.encoding = 'UTF-8'
+  options.warnings = true
   sourceCompatibility = '1.8'
-
-  jar {
-      manifest {
-          attributes(
-            "Implementation-Title": 'Support Diagnostics Utilities Gradle Process',
-             "Implementation-Version": project.version
-          )
-      }
-      exclude('**/*.xml','**/*.json')
-  }
-
-  task jarWithDeps(dependsOn: 'jar', type: Copy) {
-      def conf = configurations.runtimeClasspath
-      from conf.allDependencies.collect { conf.files(it) }
-      into "${project.buildDir}/lib"
-  }
-
-  distributions {
-     main {
-         contents {
-             from('${project.basedir}/docker') {
-                 include '*'
-                 into './docker'
-             }
-             from('${project.basedir}/scripts') {
-                 include '*'
-                 into '.'
-             }
-             from('${project.basedir}') {
-                 include 'readme.md'
-                 into '.'
-             }
-             from ('${project.basedir}/src/main/resources') {
-                 include '**/*'
-                 into './config'
-             }
-             from ('${project.buildDir}') {
-                 include 'support-diagnostics-*.jar'
-                 into './lib'
-             }
-             from ('${project.buildDir}/lib') {
-                 include '*'
-                 into './lib'
-             }
-         }
-     }
-  }
-
-  task createChecksums(type: Checksum, dependsOn: build) {
-      algorithm = Checksum.Algorithm.SHA256
-      files = fileTree(dir: "${project.buildDir}")
-  }
-
-  publishing {
-      publications {
-          maven(MavenPublication) {
-              from(components.java)
-          }
-      }
-  }
-
-  test {
-      useJUnitPlatform()
-  }
-
-  tasks.withType(JavaCompile) {
-      options.deprecation = true
-      options.encoding = 'UTF-8'
-      options.warnings = true
-      sourceCompatibility = '1.8'
-      targetCompatibility = '1.8'
-  }
+  targetCompatibility = '1.8'
+}
