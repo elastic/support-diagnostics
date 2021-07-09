@@ -32,7 +32,7 @@ cat_count:
   extension: ".txt"
   subdir: "cat"
   versions:
-    ">= 0.9.0": "/_cat/count"
+    ">= 0.9.0": "/_cat/count?v"
 
 cat_fielddata:
   extension: ".txt"
@@ -59,7 +59,7 @@ cat_master:
   extension: ".txt"
   subdir: "cat"
   versions:
-    ">= 0.9.0": "/_cat/master"
+    ">= 0.9.0": "/_cat/master?v"
 
 cat_nodeattrs:
   extension: ".txt"
@@ -71,7 +71,7 @@ cat_nodes:
   extension: ".txt"
   subdir: "cat"
   versions:
-    ">= 0.9.0": "/_cat/nodes?v&h=n,nodeId,m,i,r,d,hp,rp,cpu,load_1m,load_5m,load_15m,"
+    ">= 0.9.0": "/_cat/nodes?v&s=master,name&h=n,nodeId,m,i,r,d,hp,rp,cpu,load_1m,load_5m,load_15m,"
 
 cat_pending_tasks:
   extension: ".txt"
@@ -117,7 +117,7 @@ cat_templates:
   extension: ".txt"
   subdir: "cat"
   versions:
-    ">= 7.8.0": "/_cat/templates?v"
+    ">= 7.8.0": "/_cat/templates?v&s=name"
 
 cat_thread_pool:
   extension: ".txt"
@@ -139,7 +139,7 @@ alias:
 
 allocation:
   versions:
-    ">= 0.9.0": "/_cat/allocation?v&format=json"
+    ">= 0.9.0": "/_cat/allocation?v&pretty&format=json"
   showErrors: false
 
 allocation_explain:
@@ -154,11 +154,11 @@ allocation_explain_disk:
 component_templates:
   retry: true
   versions:
-    ">= 7.8.0": "/_component_template"
+    ">= 7.8.0": "/_component_template?pretty"
 
 count:
   versions:
-    ">= 2.0.0": "/_count"
+    ">= 2.0.0": "/_count?pretty"
 
 cluster_health:
   versions:
@@ -201,7 +201,7 @@ fielddata_stats:
 index_templates:
   retry: true
   versions:
-    ">= 7.8.0": "/_index_template"
+    ">= 7.8.0": "/_index_template?pretty"
 
 indices:
   versions:
@@ -224,11 +224,11 @@ licenses:
 mapping:
   versions:
     ">= 0.9.0 < 7.7.0": "/_mapping"
-    ">= 7.7.0": "/_mapping?expand_wildcards=all"
+    ">= 7.7.0": "/_mapping?pretty&expand_wildcards=all"
 
 master:
   versions:
-    ">= 0.9.0": "/_cat/master?format=json"
+    ">= 0.9.0": "/_cat/master?pretty&format=json"
 
 nodes:
   retry: true
@@ -237,7 +237,7 @@ nodes:
 
 nodes_short:
   versions:
-    ">= 0.9.0": "/_cat/nodes?format=json&v&full_id&h=name,id,master,ip,role"
+    ">= 0.9.0": "/_cat/nodes?format=json&v&s=name&full_id&h=name,id,master,ip,role"
 
 nodes_stats:
   retry: true
@@ -254,7 +254,7 @@ pipelines:
 
 plugins:
   versions:
-    ">= 0.9.0": "/_cat/plugins?format=json"
+    ">= 0.9.0": "/_cat/plugins?pretty&format=json"
 
 recovery:
   versions:
@@ -262,7 +262,7 @@ recovery:
 
 remote_cluster_info:
   versions:
-    ">= 6.0.0": "/_remote/info"
+    ">= 6.0.0": "/_remote/info?pretty"
 
 segments:
   retry: true
@@ -380,19 +380,19 @@ rollup_jobs:
   subdir: "commercial"
   versions:
     ">= 6.3.0 < 7.0.0": "/_xpack/rollup/job/_all"
-    ">= 7.0.0": "/_rollup/job/_all"
+    ">= 7.0.0": "/_rollup/job/_all?pretty"
 
 rollup_caps:
   subdir: "commercial"
   versions:
     ">= 6.3.0 < 7.0.0": "/_xpack/rollup/data/_all"
-    ">= 7.0.0": "/_rollup/data/_all"
+    ">= 7.0.0": "/_rollup/data/_all?pretty"
 
 rollup_index_caps:
   subdir: "commercial"
   versions:
     ">= 6.5.0 < 7.0.0": "/*/_xpack/rollup/data"
-    ">= 7.0.0": "/*/_rollup/data"
+    ">= 7.0.0": "/*/_rollup/data?pretty"
 
 searchable_snapshots_cache_stats:
   subdir: "commercial"
@@ -452,14 +452,14 @@ watcher_stats:
   versions:
     ">= 1.6.0 < 5.0.0": "/_watcher/stats/_all"
     ">= 5.0.0 < 7.0.0": "/_xpack/watcher/stats/_all"
-    ">= 7.0.0": "/_watcher/stats/_all"
+    ">= 7.0.0": "/_watcher/stats/_all?pretty"
 
 watcher_stack:
   subdir: "commercial"
   versions:
     ">= 1.6.0 < 5.0.0": "/_watcher/stats?emit_stacktraces=true"
     ">= 5.0.0 < 7.0.0": "/_xpack/watcher/stats?emit_stacktraces=true"
-    ">= 7.0.0": "/_watcher/stats?emit_stacktraces=true"
+    ">= 7.0.0": "/_watcher/stats?pretty&emit_stacktraces=true"
 
 xpack:
   subdir: "commercial"
