@@ -60,3 +60,16 @@ Once created, you will need to create or modify your Maven `settings.xml`
 
 Note: `ossrh` matches the `id` used in the `pom.xml`. You can use any version of
 `gpg` that you want.
+
+Once the `settings.xml` is setup, you can run
+
+```
+mvn clean deploy
+```
+
+This will deploy based on the version in the `pom.xml` file (`-SNAPSHOT` creates
+it in their snapshot repository, which you should always do before a real
+release).
+
+More detailed instructions can be found on
+[Sonatype's website](https://central.sonatype.org/publish/publish-maven/).
