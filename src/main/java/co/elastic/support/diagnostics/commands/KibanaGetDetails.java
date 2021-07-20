@@ -28,7 +28,7 @@ import java.util.ArrayList;
  * {@code KibanaGetDetails} uses the network configuration defined in Kibana Stats API
  * to connect to the Local or Remote instance.
  *
- * If this request fails, then the rest of the diagnostic cannot proceed, as we need to 
+ * If this request fails, then the rest of the diagnostic cannot proceed, as we need to
  * have enough details to connect to Kibana instace.
  */
 public class KibanaGetDetails extends CheckPlatformDetails {
@@ -69,7 +69,7 @@ public class KibanaGetDetails extends CheckPlatformDetails {
     }
 
     /**
-     * If Kibana process is running on a remote server 
+     * If Kibana process is running on a remote server
      * we need to check if is a docker process or if is running as any other process
      * Then create a remote system to request the Kibana process
      *
@@ -110,7 +110,7 @@ public class KibanaGetDetails extends CheckPlatformDetails {
 
 
     /**
-     * If Kibana process is running on the same server 
+     * If Kibana process is running on the same server
      * add a loca system command to be able to execute the API requests
      *
      * @param  context The current diagnostic context as set in the DiagnosticService class
@@ -216,7 +216,7 @@ public class KibanaGetDetails extends CheckPlatformDetails {
      *
      * @param context The current diagnostic context
      * @return Never {@code null}.
-     * @throws DiagnosticContext if Kibana responds with a non-200 response
+     * @throws DiagnosticException if Kibana responds with a non-200 response
      */
     public JsonNode getStats(DiagnosticContext context) throws DiagnosticException {
 

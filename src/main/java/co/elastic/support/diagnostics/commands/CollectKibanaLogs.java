@@ -27,7 +27,6 @@ import java.util.Map;
 /**
  * Kibana do not provide any API that expose the logs path
  * This class will check if the logs are in the default path and if they are collect them.
- * 
  */
 public  class CollectKibanaLogs implements Command {
 
@@ -35,8 +34,6 @@ public  class CollectKibanaLogs implements Command {
 
    /**
     * We will get the information fron the DiagnosticContext to extract and copy the logs from Local or Remote system.
-    *
-    * @param  DiagnosticContext context
     */
     public void execute(DiagnosticContext context) {
         // If we hit a snafu earlier in determining the details on where and how to run, then just get out.
@@ -84,7 +81,6 @@ public  class CollectKibanaLogs implements Command {
     * According with the OS response, read and extract the content for the logs files.
     *
     * @param output is the text returned by the <code>ls</code>/<code>dir</code> command
-    * @param fileList You can call this function multitple times, and add more files to the List
     * @param entries How many time we will iterate
     * @return Never {@code null}. Always the number specified by {@code entries}.
     */
