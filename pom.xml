@@ -7,7 +7,21 @@
     <version>8.2.0-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>Support Diagnostics Utilities</name>
+    <description>Elastic Support Diagnostics Utilities</description>
+    <url>http://github.com/elastic/support-diagnostics</url>
     <inceptionYear>2014</inceptionYear>
+
+    <developers>
+      <developer>
+        <organization>Elastic</organization>
+        <organizationUrl>https://www.elastic.co</organizationUrl>
+      </developer>
+    </developers>
+    <scm>
+      <connection>scm:git:git://github.com/elastic/support-diagnostics.git</connection>
+      <developerConnection>scm:git:ssh://github.com:elastic/support-diagnostics.git</developerConnection>
+      <url>http://github.com/elastic/support-diagnostics/tree/main</url>
+    </scm>
 
     <distributionManagement>
       <snapshotRepository>
