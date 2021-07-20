@@ -73,3 +73,8 @@ release).
 
 More detailed instructions can be found on
 [Sonatype's website](https://central.sonatype.org/publish/publish-maven/).
+
+Once deployed, you must release the library through
+[Sonatype's staging repository](https://oss.sonatype.org/#stagingRepositories),
+using your Sonatype credentials. You first "Close" the staged deployment, then
+"Release" it after it passes the validations from "Close".
