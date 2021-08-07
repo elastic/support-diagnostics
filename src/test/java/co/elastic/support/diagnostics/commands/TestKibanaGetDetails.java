@@ -21,6 +21,7 @@ import org.junit.jupiter.api.*;
 import co.elastic.support.rest.RestClient;
 import co.elastic.support.rest.RestEntry;
 import com.fasterxml.jackson.databind.JsonNode;
+import org.mockserver.model.Parameter;
 
 import java.util.List;
 

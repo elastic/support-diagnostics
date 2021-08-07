@@ -481,7 +481,7 @@ public class TestRunKibanaQueries {
     }
 
     @Test
-    public void testQueriesWithSpaces() {
+    public void testQueriesWithSpaces() throws DiagnosticException {
 
         mockServer
             .when(

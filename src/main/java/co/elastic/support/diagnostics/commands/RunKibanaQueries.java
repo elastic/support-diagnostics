@@ -98,7 +98,7 @@ public class RunKibanaQueries extends BaseQuery {
     * @param  perPage  Number of docusment we reques to the API
     * @param  action Kibana API name we are running
     */
-    private void runActionsBySpace(RestClient client, List<RestEntry> queries, int perPage, RestEntry action) {
+    public void runActionsBySpace(RestClient client, List<RestEntry> queries, int perPage, RestEntry action) throws DiagnosticException {
         List<String> spaces = getAllSpaces(client);
         String url = action.getUrl();
         String baseUrl = url.substring(4, url.length());
@@ -113,7 +113,11 @@ public class RunKibanaQueries extends BaseQuery {
             RestEntry copyAction = (RestEntry) action.clone();
 
             if (copyAction.getUrl().contains("/_find")) {
-                getAllPages(client, queries, perPage, copyAction, spaceId);
+                try {
+                    getAllPages(client, queries, perPage, copyAction, spaceId);
+                } catch (DiagnosticException e) {
+                    logger.error(String.format("Space: %s has no pagination", spaceId));
+                }
             } else {
                 String actionName = baseName + "_" + spaceId;
                 copyAction.setName(actionName);
@@ -133,6 +137,7 @@ public class RunKibanaQueries extends BaseQuery {
     * @param  queries we will store the list of queries that need to be executed 
     * @param  perPage  Number of docusment we reques to the API
     * @param  action Kibana API name we are running
+    * @param  spaceId each space has an id that allow us to collect his data
     */
     public void getAllPages(RestClient client, List<RestEntry> queries, int perPage, RestEntry action, String spaceId) throws DiagnosticException {
         // get the values needed to the pagination.
@@ -167,7 +172,7 @@ public class RunKibanaQueries extends BaseQuery {
     * @param client the configured client to connect to Kibana.
     * @return all the spaces name.
     */
-    private List<String> getAllSpaces(RestClient client) {
+    private List<String> getAllSpaces(RestClient client) throws DiagnosticException {
 
         // by default Kibana has one space, if allSpaces is empty it means we have not yet run this API.
         if (this.allSpaces.size() <= 0) {
@@ -205,7 +210,7 @@ public class RunKibanaQueries extends BaseQuery {
     * @param  perPage how many events need to be retreived in the response
     * @param  page the apge we are requesting
     * @param  action Kibana API name we are running
-    * @param  spaceId Space id where the object was defined
+    * @param  spaceId Spaces has an id that allow us to collect the data for each space
     * @return new object with the API and params that need to be executed.
     */
     private RestEntry getNewEntryPage(int perPage, int page, RestEntry action, String spaceId) {
@@ -275,7 +280,7 @@ public class RunKibanaQueries extends BaseQuery {
     * @param client the configured client to connect to Kibana.
     * @param context The current diagnostic context as set in the DiagnosticService class
     */
-    public void filterActionsHeaders(RestClient client, DiagnosticContext context) {
+    public void filterActionsHeaders(RestClient client, DiagnosticContext context) throws DiagnosticException {
 
         List<String> spaces = getAllSpaces(client);
 
