@@ -102,26 +102,26 @@ public class RunKibanaQueries extends BaseQuery {
         List<String> spaces = getAllSpaces(client);
         String url = action.getUrl();
         String baseUrl = url.substring(4, url.length());
-        String baseName = action.getName();
+        String defaultName = action.getName();
+        String defaultUrl = action.getUrl();
 
         spaces.forEach((spaceId) -> {
-            if (!spaceId.equals("default")) {
-                String apiUrl = String.format("/s/%s/api"+ baseUrl, spaceId);
-                action.setUrl(apiUrl);
-            }
-            //we need to create a new RestEntry for each space id.
-            RestEntry copyAction = (RestEntry) action.clone();
 
-            if (copyAction.getUrl().contains("/_find")) {
+            //reset the actionUrl with the original value of action url
+            String actionUrl = defaultUrl;
+            if (!spaceId.equals("default")) {
+                actionUrl = String.format("/s/%s/api"+ baseUrl, spaceId);
+            }
+
+            if (action.getUrl().contains("/_find")) {
                 try {
-                    getAllPages(client, queries, perPage, copyAction, spaceId);
+                    getAllPages(client, queries, perPage, newEntryWithNameAndUrl(action, defaultName, actionUrl), spaceId);
                 } catch (DiagnosticException e) {
                     logger.error(String.format("Space: Unable to page through [%s]", spaceId));
                 }
             } else {
-                String actionName = baseName + "_" + spaceId;
-                copyAction.setName(actionName);
-                queries.add(copyAction);
+                String actionName = defaultName + "_" + spaceId;
+                queries.add(newEntryWithNameAndUrl(action, actionName, actionUrl));
             }
         });
     }
@@ -196,10 +196,6 @@ public class RunKibanaQueries extends BaseQuery {
                     }
                 }
             }
-            //if we can not find any space, set the default space id
-            if (this.allSpaces.size() <= 0) {
-                this.allSpaces.add("default");
-            }
         }
         return this.allSpaces;
     }
@@ -215,6 +211,18 @@ public class RunKibanaQueries extends BaseQuery {
     */
     private RestEntry getNewEntryPage(int perPage, int page, RestEntry action, String spaceId) {
         return new RestEntry(String.format("%s_%s_%s", action.getName(), spaceId, page), "", ".json", false, String.format("%s?per_page=%s&page=%s", action.getUrl(), perPage, page), false);
+    }
+
+   /**
+    * Create a new `RestEntry` object with a different name and URL of the current {@code RestEntry}.
+    *
+    * @param restEntry original object
+    * @param name The new name to use
+    * @param url The new URL to use
+    * @return A copy of the current {@code RestEntry} with the {@code name} and {@code url}.
+    */
+    private RestEntry newEntryWithNameAndUrl(RestEntry restEntry, String name, String url) {
+        return new RestEntry(name, restEntry.getSubdir(), restEntry.getExtension(), restEntry.isRetry(), url, false);
     }
 
 

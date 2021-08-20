@@ -279,6 +279,18 @@ public class TestRunKibanaQueries {
                                 .withBody("{\"page\":2,\"perPage\":2,\"total\":4,\"data\":{\"xpack\":{\"default_admin_email\":null},\"kibana\":{\"uuid\":\"a4f369ef-fecd-46b7-8b16-c6c3f885d9ec\",\"name\":\"13d5e793ea51\",\"index\":\".kibana\",\"host\":\"0.0.0.0\",\"port\":18648,\"locale\":\"en\",\"transport_address\":\"0.0.0.0:18648\",\"version\":\"6.5.0\",\"snapshot\":false,\"status\":\"green\"}}}")
                                 .withStatusCode(200)
                 );
+
+        mockServer
+            .when(
+                    request()
+                            .withMethod("GET")
+                            .withPath("/api/spaces/space")
+            )
+            .respond(
+                    response()
+                            .withBody("[{\"id\":\"default\",\"name\":\"Default\",\"description\":\"This is your default space!\",\"color\":\"#00bfb3\",\"disabledFeatures\":[],\"_reserved\":true}]")
+                            .withStatusCode(200)
+        );
         return context;
     }
 
@@ -336,6 +348,7 @@ public class TestRunKibanaQueries {
 
     @Test
     public void testQueriesForKibana711() throws DiagnosticException {
+
         DiagnosticContext context = initializeKibana("7.11.0");
         int totalRetries = new RunKibanaQueries().runBasicQueries(httpRestClient, context);
 
@@ -426,7 +439,7 @@ public class TestRunKibanaQueries {
     @Test
     public void testQueriesRemovingHeaders() throws DiagnosticException {
 
-      mockServer
+        mockServer
             .when(
                     request()
                             .withMethod("GET")
@@ -436,6 +449,8 @@ public class TestRunKibanaQueries {
                     response()
                             .withBody("[{\"id\":\"eec7ee50-7129-1111-9b41-17a1879ebc72\",\"actionTypeId\":\".webhook\",\"name\":\"webhook-auto-create-case\",\"config\":{\"method\":\"post\",\"hasAuth\":true,\"url\":\"https://7067a1cd7a8142a79ab8dec9304a5436.europe-west1.gcp.cloud.es.io/api/cases\",\"headers\":{\"Authorization\":\"Basic 1111\",\"customHeader\":\"CustomValue\",\"kbn-xsrf\":\"kibana\",\"Content-Type\":\"application/json\"}},\"isPreconfigured\":false,\"referencedByCount\":9}]")
             );
+       
+
         DiagnosticContext context = initializeKibana("7.10.0");
         int totalRetries = new RunKibanaQueries().runBasicQueries(httpRestClient, context);
         new RunKibanaQueries().filterActionsHeaders(httpRestClient, context);
@@ -466,6 +481,7 @@ public class TestRunKibanaQueries {
                     response()
                             .withBody("[{\"id\":\"eec7ee50-7129-3333-9b41-17a1879ebc72\",\"actionTypeId\":\".webhook\",\"name\":\"webhook-auto-create-case\",\"test\":{\"method\":\"post\",\"hasAuth\":true,\"url\":\"https://7067a1cd7a8142a79ab8dec9304a5436.europe-west1.gcp.cloud.es.io/api/cases\",\"headers\":{\"Authorization\":\"Basic 1111\",\"customHeader\":\"CustomValue\",\"kbn-xsrf\":\"kibana\",\"Content-Type\":\"application/json\"}},\"isPreconfigured\":false,\"referencedByCount\":9}]")
         );
+
         DiagnosticContext context = initializeKibana("7.10.0");
         int totalRetries = new RunKibanaQueries().runBasicQueries(httpRestClient, context);
         try {
