@@ -116,7 +116,7 @@ public class RunKibanaQueries extends BaseQuery {
                 try {
                     getAllPages(client, queries, perPage, copyAction, spaceId);
                 } catch (DiagnosticException e) {
-                    logger.error(String.format("Space: %s has no pagination", spaceId));
+                    logger.error(String.format("Space: Unable to page through [%s]", spaceId));
                 }
             } else {
                 String actionName = baseName + "_" + spaceId;
