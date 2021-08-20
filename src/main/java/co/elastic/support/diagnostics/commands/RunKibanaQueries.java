@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Iterator;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -323,8 +325,8 @@ public class RunKibanaQueries extends BaseQuery {
 
                     // If any headers were removed, we need to rewrite the file to remove them
                     if (headerRemoved == true) {
-                        String fileName = context.tempDir + SystemProperties.fileSeparator + "kibana_actions_"+ spaceId +".json";
-                        try (FileWriter fileWriter = new FileWriter(fileName)) {
+                        Path path = Paths.get(context.tempDir, "kibana_actions_" + spaceId + ".json");
+                        try (FileWriter fileWriter = new FileWriter(path.toFile())) {
                             fileWriter.write(actions.toPrettyString());
                             fileWriter.flush();
                         } catch (IOException e) {
