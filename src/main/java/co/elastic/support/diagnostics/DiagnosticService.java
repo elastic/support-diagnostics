@@ -78,8 +78,10 @@ public class DiagnosticService extends ElasticRestClientService {
             // This will also log that same output to the diagnostic log file.
             // To just log to the file log as normal: logger.info/error/warn/debug("Log mewssage");
 
-            logger.info(Constants.CONSOLE, "Configuring log file.");
-            createFileAppender(context.tempDir, "diagnostics.log");
+            if (context.includeLogs) {
+                logger.info(Constants.CONSOLE, "Configuring log file.");
+                createFileAppender(context.tempDir, "diagnostics.log");
+            }
             DiagnosticChainExec.runDiagnostic(context, inputs.diagType);
 
             if (context.dockerPresent) {
@@ -88,7 +90,9 @@ public class DiagnosticService extends ElasticRestClientService {
 
             checkAuthLevel(context.diagnosticInputs.user, context.isAuthorized);
         } finally {
-            closeLogs();
+            if (context.includeLogs) {
+                closeLogs();
+            }
             file = createArchive(context.tempDir, ArchiveType.fromString(inputs.archiveType));
             SystemUtils.nukeDirectory(context.tempDir);
             context.resourceCache.closeAll();

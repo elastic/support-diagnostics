@@ -45,7 +45,7 @@ public class DiagnosticApp {
             Map diagMap = JsonYamlUtils.readYamlFromClasspath(Constants.DIAG_CONFIG, true);
             DiagConfig diagConfig = new DiagConfig(diagMap);
             DiagnosticService diag = new DiagnosticService();
-            DiagnosticContext context = new DiagnosticContext(diagConfig, diagnosticInputs, resourceCache);
+            DiagnosticContext context = new DiagnosticContext(diagConfig, diagnosticInputs, resourceCache, true);
 
             diag.exec(context);
         } catch (ShowHelpException she){

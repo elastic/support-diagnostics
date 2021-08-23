@@ -112,7 +112,7 @@ class TestDiagnosticService {
         DiagnosticService diag = new DiagnosticService();
 
         ResourceCache resourceCache = new ResourceCache();
-        DiagnosticContext context = new DiagnosticContext(diagConfig, newDiagnosticInputs(), resourceCache);
+        DiagnosticContext context = new DiagnosticContext(diagConfig, newDiagnosticInputs(), resourceCache, true);
 
         try {
             File result = diag.exec(context);
@@ -145,7 +145,7 @@ class TestDiagnosticService {
 
         DiagnosticService diag = new DiagnosticService();
         ResourceCache resourceCache = new ResourceCache();
-        DiagnosticContext context = new DiagnosticContext(newDiagConfig(), newDiagnosticInputs(), resourceCache);
+        DiagnosticContext context = new DiagnosticContext(newDiagConfig(), newDiagnosticInputs(), resourceCache, true);
 
         try {
             File result = diag.exec(context);
@@ -167,7 +167,7 @@ class TestDiagnosticService {
                 ResourceCache resourceCache = new ResourceCache();
 
                 try {
-                    DiagnosticContext context = new DiagnosticContext(newDiagConfig(), newDiagnosticInputs(), resourceCache);
+                    DiagnosticContext context = new DiagnosticContext(newDiagConfig(), newDiagnosticInputs(), resourceCache, false);
                     File result = diag.exec(context);
                 } catch (DiagnosticException e) {
                     System.out.println(e.getStackTrace());

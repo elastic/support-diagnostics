@@ -22,6 +22,8 @@ public class DiagnosticContext {
    public boolean isAuthorized = true;
    public boolean dockerPresent = false;
    public int perPage = 0;
+   /** whether to include log file in generated diagnostic bundle */
+   public boolean includeLogs;
 
    public String clusterName = "";
    public String tempDir = "";
@@ -38,9 +40,10 @@ public class DiagnosticContext {
 
    public ResourceCache resourceCache;
 
-   public DiagnosticContext(DiagConfig diagConfig, DiagnosticInputs diagnosticInputs, ResourceCache resourceCache) {
+   public DiagnosticContext(DiagConfig diagConfig, DiagnosticInputs diagnosticInputs, ResourceCache resourceCache, Boolean includeLogs) {
       this.diagsConfig = diagConfig;
       this.diagnosticInputs = diagnosticInputs;
       this.resourceCache = resourceCache;
+      this.includeLogs = includeLogs;
    }
 }

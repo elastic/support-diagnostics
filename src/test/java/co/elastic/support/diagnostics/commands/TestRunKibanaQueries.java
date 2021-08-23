@@ -92,7 +92,7 @@ public class TestRunKibanaQueries {
     private DiagnosticContext initializeKibana(String version) throws DiagnosticException {
 		Map diagMap = JsonYamlUtils.readYamlFromClasspath(Constants.DIAG_CONFIG, true);
 		DiagConfig diagConfig = new DiagConfig(diagMap);
-		DiagnosticContext context = new DiagnosticContext(diagConfig, new DiagnosticInputs(), resourceCache);
+		DiagnosticContext context = new DiagnosticContext(diagConfig, new DiagnosticInputs(), resourceCache, true);
     	RestEntryConfig builder = new RestEntryConfig(version);
 
         Map restCalls = JsonYamlUtils.readYamlFromClasspath(Constants.KIBANA_REST, true);
