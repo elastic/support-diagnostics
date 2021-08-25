@@ -17,9 +17,11 @@ import org.mockserver.model.Header;
 import org.mockserver.model.Parameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -35,8 +37,6 @@ public class TestRestExecCalls {
 
     private final Logger logger = LoggerFactory.getLogger(TestRestExecCalls.class);
     private ClientAndServer mockServer;
-    private Map config;
-    private PoolingHttpClientConnectionManager connectionManager;
     private RestClient httpRestClient, httpsRestClient;
     private String temp = SystemProperties.userDir + SystemProperties.fileSeparator + "temp";
     private File tempDir = new File(temp);
@@ -52,7 +52,7 @@ public class TestRestExecCalls {
     }
 
     @AfterAll
-    public void globalTeardoown() {
+    public void globalTeardown() {
         mockServer.stop();
     }
 
@@ -73,6 +73,7 @@ public class TestRestExecCalls {
             "",
             "",
             true,
+            Collections.emptyMap(),
            3000,
            3000,
            3000);
@@ -89,6 +90,7 @@ public class TestRestExecCalls {
             "",
             "",
             true,
+            Collections.emptyMap(),
            3000,
            3000,
            3000);

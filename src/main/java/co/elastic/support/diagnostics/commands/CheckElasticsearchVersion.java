@@ -56,6 +56,7 @@ public class CheckElasticsearchVersion implements Command {
                     context.diagnosticInputs.pkiKeystore,
                     context.diagnosticInputs.pkiKeystorePass,
                     context.diagnosticInputs.skipVerification,
+                    context.diagsConfig.extraHeaders,
                     context.diagsConfig.connectionTimeout,
                     context.diagsConfig.connectionRequestTimeout,
                     context.diagsConfig.socketTimeout);
