@@ -14,6 +14,8 @@ import org.junit.jupiter.api.*;
 import co.elastic.support.rest.RestClient;
 import com.vdurmont.semver4j.Semver;
 
+import java.util.Collections;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 import static org.mockserver.model.HttpRequest.request;
@@ -52,6 +54,7 @@ public class TestCheckKibanaVersion {
             "",
             "",
             true,
+            Collections.emptyMap(),
            3000,
            3000,
            3000);

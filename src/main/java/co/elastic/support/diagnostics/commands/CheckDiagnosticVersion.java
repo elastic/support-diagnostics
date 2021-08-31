@@ -55,6 +55,7 @@ public class CheckDiagnosticVersion implements Command {
                     "",
                     "",
                     true,
+                    context.diagsConfig.extraHeaders,
                     context.diagsConfig.connectionTimeout,
                     context.diagsConfig.connectionRequestTimeout,
                     context.diagsConfig.socketTimeout)){

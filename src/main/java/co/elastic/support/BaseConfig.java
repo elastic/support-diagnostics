@@ -17,6 +17,7 @@ public class BaseConfig {
     public int socketTimeout;
     public int maxTotalConn;
     public int maxConnPerRoute;
+    public Map<String, String> extraHeaders;
 
     public String diagReleaseHost = "api.github.com";
     public String diagReleaseDest = "/repos/elastic/support-diagnostics/releases/latest";
@@ -63,6 +64,8 @@ public class BaseConfig {
         socketTimeout = restConfig.get("socketTimeout") * 1000;
         maxTotalConn = restConfig.get("maxTotalConn");
         maxConnPerRoute = restConfig.get("maxConnPerRoute");
+
+        extraHeaders = (Map<String, String>) configuration.get("extra-headers");
 
         dockerGlobal = (Map<String, String>) configuration.get("docker-global");
         //kubernates = (Map<String, String>) configuration.get("kuberantes");

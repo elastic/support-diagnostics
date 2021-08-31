@@ -121,7 +121,7 @@ public abstract class BaseInputs {
                 .withIgnoreCase()
                 .withInputTrimming(true)
                 .withValueChecker(( String val, String propname) -> validateArchiveType(val))
-                .read(SystemProperties.lineSeparator + outputDirDescription);
+                .read(SystemProperties.lineSeparator + archiveTypeDescription);
     }
 
     public List<String> validatePort(int val){

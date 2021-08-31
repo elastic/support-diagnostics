@@ -19,6 +19,7 @@ import org.mockserver.model.Parameter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import java.io.File;
+import java.util.Collections;
 import java.util.Map;
 import org.junit.jupiter.api.*;
 import co.elastic.support.rest.RestClient;
@@ -67,6 +68,7 @@ public class TestRunKibanaQueries {
             "",
             "",
             true,
+            Collections.emptyMap(),
            3000,
            3000,
            3000);

@@ -16,6 +16,7 @@ import co.elastic.support.rest.RestEntryConfig;
 import org.mockserver.integration.ClientAndServer;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Map;
 import org.junit.jupiter.api.*;
 import co.elastic.support.rest.RestClient;
@@ -61,6 +62,7 @@ public class TestKibanaGetDetails {
             "",
             "",
             true,
+            Collections.emptyMap(),
            3000,
            3000,
            3000);

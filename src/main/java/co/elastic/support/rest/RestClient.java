@@ -40,6 +40,7 @@ import java.io.Closeable;
 import java.io.FileInputStream;
 import java.io.UnsupportedEncodingException;
 import java.security.KeyStore;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -48,15 +49,17 @@ public class RestClient implements Closeable {
     private static final Logger logger = LogManager.getLogger(RestClient.class);
     private static final int maxTotal = 100, defaultMaxPerRoute = 10;
 
-    private static ConcurrentMap<String, RestClient> cachedClients = new ConcurrentHashMap<>();
     private CloseableHttpClient client;
     private HttpHost httpHost;
     private HttpClientContext httpContext;
 
-    public RestClient(CloseableHttpClient client, HttpHost httpHost, HttpClientContext context) {
+    private Map<String, String> extraHeaders;
+
+    public RestClient(CloseableHttpClient client, HttpHost httpHost, HttpClientContext context, Map<String, String> extraHeaders) {
         this.client = client;
         this.httpHost = httpHost;
         this.httpContext = context;
+        this.extraHeaders = extraHeaders;
     }
 
     public RestResult execQuery(String url) {
@@ -74,6 +77,11 @@ public class RestClient implements Closeable {
     }
 
     private HttpResponse execRequest(HttpRequestBase httpRequest) {
+        if (extraHeaders != null) {
+            for (Map.Entry<String, String> entry : extraHeaders.entrySet()) {
+                httpRequest.addHeader(entry.getKey(), entry.getValue());
+            }
+        }
         try {
             return client.execute(httpHost, httpRequest, httpContext);
         } catch (HttpHostConnectException e) {
@@ -130,6 +138,7 @@ public class RestClient implements Closeable {
             String pkiKeystore,
             String pkiKeystorePass,
             boolean bypassVerify,
+            Map<String, String> extraHeaders,
             int connectionTimeout,
             int connectionRequestTimeout,
             int socketTimeout){
@@ -216,7 +225,7 @@ public class RestClient implements Closeable {
             clientBuilder.setConnectionManager(mgr);
 
             CloseableHttpClient httpClient = clientBuilder.build();
-            RestClient restClient = new RestClient(httpClient, httpHost, context);
+            RestClient restClient = new RestClient(httpClient, httpHost, context, extraHeaders);
 
             return restClient;
         }
