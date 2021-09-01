@@ -94,7 +94,7 @@ public class KibanaGetDetails extends CheckPlatformDetails {
             targetOS = context.targetNode.os;
         }
 
-        ResourceCache.addSystemCommand(Constants.systemCommands, new RemoteSystem(
+        context.resourceCache.addSystemCommand(Constants.systemCommands, new RemoteSystem(
                 targetOS,
                 context.diagnosticInputs.remoteUser,
                 context.diagnosticInputs.remotePassword,
@@ -124,7 +124,7 @@ public class KibanaGetDetails extends CheckPlatformDetails {
             context.runSystemCalls = false;
             // We do need a system command local to run the docker calls
             SystemCommand syscmd = new LocalSystem(SystemUtils.parseOperatingSystemName(SystemProperties.osName));
-            ResourceCache.addSystemCommand(Constants.systemCommands, syscmd);
+            context.resourceCache.addSystemCommand(Constants.systemCommands, syscmd);
             return;
         }
 
@@ -136,7 +136,7 @@ public class KibanaGetDetails extends CheckPlatformDetails {
         context.targetNode = findTargetNode(profiles);
 
         SystemCommand syscmd = new LocalSystem(context.targetNode.os);
-        ResourceCache.addSystemCommand(Constants.systemCommands, syscmd);
+        context.resourceCache.addSystemCommand(Constants.systemCommands, syscmd);
     }
 
 
@@ -179,7 +179,7 @@ public class KibanaGetDetails extends CheckPlatformDetails {
     /**
      * Get the Kibana server instance's profile.
      *
-     * @param  host
+     * @param  context
      * @param  profiles list of network information for each kibana instance running
      * @return return the profile for the kibana process
      * @throws RuntimeException if there is not exactly one profile.
@@ -220,7 +220,7 @@ public class KibanaGetDetails extends CheckPlatformDetails {
      */
     public JsonNode getStats(DiagnosticContext context) throws DiagnosticException {
 
-        RestClient restClient = ResourceCache.getRestClient(Constants.restInputHost);
+        RestClient restClient = context.resourceCache.getRestClient(Constants.restInputHost);
         String url = context.elasticRestCalls.get("kibana_stats").getUrl();
         RestResult result = restClient.execQuery(url);
 

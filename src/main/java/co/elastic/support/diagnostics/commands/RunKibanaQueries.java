@@ -137,10 +137,10 @@ public class RunKibanaQueries extends BaseQuery {
     *
     * @return LocalSytem that will allow us to communicate with docker
     */
-    private LocalSystem getDockerSystem() {
+    private LocalSystem getDockerSystem(ResourceCache resourceCache) {
         String osName = SystemUtils.parseOperatingSystemName(SystemProperties.osName);
         LocalSystem syscmd = new LocalSystem(osName);
-        ResourceCache.addSystemCommand(Constants.systemCommands, syscmd);
+        resourceCache.addSystemCommand(Constants.systemCommands, syscmd);
         return syscmd;
     }
 
@@ -172,14 +172,14 @@ public class RunKibanaQueries extends BaseQuery {
                     targetOS = profile.os;
                 }
                 
-                syscmd = ResourceCache.getSystemCommand(Constants.systemCommands);
+                syscmd = context.resourceCache.getSystemCommand(Constants.systemCommands);
                 break;
 
             case Constants.kibanaLocal:
                 if (context.dockerPresent) {
-                    syscmd = getDockerSystem();
+                    syscmd = getDockerSystem(context.resourceCache);
                 } else {
-                    syscmd = ResourceCache.getSystemCommand(Constants.systemCommands);
+                    syscmd = context.resourceCache.getSystemCommand(Constants.systemCommands);
                 }
                 break;
         }
@@ -248,7 +248,7 @@ public class RunKibanaQueries extends BaseQuery {
 
         try {
             context.perPage         = 100;
-            RestClient client       = ResourceCache.getRestClient(Constants.restInputHost);
+            RestClient client       = context.resourceCache.getRestClient(Constants.restInputHost);
             int totalRetries        = runBasicQueries(client, context);
             filterActionsHeaders(context);
             execSystemCommands(context);

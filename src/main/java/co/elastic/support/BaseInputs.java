@@ -5,9 +5,9 @@
  */
 package co.elastic.support;
 
-import co.elastic.support.util.ResourceCache;
 import co.elastic.support.util.SystemProperties;
 import co.elastic.support.util.SystemUtils;
+import co.elastic.support.util.TextIOManager;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import co.elastic.support.diagnostics.ShowHelpException;
@@ -52,22 +52,6 @@ public abstract class BaseInputs {
 
     // End Input Fields
 
-    // Input Readers
-    // Generic - change the read label only
-    // Warning: Setting default values may leak into later prompts if not reset. Better to use a new Reader.
-    protected StringInputReader standardStringReader = ResourceCache.textIO.newStringInputReader()
-            .withMinLength(0)
-            .withInputTrimming(true);
-    protected BooleanInputReader standardBooleanReader = ResourceCache.textIO.newBooleanInputReader();
-    protected StringInputReader  standardPasswordReader = ResourceCache.textIO.newStringInputReader()
-            .withInputMasking(true)
-            .withInputTrimming(true)
-            .withMinLength(0);
-    protected StringInputReader standardFileReader = ResourceCache.textIO.newStringInputReader()
-            .withInputTrimming(true)
-            .withValueChecker((String val, String propname) -> validateFile(val));
-    // End Input Readers
-
     public boolean runningInDocker = SystemUtils.isRunningInDocker();
 
     public BaseInputs(){
@@ -76,7 +60,7 @@ public abstract class BaseInputs {
         }
     }
 
-    public abstract boolean runInteractive();
+    public abstract boolean runInteractive(TextIOManager textIOManager);
 
     public List<String> parseInputs(String[] args){
         logger.info(Constants.CONSOLE, "Processing diagnosticInputs...");
@@ -106,8 +90,8 @@ public abstract class BaseInputs {
         }
     }
 
-    protected void runOutputDirInteractive(){
-        String output = ResourceCache.textIO.newStringInputReader()
+    protected void runOutputDirInteractive(TextIOManager textIOManager){
+        String output = textIOManager.textIO.newStringInputReader()
                 .withMinLength(0)
                 .withValueChecker(( String val, String propname) -> validateOutputDirectory(val))
                 .read(SystemProperties.lineSeparator + outputDirDescription);
@@ -116,7 +100,7 @@ public abstract class BaseInputs {
             outputDir = output;
         }
 
-        archiveType = ResourceCache.textIO.newStringInputReader()
+        archiveType = textIOManager.textIO.newStringInputReader()
                 .withDefaultValue(archiveType)
                 .withIgnoreCase()
                 .withInputTrimming(true)
@@ -158,21 +142,6 @@ public abstract class BaseInputs {
         }
 
         return Collections.singletonList("Provided archive type [" + archiveType + "] is not supported.");
-    }
-
-    public List<String> validateFile(String val) {
-        if (StringUtils.isEmpty(val.trim())) {
-            return null;
-        }
-
-        File file = new File(val);
-
-        if (!file.exists()) {
-            return Collections.singletonList("Specified file could not be located.");
-        }
-
-        return null;
-
     }
 
     public List<String> validateDir(String val) {

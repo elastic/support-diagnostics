@@ -5,10 +5,12 @@
  */
 package co.elastic.support.diagnostics;
 
+import co.elastic.support.diagnostics.chain.DiagnosticContext;
 import co.elastic.support.util.JsonYamlUtils;
 import co.elastic.support.util.ResourceCache;
 import co.elastic.support.util.SystemUtils;
 import co.elastic.support.Constants;
+import co.elastic.support.util.TextIOManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -20,13 +22,15 @@ public class DiagnosticApp {
     private static final Logger logger = LogManager.getLogger(DiagnosticApp.class);
 
     public static void main(String[] args) {
+        ResourceCache resourceCache = new ResourceCache();
+        TextIOManager textIOManager = new TextIOManager();
 
         try {
             DiagnosticInputs diagnosticInputs = new DiagnosticInputs();
             if (args.length == 0) {
                 logger.info(Constants.CONSOLE, Constants.interactiveMsg);
                 diagnosticInputs.interactive = true;
-                diagnosticInputs.runInteractive();
+                diagnosticInputs.runInteractive(textIOManager);
             } else {
                 List<String> errors = diagnosticInputs.parseInputs(args);
                 if (errors.size() > 0) {
@@ -41,16 +45,17 @@ public class DiagnosticApp {
             Map diagMap = JsonYamlUtils.readYamlFromClasspath(Constants.DIAG_CONFIG, true);
             DiagConfig diagConfig = new DiagConfig(diagMap);
             DiagnosticService diag = new DiagnosticService();
+            DiagnosticContext context = new DiagnosticContext(diagConfig, diagnosticInputs, resourceCache);
 
-            ResourceCache.terminal.dispose();
-            diag.exec(diagnosticInputs, diagConfig);
+            diag.exec(context);
         } catch (ShowHelpException she){
             SystemUtils.quitApp();
         } catch (Exception e) {
             logger.error(Constants.CONSOLE,"Fatal error occurred: {}. {}", e.getMessage(), Constants.CHECK_LOG);
             logger.error( e);
         } finally {
-            ResourceCache.closeAll();
+            resourceCache.closeAll();
+            textIOManager.close();
         }
     }
 

@@ -6,6 +6,7 @@
 package co.elastic.support.diagnostics;
 
 import co.elastic.support.Constants;
+import co.elastic.support.diagnostics.chain.DiagnosticContext;
 import co.elastic.support.util.JsonYamlUtils;
 import co.elastic.support.util.ResourceCache;
 import com.google.common.io.Files;
@@ -15,6 +16,7 @@ import org.mockserver.integration.ClientAndServer;
 import org.mockserver.model.Header;
 import org.mockserver.model.HttpRequest;
 
+import javax.annotation.Resource;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -35,13 +37,14 @@ class TestDiagnosticService {
     static private String headerKey2 = "k2";
     static private String headerVal2 = "v2";
 
+    private ResourceCache resourceCache;
+
     @BeforeAll
     public void globalSetup() {
         mockServer = startClientAndServer(9880);
         // mockserver by default is in verbose mode (useful when creating new test), move it to warning.
         ConfigurationProperties.disableSystemOut(true);
         ConfigurationProperties.logLevel("WARN");
-        ResourceCache.terminal.dispose();
     }
 
     private DiagConfig newDiagConfig() {
@@ -108,8 +111,11 @@ class TestDiagnosticService {
         diagConfig.extraHeaders = extraHeaders;
         DiagnosticService diag = new DiagnosticService();
 
+        ResourceCache resourceCache = new ResourceCache();
+        DiagnosticContext context = new DiagnosticContext(diagConfig, newDiagnosticInputs(), resourceCache);
+
         try {
-            File result = diag.exec(newDiagnosticInputs(), diagConfig);
+            File result = diag.exec(context);
             assertTrue(result.toString().matches(".*\\.zip$"), result.toString());
             try {
                 ZipFile zipFile = new ZipFile(result, ZipFile.OPEN_READ);
@@ -128,6 +134,8 @@ class TestDiagnosticService {
             }
         } catch (DiagnosticException e) {
             fail(e);
+        } finally {
+            context.resourceCache.closeAll();
         }
     }
 
@@ -136,11 +144,55 @@ class TestDiagnosticService {
         setupResponse(false);
 
         DiagnosticService diag = new DiagnosticService();
+        ResourceCache resourceCache = new ResourceCache();
+        DiagnosticContext context = new DiagnosticContext(newDiagConfig(), newDiagnosticInputs(), resourceCache);
 
         try {
-            File result = diag.exec(newDiagnosticInputs(), newDiagConfig());
+            File result = diag.exec(context);
         } catch (DiagnosticException e) {
             fail(e);
+        } finally {
+            resourceCache.closeAll();
+        }
+    }
+
+    @Test
+    public void testConcurrentExecutions() {
+        setupResponse(false);
+
+        Runnable task = new Runnable() {
+            @Override
+            public void run() {
+                DiagnosticService diag = new DiagnosticService();
+                ResourceCache resourceCache = new ResourceCache();
+
+                try {
+                    DiagnosticContext context = new DiagnosticContext(newDiagConfig(), newDiagnosticInputs(), resourceCache);
+                    File result = diag.exec(context);
+                } catch (DiagnosticException e) {
+                    System.out.println(e.getStackTrace());
+                } finally {
+                    resourceCache.closeAll();
+                }
+            }
+        };
+
+        Thread[] threads = new Thread[5];
+        Arrays.setAll(threads, i -> new Thread(task));
+        for (Thread t: threads) {
+            t.start();
+        }
+        for (Thread t: threads) {
+            try {
+                t.join(3000);
+            } catch (InterruptedException e) {
+                fail("Thread interrupted", e);
+            } finally {
+                if (t.isAlive()) {
+                    t.interrupt();
+                    fail("Thread got stuck");
+                }
+            }
         }
     }
 }

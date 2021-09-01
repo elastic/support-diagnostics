@@ -62,7 +62,7 @@ public class CheckElasticsearchVersion implements Command {
                     context.diagsConfig.socketTimeout);
 
            // Add it to the global cache - automatically closed on exit.
-            ResourceCache.addRestClient(Constants.restInputHost, restClient);
+            context.resourceCache.addRestClient(Constants.restInputHost, restClient);
             context.version = getElasticsearchVersion(restClient);
             String version = context.version.getValue();
             RestEntryConfig builder = new RestEntryConfig(version);

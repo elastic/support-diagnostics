@@ -37,7 +37,7 @@ public class CheckPlatformDetails implements Command {
 
         try {
             // Cached from previous executions
-            RestClient restClient = ResourceCache.getRestClient(Constants.restInputHost);
+            RestClient restClient = context.resourceCache.getRestClient(Constants.restInputHost);
 
             // Populate the node metadata
             Map<String, RestEntry> calls = context.elasticRestCalls;
@@ -136,7 +136,7 @@ public class CheckPlatformDetails implements Command {
                             context.diagnosticInputs.trustRemote,
                             context.diagnosticInputs.isSudo
                     );
-                    ResourceCache.addSystemCommand(Constants.systemCommands, syscmd);
+                    context.resourceCache.addSystemCommand(Constants.systemCommands, syscmd);
 
                     break;
 
@@ -146,7 +146,7 @@ public class CheckPlatformDetails implements Command {
 
                         // We do need a system command local to run the docker calls
                         syscmd = new LocalSystem(SystemUtils.parseOperatingSystemName(SystemProperties.osName));
-                        ResourceCache.addSystemCommand(Constants.systemCommands, syscmd);
+                        context.resourceCache.addSystemCommand(Constants.systemCommands, syscmd);
                         break;
                     }
 
@@ -161,7 +161,7 @@ public class CheckPlatformDetails implements Command {
                             context.diagnosticInputs.host, nodeProfiles);
 
                     syscmd = new LocalSystem(context.targetNode.os);
-                    ResourceCache.addSystemCommand(Constants.systemCommands, syscmd);
+                    context.resourceCache.addSystemCommand(Constants.systemCommands, syscmd);
 
                     break;
 

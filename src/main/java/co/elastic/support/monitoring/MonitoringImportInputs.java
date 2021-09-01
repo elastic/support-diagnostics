@@ -6,6 +6,7 @@
 package co.elastic.support.monitoring;
 
 import co.elastic.support.util.ResourceCache;
+import co.elastic.support.util.TextIOManager;
 import com.beust.jcommander.Parameter;
 import co.elastic.support.rest.ElasticRestClientInputs;
 import org.apache.commons.lang3.ObjectUtils;
@@ -13,6 +14,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.beryx.textio.StringInputReader;
+import org.beryx.textio.TextIO;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -32,24 +35,26 @@ public class MonitoringImportInputs extends ElasticRestClientInputs {
 
     // Start Input Readers
 
-    protected StringInputReader proxyHostReader = ResourceCache.textIO.newStringInputReader()
-            .withInputTrimming(true)
-            .withValueChecker((String val, String propname) -> validateId(val));
+    protected StringInputReader proxyHostReader;
 
     // End Input Readers
 
-    public boolean runInteractive(){
+    public boolean runInteractive(TextIOManager textIOManager){
 
-        clusterName = ResourceCache.textIO.newStringInputReader()
+        proxyHostReader = textIOManager.textIO.newStringInputReader()
+                .withInputTrimming(true)
+                .withValueChecker((String val, String propname) -> validateId(val));
+
+        clusterName = textIOManager.textIO.newStringInputReader()
                 .withMinLength(0)
                 .read("Specify an alternate name for the imported cluster or hit enter to use original cluster name:");
 
-        input = ResourceCache.textIO.newStringInputReader()
+        input = textIOManager.textIO.newStringInputReader()
                 .withInputTrimming(true)
                 .withValueChecker((String val, String propname) -> validateRequiredFile(val))
                 .read("Enter the full path of the archvive you wish to import.");
 
-        runHttpInteractive();
+        runHttpInteractive(textIOManager);
 
         return true;
     }

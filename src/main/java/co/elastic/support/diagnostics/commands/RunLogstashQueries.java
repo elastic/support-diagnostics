@@ -40,7 +40,7 @@ public class RunLogstashQueries extends BaseQuery {
     public void execute(DiagnosticContext context) throws DiagnosticException {
 
         try {
-            RestClient client = ResourceCache.getRestClient(Constants.restInputHost);
+            RestClient client = context.resourceCache.getRestClient(Constants.restInputHost);
 
             RestEntryConfig builder = new RestEntryConfig("1.0.0");
             Map restCalls = JsonYamlUtils.readYamlFromClasspath(Constants.LS_REST, true);
@@ -86,7 +86,7 @@ public class RunLogstashQueries extends BaseQuery {
                             context.diagnosticInputs.trustRemote,
                             context.diagnosticInputs.isSudo
                     );
-                    ResourceCache.addSystemCommand(Constants.systemCommands, syscmd);
+                    context.resourceCache.addSystemCommand(Constants.systemCommands, syscmd);
                     break;
 
                 case Constants.logstashLocal:
@@ -95,7 +95,7 @@ public class RunLogstashQueries extends BaseQuery {
                     } else {
                         syscmd = new LocalSystem(nodeProfile.os);
                     }
-                    ResourceCache.addSystemCommand(Constants.systemCommands, syscmd);
+                    context.resourceCache.addSystemCommand(Constants.systemCommands, syscmd);
 
                     break;
 

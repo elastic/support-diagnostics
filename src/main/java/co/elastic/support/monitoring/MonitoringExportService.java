@@ -129,7 +129,7 @@ public class MonitoringExportService extends ElasticRestClientService {
             logger.error( "Unexpected error occurred", t);
             logger.error(Constants.CONSOLE, "Unexpected error. {}", Constants.CHECK_LOG);
         } finally {
-            ResourceCache.textIO.dispose();
+            // resourceCache.textIO.dispose();
             closeLogs();
             createArchive(tempDir, ArchiveUtils.ArchiveType.fromString(inputs.archiveType));
             client.close();

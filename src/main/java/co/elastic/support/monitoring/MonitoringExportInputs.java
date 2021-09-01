@@ -7,6 +7,7 @@ package co.elastic.support.monitoring;
 
 import co.elastic.support.util.ResourceCache;
 import co.elastic.support.util.SystemProperties;
+import co.elastic.support.util.TextIOManager;
 import com.beust.jcommander.Parameter;
 import co.elastic.support.Constants;
 import co.elastic.support.rest.ElasticRestClientInputs;
@@ -14,6 +15,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.beryx.textio.TextIO;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -52,38 +54,38 @@ public class MonitoringExportInputs extends ElasticRestClientInputs {
     public String queryStartDate;
     public String queryEndDate;
 
-    public boolean runInteractive() {
+    public boolean runInteractive(TextIOManager textIOManager) {
 
-        runHttpInteractive();
+        runHttpInteractive(textIOManager);
 
-        String operation = standardStringReader
+        String operation = textIOManager.standardStringReader
                 .withNumberedPossibleValues("List", "Extract")
                 .withIgnoreCase()
                 .read(SystemProperties.lineSeparator + "List monitored clusters available or extract data from a cluster." );
 
         operation = operation.toLowerCase();
         if(operation.equals("extract")){
-            type = ResourceCache.textIO.newStringInputReader()
+            type = textIOManager.textIO.newStringInputReader()
                     .withInputTrimming(true)
                     .withDefaultValue("monitoring")
                     .read(SystemProperties.lineSeparator + "Enter monitoring for ES and Logstash monitoring data, metric for metricbeat system data, or all.");
 
-            clusterId = ResourceCache.textIO.newStringInputReader()
+            clusterId = textIOManager.textIO.newStringInputReader()
                     .withInputTrimming(true)
                     .withValueChecker((String val, String propname) -> validateCluster(val))
                     .read(SystemProperties.lineSeparator + "Enter the cluster id to for the cluster you wish to extract.");
 
-            cutoffDate = ResourceCache.textIO.newStringInputReader()
+            cutoffDate = textIOManager.textIO.newStringInputReader()
                     .withInputTrimming(true)
                     .withMinLength(0)
                     .read(SystemProperties.lineSeparator + "Enter the date for the cutoff point of the extraction. Defaults to today's date. Must be in the format yyyy-MM-dd.");
 
-            cutoffTime = ResourceCache.textIO.newStringInputReader()
+            cutoffTime = textIOManager.textIO.newStringInputReader()
                     .withInputTrimming(true)
                     .withMinLength(0)
                     .read(SystemProperties.lineSeparator + "Enter the time for the cutoff point of the extraction. Defaults to the current UTC time. Must be in the 24 hour format HH:mm.");
 
-            interval = ResourceCache.textIO.newIntInputReader()
+            interval = textIOManager.textIO.newIntInputReader()
                     .withInputTrimming(true)
                     .withDefaultValue(interval)
                     .withValueChecker((Integer val, String propname) -> validateInterval(val))
@@ -92,7 +94,7 @@ public class MonitoringExportInputs extends ElasticRestClientInputs {
             validateTimeWindow();
         }
 
-        runOutputDirInteractive();
+        runOutputDirInteractive(textIOManager);
 
         return true;
     }

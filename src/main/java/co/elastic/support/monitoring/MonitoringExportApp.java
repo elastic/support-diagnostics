@@ -9,6 +9,7 @@ import co.elastic.support.util.ResourceCache;
 import co.elastic.support.Constants;
 import co.elastic.support.diagnostics.ShowHelpException;
 import co.elastic.support.util.SystemUtils;
+import co.elastic.support.util.TextIOManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -20,12 +21,14 @@ public class MonitoringExportApp {
 
     public static void main(String[] args) {
 
+        ResourceCache resourceCache = new ResourceCache();
+        TextIOManager textIOManager = new TextIOManager();
         try {
             MonitoringExportInputs monitoringExportInputs = new MonitoringExportInputs();
             if (args.length == 0) {
                 logger.info(Constants.CONSOLE,  Constants.interactiveMsg);
                 monitoringExportInputs.interactive = true;
-                monitoringExportInputs.runInteractive();
+                monitoringExportInputs.runInteractive(textIOManager);
             } else {
                 List<String> errors = monitoringExportInputs.parseInputs(args);
                 if (errors.size() > 0) {
@@ -36,16 +39,14 @@ public class MonitoringExportApp {
                     SystemUtils.quitApp();
                 }
             }
-            // Needs to be done for both because in command line it
-            // may be used for passwords.
-            ResourceCache.terminal.dispose();
             new MonitoringExportService().execExtract(monitoringExportInputs);
         } catch (ShowHelpException she){
             SystemUtils.quitApp();
         } catch (Exception e) {
             logger.error(Constants.CONSOLE, "Fatal error occurred: {}. {}", e.getMessage(), Constants.CHECK_LOG);
         } finally {
-            ResourceCache.closeAll();
+            resourceCache.closeAll();
+            textIOManager.close();
         }
     }
 }

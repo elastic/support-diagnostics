@@ -40,7 +40,7 @@ public class CheckUserAuthLevel implements Command {
         String username = UrlUtils.encodeValue(context.diagnosticInputs.user);
 
         // Should already be there.
-        RestClient restClient = ResourceCache.getRestClient(Constants.restInputHost);
+        RestClient restClient = context.resourceCache.getRestClient(Constants.restInputHost);
 
         boolean hasAuthorization = false;
         Semver version = context.version;

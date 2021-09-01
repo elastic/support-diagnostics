@@ -5,6 +5,8 @@
  */
 package co.elastic.support.diagnostics.commands;
 
+import co.elastic.support.diagnostics.DiagConfig;
+import co.elastic.support.diagnostics.DiagnosticInputs;
 import co.elastic.support.util.JsonYamlUtils;
 import co.elastic.support.util.ResourceCache;
 import co.elastic.support.Constants;
@@ -155,8 +157,10 @@ public class TestKibanaGetDetails {
                             .withStatusCode(401)
                 );
 
-        ResourceCache.addRestClient(Constants.restInputHost, httpRestClient);
-        DiagnosticContext context = new DiagnosticContext();
+        ResourceCache resourceCache = new ResourceCache();
+        resourceCache.addRestClient(Constants.restInputHost, httpRestClient);
+        Map diagMap = JsonYamlUtils.readYamlFromClasspath(Constants.DIAG_CONFIG, true);
+        DiagnosticContext context = new DiagnosticContext(new DiagConfig(diagMap), new DiagnosticInputs(), resourceCache);
         Map restCalls = JsonYamlUtils.readYamlFromClasspath(Constants.KIBANA_REST, true);
         RestEntryConfig builder = new RestEntryConfig("7.10.0");
         Map<String, RestEntry> entries = builder.buildEntryMap(restCalls);
@@ -167,6 +171,8 @@ public class TestKibanaGetDetails {
             testClass.getStats(context);
         } catch (DiagnosticException e) {
             assertEquals(e.getMessage(), "Kibana responded with [401] for [/api/stats]. Unable to proceed.");
+        } finally {
+            resourceCache.closeAll();
         }
     }
 }
