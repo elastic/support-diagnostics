@@ -172,7 +172,7 @@ public class TestKibanaGetDetails {
         } catch (DiagnosticException e) {
             assertEquals(e.getMessage(), "Kibana responded with [401] for [/api/stats]. Unable to proceed.");
         } finally {
-            resourceCache.closeAll();
+            resourceCache.close();
         }
     }
 }

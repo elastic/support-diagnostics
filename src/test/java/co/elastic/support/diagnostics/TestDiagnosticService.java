@@ -180,7 +180,7 @@ class TestDiagnosticService {
         } catch (DiagnosticException e) {
             fail(e);
         } finally {
-            context.resourceCache.closeAll();
+            context.resourceCache.close();
         }
     }
 
@@ -198,7 +198,7 @@ class TestDiagnosticService {
         } catch (DiagnosticException e) {
             fail(e);
         } finally {
-            resourceCache.closeAll();
+            resourceCache.close();
         }
     }
 
@@ -221,7 +221,7 @@ class TestDiagnosticService {
                 } catch (DiagnosticException e) {
                     System.out.println(e.getStackTrace());
                 } finally {
-                    resourceCache.closeAll();
+                    resourceCache.close();
                 }
             }
         };

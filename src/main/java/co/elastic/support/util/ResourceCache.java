@@ -13,7 +13,7 @@ import java.io.Closeable;
 import java.util.concurrent.ConcurrentHashMap;
 
 
-public class ResourceCache{
+public class ResourceCache implements AutoCloseable {
 
     private final Logger logger = LogManager.getLogger(ResourceCache.class);
     private ConcurrentHashMap<String, Closeable> resources = new ConcurrentHashMap();
@@ -42,8 +42,8 @@ public class ResourceCache{
         throw new IllegalStateException("RestClient instance does not exist");
     }
 
-    // Centralized method for cleaning up ssh and http clients
-    public void closeAll() {
+    @Override
+    public void close() {
         resources.forEach((name, resource)->{
                 try{
                     resource.close();

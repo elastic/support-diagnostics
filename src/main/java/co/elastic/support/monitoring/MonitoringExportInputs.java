@@ -5,7 +5,6 @@
  */
 package co.elastic.support.monitoring;
 
-import co.elastic.support.util.ResourceCache;
 import co.elastic.support.util.SystemProperties;
 import co.elastic.support.util.TextIOManager;
 import com.beust.jcommander.Parameter;
@@ -15,7 +14,6 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.beryx.textio.TextIO;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;

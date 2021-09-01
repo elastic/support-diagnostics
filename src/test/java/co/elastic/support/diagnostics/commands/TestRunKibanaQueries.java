@@ -86,7 +86,7 @@ public class TestRunKibanaQueries {
 
         mockServer.reset();
         FileUtils.deleteQuietly(tempDir);
-		resourceCache.closeAll();
+		resourceCache.close();
     }
 
     private DiagnosticContext initializeKibana(String version) throws DiagnosticException {

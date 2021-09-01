@@ -54,7 +54,7 @@ public class DiagnosticApp {
             logger.error(Constants.CONSOLE,"Fatal error occurred: {}. {}", e.getMessage(), Constants.CHECK_LOG);
             logger.error( e);
         } finally {
-            resourceCache.closeAll();
+            resourceCache.close();
             textIOManager.close();
         }
     }

@@ -13,7 +13,7 @@ import java.io.File;
 import java.util.Collections;
 import java.util.List;
 
-public class TextIOManager {
+public class TextIOManager implements AutoCloseable {
 
     public TextIO textIO;
 
@@ -57,13 +57,15 @@ public class TextIOManager {
         File file = new File(val);
 
         if (!file.exists()) {
-            return Collections.singletonList("Specified file could not be located.");
+            return Collections.singletonList(
+                    String.format("Specified file [%s] could not be located.", file.getPath())
+            );
         }
 
         return null;
-
     }
 
+    @Override
     public void close() {
         textIO.dispose();
     }

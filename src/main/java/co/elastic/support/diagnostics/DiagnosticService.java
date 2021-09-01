@@ -95,7 +95,7 @@ public class DiagnosticService extends ElasticRestClientService {
             }
             file = createArchive(context.tempDir, ArchiveType.fromString(inputs.archiveType));
             SystemUtils.nukeDirectory(context.tempDir);
-            context.resourceCache.closeAll();
+            context.resourceCache.close();
         }
 
         return file;

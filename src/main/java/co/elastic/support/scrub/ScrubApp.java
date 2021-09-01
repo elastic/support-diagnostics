@@ -48,7 +48,7 @@ public class ScrubApp {
         } catch (Exception e) {
             logger.error(Constants.CONSOLE,  "Fatal error occurred: {}. {}", e.getMessage(), Constants.CHECK_LOG);
         } finally {
-            resourceCache.closeAll();
+            resourceCache.close();
             textIOManager.close();
         }
     }

@@ -40,7 +40,7 @@ public class DiagnosticContext {
 
    public ResourceCache resourceCache;
 
-   public DiagnosticContext(DiagConfig diagConfig, DiagnosticInputs diagnosticInputs, ResourceCache resourceCache, Boolean includeLogs) {
+   public DiagnosticContext(DiagConfig diagConfig, DiagnosticInputs diagnosticInputs, ResourceCache resourceCache, boolean includeLogs) {
       this.diagsConfig = diagConfig;
       this.diagnosticInputs = diagnosticInputs;
       this.resourceCache = resourceCache;
