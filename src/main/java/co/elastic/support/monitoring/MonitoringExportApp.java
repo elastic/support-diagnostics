@@ -21,14 +21,16 @@ public class MonitoringExportApp {
 
     public static void main(String[] args) {
 
-        ResourceCache resourceCache = new ResourceCache();
-        TextIOManager textIOManager = new TextIOManager();
         try {
             MonitoringExportInputs monitoringExportInputs = new MonitoringExportInputs();
             if (args.length == 0) {
                 logger.info(Constants.CONSOLE,  Constants.interactiveMsg);
                 monitoringExportInputs.interactive = true;
-                monitoringExportInputs.runInteractive(textIOManager);
+                try(
+                    TextIOManager textIOManager = new TextIOManager();
+                ) {
+                    monitoringExportInputs.runInteractive(textIOManager);
+                }
             } else {
                 List<String> errors = monitoringExportInputs.parseInputs(args);
                 if (errors.size() > 0) {
@@ -44,9 +46,6 @@ public class MonitoringExportApp {
             SystemUtils.quitApp();
         } catch (Exception e) {
             logger.error(Constants.CONSOLE, "Fatal error occurred: {}. {}", e.getMessage(), Constants.CHECK_LOG);
-        } finally {
-            resourceCache.close();
-            textIOManager.close();
         }
     }
 }

@@ -171,16 +171,14 @@ class TestDiagnosticService {
         diagConfig.extraHeaders = extraHeaders;
         DiagnosticService diag = new DiagnosticService();
 
-        ResourceCache resourceCache = new ResourceCache();
-        DiagnosticContext context = new DiagnosticContext(diagConfig, newDiagnosticInputs(), resourceCache, true);
-
-        try {
+        try(
+            ResourceCache resourceCache = new ResourceCache();
+        ) {
+            DiagnosticContext context = new DiagnosticContext(diagConfig, newDiagnosticInputs(), resourceCache, true);
             File result = diag.exec(context);
             checkResult(result, true);
         } catch (DiagnosticException e) {
             fail(e);
-        } finally {
-            context.resourceCache.close();
         }
     }
 
@@ -189,16 +187,15 @@ class TestDiagnosticService {
         setupResponse(false);
 
         DiagnosticService diag = new DiagnosticService();
-        ResourceCache resourceCache = new ResourceCache();
-        DiagnosticContext context = new DiagnosticContext(newDiagConfig(), newDiagnosticInputs(), resourceCache, true);
 
-        try {
+        try(
+            ResourceCache resourceCache = new ResourceCache();
+        ) {
+            DiagnosticContext context = new DiagnosticContext(newDiagConfig(), newDiagnosticInputs(), resourceCache, true);
             File result = diag.exec(context);
             checkResult(result, true);
         } catch (DiagnosticException e) {
             fail(e);
-        } finally {
-            resourceCache.close();
         }
     }
 
@@ -212,16 +209,15 @@ class TestDiagnosticService {
             @Override
             public void run() {
                 DiagnosticService diag = new DiagnosticService();
-                ResourceCache resourceCache = new ResourceCache();
 
-                try {
+                try(
+                    ResourceCache resourceCache = new ResourceCache();
+                ) {
                     DiagnosticContext context = new DiagnosticContext(newDiagConfig(), newDiagnosticInputs(), resourceCache, false);
                     File result = diag.exec(context);
                     results.put(i, result);
                 } catch (DiagnosticException e) {
                     System.out.println(e.getStackTrace());
-                } finally {
-                    resourceCache.close();
                 }
             }
         };

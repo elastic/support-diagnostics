@@ -22,10 +22,10 @@ public class DiagnosticApp {
     private static final Logger logger = LogManager.getLogger(DiagnosticApp.class);
 
     public static void main(String[] args) {
-        ResourceCache resourceCache = new ResourceCache();
-        TextIOManager textIOManager = new TextIOManager();
-
-        try {
+        try(
+            ResourceCache resourceCache = new ResourceCache();
+            TextIOManager textIOManager = new TextIOManager();
+        ) {
             DiagnosticInputs diagnosticInputs = new DiagnosticInputs();
             if (args.length == 0) {
                 logger.info(Constants.CONSOLE, Constants.interactiveMsg);
@@ -53,9 +53,6 @@ public class DiagnosticApp {
         } catch (Exception e) {
             logger.error(Constants.CONSOLE,"Fatal error occurred: {}. {}", e.getMessage(), Constants.CHECK_LOG);
             logger.error( e);
-        } finally {
-            resourceCache.close();
-            textIOManager.close();
         }
     }
 

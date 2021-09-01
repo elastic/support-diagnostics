@@ -22,10 +22,9 @@ public class ScrubApp {
     private static Logger logger = LogManager.getLogger(ScrubApp.class);
 
     public static void main(String[] args) {
-        ResourceCache resourceCache = new ResourceCache();
-        TextIOManager textIOManager = new TextIOManager();
-
-        try {
+        try(
+            TextIOManager textIOManager = new TextIOManager();
+        ) {
             ScrubInputs scrubInputs = new ScrubInputs();
             if (args.length == 0) {
                 logger.error(Constants.CONSOLE,  Constants.interactiveMsg);
@@ -47,9 +46,6 @@ public class ScrubApp {
             SystemUtils.quitApp();
         } catch (Exception e) {
             logger.error(Constants.CONSOLE,  "Fatal error occurred: {}. {}", e.getMessage(), Constants.CHECK_LOG);
-        } finally {
-            resourceCache.close();
-            textIOManager.close();
         }
     }
 

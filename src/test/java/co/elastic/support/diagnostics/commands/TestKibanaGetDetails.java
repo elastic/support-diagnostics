@@ -157,22 +157,21 @@ public class TestKibanaGetDetails {
                             .withStatusCode(401)
                 );
 
-        ResourceCache resourceCache = new ResourceCache();
-        resourceCache.addRestClient(Constants.restInputHost, httpRestClient);
         Map diagMap = JsonYamlUtils.readYamlFromClasspath(Constants.DIAG_CONFIG, true);
-        DiagnosticContext context = new DiagnosticContext(new DiagConfig(diagMap), new DiagnosticInputs(), resourceCache, true);
         Map restCalls = JsonYamlUtils.readYamlFromClasspath(Constants.KIBANA_REST, true);
         RestEntryConfig builder = new RestEntryConfig("7.10.0");
         Map<String, RestEntry> entries = builder.buildEntryMap(restCalls);
-        context.elasticRestCalls = entries;
 
         KibanaGetDetails testClass = new KibanaGetDetails();
-        try {
+        try(
+            ResourceCache resourceCache = new ResourceCache();
+        ) {
+            DiagnosticContext context = new DiagnosticContext(new DiagConfig(diagMap), new DiagnosticInputs(), resourceCache, true);
+            context.elasticRestCalls = entries;
+            resourceCache.addRestClient(Constants.restInputHost, httpRestClient);
             testClass.getStats(context);
         } catch (DiagnosticException e) {
             assertEquals(e.getMessage(), "Kibana responded with [401] for [/api/stats]. Unable to proceed.");
-        } finally {
-            resourceCache.close();
         }
     }
 }

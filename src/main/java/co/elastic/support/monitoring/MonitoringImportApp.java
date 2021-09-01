@@ -21,11 +21,9 @@ public class MonitoringImportApp {
     private static final Logger logger = LogManager.getLogger(MonitoringImportApp.class);
 
     public static void main(String[] args) {
-
-        ResourceCache resourceCache = new ResourceCache();
-        TextIOManager textIOManager = new TextIOManager();
-
-        try {
+        try(
+            TextIOManager textIOManager = new TextIOManager();
+        ) {
             MonitoringImportInputs monitoringImportInputs = new MonitoringImportInputs();
             if (args.length == 0) {
                 logger.info(Constants.CONSOLE,  Constants.interactiveMsg);
@@ -46,9 +44,6 @@ public class MonitoringImportApp {
             SystemUtils.quitApp();
         } catch (Exception e) {
             logger.error(Constants.CONSOLE,  "Error occurred: {}. {}", e.getMessage(), Constants.CHECK_LOG);
-        } finally {
-            resourceCache.close();
-            textIOManager.close();
         }
     }
 
