@@ -78,7 +78,7 @@ public class TestRunKibanaQueries {
            3000);
         tempDir.mkdir();
 
-		resourceCache = new ResourceCache();
+        resourceCache = new ResourceCache();
     }
 
     @AfterEach
@@ -86,13 +86,13 @@ public class TestRunKibanaQueries {
 
         mockServer.reset();
         FileUtils.deleteQuietly(tempDir);
-		resourceCache.close();
+        resourceCache.close();
     }
 
     private DiagnosticContext initializeKibana(String version) throws DiagnosticException {
-		Map diagMap = JsonYamlUtils.readYamlFromClasspath(Constants.DIAG_CONFIG, true);
-		DiagConfig diagConfig = new DiagConfig(diagMap);
-		DiagnosticContext context = new DiagnosticContext(diagConfig, new DiagnosticInputs(), resourceCache, true);
+        Map diagMap = JsonYamlUtils.readYamlFromClasspath(Constants.DIAG_CONFIG, true);
+        DiagConfig diagConfig = new DiagConfig(diagMap);
+        DiagnosticContext context = new DiagnosticContext(diagConfig, new DiagnosticInputs(), resourceCache, true);
     	RestEntryConfig builder = new RestEntryConfig(version);
 
         Map restCalls = JsonYamlUtils.readYamlFromClasspath(Constants.KIBANA_REST, true);
