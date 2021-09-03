@@ -5,8 +5,8 @@
  */
 package co.elastic.support.diagnostics;
 
-import co.elastic.support.util.ResourceCache;
 import co.elastic.support.util.SystemProperties;
+import co.elastic.support.util.TextIOManager;
 import com.beust.jcommander.Parameter;
 import co.elastic.support.Constants;
 import co.elastic.support.rest.ElasticRestClientInputs;
@@ -149,13 +149,13 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
         }
     }
 
-    public boolean runInteractive() {
+    public boolean runInteractive(TextIOManager textIOManager) {
 
-        bypassDiagVerify = standardBooleanReader
+        bypassDiagVerify = textIOManager.standardBooleanReader
                 .withDefaultValue(bypassDiagVerify)
                 .read(SystemProperties.lineSeparator + bypassDiagVerifyDescription);
 
-        diagType = ResourceCache.textIO.newStringInputReader()
+        diagType = textIOManager.textIO.newStringInputReader()
                 .withNumberedPossibleValues(typeEntries)
                 .withDefaultValue(typeEntries[0])
                 .read(SystemProperties.lineSeparator + typeDescription)
@@ -165,7 +165,7 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
         setDefaultPortForDiagType(diagType);
 
         // We'll do this for any Elastic or Logstash submit
-        runHttpInteractive();
+        runHttpInteractive(textIOManager);
 
         if(diagType.contains("remote")) {
             logger.info(Constants.CONSOLE, remoteAccessMessage);
@@ -174,82 +174,82 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
                     SystemProperties.lineSeparator
                     + "This account must have sufficient authority to run the commands and access the logs.";
 
-            remoteUser = ResourceCache.textIO.newStringInputReader()
+            remoteUser = textIOManager.textIO.newStringInputReader()
                     .withInputTrimming(true)
                     .withValueChecker((String val, String propname) -> validateRemoteUser(val))
                     .read(SystemProperties.lineSeparator + remoteUserTxt);
 
-            isSudo = ResourceCache.textIO.newBooleanInputReader()
+            isSudo = textIOManager.textIO.newBooleanInputReader()
                     .withDefaultValue(isSudo)
                     .read(SystemProperties.lineSeparator + sudoDescription);
 
-            boolean useKeyfile = ResourceCache.textIO.newBooleanInputReader()
+            boolean useKeyfile = textIOManager.textIO.newBooleanInputReader()
                     .withDefaultValue(false)
                     .read(SystemProperties.lineSeparator + "Use a keyfile for authentication?");
 
             if (useKeyfile) {
-                keyfile = standardFileReader
+                keyfile = textIOManager
+                        .standardFileReader
                         .read(SystemProperties.lineSeparator + sshKeyFileDescription);
 
-                boolean checkMe = standardBooleanReader
+                boolean checkMe = textIOManager.standardBooleanReader
                         .read("Is the keyfile password protected?");
 
                 if(checkMe){
-                    keyfilePassword = standardPasswordReader
+                    keyfilePassword = textIOManager.standardPasswordReader
                             .read(SystemProperties.lineSeparator + sshKeyFIlePassphraseDescription);
                 }
                 if(isSudo){
-                    checkMe = standardBooleanReader
+                    checkMe = textIOManager.standardBooleanReader
                             .read("Password required for sudo challenge?");
 
                     if(checkMe){
-                        remotePassword = standardPasswordReader
+                        remotePassword = textIOManager.standardPasswordReader
                                 .read(SystemProperties.lineSeparator + "Enter the password for remote sudo.");
                     }
                 }
             } else {
-                remotePassword = standardPasswordReader
+                remotePassword = textIOManager.standardPasswordReader
                         .read(SystemProperties.lineSeparator + remotePasswordDescription);
             }
 
-            remotePort = ResourceCache.textIO.newIntInputReader()
+            remotePort = textIOManager.textIO.newIntInputReader()
                     .withDefaultValue(remotePort)
                     .withValueChecker((Integer val, String propname) -> validatePort(val))
                     .read(SystemProperties.lineSeparator + remotePortDescription);
 
-            trustRemote = standardBooleanReader
+            trustRemote = textIOManager.standardBooleanReader
                     .withDefaultValue(trustRemote)
                     .read(SystemProperties.lineSeparator + trustRemoteDescription);
 
             if (!trustRemote){
-                knownHostsFile = standardFileReader
+                knownHostsFile = textIOManager.standardFileReader
                         .read(SystemProperties.lineSeparator + knownHostsDescription);
             }
         }
 
-        runOutputDirInteractive();
+        runOutputDirInteractive(textIOManager);
 
-        ResourceCache.textIO.dispose();
         return true;
     }
 
-    public List<String> parseInputs(String[] args){
+    public List<String> parseInputs(TextIOManager textIOManager, String[] args){
         List<String> errors = super.parseInputs(args);
 
         errors.addAll(ObjectUtils.defaultIfNull(validateDiagType(diagType), emptyList));
         errors.addAll(ObjectUtils.defaultIfNull(setDefaultPortForDiagType(diagType), emptyList));
         errors.addAll(ObjectUtils.defaultIfNull(validateRemoteUser(remoteUser), emptyList));
         errors.addAll(ObjectUtils.defaultIfNull(validatePort(remotePort), emptyList));
-        errors.addAll(ObjectUtils.defaultIfNull(validateFile(keyfile), emptyList));
-        errors.addAll(ObjectUtils.defaultIfNull(validateFile(knownHostsFile), emptyList));
+        errors.addAll(ObjectUtils.defaultIfNull(textIOManager.validateFile(keyfile), emptyList));
+        errors.addAll(ObjectUtils.defaultIfNull(textIOManager.validateFile(knownHostsFile), emptyList));
 
         if(isRemotePass){
-            remotePassword = standardPasswordReader
+            remotePassword = textIOManager.standardPasswordReader
                     .read(remotePasswordDescription);
         }
 
         if(isKeyFilePass){
-            keyfilePassword = standardPasswordReader
+            keyfilePassword = textIOManager.standardPasswordReader
                     .read(sshKeyFIlePassphraseDescription);
         }
 

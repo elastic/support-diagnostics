@@ -8,6 +8,7 @@ package co.elastic.support.rest;
 import co.elastic.support.BaseInputs;
 import co.elastic.support.util.ResourceCache;
 import co.elastic.support.util.SystemProperties;
+import co.elastic.support.util.TextIOManager;
 import com.beust.jcommander.Parameter;
 import co.elastic.support.Constants;
 import org.apache.commons.lang3.ObjectUtils;
@@ -97,13 +98,13 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
         }
     }
 
-    public List<String> parseInputs(String args[]){
+    public List<String> parseInputs(TextIOManager textIOManager, String args[]){
         List<String> errors = super.parseInputs(args);
         scheme = isSsl ? "https": "http";
 
         errors.addAll(ObjectUtils.defaultIfNull(validateHost(host), emptyList));
         errors.addAll(ObjectUtils.defaultIfNull(validateProxyHost(proxyHost), emptyList));
-        errors.addAll(ObjectUtils.defaultIfNull(validateFile(pkiKeystore), emptyList));
+        errors.addAll(ObjectUtils.defaultIfNull(textIOManager.validateFile(pkiKeystore), emptyList));
         if(StringUtils.isNotEmpty(pkiKeystore)){
             errors.addAll(ObjectUtils.defaultIfNull(validateAuthType(pkiLoginAuth), emptyList));
         }
@@ -112,20 +113,20 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
 
         // If we got this far, get the passwords.
         if(isPassword){
-                password = standardPasswordReader
+                password = textIOManager.standardPasswordReader
                         .read(passwordDescription);
         }
 
         if(StringUtils.isNotEmpty(pkiKeystore)){
             if(isPkiPass){
-                pkiKeystorePass = standardPasswordReader
+                pkiKeystorePass = textIOManager.standardPasswordReader
                         .read(pkiKeystorePasswordDescription);
             }
         }
 
         if(StringUtils.isNotEmpty(proxyUser)){
             if(isProxyPass){
-                proxyPassword = standardPasswordReader
+                proxyPassword = textIOManager.standardPasswordReader
                         .read(proxyPasswordDescription);
             }
         }
@@ -134,10 +135,10 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
 
     }
 
-    protected void runHttpInteractive(){
+    protected void runHttpInteractive(TextIOManager textIOManager){
 
         if(runningInDocker){
-            host = ResourceCache.textIO.newStringInputReader()
+            host = textIOManager.textIO.newStringInputReader()
                     .withMinLength(1)
                     .withIgnoreCase()
                     .withInputTrimming(true)
@@ -145,7 +146,7 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
                     .read(SystemProperties.lineSeparator + hostDescription);
         }
         else {
-            host = ResourceCache.textIO.newStringInputReader()
+            host = textIOManager.textIO.newStringInputReader()
                     .withDefaultValue(host)
                     .withIgnoreCase()
                     .withInputTrimming(true)
@@ -153,17 +154,17 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
                     .read(SystemProperties.lineSeparator + hostDescription);
         }
 
-        port = ResourceCache.textIO.newIntInputReader()
+        port = textIOManager.textIO.newIntInputReader()
                 .withDefaultValue(port)
                 .withValueChecker((Integer val, String propname) -> validatePort(val))
                 .read(SystemProperties.lineSeparator + "Listening port. Defaults to " + port + ":");
 
-        isSsl = ResourceCache.textIO.newBooleanInputReader()
+        isSsl = textIOManager.textIO.newBooleanInputReader()
                 .withDefaultValue(true)
                 .read(SystemProperties.lineSeparator + sslDescription);
 
         if(isSsl){
-            skipVerification = ResourceCache.textIO.newBooleanInputReader()
+            skipVerification = textIOManager.textIO.newBooleanInputReader()
                     .withDefaultValue(skipVerification)
                     .read(SystemProperties.lineSeparator + skipHostnameVerificationDescription);
         }
@@ -171,55 +172,55 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
             scheme = "http";
         }
 
-        boolean isSecured = ResourceCache.textIO.newBooleanInputReader()
+        boolean isSecured = textIOManager.textIO.newBooleanInputReader()
                 .withDefaultValue(true)
                 .read(SystemProperties.lineSeparator + "Cluster secured?");
 
         if(isSecured){
 
-            String authType = ResourceCache.textIO.newStringInputReader()
+            String authType = textIOManager.textIO.newStringInputReader()
                     .withNumberedPossibleValues(userLoginAuth, pkiLoginAuth)
                     .withDefaultValue(userLoginAuth)
                     .read(SystemProperties.lineSeparator + "Type of authentication to use:");
 
             // SSL needs to be in place for PKI
             if(authType.equals(pkiLoginAuth) && !isSsl){
-                ResourceCache.terminal.println("TLS must be enabled to use PKI - defaulting to user/password authentication.");
+                textIOManager.textIO.getTextTerminal().println("TLS must be enabled to use PKI - defaulting to user/password authentication.");
                 authType = userLoginAuth;
             }
 
             if(authType.equals(userLoginAuth)){
-                user = standardStringReader
+                user = textIOManager.standardStringReader
                         .read(SystemProperties.lineSeparator + userDescription);
 
-                password = standardPasswordReader
+                password = textIOManager.standardPasswordReader
                         .read(SystemProperties.lineSeparator + passwordDescription);
             }
             else{
-                pkiKeystore = standardFileReader
+                pkiKeystore = textIOManager.standardFileReader
                         .read(SystemProperties.lineSeparator + pkiKeystoreDescription);
-                pkiKeystorePass = standardPasswordReader
+                pkiKeystorePass = textIOManager.standardPasswordReader
                         .read(SystemProperties.lineSeparator + pkiKeystorePasswordDescription);
             }
         }
 
-        boolean httpProxy = standardBooleanReader
+        boolean httpProxy = textIOManager.standardBooleanReader
                 .withDefaultValue(false)
                 .read(SystemProperties.lineSeparator + "Http Proxy Server present?");
 
         if(httpProxy){
-            proxyHost = ResourceCache.textIO.newStringInputReader()
+            proxyHost = textIOManager.textIO.newStringInputReader()
                     .withIgnoreCase()
                     .withInputTrimming(true)
                     .withValueChecker((String val, String propname) -> validateProxyHost(val))
                     .read(SystemProperties.lineSeparator + proxyHostDescription);
 
-            proxyPort = ResourceCache.textIO.newIntInputReader()
+            proxyPort = textIOManager.textIO.newIntInputReader()
                     .withDefaultValue(proxyPort)
                     .withValueChecker((Integer val, String propname) -> validatePort(val))
                     .read(SystemProperties.lineSeparator + proxyPortDescription);
 
-            proxyPassword = standardPasswordReader
+            proxyPassword = textIOManager.standardPasswordReader
                     .read(SystemProperties.lineSeparator + proxyPasswordDescription);
         }
 

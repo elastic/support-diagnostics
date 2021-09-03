@@ -8,6 +8,7 @@ package co.elastic.support.scrub;
 import co.elastic.support.BaseInputs;
 import co.elastic.support.util.ResourceCache;
 import co.elastic.support.util.SystemProperties;
+import co.elastic.support.util.TextIOManager;
 import com.beust.jcommander.Parameter;
 import co.elastic.support.Constants;
 import org.apache.commons.lang3.StringUtils;
@@ -36,14 +37,14 @@ public class ScrubInputs extends BaseInputs {
     public boolean isArchive = true;
     public String scrubbedFileBaseName;
 
-    public boolean runInteractive() {
+    public boolean runInteractive(TextIOManager textIOManager) {
 
-        scrub = ResourceCache.textIO.newStringInputReader()
+        scrub = textIOManager.textIO.newStringInputReader()
                 .withInputTrimming(true)
                 .withValueChecker((String val, String propname) -> validateScrubInput(val))
                 .read("Enter the full path of the archive you wish to import.");
 
-        workers = ResourceCache.textIO.newIntInputReader()
+        workers = textIOManager.textIO.newIntInputReader()
                 .withMinVal(0)
                 .withDefaultValue(workers)
                 .read("Enter the number of workers to run in parallel. Defaults to the detected number of processors: " + workers);
@@ -56,7 +57,7 @@ public class ScrubInputs extends BaseInputs {
         if (runningInDocker) {
             logger.info(Constants.CONSOLE, "Result will be written to the configured Docker volume.");
         } else {
-            runOutputDirInteractive();
+            runOutputDirInteractive(textIOManager);
         }
 
         return true;

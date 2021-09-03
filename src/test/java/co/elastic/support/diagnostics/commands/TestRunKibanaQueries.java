@@ -5,7 +5,10 @@
  */
 package co.elastic.support.diagnostics.commands;
 
+import co.elastic.support.diagnostics.DiagConfig;
+import co.elastic.support.diagnostics.DiagnosticInputs;
 import co.elastic.support.util.JsonYamlUtils;
+import co.elastic.support.util.ResourceCache;
 import co.elastic.support.util.SystemProperties;
 import co.elastic.support.Constants;
 import co.elastic.support.diagnostics.DiagnosticException;
@@ -41,6 +44,7 @@ public class TestRunKibanaQueries {
     private RestClient httpRestClient, httpsRestClient;
     private String temp = SystemProperties.userDir + SystemProperties.fileSeparator + "temp";
     private File tempDir = new File(temp);
+    private ResourceCache resourceCache;
 
     @BeforeAll
     public void globalSetup() {
@@ -74,6 +78,7 @@ public class TestRunKibanaQueries {
            3000);
         tempDir.mkdir();
 
+        resourceCache = new ResourceCache();
     }
 
     @AfterEach
@@ -81,12 +86,13 @@ public class TestRunKibanaQueries {
 
         mockServer.reset();
         FileUtils.deleteQuietly(tempDir);
-
+        resourceCache.close();
     }
 
     private DiagnosticContext initializeKibana(String version) throws DiagnosticException {
-
-    	DiagnosticContext context = new DiagnosticContext();
+        Map diagMap = JsonYamlUtils.readYamlFromClasspath(Constants.DIAG_CONFIG, true);
+        DiagConfig diagConfig = new DiagConfig(diagMap);
+        DiagnosticContext context = new DiagnosticContext(diagConfig, new DiagnosticInputs(), resourceCache, true);
     	RestEntryConfig builder = new RestEntryConfig(version);
 
         Map restCalls = JsonYamlUtils.readYamlFromClasspath(Constants.KIBANA_REST, true);
@@ -396,7 +402,6 @@ public class TestRunKibanaQueries {
 
     @Test
     public void testQueriesRemovingHeaders() throws DiagnosticException {
-
       mockServer
             .when(
                     request()
@@ -424,7 +429,6 @@ public class TestRunKibanaQueries {
     */
     @Test
     public void testQueriesWithoutHeaders() throws DiagnosticException {
-
       mockServer
             .when(
                     request()
@@ -446,6 +450,5 @@ public class TestRunKibanaQueries {
         JsonNode config = nodeData.get(0).get("config");
         assertEquals(nodeData.get(0).path("id").asText(), "eec7ee50-7129-3333-9b41-17a1879ebc72");
         assertTrue((config == null || config.isNull()));
-
     }
 }

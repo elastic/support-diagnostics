@@ -37,7 +37,7 @@ public  class CollectLogs implements Command {
         }
 
         // Should be cached from the PlatformDetails check.
-        SystemCommand sysCmd = ResourceCache.getSystemCommand(Constants.systemCommands);
+        SystemCommand sysCmd = context.resourceCache.getSystemCommand(Constants.systemCommands);
         String targetDir = context.tempDir + SystemProperties.fileSeparator + "logs";
         ProcessProfile targetNode = context.targetNode;
         JavaPlatform javaPlatform = targetNode.javaPlatform;

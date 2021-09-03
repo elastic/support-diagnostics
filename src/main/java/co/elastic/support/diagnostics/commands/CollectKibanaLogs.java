@@ -47,7 +47,7 @@ public  class CollectKibanaLogs implements Command {
             return;
         }
 
-        SystemCommand sysCmd = ResourceCache.getSystemCommand(Constants.systemCommands);
+        SystemCommand sysCmd = context.resourceCache.getSystemCommand(Constants.systemCommands);
         String targetDir = context.tempDir + SystemProperties.fileSeparator + "logs";
         ProcessProfile targetNode = context.targetNode;
 

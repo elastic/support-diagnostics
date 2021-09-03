@@ -9,6 +9,7 @@ import co.elastic.support.diagnostics.DiagnosticInputs;
 import co.elastic.support.diagnostics.ProcessProfile;
 import co.elastic.support.rest.RestEntry;
 import co.elastic.support.diagnostics.DiagConfig;
+import co.elastic.support.util.ResourceCache;
 import com.vdurmont.semver4j.Semver;
 
 import java.util.ArrayList;
@@ -21,6 +22,8 @@ public class DiagnosticContext {
    public boolean isAuthorized = true;
    public boolean dockerPresent = false;
    public int perPage = 0;
+   /** whether to include log file in generated diagnostic bundle */
+   public boolean includeLogs;
 
    public String clusterName = "";
    public String tempDir = "";
@@ -35,7 +38,12 @@ public class DiagnosticContext {
    public List<String> dockerContainers = new ArrayList<String>();
    public Map<String, RestEntry> elasticRestCalls;
 
+   public ResourceCache resourceCache;
 
-
-
+   public DiagnosticContext(DiagConfig diagConfig, DiagnosticInputs diagnosticInputs, ResourceCache resourceCache, boolean includeLogs) {
+      this.diagsConfig = diagConfig;
+      this.diagnosticInputs = diagnosticInputs;
+      this.resourceCache = resourceCache;
+      this.includeLogs = includeLogs;
+   }
 }

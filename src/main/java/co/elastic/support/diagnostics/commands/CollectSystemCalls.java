@@ -31,7 +31,7 @@ public class CollectSystemCalls implements Command {
         }
 
         // Should be cached from the PlatformDetails check.
-        SystemCommand sysCmd = ResourceCache.getSystemCommand(Constants.systemCommands);
+        SystemCommand sysCmd = context.resourceCache.getSystemCommand(Constants.systemCommands);
         String targetDir = context.tempDir + SystemProperties.fileSeparator + "syscalls";
         String pid = context.targetNode.pid;
         ProcessProfile targetNode = context.targetNode;

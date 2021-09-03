@@ -29,7 +29,7 @@ public class CollectDockerInfo implements Command {
 
     public void execute(DiagnosticContext context) {
 
-        SystemCommand systemCommand = ResourceCache.getSystemCommand(Constants.systemCommands);
+        SystemCommand systemCommand = context.resourceCache.getSystemCommand(Constants.systemCommands);
 
         // Run the system calls first to get the host's stats
         String targetDir = context.tempDir + SystemProperties.fileSeparator + "syscalls";

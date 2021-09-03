@@ -6,7 +6,6 @@
 package co.elastic.support.diagnostics;
 
 import co.elastic.support.rest.ElasticRestClientService;
-import co.elastic.support.util.ResourceCache;
 import co.elastic.support.util.SystemProperties;
 import co.elastic.support.util.SystemUtils;
 import co.elastic.support.Constants;
@@ -27,10 +26,9 @@ public class DiagnosticService extends ElasticRestClientService {
 
     private Logger logger = LogManager.getLogger(DiagnosticService.class);
 
-    public File exec(DiagnosticInputs inputs, DiagConfig config) throws DiagnosticException {
-        DiagnosticContext ctx = new DiagnosticContext();
-        ctx.diagsConfig = config;
-        ctx.diagnosticInputs = inputs;
+    public File exec(DiagnosticContext context) throws DiagnosticException {
+        DiagConfig config = context.diagsConfig;
+        DiagnosticInputs inputs = context.diagnosticInputs;
         File file;
 
         try(
@@ -53,16 +51,16 @@ public class DiagnosticService extends ElasticRestClientService {
                     config.socketTimeout
             )){
 
-            ResourceCache.addRestClient(Constants.restInputHost, esRestClient);
+            context.resourceCache.addRestClient(Constants.restInputHost, esRestClient);
 
             // Create the temp directory - delete if first if it exists from a previous run
             String outputDir = inputs.outputDir;
-            ctx.tempDir = outputDir + SystemProperties.fileSeparator + inputs.diagType + "-" + Constants.ES_DIAG;
-            logger.info(Constants.CONSOLE, "{}Creating temp directory: {}", SystemProperties.lineSeparator, ctx.tempDir);
+            context.tempDir = outputDir + SystemProperties.fileSeparator + inputs.diagType + "-" + Constants.ES_DIAG;
+            logger.info(Constants.CONSOLE, "{}Creating temp directory: {}", SystemProperties.lineSeparator, context.tempDir);
 
             try {
-                FileUtils.deleteDirectory(new File(ctx.tempDir));
-                Files.createDirectories(Paths.get(ctx.tempDir));
+                FileUtils.deleteDirectory(new File(context.tempDir));
+                Files.createDirectories(Paths.get(context.tempDir));
             }
             catch (IOException ioe) {
                 logger.error("Temp directory error", ioe);
@@ -80,20 +78,23 @@ public class DiagnosticService extends ElasticRestClientService {
             // This will also log that same output to the diagnostic log file.
             // To just log to the file log as normal: logger.info/error/warn/debug("Log mewssage");
 
-            logger.info(Constants.CONSOLE, "Configuring log file.");
-            createFileAppender(ctx.tempDir, "diagnostics.log");
-            DiagnosticChainExec.runDiagnostic(ctx, inputs.diagType);
+            if (context.includeLogs) {
+                logger.info(Constants.CONSOLE, "Configuring log file.");
+                createFileAppender(context.tempDir, "diagnostics.log");
+            }
+            DiagnosticChainExec.runDiagnostic(context, inputs.diagType);
 
-            if (ctx.dockerPresent) {
+            if (context.dockerPresent) {
                 logger.info(Constants.CONSOLE, "Identified Docker installations - bypassed log collection and some system calls.");
             }
 
-            checkAuthLevel(ctx.diagnosticInputs.user, ctx.isAuthorized);
+            checkAuthLevel(context.diagnosticInputs.user, context.isAuthorized);
         } finally {
-            closeLogs();
-            file = createArchive(ctx.tempDir, ArchiveType.fromString(inputs.archiveType));
-            SystemUtils.nukeDirectory(ctx.tempDir);
-            ResourceCache.closeAll();
+            if (context.includeLogs) {
+                closeLogs();
+            }
+            file = createArchive(context.tempDir, ArchiveType.fromString(inputs.archiveType));
+            SystemUtils.nukeDirectory(context.tempDir);
         }
 
         return file;

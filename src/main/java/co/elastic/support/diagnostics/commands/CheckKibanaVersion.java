@@ -66,7 +66,7 @@ public class CheckKibanaVersion implements Command {
                     context.diagsConfig.socketTimeout);
 
            // Add it to the global cache - automatically closed on exit.
-            ResourceCache.addRestClient(Constants.restInputHost, restClient);
+            context.resourceCache.addRestClient(Constants.restInputHost, restClient);
             context.version = getKibanaVersion(restClient);
             String version = context.version.getValue();
             RestEntryConfig builder = new RestEntryConfig(version);
