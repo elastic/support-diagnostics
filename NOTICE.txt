@@ -25,14 +25,14 @@ Third party libraries used by the Support Diagnostics Utilities:
   Apache Velocity - Engine under Apache License 2.0
   Apache Velocity - JSR 223 Scripting under Apache License 2.0
   ASM based accessors helper used by json-smart under Apache License 2.0
-  ASM Core under BSD
+  ASM Core under BSD 2-Clause
   Bouncy Castle PKIX, CMS, EAC, TSP, PKCS, OCSP, CMP, and CRMF APIs under Bouncy Castle Licence
   Bouncy Castle Provider under Bouncy Castle Licence
   Extended StAX API under Dual license consisting of the CDDL v1.1 and GPL v2
   fastinfoset under Apache License 2.0
   FindBugs-jsr305 under Apache License 2.0
   Guava: Google Core Libraries for Java under Apache License 2.0
-  Hamcrest Core under New BSD License
+  Hamcrest Core under BSD 3-Clause
   istack common utility code runtime under CDDL 1.1 or GPL2 w/ CPE
   Jackson-annotations under Apache License 2.0
   Jackson-core under Apache License 2.0
@@ -47,10 +47,10 @@ Third party libraries used by the Support Diagnostics Utilities:
   JAXB Runtime under CDDL+GPL License
   jaxb-api under CDDL 1.1 or GPL2 w/ CPE
   jcommander under Apache License 2.0
-  JLine under The BSD License
+  JLine under BSD 2-Clause
   Joda-Time under Apache License 2.0
   JOpt Simple under The MIT License
-  JSch under Revised BSD
+  JSch under BSD 3-Clause
   JSON library from Android SDK under Apache License 2.0
   JSON Small and Fast Parser under Apache License 2.0
   json-schema-core under Lesser General Public License, version 3 or greater or Apache License 2.0
@@ -65,7 +65,7 @@ Third party libraries used by the Support Diagnostics Utilities:
   JUnit Platform Launcher under Eclipse Public License v2.0
   JUnit Platform Surefire Provider under The Apache License 2.0
   JUnit Vintage Engine under Eclipse Public License v2.0
-  JZlib under BSD
+  JZlib under BSD 2-Clause
   libphonenumber under Apache License 2.0
   MockServer & Proxy Netty under Apache License 2.0
   MockServer Core under Apache License 2.0
