@@ -277,7 +277,7 @@ If you use a PKI store to authenticate to your Elasticsearch cluster you may use
 
  <tr>
    <td width="20%" align="left" valign="top">--pkiPass</td>
-   <td width="50%" align="left" valign="top">Prompt for a password if the PKI keystore is secured. </td>
+   <td width="50%" align="left" valign="top">Prompt for a password if the PKI keystore is secured.  Note that this password will be used for both the secured keystore and the secured key. </td>
    <td width="30%" align="left" valign="top">Option only - no value.</td>
  </tr>
 
