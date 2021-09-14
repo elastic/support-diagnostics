@@ -78,6 +78,7 @@ class TestDiagnosticService {
     private DiagnosticInputs newDiagnosticInputs() {
         DiagnosticInputs diagnosticInputs = new DiagnosticInputs();
         diagnosticInputs.port = 9880;
+        diagnosticInputs.diagType = Constants.api;
         try {
             File outputDir = folder.newFolder();
             diagnosticInputs.outputDir = outputDir.toString();
@@ -211,23 +212,21 @@ class TestDiagnosticService {
             public void run() {
                 DiagnosticService diag = new DiagnosticService();
 
-                try(
-                    ResourceCache resourceCache = new ResourceCache();
-                ) {
+                try(ResourceCache resourceCache = new ResourceCache()) {
                     DiagnosticContext context = new DiagnosticContext(newDiagConfig(), newDiagnosticInputs(), resourceCache, false);
                     File result = diag.exec(context);
                     results.put(i, result);
                 } catch (DiagnosticException e) {
                     System.out.println(e.getStackTrace());
+                    fail(e);
                 }
             }
         };
 
         Thread[] threads = new Thread[10];
         Arrays.setAll(threads, i -> new Thread(task.apply(i)));
-        for (Thread t: threads) {
-            t.start();
-        }
+        Arrays.stream(threads).forEach(Thread::start);
+
         for (Thread t: threads) {
             try {
                 t.join(3000);
