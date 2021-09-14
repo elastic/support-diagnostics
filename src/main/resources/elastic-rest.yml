@@ -284,6 +284,10 @@ shards:
   versions:
     ">=0.9.0": "/_cat/shards?format=json&bytes=b&pretty"
 
+snapshot:
+  versions:
+    ">=7.15.0": "/_snapshot/*/*?verbose=false"
+
 tasks:
   versions:
     ">=2.0.0": "/_tasks?pretty&human&detailed=true"
