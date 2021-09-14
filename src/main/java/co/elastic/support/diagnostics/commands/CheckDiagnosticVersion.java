@@ -76,7 +76,9 @@ public class CheckDiagnosticVersion implements Command {
             RestResult restResult = new RestResult(restClient.execGet(
                     context.diagsConfig.diagLatestRelease), context.diagsConfig.diagLatestRelease);
             JsonNode rootNode = JsonYamlUtils.createJsonNodeFromString(restResult.toString());
-            String ver = rootNode.path("tag_name").asText();
+            // newer tags are prefixed with `v`, so remove it
+            String ver = rootNode.path("tag_name").asText().replaceAll("^v", "");
+
             Semver diagVer = new Semver(context.diagVersion, Semver.SemverType.NPM);
             String rule = ">= " + ver;
 
