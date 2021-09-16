@@ -32,7 +32,7 @@ public class ScrubApp {
                 scrubInputs.interactive = true;
                 scrubInputs.runInteractive(textIOManager);
             } else {
-                List<String> errors = scrubInputs.parseIinputs(args);
+                List<String> errors = scrubInputs.parseInputs(textIOManager, args);
                 if (errors.size() > 0) {
                     for (String err : errors) {
                         logger.error(Constants.CONSOLE,  err);

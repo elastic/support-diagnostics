@@ -98,9 +98,9 @@ public class MonitoringExportInputs extends ElasticRestClientInputs {
         return true;
     }
 
-    public List<String> parseInputs(String[] args) {
-
-        List<String> errors = super.parseInputs(args);
+    @Override
+    public List<String> parseInputs(TextIOManager textIOManager, String[] args) {
+        List<String> errors = super.parseInputs(textIOManager, args);
 
         if (!listClusters) {
             errors.addAll(ObjectUtils.defaultIfNull(validateCluster(clusterId), emptyList));
@@ -109,7 +109,6 @@ public class MonitoringExportInputs extends ElasticRestClientInputs {
         }
 
         return errors;
-
     }
 
     public List<String> validateTimeWindow(){

@@ -64,8 +64,9 @@ public class ScrubInputs extends BaseInputs {
         return true;
     }
 
-    public List<String> parseIinputs(String[] args) {
-        List<String> errors = super.parseInputs(args);
+    @Override
+    public List<String> parseInputs(TextIOManager textIOManager, String[] args) {
+        List<String> errors = super.parseInputs(textIOManager, args);
 
         List valid = validateScrubInput(scrub);
         if(valid != null){

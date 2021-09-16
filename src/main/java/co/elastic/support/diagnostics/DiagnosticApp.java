@@ -33,7 +33,7 @@ public class DiagnosticApp {
                 diagnosticInputs.interactive = true;
                 diagnosticInputs.runInteractive(textIOManager);
             } else {
-                List<String> errors = diagnosticInputs.parseInputs(args);
+                List<String> errors = diagnosticInputs.parseInputs(textIOManager, args);
                 if (errors.size() > 0) {
                     for (String err : errors) {
                         logger.error(Constants.CONSOLE, err);
@@ -60,4 +60,3 @@ public class DiagnosticApp {
 
 
 }
-
