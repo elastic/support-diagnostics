@@ -31,7 +31,7 @@ public class MonitoringImportApp {
                 monitoringImportInputs.interactive = true;
                 monitoringImportInputs.runInteractive(textIOManager);
             } else {
-                List<String> errors = monitoringImportInputs.parseInputs(args);
+                List<String> errors = monitoringImportInputs.parseInputs(textIOManager, args);
                 if (errors.size() > 0) {
                     for (String err : errors) {
                         logger.error(Constants.CONSOLE,  err);

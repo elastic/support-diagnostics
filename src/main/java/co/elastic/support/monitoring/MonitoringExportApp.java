@@ -22,18 +22,14 @@ public class MonitoringExportApp {
 
     public static void main(String[] args) {
 
-        try {
+        try (TextIOManager textIOManager = new TextIOManager()) {
             MonitoringExportInputs monitoringExportInputs = new MonitoringExportInputs();
             if (args.length == 0) {
                 logger.info(Constants.CONSOLE,  Constants.interactiveMsg);
                 monitoringExportInputs.interactive = true;
-                try(
-                    TextIOManager textIOManager = new TextIOManager();
-                ) {
-                    monitoringExportInputs.runInteractive(textIOManager);
-                }
+                monitoringExportInputs.runInteractive(textIOManager);
             } else {
-                List<String> errors = monitoringExportInputs.parseInputs(args);
+                List<String> errors = monitoringExportInputs.parseInputs(textIOManager, args);
                 if (errors.size() > 0) {
                     for (String err : errors) {
                         logger.error(Constants.CONSOLE, err);

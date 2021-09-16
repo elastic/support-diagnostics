@@ -99,8 +99,9 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
         }
     }
 
+    @Override
     public List<String> parseInputs(TextIOManager textIOManager, String args[]){
-        List<String> errors = super.parseInputs(args);
+        List<String> errors = super.parseInputs(textIOManager, args);
         scheme = isSsl ? "https": "http";
 
         errors.addAll(ObjectUtils.defaultIfNull(validateHost(host), emptyList));
@@ -114,8 +115,8 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
 
         // If we got this far, get the passwords.
         if(isPassword){
-                password = textIOManager.standardPasswordReader
-                        .read(passwordDescription);
+            password = textIOManager.standardPasswordReader
+                    .read(passwordDescription);
         }
 
         if(StringUtils.isNotEmpty(pkiKeystore)){
@@ -133,7 +134,6 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
         }
 
         return errors;
-
     }
 
     protected void runHttpInteractive(TextIOManager textIOManager){

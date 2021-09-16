@@ -21,7 +21,7 @@ import java.util.List;
 
 public class DiagnosticInputs extends ElasticRestClientInputs {
 
-    
+
     public final static String[]
             diagnosticTypeValues = {
             Constants.local,
@@ -234,8 +234,9 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
         return true;
     }
 
+    @Override
     public List<String> parseInputs(TextIOManager textIOManager, String[] args){
-        List<String> errors = super.parseInputs(args);
+        List<String> errors = super.parseInputs(textIOManager, args);
 
         errors.addAll(ObjectUtils.defaultIfNull(validateDiagType(diagType), emptyList));
         errors.addAll(ObjectUtils.defaultIfNull(setDefaultPortForDiagType(diagType), emptyList));

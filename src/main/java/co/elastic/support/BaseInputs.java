@@ -63,7 +63,7 @@ public abstract class BaseInputs {
 
     public abstract boolean runInteractive(TextIOManager textIOManager);
 
-    public List<String> parseInputs(String[] args){
+    public List<String> parseInputs(TextIOManager textIOManager, String[] args){
         logger.info(Constants.CONSOLE, "Processing diagnosticInputs...");
         jCommander = new JCommander(this);
         jCommander.setCaseSensitiveOptions(true);
