@@ -380,6 +380,11 @@ ml_stats:
     ">= 5.0.0 < 7.0.0": "/_xpack/ml/anomaly_detectors/_stats?pretty"
     ">= 7.0.0": "/_ml/anomaly_detectors/_stats?pretty"
 
+nodes_shutdown_status:
+  subdir: "commercial"
+  versions:
+    ">= 7.15.0": "/_nodes/shutdown?pretty"
+
 rollup_jobs:
   subdir: "commercial"
   versions:
