@@ -203,6 +203,10 @@ index_templates:
   versions:
     ">= 7.8.0": "/_index_template"
 
+index_patterns:
+  versions:
+    ">= 0.9.0": "/.kibana/_search?size=100&q=type:index-pattern"
+
 indices:
   versions:
     ">= 0.9.0 < 5.1.1": "/_cat/indices?format=json&bytes=b&h=index,shard,prirep,state,docs,store,id,node"
