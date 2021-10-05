@@ -347,6 +347,11 @@ ilm_status:
   versions:
     ">= 6.6.0": "/_ilm/status?pretty"
 
+logstash_pipeline:
+  subdir: "commercial"
+  versions:
+    ">= 7.12.0": "/_logstash/pipeline"
+
 ml_anomaly_detectors:
   subdir: "commercial"
   versions:
@@ -443,6 +448,11 @@ slm_stats:
   subdir: "commercial"
   versions:
     ">= 7.5.0": "/_slm/stats?pretty"
+
+slm_status:
+  subdir: "commercial"
+  versions:
+    ">= 7.6.0": "/_slm/status"
 
 transform:
   subdir: "commercial"
