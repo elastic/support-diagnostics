@@ -288,6 +288,11 @@ snapshot:
   versions:
     ">=7.15.0": "/_snapshot/*/*?verbose=false"
 
+ssl_certs:
+  versions:
+    ">= 6.2.0 < 7.0.0": "/_xpack/ssl/certificates"
+    ">= 7.0.0": "/_ssl/certificates"
+
 tasks:
   versions:
     ">=2.0.0": "/_tasks?pretty&human&detailed=true"
