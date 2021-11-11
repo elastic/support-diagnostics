@@ -379,6 +379,12 @@ ml_dataframe_stats:
   versions:
     ">= 7.3.0": "/_ml/data_frame/analytics/_stats?pretty"
 
+ml_info:
+  subdir: "commercial"
+  versions:
+    ">= 6.3.0 < 7.0.0": "/_xpack/ml/info?pretty"
+    ">= 7.0.0": "/_ml/info?pretty"
+
 ml_stats:
   subdir: "commercial"
   versions:
