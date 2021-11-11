@@ -342,7 +342,7 @@ ilm_explain:
   versions:
     ">= 6.6.0": "/*/_ilm/explain?human&pretty"
 
-ilm_explain_errors:
+ilm_explain_only_errors:
   subdir: "commercial"
   versions:
     ">= 7.4.0": "/*/_ilm/explain?only_errors=true&human&pretty"
