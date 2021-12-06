@@ -477,14 +477,14 @@ slm_status:
 transform:
   subdir: "commercial"
   versions:
-    ">= 7.2.0 < 7.5.0": "_data_frame/transforms?pretty"
-    ">= 7.5.0": "_transform?pretty"
+    ">= 7.2.0 < 7.5.0": "/_data_frame/transforms?pretty"
+    ">= 7.5.0": "/_transform?pretty"
 
 transform_stats:
   subdir: "commercial"
   versions:
-    ">= 7.2.0 < 7.5.0": "_data_frame/transforms/_stats?pretty"
-    ">= 7.5.0": "_transform/_stats?pretty"
+    ">= 7.2.0 < 7.5.0": "/_data_frame/transforms/_stats?pretty"
+    ">= 7.5.0": "/_transform/_stats?pretty"
 
 watcher_stats:
   subdir: "commercial"
