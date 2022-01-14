@@ -5,9 +5,13 @@ scriptDir="${scriptDir/\/diagnostics.sh/$''}"
 libDir="$scriptDir"'/lib'
 
 if [ ! -d "$libDir" ]; then
-    echo "Runtimes library does not exist - make sure you are running the "
-    echo "archive with 'dist-' in the name, not the one labeled: 'source'."
-    exit
+    echo "Diagnostic executable not found:"
+    echo ""
+    echo "Please make sure that you are running with the archive ending with"
+    echo "'-dist.zip' in the name and not the one labeled 'Source code'."
+    echo ""
+    echo "Download at https://github.com/elastic/support-diagnostics/releases/latest"
+    exit 400
 fi
 
 if [ -x "${JAVA_HOME}/bin/java" ]; then
