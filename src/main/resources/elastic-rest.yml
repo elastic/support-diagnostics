@@ -51,8 +51,8 @@ cat_indices:
   subdir: "cat"
   versions:
     ">= 0.9.0 < 5.1.1": "/_cat/indices?v"
-    ">= 5.1.1 < 6.7.0": "/_cat/indices?v&s=index"
-    ">= 6.7.0 < 7.7.0": "/_cat/indices?v&s&h=health,status,index,uuid,pri,rep,docs.count,docs.deleted,store.size,pri.store.size,sth"
+    ">= 5.1.1 < 6.0.0": "/_cat/indices?v&s=index"
+    ">= 6.0.0 < 7.7.0": "/_cat/indices?v&s=index&h=health,status,index,uuid,pri,rep,docs.count,docs.deleted,store.size,pri.store.size,sth"
     ">= 7.7.0": "/_cat/indices?v&s=index&h=health,status,index,uuid,pri,rep,docs.count,docs.deleted,store.size,pri.store.size,sth&expand_wildcards=all"
 
 cat_master:
@@ -72,6 +72,7 @@ cat_nodes:
   subdir: "cat"
   versions:
     ">= 0.9.0": "/_cat/nodes?v&h=n,nodeId,m,i,r,d,hp,rp,cpu,load_1m,load_5m,load_15m,"
+    ">= 6.0.0": "/_cat/nodes?v&h=n,nodeId,m,i,r,d,hp,rp,cpu,load_1m,load_5m,load_15m&s=n"
 
 cat_pending_tasks:
   extension: ".txt"
