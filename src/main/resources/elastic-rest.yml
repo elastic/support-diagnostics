@@ -71,7 +71,7 @@ cat_nodes:
   extension: ".txt"
   subdir: "cat"
   versions:
-    ">= 0.9.0": "/_cat/nodes?v&h=n,nodeId,m,i,r,d,hp,rp,cpu,load_1m,load_5m,load_15m,"
+    ">= 0.9.0 < 6.0.0": "/_cat/nodes?v&h=n,nodeId,m,i,r,d,hp,rp,cpu,load_1m,load_5m,load_15m,"
     ">= 6.0.0": "/_cat/nodes?v&h=n,nodeId,m,i,r,d,hp,rp,cpu,load_1m,load_5m,load_15m&s=n"
 
 cat_pending_tasks:
