@@ -269,6 +269,10 @@ remote_cluster_info:
   versions:
     ">= 6.0.0": "/_remote/info"
 
+repositories:
+  versions:
+    ">= 2.0.0": "_snapshot?pretty"
+
 segments:
   retry: true
   versions:
