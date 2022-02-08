@@ -20,7 +20,8 @@ cat_aliases:
   extension: ".txt"
   subdir: "cat"
   versions:
-    ">= 0.9.0": "/_cat/aliases?v"
+    ">= 0.9.0 < 5.1.1": "/_cat/aliases?v"
+    ">= 5.1.1": "/_cat/aliases?v&s=alias,index"
 
 cat_allocation:
   extension: ".txt"
