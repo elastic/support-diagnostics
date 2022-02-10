@@ -19,6 +19,7 @@ import co.elastic.support.util.ResourceCache;
 import co.elastic.support.util.SystemProperties;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.vdurmont.semver4j.Semver;
+import com.vdurmont.semver4j.SemverException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import java.util.regex.Matcher;
@@ -96,22 +97,29 @@ public class CheckKibanaVersion implements Command {
     * @throws DiagnosticException if the request fails or the version is invalid
     */
     public static Semver getKibanaVersion(RestClient client) throws DiagnosticException {
-            RestResult res = client.execQuery("/api/settings");
-            if (! res.isValid()) {
-                throw new DiagnosticException(res.formatStatusMessage("Could not retrieve the Kibana version - unable to continue."));
+            String version = "";
+            RestResult res = client.execQuery("/api/stats");
+            if (res.isValid()) {
+                String result = res.toString();
+                JsonNode root = JsonYamlUtils.createJsonNodeFromString(result);
+                version = root.path("kibana").path("version").asText();
+            } else {
+                res = client.execQuery("/api/settings");
+                if (res.isValid()) {
+                    String result = res.toString();
+                    JsonNode root = JsonYamlUtils.createJsonNodeFromString(result);
+                    version = root.path("settings").path("kibana").path("version").asText();
+                } else {
+                    throw new DiagnosticException(res.formatStatusMessage("Could not retrieve the Kibana version - unable to continue."));
+                }
             }
-            String result = res.toString();
-            JsonNode root = JsonYamlUtils.createJsonNodeFromString(result);
-            String version = root.path("settings").path("kibana").path("version").asText();
             logger.info(Constants.CONSOLE, String.format("Kibana Version is :%s", version));
 
-            Pattern versionPattern = Pattern.compile("^([1-9]\\d*)\\.(\\d+)\\.(\\d+)?");
-            Matcher matcher = versionPattern.matcher(version);
-
-            if(!matcher.matches()) {
+            try {
+                return new Semver(version, Semver.SemverType.NPM);
+            } catch (SemverException ex) {
                 throw new DiagnosticException(String.format("Kibana version format is wrong - unable to continue. (%s)", version));
             }
-            return new Semver(version, Semver.SemverType.NPM);
     }
 
 }
