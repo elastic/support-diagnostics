@@ -66,7 +66,7 @@ public class TestCheckKibanaVersion {
         mockServer.reset();
     }
 
-    private void initializeKibana() {
+    private void initializeKibanaSettings(String version) {
 
         mockServer
                 .when(
@@ -76,7 +76,24 @@ public class TestCheckKibanaVersion {
                 )
                 .respond(
                         response()
-                                .withBody("{\"cluster_uuid\":\"RLtzkhfBRUadN4WZ8fnnog\",\"settings\":{\"xpack\":{\"default_admin_email\":null},\"kibana\":{\"uuid\":\"a4f369ef-fecd-46b7-8b16-c6c3f885d9ec\",\"name\":\"13d5e793ea51\",\"index\":\".kibana\",\"host\":\"0.0.0.0\",\"port\":18648,\"locale\":\"en\",\"transport_address\":\"0.0.0.0:18648\",\"version\":\"6.5.0\",\"snapshot\":false,\"status\":\"green\"}}}")
+                                .withBody("{\"cluster_uuid\":\"RLtzkhfBRUadN4WZ8fnnog\",\"settings\":{\"xpack\":{\"default_admin_email\":null},\"kibana\":{\"uuid\":\"a4f369ef-fecd-46b7-8b16-c6c3f885d9ec\",\"name\":\"13d5e793ea51\",\"index\":\".kibana\",\"host\":\"0.0.0.0\",\"port\":18648,\"locale\":\"en\",\"transport_address\":\"0.0.0.0:18648\",\"version\":\"" + version + "\",\"snapshot\":false,\"status\":\"green\"}}}")
+                                .withStatusCode(200)
+                );
+
+
+    }
+
+    private void initializeKibanaStats(String version) {
+
+        mockServer
+                .when(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/api/stats")
+                )
+                .respond(
+                        response()
+                                .withBody("{\"kibana\":{\"uuid\":\"669ae985-31f7-493b-9910-522cac4d5479\",\"name\":\"6f5485cce678\",\"index\":\".kibana\",\"host\":\"0.0.0.0\",\"locale\":\"en\",\"transport_address\":\"0.0.0.0:18117\",\"version\":\"" + version + "\",\"snapshot\":false,\"status\":\"green\"}}")
                                 .withStatusCode(200)
                 );
 
@@ -84,13 +101,27 @@ public class TestCheckKibanaVersion {
     }
 
     @Test
-    public void testQueriesForKibana() throws DiagnosticException {
-		initializeKibana();
+    public void testQueriesForKibanaWhenSettings() throws DiagnosticException {
+		initializeKibanaSettings("6.5.0");
         Semver version = new CheckKibanaVersion().getKibanaVersion(httpRestClient);
-        // the version 6.5.0 was defined on the json object on the mockServer boby.
    		assertEquals("6.5.0", version.getValue());
     }
 
+    @Test
+    public void testQueriesForKibanaWhenStats() throws DiagnosticException {
+        initializeKibanaStats("8.0.0-rc2");
+        Semver version = new CheckKibanaVersion().getKibanaVersion(httpRestClient);
+        assertEquals("8.0.0-rc2", version.getValue());
+    }
+
+    @Test
+    public void testQueriesForKibanaWhenStatsAndSettings() throws DiagnosticException {
+        initializeKibanaStats("8.0.0-rc2");
+        initializeKibanaSettings("7.17.0");
+        Semver version = new CheckKibanaVersion().getKibanaVersion(httpRestClient);
+        // the version should be computed from the /api/stats call
+        assertEquals("8.0.0-rc2", version.getValue());
+    }
 
     /**
      * version is Mandatory as we use the version to define the APIs that will be executed
