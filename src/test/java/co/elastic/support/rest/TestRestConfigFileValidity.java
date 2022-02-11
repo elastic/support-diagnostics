@@ -44,7 +44,7 @@ public class TestRestConfigFileValidity {
             int nbrValid = 0;
 
             // Urls should have a leading /
-            // For each entry there should be only 1 valid url.
+            // For each entry there should be at most 1 valid url.
             for (Map.Entry<String, String> url : urls.entrySet()) {
                 assertTrue(url.getValue(), url.getValue().startsWith("/"));
                 if (sem.satisfies(url.getKey())) {
@@ -52,7 +52,8 @@ public class TestRestConfigFileValidity {
                 }
             }
 
-            assertTrue(nbrValid == 1);
+            // should be at most 1 valid URL (0 if it's not available anymore)
+            assertTrue(entry.getKey(), nbrValid <= 1);
 
         }
 
