@@ -97,22 +97,14 @@ public class CheckKibanaVersion implements Command {
     * @throws DiagnosticException if the request fails or the version is invalid
     */
     public static Semver getKibanaVersion(RestClient client) throws DiagnosticException {
-            String version = "";
             RestResult res = client.execQuery("/api/stats");
-            if (res.isValid()) {
-                String result = res.toString();
-                JsonNode root = JsonYamlUtils.createJsonNodeFromString(result);
-                version = root.path("kibana").path("version").asText();
-            } else {
-                res = client.execQuery("/api/settings");
-                if (res.isValid()) {
-                    String result = res.toString();
-                    JsonNode root = JsonYamlUtils.createJsonNodeFromString(result);
-                    version = root.path("settings").path("kibana").path("version").asText();
-                } else {
-                    throw new DiagnosticException(res.formatStatusMessage("Could not retrieve the Kibana version - unable to continue."));
-                }
+            if (! res.isValid()) {
+                throw new DiagnosticException(res.formatStatusMessage("Could not retrieve the Kibana version - unable to continue."));
             }
+            String result = res.toString();
+            JsonNode root = JsonYamlUtils.createJsonNodeFromString(result);
+            String version = root.path("kibana").path("version").asText();
+
             logger.info(Constants.CONSOLE, String.format("Kibana Version is :%s", version));
 
             try {
