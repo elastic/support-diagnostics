@@ -272,7 +272,7 @@ remote_cluster_info:
 
 repositories:
   versions:
-    ">= 2.0.0": "_snapshot?pretty"
+    ">= 2.0.0": "/_snapshot?pretty"
 
 segments:
   retry: true
