@@ -36,7 +36,7 @@ kibana_detection_engine_signals:
 
 kibana_settings:
   versions:
-    ">= 6.5.0": "/api/settings"
+    ">= 6.5.0 < 8.0.0": "/api/settings"
 
 kibana_stats:
   versions:
