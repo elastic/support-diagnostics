@@ -337,6 +337,16 @@ ccr_stats:
   versions:
     ">= 6.5.0": "/_ccr/stats?pretty"
 
+data_stream:
+  subdir: "commercial"
+  versions:
+    ">= 7.9.0": "/_data_stream?pretty"
+
+data_stream_index:
+  subdir: "commercial"
+  versions:
+    ">= 7.9.0": "/_all?filter_path=*.data_stream&expand_wildcards=all"
+
 enrich_policies:
   subdir: "commercial"
   versions:
@@ -510,8 +520,3 @@ xpack:
   subdir: "commercial"
   versions:
     ">= 5.0.0": "/_xpack/usage?pretty&human"
-
-data_stream:
-  subdir: "commercial"
-  versions:
-    ">= 7.9.0": "/_data_stream?pretty"
