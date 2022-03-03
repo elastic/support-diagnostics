@@ -20,6 +20,7 @@ import co.elastic.support.util.SystemCommand;
 import co.elastic.support.util.SystemProperties;
 import co.elastic.support.util.SystemUtils;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -189,7 +190,7 @@ public class RunKibanaQueries extends BaseQuery {
 
 
    /**
-    * We will not collect all the headerst hat are returned by the actions API (kibana_actions.json file).
+    * We will not collect all the headers that are returned by the actions API (kibana_actions.json file).
     * for troubleshooting support engineers will only need "kbn-xsrf" or "Content-Type", all the others are removed.
     *
     * @param  context The current diagnostic context as set in the DiagnosticService class
@@ -226,7 +227,8 @@ public class RunKibanaQueries extends BaseQuery {
                 if (headerRemoved == true) {
                     String fileName = context.tempDir + SystemProperties.fileSeparator + "kibana_actions.json";
                     try (FileWriter fileWriter = new FileWriter(fileName)) {
-                        fileWriter.write(actions.toPrettyString());
+                        ObjectMapper mapper = new ObjectMapper();
+                        fileWriter.write(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(actions));
                         fileWriter.flush();
                     } catch (IOException e) {
                       logger.error("Unexpected error while writing [kibana_actions.json]", e);
