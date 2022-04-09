@@ -42,6 +42,10 @@ kibana_stats:
   versions:
     ">= 6.5.0": "/api/stats"
 
+kibana_status:
+  versions:
+    ">= 6.5.0": "/api/status"
+
 kibana_task_manager_help:
   versions:
     ">= 7.11.0": "/api/task_manager/_health"
