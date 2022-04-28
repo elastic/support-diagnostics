@@ -51,6 +51,7 @@ linuxOS:
     sar: "sar -A"
     sysctl: "sysctl -a"
     dmesg: "dmesg"
+    dmesg_t: "dmesg -T"
     huge_pages: "cat /sys/kernel/mm/transparent_hugepage/enabled"
     cpu_governor: "cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"
     limits: "cat /etc/security/limits.conf"
