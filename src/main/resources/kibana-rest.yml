@@ -44,7 +44,7 @@ kibana_stats:
 
 kibana_status:
   versions:
-    ">= 4.2.0": "/api/status"
+    ">= 5.0.0": "/api/status"
 
 kibana_task_manager_help:
   versions:
