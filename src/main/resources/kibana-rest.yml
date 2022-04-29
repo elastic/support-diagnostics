@@ -34,6 +34,14 @@ kibana_detection_engine_signals:
   versions:
     "> 7.10.0": "/api/detection_engine/prepackaged"
 
+kibana_roles:
+  versions:
+    ">= 6.4.0": "/api/security/role"
+
+kibana_spaces:
+  versions:
+    ">= 6.5.0": "/api/spaces/space"
+
 kibana_settings:
   versions:
     ">= 6.5.0 < 8.0.0": "/api/settings"
@@ -45,3 +53,8 @@ kibana_stats:
 kibana_task_manager_help:
   versions:
     ">= 7.11.0": "/api/task_manager/_health"
+
+kibana_user:
+  versions:
+    ">= 7.6.0": "/internal/security/me"
+    ">= 5.0.0 < 7.6.0": "/api/security/v1/me"
