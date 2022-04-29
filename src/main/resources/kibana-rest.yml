@@ -40,7 +40,7 @@ kibana_roles:
 
 kibana_spaces:
   versions:
-    ">= 6.4.0": "/api/spaces/space?include_authorized_purposes=true"
+    ">= 6.5.0": "/api/spaces/space"
 
 kibana_settings:
   versions:
@@ -57,3 +57,4 @@ kibana_task_manager_help:
 kibana_user:
   versions:
     ">= 7.6.0": "/internal/security/me"
+    ">= 5.0.0 < 7.6.0": "/api/security/v1/me"
