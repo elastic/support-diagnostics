@@ -34,7 +34,6 @@ public class BaseConfig {
     protected Map configuration;
 
     public BaseConfig(Map configuration) {
-
         this.configuration = configuration;
 
         Map<String, String> githubSettings = (Map<String, String>) configuration.get("github-settings");
@@ -69,13 +68,10 @@ public class BaseConfig {
         extraHeaders = (Map<String, String>) configuration.get("extra-headers");
 
         dockerGlobal = (Map<String, String>) configuration.get("docker-global");
-        //kubernates = (Map<String, String>) configuration.get("kuberantes");
 
         dockerContainer = (Map<String, String>) configuration.get("docker-container");
         dockerContainerIds = (String) configuration.get("docker-container-ids");
         dockerExecutablePath = (String) configuration.get("docker-executable-location");
-
-
     }
 
 }

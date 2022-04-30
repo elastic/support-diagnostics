@@ -139,19 +139,28 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
     public int remotePort = 22;
     // End Input Fields
 
+    /**
+     * The `runner` represents what ran the diagnostic. It defaults to
+     * `"unknown"` if unset.
+     */
+    public String runner = "unknown";
+
     String[] typeEntries;
 
-    public DiagnosticInputs(){
-        if(runningInDocker){
-            typeEntries = diagnosticTypeEntriesDocker;
-        }
-        else{
-            typeEntries = diagnosticTypeEntries;
-        }
+    public DiagnosticInputs() {
+        this.typeEntries =
+          runningInDocker ?
+            diagnosticTypeEntriesDocker :
+            diagnosticTypeEntries;
+    }
+
+    public DiagnosticInputs(String runner) {
+        this();
+
+        this.runner = runner;
     }
 
     public boolean runInteractive(TextIOManager textIOManager) {
-
         bypassDiagVerify = textIOManager.standardBooleanReader
                 .withDefaultValue(bypassDiagVerify)
                 .read(SystemProperties.lineSeparator + bypassDiagVerifyDescription);
@@ -316,6 +325,7 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
                 ", knownHostsFile='" + knownHostsFile + '\'' +
                 ", sudo=" + isSudo + '\'' +
                 ", remotePort=" + remotePort +
+                ", runner='" + runner + "'" +
                 '}';
     }
 }

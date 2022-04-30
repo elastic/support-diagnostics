@@ -29,12 +29,12 @@ public class TestRestConfigFileValidity {
         // validates each set of version entries.
         for (String yamlfile : Arrays.asList("elastic-rest.yml", "logstash-rest.yml", "kibana-rest.yml", "monitoring-rest.yml")) {
             Map<String, Object> restEntriesConfig = JsonYamlUtils.readYamlFromClasspath(yamlfile, true);
-            validateEntries(restEntriesConfig);
+            validateEntries(yamlfile, restEntriesConfig);
         }
     }
 
 
-    private void validateEntries(Map<String, Object> config) {
+    private void validateEntries(String file, Map<String, Object> config) {
         for (Map.Entry<String, Object> entry : config.entrySet()) {
 
             Map<String, Object> values = (Map) entry.getValue();
@@ -53,7 +53,7 @@ public class TestRestConfigFileValidity {
             }
 
             // should be at most 1 valid URL (0 if it's not available anymore)
-            assertTrue(entry.getKey(), nbrValid <= 1);
+            assertTrue("[" + file +  "][" + entry.getKey() + "] matches " + nbrValid, nbrValid <= 1);
 
         }
 

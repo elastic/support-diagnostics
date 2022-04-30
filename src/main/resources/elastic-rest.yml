@@ -514,5 +514,5 @@ xpack:
 data_stream:
   subdir: "commercial"
   versions:
-    ">= 7.9.0": "/_data_stream?pretty"
+    ">= 7.9.0 < 7.11.0": "/_data_stream?pretty"
     ">= 7.11.0": "/_data_stream?pretty&expand_wildcards=all"

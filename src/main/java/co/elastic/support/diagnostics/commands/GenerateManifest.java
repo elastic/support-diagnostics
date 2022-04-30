@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.TimeZone;
 
 public class GenerateManifest implements Command {
-
    /**
     * Generate a manifest containing the basic runtime info for the diagnostic runtime.
     * Some of the values we get, like the Diagnostic version will be used again
@@ -42,24 +41,16 @@ public class GenerateManifest implements Command {
 
          Map<String, Object> manifest = new HashMap<>();
 
-         String diagVersion = context.diagVersion;
-         manifest.put(Constants.DIAG_VERSION, diagVersion);
+         manifest.put(Constants.DIAG_VERSION, context.diagVersion);
          manifest.put("Product Version", context.version);
          manifest.put("collectionDate", SystemProperties.getUtcDateTimeString());
          manifest.put("diagnosticInputs", context.diagnosticInputs.toString());
+         manifest.put("runner", context.diagnosticInputs.runner);
 
          File manifestFile = new File(context.tempDir + SystemProperties.fileSeparator + "manifest.json");
          mapper.writeValue(manifestFile, manifest);
       } catch (Exception e) {
          logger.info(Constants.CONSOLE, "Error creating the manifest file", e);
       }
-   }
-
-   public String getIsoDate() {
-      TimeZone tz = TimeZone.getTimeZone("UTC");
-      DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ");
-      df.setTimeZone(tz);
-      String nowAsISO = df.format(new Date());
-      return nowAsISO;
    }
 }
