@@ -27,7 +27,7 @@ public class DiagnosticApp {
             ResourceCache resourceCache = new ResourceCache();
             TextIOManager textIOManager = new TextIOManager();
         ) {
-            DiagnosticInputs diagnosticInputs = new DiagnosticInputs();
+            DiagnosticInputs diagnosticInputs = new DiagnosticInputs("cli");
             if (args.length == 0) {
                 logger.info(Constants.CONSOLE, Constants.interactiveMsg);
                 diagnosticInputs.interactive = true;

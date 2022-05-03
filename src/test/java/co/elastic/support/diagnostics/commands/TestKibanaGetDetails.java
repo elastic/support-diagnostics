@@ -51,10 +51,10 @@ public class TestKibanaGetDetails {
 
     @BeforeEach
     public void setup() {
-        
+
         httpRestClient = RestClient.getClient(
-            "localhost", 
-            9880, 
+            "localhost",
+            9880,
             "http",
             "elastic",
             "elastic",
@@ -119,7 +119,6 @@ public class TestKibanaGetDetails {
     */
     @Test
     public void testClusterFindTargetNode() {
-        
         KibanaGetDetails testClass = new KibanaGetDetails();
         List<ProcessProfile> nodeProfiles = new ArrayList<>();
         ProcessProfile diagNode = new ProcessProfile();
@@ -145,7 +144,6 @@ public class TestKibanaGetDetails {
 
     @Test
     public void testFunctionGetStats() throws DiagnosticException {
-
         mockServer
                 .when(
                         request()
@@ -167,7 +165,12 @@ public class TestKibanaGetDetails {
         try(
             ResourceCache resourceCache = new ResourceCache();
         ) {
-            DiagnosticContext context = new DiagnosticContext(new DiagConfig(diagMap), new DiagnosticInputs(), resourceCache, true);
+            DiagnosticContext context = new DiagnosticContext(
+                new DiagConfig(diagMap),
+                new DiagnosticInputs("testKibanaGetDetails"),
+                resourceCache,
+                true
+            );
             context.elasticRestCalls = entries;
             resourceCache.addRestClient(Constants.restInputHost, httpRestClient);
             testClass.getStats(context);

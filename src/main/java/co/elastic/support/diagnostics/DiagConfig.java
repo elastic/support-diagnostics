@@ -13,13 +13,11 @@ import org.apache.logging.log4j.Logger;
 import java.util.Map;
 
 public class DiagConfig extends BaseConfig {
-
     private static Logger logger = LogManager.getLogger(DiagConfig.class);
 
-
     public int callRetries, pauseRetries, maxLogs, maxGcLogs;
-    public DiagConfig(Map configuration) {
 
+    public DiagConfig(Map configuration) {
         super(configuration);
 
         // When we retry a failed call how many times, and how long to wait before reattempting.
@@ -30,7 +28,6 @@ public class DiagConfig extends BaseConfig {
         Map<String, Integer> logSettings = (Map<String, Integer>) configuration.get("log-settings");
         maxGcLogs = logSettings.get("maxGcLogs");
         maxLogs = logSettings.get("maxLogs");
-
     }
 
     public Map<String, Map<String, String>> getSysCalls(String key){
@@ -38,4 +35,3 @@ public class DiagConfig extends BaseConfig {
     }
 
 }
-
