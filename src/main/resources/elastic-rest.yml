@@ -223,8 +223,8 @@ indices_stats:
 internal_health:
   retry: true
   versions:
-    ">= 8.2.0 < 8.3.0": "/_internal/_health"
-    ">= 8.3.0": "/_internal/_health?explain"
+    ">= 8.2.0 < 8.3.0": "/_internal/_health?pretty"
+    ">= 8.3.0": "/_internal/_health?pretty&explain"
 
 licenses:
   versions:
