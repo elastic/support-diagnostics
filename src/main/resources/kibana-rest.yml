@@ -69,7 +69,7 @@ kibana_security_exception_list:
 
 kibana_security_endpoint_trusted_apps:
   versions:
-    ">= 7.9.0": "/api/endpoint/trusted_apps"
+    ">= 7.10.0": "/api/endpoint/trusted_apps"
 
 kibana_security_endpoint_exception_host_isolation:
   versions:
