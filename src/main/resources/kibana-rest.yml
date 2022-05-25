@@ -65,7 +65,7 @@ kibana_user:
 
 kibana_security_exception_list:
   versions:
-    ">= 7.9.0": "/api/exception_lists/_find?namespace_type=agnostic"
+    ">= 7.10.0": "/api/exception_lists/_find?namespace_type=agnostic"
 
 kibana_security_endpoint_trusted_apps:
   versions:
@@ -73,31 +73,31 @@ kibana_security_endpoint_trusted_apps:
 
 kibana_security_endpoint_exception_host_isolation:
   versions:
-    ">=7.9.0": "/api/exception_lists/items/_find?list_id=endpoint_host_isolation_exceptions&namespace_type=agnostic"
+    ">= 7.14.0": "/api/exception_lists/items/_find?list_id=endpoint_host_isolation_exceptions&namespace_type=agnostic"
 
 kibana_security_endpoint_exception_event_filters:
   versions:
-    ">=7.9.0": "/api/exception_lists/items/_find?list_id=endpoint_event_filters&namespace_type=agnostic"
+    ">= 7.14.0": "/api/exception_lists/items/_find?list_id=endpoint_event_filters&namespace_type=agnostic"
 
 kibana_security_endpoint_exceotion_trusted_apps:
   versions:
-    ">=7.9.0": "/api/exception_lists/items/_find?list_id=endpoint_trusted_apps&namespace_type=agnostic"
+    ">= 7.14.0": "/api/exception_lists/items/_find?list_id=endpoint_trusted_apps&namespace_type=agnostic"
 
 kibana_security_packages:
   versions:
-    ">=7.9.0": "/api/fleet/epm/packages?experimental=true&category=security"
+    ">= 7.10.0": "/api/fleet/epm/packages?experimental=true&category=security"
 
 kibana_fleet_agents:
   versions:
-    ">=7.9.0": "/api/fleet/agents"
+    ">= 7.10.0": "/api/fleet/agents"
 
 kibana_fleet_agent_policies:
   versions:
-    ">=7.9.0": "/api/fleet/agent_policies"
+    ">= 7.10.0": "/api/fleet/agent_policies"
 
 kibana_fleet_package_policies:
   versions:
-    ">=7.9.0": "/api/fleet/package_policies"
+    ">=7.10.0": "/api/fleet/package_policies"
 
 #kibana_security_endpoint_metadata:
 #  versions:
