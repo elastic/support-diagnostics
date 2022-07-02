@@ -54,27 +54,6 @@ kibana_spaces:
   versions:
     ">= 6.5.0": "/api/spaces/space"
 
-kibana_settings:
-  versions:
-    ">= 6.5.0 < 8.0.0": "/api/settings"
-
-kibana_stats:
-  versions:
-    ">= 6.5.0": "/api/stats"
-
-kibana_status:
-  versions:
-    ">= 5.0.0": "/api/status"
-
-kibana_task_manager_help:
-  versions:
-    ">= 7.11.0": "/api/task_manager/_health"
-
-kibana_user:
-  versions:
-    ">= 7.6.0": "/internal/security/me"
-    ">= 5.0.0 < 7.6.0": "/api/security/v1/me"
-
 kibana_security_exception_list:
   versions:
     ">= 7.10.0": "/api/exception_lists/_find?namespace_type=agnostic"
@@ -102,3 +81,28 @@ kibana_security_packages:
 #kibana_security_endpoint_metadata:
 #  versions:
 #    ">=7.9.0": "/api/endpoint/metadata"
+
+kibana_settings:
+  versions:
+    ">= 6.5.0 < 8.0.0": "/api/settings"
+
+kibana_spaces:
+  versions:
+    ">= 6.5.0": "/api/spaces/space"
+
+kibana_stats:
+  versions:
+    ">= 6.5.0": "/api/stats"
+
+kibana_status:
+  versions:
+    ">= 5.0.0": "/api/status"
+
+kibana_task_manager_help:
+  versions:
+    ">= 7.11.0": "/api/task_manager/_health"
+
+kibana_user:
+  versions:
+    ">= 7.6.0": "/internal/security/me"
+    ">= 5.0.0 < 7.6.0": "/api/security/v1/me"
