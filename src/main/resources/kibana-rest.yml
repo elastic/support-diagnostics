@@ -34,6 +34,18 @@ kibana_detection_engine_signals:
   versions:
     "> 7.10.0": "/api/detection_engine/prepackaged"
 
+kibana_fleet_agents:
+  versions:
+    ">= 7.10.0": "/api/fleet/agents"
+
+kibana_fleet_agent_policies:
+  versions:
+    ">= 7.10.0": "/api/fleet/agent_policies"
+
+kibana_fleet_package_policies:
+  versions:
+    ">=7.10.0": "/api/fleet/package_policies"
+
 kibana_roles:
   versions:
     ">= 6.4.0": "/api/security/role"
@@ -86,18 +98,6 @@ kibana_security_endpoint_trusted_apps:
 kibana_security_packages:
   versions:
     ">= 7.10.0": "/api/fleet/epm/packages?experimental=true&category=security"
-
-kibana_fleet_agents:
-  versions:
-    ">= 7.10.0": "/api/fleet/agents"
-
-kibana_fleet_agent_policies:
-  versions:
-    ">= 7.10.0": "/api/fleet/agent_policies"
-
-kibana_fleet_package_policies:
-  versions:
-    ">=7.10.0": "/api/fleet/package_policies"
 
 #kibana_security_endpoint_metadata:
 #  versions:
