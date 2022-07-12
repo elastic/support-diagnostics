@@ -62,3 +62,7 @@ kibana_user:
   versions:
     ">= 7.6.0": "/internal/security/me"
     ">= 5.0.0 < 7.6.0": "/api/security/v1/me"
+
+kibana_stack_monitoring_health:
+  versions:
+    ">= 8.3.1": "/api/monitoring/v1/_health"
