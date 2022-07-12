@@ -22,9 +22,14 @@ kibana_alerts:
   versions:
     ">= 7.9.0": "/api/alerts/_find"
 
+kibana_alerts_health:
+  versions:
+    ">= 7.11.0": "/api/alerts/_health"
+    ">= 7.13.0": "/api/alerting/_health"
+
 kibana_detection_engine_find:
   versions:
-    ">= 7.6.0": "/api/detection_engine/rules/_find"
+    ">= 7.6.0": "/api/detection_engine/rules/_find?sort_field=enabled&sort_order=asc"
 
 kibana_detection_engine_privileges:
   versions:
@@ -70,6 +75,15 @@ kibana_security_endpoint_event_filters:
   versions:
     ">= 7.14.0": "/api/exception_lists/items/_find?list_id=endpoint_event_filters&namespace_type=agnostic"
 
+kibana_security_endpoint_list:
+  versions:
+    ">= 7.14.0": "/api/exception_lists/items/_find?list_id=endpoint_list&namespace_type=agnostic"
+
+kibana_security_endpoint_metadata:
+  versions:
+#    ">=7.9.0": "/api/endpoint/metadata" #>8.x it's supposed to be a POST which we don't support atm
+    ">= 8.0.0": "/api/endpoint/metadata"
+
 kibana_security_endpoint_trusted_apps:
   versions:
     ">= 7.14.0": "/api/exception_lists/items/_find?list_id=endpoint_trusted_apps&namespace_type=agnostic"
@@ -77,10 +91,6 @@ kibana_security_endpoint_trusted_apps:
 kibana_security_packages:
   versions:
     ">= 7.10.0": "/api/fleet/epm/packages?experimental=true&category=security"
-
-#kibana_security_endpoint_metadata:
-#  versions:
-#    ">=7.9.0": "/api/endpoint/metadata"
 
 kibana_settings:
   versions:
@@ -94,11 +104,16 @@ kibana_stats:
   versions:
     ">= 6.5.0": "/api/stats"
 
+# can be uncommented if there is needed deeper health information on the stats
+#kibana_stats_extended:
+#  versions:
+#    ">= 6.5.0": "/api/stats?extended=true"
+
 kibana_status:
   versions:
     ">= 5.0.0": "/api/status"
 
-kibana_task_manager_help:
+kibana_task_manager_health:
   versions:
     ">= 7.11.0": "/api/task_manager/_health"
 

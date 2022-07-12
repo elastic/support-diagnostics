@@ -32,6 +32,7 @@ import java.util.Iterator;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URI;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -78,7 +79,7 @@ public class RunKibanaQueries extends BaseQuery {
         for (Map.Entry<String, RestEntry> entry : context.elasticRestCalls.entrySet()) {
 
             String actionName = entry.getValue().getName().toString();
-            if (actionName.equals("kibana_alerts") || actionName.equals("kibana_detection_engine_find") || actionName.equals("kibana_security_endpoint_trusted_apps") || actionName.equals("kibana_security_endpoint_exception_host_isolation") || actionName.equals("kibana_security_endpoint_exception_event_filters") || actionName.equals("kibana_security_endpoint_exceotion_trusted_apps") || actionName.equals("kibana_fleet_agents") || actionName.equals("kibana_fleet_agent_policies") || actionName.equals("kibana_fleet_package_policies")) {
+            if (actionName.equals("kibana_alerts") || actionName.equals("kibana_detection_engine_find") || actionName.equals("kibana_fleet_agent_policies") || actionName.equals("kibana_fleet_agents") || actionName.equals("kibana_fleet_package_policies") || actionName.equals("kibana_security_endpoint_event_filters") || actionName.equals("kibana_security_endpoint_host_isolation") || actionName.equals("kibana_security_endpoint_list") || actionName.equals("kibana_security_endpoint_metadata") || actionName.equals("kibana_security_endpoint_trusted_apps") || actionName.equals("kibana_security_exception_list")) {
                 getAllPages(client, queries, context.perPage, entry.getValue());
             } else {
                 queries.add(entry.getValue());
@@ -89,6 +90,27 @@ public class RunKibanaQueries extends BaseQuery {
         return totalRetries;
     }
 
+    private String getPageUrl(RestEntry action, int page, int perPage) {
+        String actionUrl = action.getUrl();
+        String perPageField = "per_page";
+
+        if (
+            action.getName().equals("kibana_fleet_agents") ||
+            action.getName().equals("kibana_fleet_agent_policies") ||
+            action.getName().equals("kibana_fleet_package_policies")
+        ) {
+            perPageField = "perPage";
+        } else if (
+            action.getName().equals("kibana_security_endpoint_metadata")
+        ) {
+            perPageField = "pageSize";
+        }
+
+        final String querystringPrefix = URI.create(actionUrl).getQuery() != null ? "&" : "?";
+        final String params = "page=" + page + "&" + perPageField + "=" + perPage;
+
+        return actionUrl + querystringPrefix + params;
+    }
 
    /**
     * On this function we will use the RestEntry action object to get the URL and execute the API one first time
@@ -103,21 +125,9 @@ public class RunKibanaQueries extends BaseQuery {
     */
     public void getAllPages(RestClient client, List<RestEntry> queries, int perPage, RestEntry action) throws DiagnosticException {
         // get the values needed to the pagination.
-        RestResult res;
-        Pattern p = Pattern.compile( ".*\\?.*" );
-        Matcher m = p.matcher( action.url );
-        if (m.find()) {
-            res = client.execQuery(String.format("%s&per_page=1", action.getUrl()));
-        }
-        else {
-            if (action.getName().equals("kibana_fleet_agents") || action.getName().equals("kibana_fleet_agent_policies") || action.getName().equals("kibana_fleet_package_policies")) {
-                res = client.execQuery(String.format("%s?perPage=1", action.getUrl()));
-            } else {
-                res = client.execQuery(String.format("%s?per_page=1", action.getUrl()));
-            }
-        }
+        RestResult res = client.execQuery(getPageUrl(action, 1, 100));
         if (! res.isValid()) {
-            throw new DiagnosticException( res.formatStatusMessage( "Could not retrieve Kibana API pagination - unable to continue."));
+            throw new DiagnosticException( res.formatStatusMessage("Could not retrieve Kibana API pagination - unable to continue." + action.getUrl()));
         }
         String result   = res.toString();
         JsonNode root   = JsonYamlUtils.createJsonNodeFromString(result);
@@ -144,18 +154,7 @@ public class RunKibanaQueries extends BaseQuery {
     * @return new object with the API and params that need to be executed.
     */
     private RestEntry getNewEntryPage(int perPage, int page, RestEntry action) {
-        if (action.getName().equals("kibana_fleet_agents") || action.getName().equals("kibana_fleet_agent_policies") || action.getName().equals("kibana_fleet_package_policies")) {
-            return new RestEntry(String.format("%s_%s", action.getName(), page), "", ".json", false, String.format("%s?perPage=%s&page=%s", action.getUrl(), perPage, page), false);
-        } else {
-            RestResult res;
-            Pattern p = Pattern.compile( ".*\\?.*" );
-            Matcher m = p.matcher( action.getUrl() );
-            if (m.find()) {
-                return new RestEntry(String.format("%s_%s", action.getName(), page), "", ".json", false, String.format("%s&per_page=%s&page=%s", action.getUrl(), perPage, page), false);
-            } else {
-                return new RestEntry(String.format("%s_%s", action.getName(), page), "", ".json", false, String.format("%s?per_page=%s&page=%s", action.getUrl(), perPage, page), false);
-            }
-        }
+        return new RestEntry(String.format("%s_%s", action.getName(), page), "", ".json", false, getPageUrl(action, page, perPage), false);
     }
 
 
