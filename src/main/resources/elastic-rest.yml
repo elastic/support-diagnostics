@@ -357,11 +357,13 @@ ilm_explain:
   subdir: "commercial"
   versions:
     ">= 6.6.0": "/*/_ilm/explain?human&pretty"
+    ">= 7.7.0": "/*/_ilm/explain?human&pretty&expand_wildcards=all"
 
 ilm_explain_only_errors:
   subdir: "commercial"
   versions:
     ">= 7.4.0": "/*/_ilm/explain?only_errors=true&human&pretty"
+    ">= 7.7.0": "/*/_ilm/explain?only_errors=true&human&pretty&expand_wildcards=all"
 
 ilm_policies:
   subdir: "commercial"
