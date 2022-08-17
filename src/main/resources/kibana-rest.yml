@@ -24,7 +24,7 @@ kibana_alerts:
 
 kibana_alerts_health:
   versions:
-    ">= 7.11.0": "/api/alerts/_health"
+    ">= 7.11.0 < 7.13.0": "/api/alerts/_health"
     ">= 7.13.0": "/api/alerting/_health"
 
 kibana_detection_engine_find:
