@@ -75,7 +75,7 @@ kibana_security_endpoint_event_filters:
   versions:
     ">= 7.14.0": "/api/exception_lists/items/_find?list_id=endpoint_event_filters&namespace_type=agnostic"
 
-kibana_security_endpoint_list:
+kibana_security_endpoint_exception_items:
   versions:
     ">= 7.14.0": "/api/exception_lists/items/_find?list_id=endpoint_list&namespace_type=agnostic"
 
