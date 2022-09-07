@@ -133,40 +133,38 @@ public class RunKibanaQueries extends BaseQuery {
         return actionUrl + querystringPrefix + params;
     }
 
-   /**
-    * On this function we will use the RestEntry action object to get the URL and execute the API one first time
-    * to get the total of events defined in Kibana for that API.
-    * Once we have the total of event we can calculate the number of pages/call we will need to execute
-    * then we call getNewEntryPage to create a new RestEntry for each page.
-    *
-    * @param  client the configured client to connect to Kibana.
-    * @param  queries we will store the list of queries that need to be executed
-    * @param  perPage  Number of docusment we reques to the API
-    * @param  action Kibana API name we are running
-    */
+    /**
+     * On this function we will use the RestEntry action object to get the URL and execute the API one first time
+     * to get the total of events defined in Kibana for that API.
+     * Once we have the total of event we can calculate the number of pages/call we will need to execute
+     * then we call getNewEntryPage to create a new RestEntry for each page.
+     *
+     * @param client the configured client to connect to Kibana.
+     * @param queries we will store the list of queries that need to be executed
+     * @param perPage  Number of docusment we reques to the API
+     * @param action Kibana API name we are running
+     */
     public void getAllPages(RestClient client, List<RestEntry> queries, int perPage, RestEntry action) throws DiagnosticException {
-        String url = getPageUrl(action, 1, 100);
+        // get the values needed to the pagination (only need the total)
+        String url = getPageUrl(action, 1, 1);
 
         // get the values needed to the pagination.
         RestResult res = client.execQuery(url);
+
         if (! res.isValid()) {
             logger.info(Constants.CONSOLE, "{}   {}  failed. Bypassing", action.getName(), url);
             logger.info(Constants.CONSOLE, res.formatStatusMessage("See archived diagnostics.log for more detail."));
         }
 
-        String result   = res.toString();
-        JsonNode root   = JsonYamlUtils.createJsonNodeFromString(result);
-        int total       = (int) (Math.ceil(root.path("total").intValue() / 100.0)) * 100;
+        JsonNode root = JsonYamlUtils.createJsonNodeFromString(res.toString());
+        int totalPages = (int)Math.ceil(root.path("total").doubleValue() / perPage);
 
-        if (total > 0 && perPage > 0) {
-            // Get the first actions page
-            queries.add(getNewEntryPage(perPage, 1, action));
-            // If there is more pages add the new queries
-            if (perPage < total) {
-                int numberPages = (int)Math.ceil(total / perPage);
-                for (int i = 2; i <= numberPages; i++) {
-                    queries.add(getNewEntryPage(perPage, i, action));
-                }
+        // guarantee at least one page is returned regardless of total
+        queries.add(getNewEntryPage(perPage, 1, action));
+
+        if (totalPages > 1) {
+            for (int currentPage = 2; currentPage <= totalPages; ++currentPage) {
+                queries.add(getNewEntryPage(perPage, currentPage, action));
             }
         }
     }
