@@ -37,7 +37,8 @@ kibana_detection_engine_privileges:
 
 kibana_detection_engine_signals:
   versions:
-    "> 7.10.0": "/api/detection_engine/rules/prepackaged/_status"
+    ">= 7.10.0 < 7.15.0": "/api/detection_engine/prepackaged"
+    ">= 7.15.0": "/api/detection_engine/rules/prepackaged/_status"
 
 kibana_fleet_agents:
   versions:
@@ -67,6 +68,7 @@ kibana_security_endpoint_trusted_apps:
   versions:
     ">= 7.10.0": "/api/endpoint/trusted_apps"
 
+# These endpoints will return 404 if there are no exceptions
 kibana_security_endpoint_host_isolation:
   versions:
     ">= 7.14.0": "/api/exception_lists/items/_find?list_id=endpoint_host_isolation_exceptions&namespace_type=agnostic"
