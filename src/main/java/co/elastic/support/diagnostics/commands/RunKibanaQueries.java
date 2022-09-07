@@ -151,13 +151,12 @@ public class RunKibanaQueries extends BaseQuery {
         // get the values needed to the pagination.
         RestResult res = client.execQuery(url);
 
-        if (! res.isValid()) {
-            logger.info(Constants.CONSOLE, "{}   {}  failed. Bypassing", action.getName(), url);
-            logger.info(Constants.CONSOLE, res.formatStatusMessage("See archived diagnostics.log for more detail."));
-        }
+        int totalPages = 0;
 
-        JsonNode root = JsonYamlUtils.createJsonNodeFromString(res.toString());
-        int totalPages = (int)Math.ceil(root.path("total").doubleValue() / perPage);
+        if (res.isValid()) {
+            JsonNode root = JsonYamlUtils.createJsonNodeFromString(res.toString());
+            totalPages = (int)Math.ceil(root.path("total").doubleValue() / perPage);
+        }
 
         // guarantee at least one page is returned regardless of total
         queries.add(getNewEntryPage(perPage, 1, action));
