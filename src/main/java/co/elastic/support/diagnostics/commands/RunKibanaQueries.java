@@ -124,23 +124,17 @@ public class RunKibanaQueries extends BaseQuery {
     * @param  action Kibana API name we are running
     */
     public void getAllPages(RestClient client, List<RestEntry> queries, int perPage, RestEntry action) throws DiagnosticException {
-        // get the values needed to the pagination.
-        RestResult res = client.execQuery(getPageUrl(action, 1, 100));
+        // get the values needed to the pagination (need the total)
+        RestResult res = client.execQuery(getPageUrl(action, 1, 1));
         if (! res.isValid()) {
             throw new DiagnosticException( res.formatStatusMessage("Could not retrieve Kibana API pagination - unable to continue." + action.getUrl()));
         }
         String result   = res.toString();
         JsonNode root   = JsonYamlUtils.createJsonNodeFromString(result);
-        int total       = (int) (Math.ceil(root.path("total").intValue() / 100.0)) * 100;
-        if (total > 0 && perPage > 0) {
-            // Get the first actions page
-            queries.add(getNewEntryPage(perPage, 1, action));
-            // If there is more pages add the new queries
-            if (perPage < total) {
-                int numberPages = (int)Math.ceil(total / perPage);
-                for (int i = 2; i <= numberPages; i++) {
-                    queries.add(getNewEntryPage(perPage, i, action));
-                }
+        int totalPages       = (int) (Math.ceil(root.path("total").doubleValue() / Double.valueOf(perPage)));
+        if (totalPages > 0 && perPage > 0) {
+            for(int currentPage = 1; currentPage <= totalPages; currentPage++) {
+                queries.add(getNewEntryPage(perPage, currentPage, action));
             }
         }
     }
