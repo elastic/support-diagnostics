@@ -26,6 +26,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Iterator;
@@ -43,13 +44,34 @@ public class RunKibanaQueries extends BaseQuery {
 
     private static final Logger logger = LogManager.getLogger(RunKibanaQueries.class);
 
-   /**
-    * Create a new ProcessProfile object and extract the information from fileName to get PID and OS.
-    * @param  tempDir where is the temporary data stored
-    * @param  fileName of the API content required, for more information check the kibana-rest.ymal
-    * @param  context The current diagnostic context as set in the DiagnosticService class
-    * @return the object that consolidate the process information
-    */
+    /**
+     * Paged actions are explicitally called out because they behave differently
+     * than normal diagnostic behaviors because they need to be called
+     * repeatedly in order to fetch all of the data.
+     */
+    private static final List<String> pagedActions = Arrays.asList(
+        new String[] {
+            "kibana_alerts",
+            "kibana_detection_engine_find",
+            "kibana_fleet_agent_policies",
+            "kibana_fleet_agents",
+            "kibana_fleet_package_policies",
+            "kibana_security_endpoint_event_filters",
+            "kibana_security_endpoint_exception_items",
+            "kibana_security_endpoint_host_isolation",
+            "kibana_security_endpoint_metadata",
+            "kibana_security_endpoint_trusted_apps",
+            "kibana_security_exception_list",
+        }
+    );
+
+    /**
+     * Create a new ProcessProfile object and extract the information from fileName to get PID and OS.
+     * @param  tempDir where is the temporary data stored
+     * @param  fileName of the API content required, for more information check the kibana-rest.ymal
+     * @param  context The current diagnostic context as set in the DiagnosticService class
+     * @return the object that consolidate the process information
+     */
     private ProcessProfile getProfile(String tempDir, String fileName, DiagnosticContext context) {
         ProcessProfile profile = new ProcessProfile();
         context.targetNode = profile;
@@ -61,25 +83,24 @@ public class RunKibanaQueries extends BaseQuery {
     }
 
 
-   /**
-    * CheckKibanaVersion (executed before) defined/set the context.elasticRestCalls.
-    * here we will loop and create a List of RestEntry with the queries/APIs that need to be executed
-    * You have two APIs that work differently and and may have or not many pages, so we use the getAllPages function
-    * runQueries called in this function create a json file for each RestEntry set on the 'queries' variable.
-    *
-    * @param  client the configured client to connect to Kibana.
-    * @param  context  The current diagnostic context as set in the DiagnosticService class
-    * @return Number of HTTP request that will be executed.
-    */
+    /**
+     * CheckKibanaVersion (executed before) defined/set the context.elasticRestCalls.
+     * here we will loop and create a List of RestEntry with the queries/APIs that need to be executed
+     * You have two APIs that work differently and and may have or not many pages, so we use the getAllPages function
+     * runQueries called in this function create a json file for each RestEntry set on the 'queries' variable.
+     *
+     * @param  client the configured client to connect to Kibana.
+     * @param  context  The current diagnostic context as set in the DiagnosticService class
+     * @return Number of HTTP request that will be executed.
+     */
     public int runBasicQueries(RestClient client, DiagnosticContext context) throws DiagnosticException {
-
         int totalRetries = 0;
         List<RestEntry> queries = new ArrayList<>();
-        
-        for (Map.Entry<String, RestEntry> entry : context.elasticRestCalls.entrySet()) {
 
+        for (Map.Entry<String, RestEntry> entry : context.elasticRestCalls.entrySet()) {
             String actionName = entry.getValue().getName().toString();
-            if (actionName.equals("kibana_alerts") || actionName.equals("kibana_detection_engine_find") || actionName.equals("kibana_fleet_agent_policies") || actionName.equals("kibana_fleet_agents") || actionName.equals("kibana_fleet_package_policies") || actionName.equals("kibana_security_endpoint_event_filters") || actionName.equals("kibana_security_endpoint_host_isolation") || actionName.equals("kibana_security_endpoint_list") || actionName.equals("kibana_security_endpoint_metadata") || actionName.equals("kibana_security_endpoint_trusted_apps") || actionName.equals("kibana_security_exception_list")) {
+
+            if (pagedActions.contains(actionName)) {
                 getAllPages(client, queries, context.perPage, entry.getValue());
             } else {
                 queries.add(entry.getValue());
@@ -112,28 +133,38 @@ public class RunKibanaQueries extends BaseQuery {
         return actionUrl + querystringPrefix + params;
     }
 
-   /**
-    * On this function we will use the RestEntry action object to get the URL and execute the API one first time
-    * to get the total of events defined in Kibana for that API.
-    * Once we have the total of event we can calculate the number of pages/call we will need to execute
-    * then we call getNewEntryPage to create a new RestEntry for each page.
-    *
-    * @param  client the configured client to connect to Kibana.
-    * @param  queries we will store the list of queries that need to be executed 
-    * @param  perPage  Number of docusment we reques to the API
-    * @param  action Kibana API name we are running
-    */
+    /**
+     * On this function we will use the RestEntry action object to get the URL and execute the API one first time
+     * to get the total of events defined in Kibana for that API.
+     * Once we have the total of event we can calculate the number of pages/call we will need to execute
+     * then we call getNewEntryPage to create a new RestEntry for each page.
+     *
+     * @param client the configured client to connect to Kibana.
+     * @param queries we will store the list of queries that need to be executed
+     * @param perPage  Number of docusment we reques to the API
+     * @param action Kibana API name we are running
+     */
     public void getAllPages(RestClient client, List<RestEntry> queries, int perPage, RestEntry action) throws DiagnosticException {
-        // get the values needed to the pagination (need the total)
-        RestResult res = client.execQuery(getPageUrl(action, 1, 1));
+        // get the values needed to the pagination (only need the total)
+        String url = getPageUrl(action, 1, 1);
+
+        // get the values needed to the pagination.
+        RestResult res = client.execQuery(url);
+
         if (! res.isValid()) {
-            throw new DiagnosticException( res.formatStatusMessage("Could not retrieve Kibana API pagination - unable to continue." + action.getUrl()));
+            logger.info(Constants.CONSOLE, "{}   {}  failed. Bypassing", action.getName(), url);
+            logger.info(Constants.CONSOLE, res.formatStatusMessage("See archived diagnostics.log for more detail."));
         }
-        String result   = res.toString();
-        JsonNode root   = JsonYamlUtils.createJsonNodeFromString(result);
-        int totalPages       = (int) (Math.ceil(root.path("total").doubleValue() / Double.valueOf(perPage)));
-        if (totalPages > 0 && perPage > 0) {
-            for(int currentPage = 1; currentPage <= totalPages; currentPage++) {
+
+        String result = res.toString();
+        JsonNode root = JsonYamlUtils.createJsonNodeFromString(result);
+        int totalPages = (int)Math.ceil(root.path("total").doubleValue() / perPage);
+
+        // guarantee at least one page is returned regardless of total
+        queries.add(getNewEntryPage(perPage, 1, action));
+
+        if (totalPages > 1) {
+            for (int currentPage = 2; currentPage <= totalPages; ++currentPage) {
                 queries.add(getNewEntryPage(perPage, currentPage, action));
             }
         }
@@ -167,7 +198,7 @@ public class RunKibanaQueries extends BaseQuery {
    /**
     * This function is executed **after** runBasicQueries
     * Extract the information on the kibana_stats.json with getProfile function.
-    * set the ResourceCache.addSystemCommand according tp the OS 
+    * set the ResourceCache.addSystemCommand according tp the OS
     *
     * @param  context The current diagnostic context as set in the DiagnosticService class
     * @return according with the type of diagnostic return the system command
@@ -191,7 +222,7 @@ public class RunKibanaQueries extends BaseQuery {
                 else{
                     targetOS = profile.os;
                 }
-                
+
                 syscmd = context.resourceCache.getSystemCommand(Constants.systemCommands);
                 break;
 
