@@ -156,8 +156,7 @@ public class RunKibanaQueries extends BaseQuery {
             logger.info(Constants.CONSOLE, res.formatStatusMessage("See archived diagnostics.log for more detail."));
         }
 
-        String result = res.toString();
-        JsonNode root = JsonYamlUtils.createJsonNodeFromString(result);
+        JsonNode root = JsonYamlUtils.createJsonNodeFromString(res.toString());
         int totalPages = (int)Math.ceil(root.path("total").doubleValue() / perPage);
 
         // guarantee at least one page is returned regardless of total
