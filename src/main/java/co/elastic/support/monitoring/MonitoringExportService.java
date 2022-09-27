@@ -91,7 +91,7 @@ public class MonitoringExportService extends ElasticRestClientService {
 
 
             if (inputs.listClusters) {
-                logger.info(Constants.CONSOLE,  "Diaplaying a list of available clusters.");
+                logger.info(Constants.CONSOLE,  "Displaying a list of available clusters.");
                 showAvailableClusters(config, client, monitoringUri);
                 return;
             }
