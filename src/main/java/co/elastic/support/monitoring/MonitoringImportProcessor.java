@@ -18,9 +18,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.*;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Vector;
@@ -68,17 +65,16 @@ public class MonitoringImportProcessor {
 
         logger.info(Constants.CONSOLE, "Processing: {}", file.getName());
         long eventsWritten = 0;
-        String indexDate = (DateTimeFormatter.ofPattern("yyyy-MM-dd").format(ZonedDateTime.now(ZoneId.of("+0"))));
         String indexName;
 
         try (InputStream instream = new FileInputStream(file)) {
 
             if (file.getName().contains("logstash")) {
-                indexName = config.logstashExtractIndexPattern + "-" + indexDate;
+                indexName = config.logstashExtractIndexPattern + "-" + inputs.targetSuffix;
             } else if (file.getName().contains("metricbeat")) {
-                indexName = config.metricbeatExtractIndexPattern + "-" + indexDate;
+                indexName = config.metricbeatExtractIndexPattern + "-" + inputs.targetSuffix;
             } else {
-                indexName = config.monitoringExtractIndexPattern + "-" + indexDate;
+                indexName = config.monitoringExtractIndexPattern + "-" + inputs.targetSuffix;
             }
 
             BufferedReader br = new BufferedReader(new InputStreamReader(instream));

@@ -736,6 +736,12 @@ Once the data is imported you should be able to view the new data via monitoring
    <td width="30%" align="left" valign="top">--clustername testCluster</td>
  </tr>
 
+ <tr>
+   <td width="20%" align="left" valign="top">--targetsuffix</td>
+   <td width="50%" align="left" valign="top">An alternative suffix to be used when ingesting documents to target such as `.monitoring-es-7-diag-import-`. Default is `yyyy-MM-dd`. Must be lowercase.</td>
+   <td width="30%" align="left" valign="top">--targetsuffix test-cluster-20200106</td>
+ </tr>
+
  </table>
 
 ### Monitoring Import Examples
@@ -755,7 +761,7 @@ Uses the generated index name but gives the cluster a different name:
 Uses a custom index and cluster name:
 
 ```$xslt
-   ./import-monitoring.sh --host 10.0.0.20 -u elastic -p --ssl -i /Users/joe_user/temp/export-20190801-150615.zip  --clustername big_cluster --indexName big_cluster_2019_10_01
+   ./import-monitoring.sh --host 10.0.0.20 -u elastic -p --ssl -i /Users/joe_user/temp/export-20190801-150615.zip  --clustername big_cluster --targetsuffix big_cluster_2019_10_01
 ```
 
 ## Standard Diagnostic Troubleshooting
