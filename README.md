@@ -186,7 +186,7 @@ Elasticseach, Kibana, and Logstash each have three distinct execution modes avai
  </thead>
 
  <tr>
-   <td width="20%" align="left" valign="top">--help</td>
+   <td width="20%" align="left" valign="top">-?<br>--help</td>
    <td width="50%" align="left" valign="top">Display help for the command line options.</td>
    <td width="30%" align="left" valign="top">Option only - no value.</td>
  </tr>
@@ -541,6 +541,8 @@ After it has checked for IP and MAC addresses it will use any configured tokens.
  </tr>
  </table>
 
+ See `./scrub.sh --help` for other options.
+
 #### Sanitization Examples
 
 Writing output from a diagnostic zip file to the working directory with the workers determined dynamically:
@@ -643,6 +645,8 @@ Metricbeat system information can also be collected by specifying the input type
 
  </table>
 
+See `./export-monitoring.sh --help` for other options.
+
 ### Monitoring Extract Examples
 
 Simple case using defaults - data from the last 6 hours will be collected:
@@ -737,6 +741,8 @@ Once the data is imported you should be able to view the new data via monitoring
  </tr>
 
  </table>
+
+See `./import-monitoring.sh --help` for other options.
 
 ### Monitoring Import Examples
 
