@@ -226,6 +226,11 @@ internal_health:
     ">= 8.2.0 < 8.3.0": "/_internal/_health?pretty"
     ">= 8.3.0": "/_internal/_health?pretty&explain"
 
+internal_desired_balance:
+  retry: true
+  versions:
+    ">= 8.6.0": "/_internal/desired_balance"
+
 licenses:
   versions:
     ">= 1.0.0 < 2.0.0": "/_licenses"
