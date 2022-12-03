@@ -2,7 +2,7 @@
   "order" : 0,
   "version" : 7000199,
   "index_patterns" : [
-    ".monitoring-es-7-diag-import"
+    ".monitoring-es-7-diag-import-*"
   ],
   "settings" : {
     "index" : {
