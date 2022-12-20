@@ -225,6 +225,8 @@ internal_health:
   versions:
     ">= 8.2.0 < 8.3.0": "/_internal/_health?pretty"
     ">= 8.3.0": "/_internal/_health?pretty&explain"
+    ">= 8.6.0 < 8.7.0": "/_internal/_health?pretty"
+    ">=8.7.0": "/_health?pretty"
 
 internal_desired_balance:
   retry: true
