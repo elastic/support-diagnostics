@@ -148,7 +148,7 @@ public class MonitoringImportProcessor {
     }
 
     private long writeBatch(String query, int size) {
-        RestResult res = new RestResult(client.execPost("_bulk", query), "_bulk");
+        RestResult res = new RestResult(client.execPost("/_bulk", query), "/_bulk");
         if (res.getStatus() != 200) {
             logger.error(Constants.CONSOLE, "Batch update had errors: {}  {}", res.getStatus(), res.getReason());
             logger.error(Constants.CONSOLE, Constants.CHECK_LOG);
@@ -169,7 +169,7 @@ public class MonitoringImportProcessor {
                 String path = Constants.TEMPLATE_CONFIG_PACKAGE + template + ".json";
                 File file = new File(classLoader.getResource(path).getFile());
                 String data = FileUtils.readFileToString(file, "UTF-8");
-                client.execPost("_template/" + template, data);
+                client.execPost("/_template/" + template, data);
             } catch (Exception e) {
                 logger.error("Issue checking template {}", template, e);
             }

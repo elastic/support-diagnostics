@@ -35,7 +35,7 @@ public class MonitoringImportConfig extends BaseConfig {
         bulkSize = (Integer) configuration.get("bulk-import-size");
         monitoringExtractIndexPattern = (String)configuration.get("monitoring-extract-pattern");
         logstashExtractIndexPattern = (String)configuration.get("logstash-extract-pattern");
-        metricbeatExtractIndexPattern = (String)configuration.get("metricbeatExtractIndexPattern");
+        metricbeatExtractIndexPattern = (String)configuration.get("metricbeat-extract-pattern");
         templateList = (List<String>)configuration.get("import-templates");
 
     }
