@@ -103,3 +103,6 @@ buildNumber.properties
 
 .DS_Store
 
+
+
+./diagnostic-output
