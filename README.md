@@ -679,6 +679,12 @@ Lists the clusters available in this monitoring cluster
     ./export-monitoring.sh --host 10.0.0.20 -u elastic -p --ssl --list
 ```
 
+Get data from a monitoring cluster in the elastic cloud, with the port that is different from default and the last 8 hours of data:
+
+```$xslt
+    ./export-monitoring.sh --host 2775abprd8230d55d11e5edc86752260dd.us-east-1.aws.found.io  -u elastic -p --port 9243 --ssl --id 37G473XV7843 --interval 8
+```
+
 This will provide a listing in the following format:
 
  <table>
