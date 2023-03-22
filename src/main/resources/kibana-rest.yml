@@ -51,11 +51,11 @@ kibana_fleet_agent_policies:
 kibana_fleet_package_policies:
   versions:
     ">=7.10.0": "/api/fleet/package_policies"
-    
+
 kibana_fleet_packages:
   versions:
     ">=7.11.0": "/api/fleet/epm/packages?experimental=true"
-    
+
 kibana_fleet_agent_status:
   versions:
     ">= 7.11.0 < 8.0.0": "/api/fleet/agent-status"
@@ -73,18 +73,6 @@ kibana_roles:
   versions:
     ">= 6.4.0": "/api/security/role"
 
-kibana_spaces:
-  versions:
-    ">= 6.5.0": "/api/spaces/space"
-
-kibana_security_exception_list:
-  versions:
-    ">= 7.10.0": "/api/exception_lists/_find?namespace_type=agnostic"
-
-kibana_security_endpoint_trusted_apps:
-  versions:
-    ">= 7.10.0": "/api/endpoint/trusted_apps"
-
 # These endpoints will return 404 if there are no exceptions
 kibana_security_endpoint_host_isolation:
   versions:
@@ -100,12 +88,16 @@ kibana_security_endpoint_exception_items:
 
 kibana_security_endpoint_metadata:
   versions:
-#    ">=7.9.0": "/api/endpoint/metadata" #>8.x it's supposed to be a POST which we don't support atm
     ">= 8.0.0": "/api/endpoint/metadata"
 
 kibana_security_endpoint_trusted_apps:
   versions:
+    ">= 7.10.0 < 7.14.0": "/api/endpoint/trusted_apps"
     ">= 7.14.0": "/api/exception_lists/items/_find?list_id=endpoint_trusted_apps&namespace_type=agnostic"
+
+kibana_security_exception_list:
+  versions:
+    ">= 7.10.0": "/api/exception_lists/_find?namespace_type=agnostic"
 
 kibana_security_packages:
   versions:
