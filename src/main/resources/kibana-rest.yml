@@ -51,6 +51,23 @@ kibana_fleet_agent_policies:
 kibana_fleet_package_policies:
   versions:
     ">=7.10.0": "/api/fleet/package_policies"
+    
+kibana_fleet_packages:
+  versions:
+    ">=7.11.0": "/api/fleet/epm/packages?experimental=true"
+    
+kibana_fleet_agent_status:
+  versions:
+    ">= 7.11.0 < 8.0.0": "/api/fleet/agent-status"
+    ">= 8.0.0": "/api/fleet/agent_status"
+
+kibana_fleet_agents_current_upgrades:
+  versions:
+    ">= 8.3.0": "/api/fleet/agents/current_upgrades"
+
+kibana_fleet_settings:
+  versions:
+    ">= 7.14.0": "/api/fleet/settings"
 
 kibana_roles:
   versions:
