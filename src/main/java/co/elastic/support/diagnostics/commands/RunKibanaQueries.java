@@ -55,7 +55,6 @@ public class RunKibanaQueries extends BaseQuery {
             "kibana_detection_engine_find",
             "kibana_fleet_agent_policies",
             "kibana_fleet_agents",
-            "kibana_fleet_package_policies",
             "kibana_security_endpoint_event_filters",
             "kibana_security_endpoint_exception_items",
             "kibana_security_endpoint_host_isolation",
@@ -117,8 +116,7 @@ public class RunKibanaQueries extends BaseQuery {
 
         if (
             action.getName().equals("kibana_fleet_agents") ||
-            action.getName().equals("kibana_fleet_agent_policies") ||
-            action.getName().equals("kibana_fleet_package_policies")
+            action.getName().equals("kibana_fleet_agent_policies")
         ) {
             perPageField = "perPage";
         } else if (
