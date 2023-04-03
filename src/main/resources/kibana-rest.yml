@@ -59,7 +59,11 @@ kibana_fleet_agent_status:
 
 kibana_fleet_agents_current_upgrades:
   versions:
-    ">= 8.3.0": "/api/fleet/agents/current_upgrades"
+    ">= 8.3.0 < 8.7.0": "/api/fleet/agents/current_upgrades"
+    
+kibana_fleet_agents_action_status:
+  versions:
+    ">= 8.7.0": "/api/fleet/agents/action_status"
 
 kibana_fleet_settings:
   versions:
