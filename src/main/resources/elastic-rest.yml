@@ -217,8 +217,8 @@ indices:
 indices_stats:
   retry: true
   versions:
-    ">= 0.9.0 < 7.7.0": "/_stats?level=shards&pretty&human"
-    ">= 7.7.0": "/_stats?level=shards&pretty&human&expand_wildcards=all"
+    ">= 0.9.0 < 7.7.0": "/_stats?level=shards&human"
+    ">= 7.7.0": "/_stats?level=shards&human&expand_wildcards=all"
 
 internal_health:
   retry: true
@@ -261,7 +261,7 @@ nodes_short:
 nodes_stats:
   retry: true
   versions:
-    ">= 0.9.0": "/_nodes/stats?pretty&human"
+    ">= 0.9.0": "/_nodes/stats?human"
 
 nodes_usage:
   versions:
