@@ -27,6 +27,7 @@ logstash_node_stats:
     "> 0.0.0": "/_node/stats?pretty"
 
 logstash_nodes_hot_threads:
+  extension: ".txt"
   versions:
     "> 0.0.0": "/_node/hot_threads?human=true&threads=10000"
 
