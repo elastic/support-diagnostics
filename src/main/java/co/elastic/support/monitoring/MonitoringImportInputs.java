@@ -30,8 +30,8 @@ public class MonitoringImportInputs extends ElasticRestClientInputs {
     @Parameter(names = {"--clustername"}, description = "Overrides the name of the imported cluster.")
     protected String clusterName;
 
-    @Parameter(names = {"--targetsuffix"}, description = "Overrides the suffix of the import target from the date, appending it to e.g. .monitoring-es-7-diag-import-.")
-    protected String targetSuffix;
+    @Parameter(names = {"--targetsuffix"}, description = "Overrides the suffix of the import target from yyyy-MM-dd.")
+    protected String targetSuffix = DateTimeFormatter.ofPattern("yyyy-MM-dd").format(ZonedDateTime.now(ZoneId.of("+0")));
 
     @Parameter(names = {"-i", "--input"}, description = "Required: The archive that you wish to import into Elastic Monitoring. This must be in the format produced by the diagnostic export utility.")
     protected String input;
@@ -56,7 +56,7 @@ public class MonitoringImportInputs extends ElasticRestClientInputs {
 
         targetSuffix = textIOManager.textIO.newStringInputReader()
                 .withInputTrimming(true)
-                .withDefaultValue((DateTimeFormatter.ofPattern("yyyy-MM-dd").format(ZonedDateTime.now(ZoneId.of("+0")))))
+                .withDefaultValue(targetSuffix)
                 .read("Specify an alternate suffix for the import target or hit enter for the default generated name:");
 
         input = textIOManager.textIO.newStringInputReader()

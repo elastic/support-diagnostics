@@ -748,7 +748,7 @@ Once the data is imported you should be able to view the new data via monitoring
 
  <tr>
    <td width="20%" align="left" valign="top">--targetsuffix</td>
-   <td width="50%" align="left" valign="top">An alternative suffix to be used when ingesting documents to target such as `.monitoring-es-7-diag-import-`. Default is `yyyy-MM-dd`. Must be lowercase.</td>
+   <td width="50%" align="left" valign="top">An alternative suffix to be used when ingesting documents to target such as `.monitoring-es-{{version}}-diag-import-{{suffix}}`. Default is `yyyy-MM-dd`. Must be lowercase.</td>
    <td width="30%" align="left" valign="top">--targetsuffix test-cluster-20200106</td>
  </tr>
 

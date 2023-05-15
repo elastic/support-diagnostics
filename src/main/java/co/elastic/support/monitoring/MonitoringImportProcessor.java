@@ -70,27 +70,41 @@ public class MonitoringImportProcessor {
         try (InputStream instream = new FileInputStream(file)) {
 
             if (file.getName().contains("logstash")) {
-                indexName = config.logstashExtractIndexPattern + "-" + inputs.targetSuffix;
+                indexName = config.logstashExtractIndexPattern.replace("{{suffix}}", inputs.targetSuffix);
             } else if (file.getName().contains("metricbeat")) {
-                indexName = config.metricbeatExtractIndexPattern + "-" + inputs.targetSuffix;
+                indexName = config.metricbeatExtractIndexPattern.replace("{{suffix}}", inputs.targetSuffix);
             } else {
-                indexName = config.monitoringExtractIndexPattern + "-" + inputs.targetSuffix;
+                indexName = config.monitoringExtractIndexPattern.replace("{{suffix}}", inputs.targetSuffix);
             }
 
             BufferedReader br = new BufferedReader(new InputStreamReader(instream));
             StringBuilder batchBuilder = new StringBuilder();
             String contents;
             int batch = 0;
-            Map<String, Map> inputIndex = new LinkedHashMap();
-            Map<String, String> inputIndexField = new LinkedHashMap<>();
-            inputIndexField.put("_index", indexName);
-            inputIndex.put("index", inputIndexField);
-            String indexLine = JsonYamlUtils.mapper.writeValueAsString(inputIndex);
+            Map<String, String> inputMeta = new LinkedHashMap<>();
+            Map<String, Map> inputAction = new LinkedHashMap();
 
             try {
-                while ((contents = br.readLine()) != null) {
+                // Pre-fetching to determine source version
+                contents = br.readLine();
+                ObjectNode sourceObject = JsonYamlUtils.mapper.readValue(contents, ObjectNode.class);
+                if (StringUtils.isEmpty(sourceObject.path("type").asText())) {
+                    indexName = indexName.replace("{{version}}", "8");
+                    logger.info(Constants.CONSOLE, "Targeting {} because no type field is found", indexName);
+                    inputMeta.put("_index", indexName);
+                    inputAction.put("create", inputMeta);
+                } else {
+                    indexName = indexName.replace("{{version}}", "7");
+                    logger.info(Constants.CONSOLE, "Targeting {} because type field is found", indexName);
+                    inputMeta.put("_index", indexName);
+                    inputAction.put("index", inputMeta);
+                }
+
+                String actionLine = JsonYamlUtils.mapper.writeValueAsString(inputAction);
+
+                while (contents != null) {
                     // If clustername is present and they changed it, update
-                    ObjectNode sourceObject = JsonYamlUtils.mapper.readValue(contents, ObjectNode.class);
+                    sourceObject = JsonYamlUtils.mapper.readValue(contents, ObjectNode.class);
                     String clusterName = sourceObject.path("cluster_name").asText();
 
                     if (updateClusterName && StringUtils.isNotEmpty(clusterName)) {
@@ -98,13 +112,13 @@ public class MonitoringImportProcessor {
                     }
 
                     String altClusterName = sourceObject.path("cluster_settings").path("cluster").path("metadata").path("display_name").asText();
-                    if (StringUtils.isNotEmpty(altClusterName)) {
+                    if (updateClusterName && StringUtils.isNotEmpty(altClusterName)) {
                         sourceObject.with("cluster_settings").with("cluster").with("metadata").put("display_name", newClusterName);
                     }
 
                     String sourceLine = JsonYamlUtils.mapper.writeValueAsString(sourceObject);
 
-                    batchBuilder.append(indexLine + "\n");
+                    batchBuilder.append(actionLine + "\n");
                     batchBuilder.append(sourceLine + "\n");
 
                     // See if we need to
@@ -118,6 +132,7 @@ public class MonitoringImportProcessor {
                     } else {
                         batch++;
                     }
+                    contents = br.readLine();
                 }
 
                 // if there's anything left do the cleanup

@@ -3,7 +3,10 @@
   "query":{
     "bool": {
       "filter": [
-        {"term": {"type": "index_stats"} },
+        {"bool": {"should": [
+          {"term": {"type": "index_stats"}},
+          {"exists": {"field": "index_stats"}}
+        ]}},
         {"term": { "cluster_uuid" : "{{clusterId}}"} },
         { "range":
           { "timestamp":
