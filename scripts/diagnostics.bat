@@ -6,10 +6,15 @@ SET diagpath=%scriptpath:~0,-1%
 SET libpath=%diagpath%\lib\NUL
 
 IF NOT EXIST %libpath% (
-    ECHO "Runtimes library does not exist - make sure you are running the "
-    ECHO "archive with 'dist' in the name, not the one labeled: 'source'."
-    EXIT
+    ECHO Diagnostic executable not found:
+    ECHO.
+    ECHO Please make sure that you are running with the archive ending with
+    ECHO '-dist.zip' in the name and not the one labeled 'Source code'.
+    ECHO.
+    ECHO Download at https://github.com/elastic/support-diagnostics/releases/latest
+    EXIT /b 400
 )
+
 set JAVA_EXEC=java
 if not defined JAVA_HOME (
   set JAVA_EXEC=java
@@ -19,10 +24,15 @@ if not defined JAVA_HOME (
   set JAVA_EXEC=!JAVA_HOME!\bin\java
 )
 
-if not defined DIAG_JAVA_OPTIONS (
-  set DIAG_JAVA_OPTIONS=-Xmx512m
+if defined DIAG_DEBUG (
+  set DIAG_DEBUG_OPTS=-Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=y
 )
 
-"%JAVA_EXEC%" %DIAG_JAVA_OPTIONS% -cp %diagpath%\config;%diagpath%\lib\* co.elastic.support.diagnostics.DiagnosticApp %*
+if not defined DIAG_JAVA_OPTS (
+  set DIAG_JAVA_OPTS=-Xms256m -Xmx2000m
+)
+
+echo Using %DIAG_JAVA_OPTS% %DIAG_DEBUG_OPTS% for options.
+"%JAVA_EXEC%" %DIAG_JAVA_OPTS% %DIAG_DEBUG_OPTS% -cp %diagpath%\config;%diagpath%\lib\* co.elastic.support.diagnostics.DiagnosticApp %*
 
 endlocal
