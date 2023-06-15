@@ -65,7 +65,7 @@ linuxOS:
     javac: "{{JAVA_HOME}}/bin/javac -version"
 
   logs:
-    elastic: "ls -alt {{LOGPATH}} | grep '{{CLUSTERNAME}}.log' | awk '{print $9}'"
+    elastic: "ls -alt {{LOGPATH}} | grep -e '{{CLUSTERNAME}}.log' -e '{{CLUSTERNAME}}.json' | awk '{print $9}'"
     elastic-arc: "ls -alt {{LOGPATH}} | grep '{{CLUSTERNAME}}-.*-1.log.gz' | awk '{print $9}'"
     gc: "ls -alt {{LOGPATH}} |  awk '/gc/ {print $9}'"
     kibana: "ls -alt /var/log/kibana/ |  awk '/.json|.log/ {print $9}'"
@@ -85,7 +85,7 @@ macOS:
     javac: "{{JAVA_HOME}}/bin/javac -version"
 
   logs:
-    elastic: "ls -alt {{LOGPATH}} | grep '{{CLUSTERNAME}}.log' | awk '{print $9}'"
+    elastic: "ls -alt {{LOGPATH}} | grep -e '{{CLUSTERNAME}}.log' -e '{{CLUSTERNAME}}.json' | awk '{print $9}'"
     elastic-arc: "ls -alt {{LOGPATH}} | grep '{{CLUSTERNAME}}-.*-1.log.gz' | awk '{print $9}'"
     gc: "ls -alt {{LOGPATH}} |  awk '/gc/ {print $9}'"
     kibana: "ls -alt /var/log/kibana/ |  awk '/.json|.log/ {print $9}'"
