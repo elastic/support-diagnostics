@@ -51,6 +51,10 @@ kibana_fleet_package_policies:
   versions:
     ">=7.10.0": "/api/fleet/package_policies"
 
+kibana_lists_privileges:
+  versions:
+    ">= 7.9.0": "/api/lists/privileges"
+
 kibana_roles:
   versions:
     ">= 6.4.0": "/api/security/role"
@@ -102,7 +106,7 @@ kibana_spaces:
 
 kibana_stats:
   versions:
-    ">= 6.5.0": "/api/stats"
+    ">= 6.5.0": "/api/stats?extended=true"
 
 # can be uncommented if there is needed deeper health information on the stats
 #kibana_stats_extended:
