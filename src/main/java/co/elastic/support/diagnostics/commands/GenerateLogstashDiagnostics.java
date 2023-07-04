@@ -49,24 +49,31 @@ public class GenerateLogstashDiagnostics implements Command {
     public void execute(DiagnosticContext context) throws DiagnosticException {
         try {
             final RestClient client = context.resourceCache.getRestClient(Constants.restInputHost);
-            final JsonData jsonData = new JsonData(getNodeInfo(client), getNodeStats(client));
+            final Datasource datasource = new Datasource(new JsonData(getNodeInfo(client), getNodeStats(client)));
             final Configuration configuration = createTemplateConfiguration();
 
             for (String templateFileName : getAllTemplates()) {
-                final String outputFileName = templateFileName.substring(0, templateFileName.lastIndexOf(".ftlh"));
-                final Path outputFilePath = Paths.get(context.tempDir, "logstash_diagnostic_" + outputFileName);
-                try {
-                    final Template template = configuration.getTemplate(templateFileName);
-                    final StringWriter writer = new StringWriter();
-                    template.process(new Datasource(jsonData), writer);
-                    SystemUtils.writeToFile(writer.toString(), outputFilePath.toString());
-                } catch (IOException | TemplateException e) {
-                    logger.error(Constants.CONSOLE, String.format("Could not generate Logstash diagnostic: %s - skipping template.", templateFileName), e);
-                }
+                writeTemplateOutputFile(configuration, templateFileName, datasource, getTemplateOutputFilePath(context.tempDir, templateFileName));
             }
         } catch (Exception e) {
-            logger.info(Constants.CONSOLE, "Unexpected error - bypassing some or all Logstash diagnostics report calls. {}", Constants.CHECK_LOG);
+            logger.info(Constants.CONSOLE, "Unexpected error - bypassing some or all Logstash diagnostics calls. {}", Constants.CHECK_LOG);
         }
+    }
+
+    private void writeTemplateOutputFile(Configuration configuration, String templateFileName, Datasource datasource, Path output) throws DiagnosticException {
+        try {
+            final Template template = configuration.getTemplate(templateFileName);
+            final StringWriter writer = new StringWriter();
+            template.process(datasource, writer);
+            SystemUtils.writeToFile(writer.toString(), output.toString());
+        } catch (IOException | TemplateException e) {
+            logger.error(Constants.CONSOLE, "Could not generate Logstash diagnostic file - skipping template {}.", templateFileName, e);
+        }
+    }
+
+    private Path getTemplateOutputFilePath(String targetDir, String templateFileName) {
+        final String outputFileName = templateFileName.substring(0, templateFileName.lastIndexOf(".ftlh"));
+        return Paths.get(targetDir, "logstash_diagnostic_" + outputFileName);
     }
 
     private Configuration createTemplateConfiguration() throws TemplateModelException {
@@ -94,7 +101,7 @@ public class GenerateLogstashDiagnostics implements Command {
                     .map(p -> p.getFileName().toString())
                     .collect(Collectors.toList());
         } catch (IOException e) {
-            logger.error(String.format("Error retrieving Logstash diagnostic templates files from config directory:  %s.", DIAGNOSTIC_TEMPLATES_PATH), e);
+            logger.error("Error retrieving Logstash diagnostic templates files from config directory:  {}", DIAGNOSTIC_TEMPLATES_PATH, e);
             throw e;
         }
     }
