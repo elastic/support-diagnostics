@@ -11,12 +11,12 @@
     <meta charset="utf-8"/>
     <meta content="initial-scale=1, width=device-width" name="viewport"/>
     <script crossorigin="anonymous"
-            src="https://unpkg.com/react@latest/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@latest/umd/react-dom.development.js"></script>
+            src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
     <script crossorigin="anonymous"
-            src="https://unpkg.com/@mui/material@latest/umd/material-ui.development.js"></script>
+            src="https://unpkg.com/@mui/material@5.13.7/umd/material-ui.production.min.js"></script>
     <script crossorigin="anonymous"
-            src="https://unpkg.com/babel-standalone@latest/babel.min.js"></script>
+            src="https://unpkg.com/babel-standalone@6.26.0/babel.min.js"></script>
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
           rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
