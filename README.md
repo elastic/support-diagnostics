@@ -40,7 +40,7 @@
     - [Monitoring Import Examples](#monitoring-import-examples)
   - [Standard Diagnostic Troubleshooting](#standard-diagnostic-troubleshooting)
 
-# Support Diagnostics Utility
+# Support Diagnostics Utility -- Works with all Elastic Deployment Types
 
 [Click here for the latest version of the Support Diagnostics Utility](https://github.com/elastic/support-diagnostics/releases/latest)
 
