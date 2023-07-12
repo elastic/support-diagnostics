@@ -11,11 +11,12 @@ Third party libraries used by the Support Diagnostics Utilities:
   Apache Commons BeanUtils under Apache License, Version 2.0
   Apache Commons Codec under Apache License, Version 2.0
   Apache Commons Collections under Apache License, Version 2.0
-  Apache Commons Compress under Apache License, Version 2.0
+  Apache Commons Compress under Apache-2.0
   Apache Commons IO under Apache License, Version 2.0
   Apache Commons Lang under Apache License, Version 2.0
   Apache Commons Logging under The Apache Software License, Version 2.0
   Apache Commons Text under Apache License, Version 2.0
+  Apache FreeMarker under Apache License, Version 2.0
   Apache HttpClient under Apache License, Version 2.0
   Apache HttpCore under Apache License, Version 2.0
   Apache Log4j API under Apache License, Version 2.0
@@ -28,23 +29,23 @@ Third party libraries used by the Support Diagnostics Utilities:
   ASM Core under BSD
   Bouncy Castle PKIX, CMS, EAC, TSP, PKCS, OCSP, CMP, and CRMF APIs under Bouncy Castle Licence
   Bouncy Castle Provider under Bouncy Castle Licence
-  Extended StAX API under Dual license consisting of the CDDL v1.1 and GPL v2
-  fastinfoset under Apache License, Version 2.0
   FindBugs-jsr305 under The Apache Software License, Version 2.0
   Guava: Google Core Libraries for Java under The Apache Software License, Version 2.0
   Hamcrest Core under New BSD License
-  istack common utility code runtime under CDDL 1.1 or GPL2 w/ CPE
+  istack common utility code runtime under Eclipse Distribution License - v 1.0
   Jackson-annotations under The Apache Software License, Version 2.0
   Jackson-core under The Apache Software License, Version 2.0
   jackson-coreutils under Lesser General Public License, version 3 or greater or Apache Software License, version 2.0
   jackson-databind under The Apache Software License, Version 2.0
+  Jakarta Activation under EDL 1.0
+  Jakarta XML Binding API under Eclipse Distribution License - v 1.0
   Java Native Access under LGPL, version 2.1 or Apache License v2.0
   Java Native Access Platform under LGPL, version 2.1 or Apache License v2.0
   Java Servlet API under CDDL + GPLv2 with classpath exception
   JavaBeans Activation Framework (JAF) under Common Development and Distribution License (CDDL) v1.0
   JavaBeans Activation Framework API jar under CDDL/GPLv2+CE
   JavaMail API jar under CDDL or GPLv2+CE
-  JAXB Runtime under CDDL+GPL License
+  JAXB Runtime under Eclipse Distribution License - v 1.0
   jaxb-api under CDDL 1.1 or GPL2 w/ CPE
   jcommander under Apache License, Version 2.0
   JLine under The BSD License
@@ -96,5 +97,5 @@ Third party libraries used by the Support Diagnostics Utilities:
   Support Diagnostics Utilities under Elastic License
   SureFire API under Apache License, Version 2.0
   SureFire Logger API under Apache License, Version 2.0
-  TXW2 Runtime under CDDL+GPL License
+  TXW2 Runtime under Eclipse Distribution License - v 1.0
 
