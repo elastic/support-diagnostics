@@ -16,6 +16,7 @@ import co.elastic.support.diagnostics.commands.CollectDockerInfo;
 import co.elastic.support.diagnostics.commands.CollectKibanaLogs;
 import co.elastic.support.diagnostics.commands.CollectLogs;
 import co.elastic.support.diagnostics.commands.CollectSystemCalls;
+import co.elastic.support.diagnostics.commands.GenerateLogstashDiagnostics;
 import co.elastic.support.diagnostics.commands.GenerateManifest;
 import co.elastic.support.diagnostics.commands.KibanaGetDetails;
 import co.elastic.support.diagnostics.commands.RetrieveSystemDigest;
@@ -69,6 +70,7 @@ public class DiagnosticChainExec {
 
             case Constants.logstashLocal :
                 new RunLogstashQueries().execute(context);
+                new GenerateLogstashDiagnostics().execute(context);
                 if(context.runSystemCalls){
                     new CollectSystemCalls().execute(context);
                     new RetrieveSystemDigest().execute(context);
@@ -80,6 +82,7 @@ public class DiagnosticChainExec {
 
             case Constants.logstashRemote :
                 new RunLogstashQueries().execute(context);
+                new GenerateLogstashDiagnostics().execute(context);
                 if(context.runSystemCalls){
                     new CollectSystemCalls().execute(context);
                 }
