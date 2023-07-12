@@ -27,18 +27,37 @@ kibana_alerts_health:
     ">= 7.11.0 < 7.13.0": "/api/alerts/_health"
     ">= 7.13.0": "/api/alerting/_health"
 
-kibana_detection_engine_find:
+# Calculates health of Detection Engine and returns a health snapshot.
+# Scope: the whole cluster = all detection rules in all Kibana spaces.
+# https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/common/detection_engine/rule_monitoring/api/detection_engine_health/README.md
+kibana_detection_engine_health_cluster:
   versions:
-    ">= 7.6.0": "/api/detection_engine/rules/_find?sort_field=enabled&sort_order=asc"
+    ">= 8.8.2": "/internal/detection_engine/health/_cluster"
+
+# Calculates health of Detection Engine and returns a health snapshot.
+# Scope: all detection rules in the current/default Kibana space.
+# https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/common/detection_engine/rule_monitoring/api/detection_engine_health/README.md
+kibana_detection_engine_health_space:
+  versions:
+    ">= 8.8.2": "/internal/detection_engine/health/_space"
 
 kibana_detection_engine_privileges:
   versions:
     ">= 7.6.0": "/api/detection_engine/privileges"
 
-kibana_detection_engine_signals:
+# Returns installed detection rules, both prebuilt and custom. This endpoint requires pagination.
+# Scope: current/default Kibana space.
+kibana_detection_engine_rules_installed:
+  versions:
+    ">= 7.6.0": "/api/detection_engine/rules/_find?sort_field=enabled&sort_order=asc"
+
+# Returns status of prebuilt detection rules: how many of them are installed, can be installed, can be upgraded, etc.
+# Scope: current/default Kibana space.
+kibana_detection_engine_rules_prebuilt_status:
   versions:
     ">= 7.10.0 < 7.15.0": "/api/detection_engine/prepackaged"
-    ">= 7.15.0": "/api/detection_engine/rules/prepackaged/_status"
+    ">= 7.15.0 < 8.9.0": "/api/detection_engine/rules/prepackaged/_status"
+    ">= 8.9.0": "/internal/detection_engine/prebuilt_rules/status"
 
 kibana_fleet_agents:
   versions:

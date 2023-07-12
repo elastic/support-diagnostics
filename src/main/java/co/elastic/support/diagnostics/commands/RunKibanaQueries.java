@@ -52,7 +52,7 @@ public class RunKibanaQueries extends BaseQuery {
     private static final List<String> pagedActions = Arrays.asList(
         new String[] {
             "kibana_alerts",
-            "kibana_detection_engine_find",
+            "kibana_detection_engine_rules_installed",
             "kibana_fleet_agent_policies",
             "kibana_fleet_agents",
             "kibana_security_endpoint_event_filters",
