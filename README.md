@@ -441,7 +441,7 @@ Executing against a remote host, full collection, using an ssh public key file a
 ./diagnostics.sh --host 10.0.0.20 --type remote -u someuser --password --ssl --remoteUser someuser --keyFile "~.ssh/es_rsa" --bypassDiagVerify
 ```
 
-Executing against a cloud cluster. Note that in this case we use 9243 for the port, disable host name verification and force the type to strictly api calls.
+Executing against a Cloud, ECE, or ECK cluster. Note that in this case we use 9243 for the port, disable host name verification and force the type to strictly api calls.
 
 ```$xslt
 ./diagnostics.sh --host 2775abprd8230d55d11e5edc86752260dd.us-east-1.aws.found.io -u elastic -p --port 9243 --ssl --type api --noVerify
