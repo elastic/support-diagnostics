@@ -127,9 +127,9 @@ import-templates:
   - "monitoring-logstash-diag"
   - "metricbeat-system-diag"
 
-monitoring-extract-pattern: ".monitoring-es-7-diag-import"
-logstash-extract-pattern: ".monitoring-logstash-7-diag-import"
-metricbeat-extract-pattern: "metricbeat-7-diag-import"
+monitoring-extract-pattern: ".monitoring-es-{{version}}-diag-import-{{suffix}}"
+logstash-extract-pattern: ".monitoring-logstash-{{version}}-diag-import-{{suffix}}"
+metricbeat-extract-pattern: "metricbeat-{{version}}-diag-import-{{suffix}}"
 
 query-files:
   - general

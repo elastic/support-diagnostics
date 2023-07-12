@@ -1,7 +1,12 @@
 {
   "query": {
     "bool": {
-      "filter": [ { "term": { "type": "cluster_stats" } } ]
+      "filter": [
+        {"bool": {"should": [
+          {"term": {"type": "cluster_stats"}},
+          {"exists": {"field": "cluster_stats"}}
+        ]}}
+      ]
     }
   },
   "collapse": {
@@ -11,5 +16,5 @@
     "timestamp": "asc"
   },
   "size": 100,
-  "_source": ["cluster_uuid", "cluster_name", "cluster_settings.cluster.metadata.display_name"]
+  "_source": ["cluster_uuid", "cluster_name", "cluster_settings.cluster.metadata.display_name", "elasticsearch.cluster.name"]
 }

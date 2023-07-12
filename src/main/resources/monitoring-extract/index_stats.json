@@ -10,7 +10,10 @@
         }}
       ],
       "filter": [
-        {"term": {"type": "{{type}}"} },
+        {"bool": {"should": [
+          {"term": {"type": "{{type}}"}},
+          {"exists": {"field": "{{field}}"}}
+        ]}},
         {"term": { "cluster_uuid" : "{{clusterId}}"} },
         { "range":
           { "timestamp":

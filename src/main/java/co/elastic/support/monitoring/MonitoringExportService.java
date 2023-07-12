@@ -177,12 +177,22 @@ public class MonitoringExportService extends ElasticRestClientService {
             ArrayNode hits = (ArrayNode) hitsNode;
             for (JsonNode hit : hits) {
                 Map<String, String> display = new HashMap<>();
-                display.put("id", hit.path("_source").path("cluster_uuid").asText());
-                display.put("name", hit.path("_source").path("cluster_name").asText());
+
+                String clusterUuid = hit.path("_source").path("cluster_uuid").asText();
+                if (StringUtils.isEmpty(clusterUuid)) {
+                    clusterUuid = hit.path("fields").path("cluster_uuid").path(0).asText();
+                }
+                String clusterName = hit.path("_source").path("cluster_name").asText();
+                if (StringUtils.isEmpty(clusterName)) {
+                    clusterName = hit.path("_source").path("elasticsearch").path("cluster").path("name").asText();
+                }
                 String displayName = hit.path("_source").path("cluster_settings").path("cluster").path("metadata").path("display_name").asText();
                 if (StringUtils.isEmpty(displayName)) {
                     displayName = "none";
                 }
+
+                display.put("id", clusterUuid);
+                display.put("name", clusterName);
                 display.put("display name", displayName);
                 clusterIds.add(display);
             }
@@ -238,8 +248,10 @@ public class MonitoringExportService extends ElasticRestClientService {
                 startUri = monitoringStartUri.replace("{{type}}", "es");
                 statFile = tempDir + SystemProperties.fileSeparator + stat + ".json";
             }
+            String field = stat.equalsIgnoreCase("shards") ? "shard" : stat;
 
             query = query.replace("{{type}}", stat);
+            query = query.replace("{{field}}", field);
             query = query.replace("{{size}}", monitoringScroll);
             query = query.replace("{{start}}", inputs.queryStartDate);
             query = query.replace("{{stop}}", inputs.queryEndDate);
