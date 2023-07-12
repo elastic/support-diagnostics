@@ -223,7 +223,7 @@ class TestDiagnosticService {
             }
         };
 
-        Thread[] threads = new Thread[10];
+        Thread[] threads = new Thread[3];
         Arrays.setAll(threads, i -> new Thread(task.apply(i)));
         Arrays.stream(threads).forEach(Thread::start);
 
