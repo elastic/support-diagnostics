@@ -27,7 +27,7 @@ if [ ! -x "$JAVA" ]; then
     exit 1
 fi
 
-[[ "${DIAG_DEBUG}" != "" ]] && export DIAG_DEBUG_OPTS=" -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=y"
+[[ "${DIAG_DEBUG}" != "" ]] && export DIAG_DEBUG_OPTS="-Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=y"
 
 [[ "${DIAG_JAVA_OPTS}" == "" ]] && export DIAG_JAVA_OPTS="-Xms256m -Xmx2000m"
 

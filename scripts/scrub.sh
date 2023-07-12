@@ -1,17 +1,21 @@
 #!/usr/bin/env bash
 
-scriptDir=$0
-scriptDir=${scriptDir/\/scrub.sh/$''}
-libDir=$scriptDir'/lib'
+scriptDir="$0"
+scriptDir="${scriptDir/\/scrub.sh/$''}"
+libDir="$scriptDir"'/lib'
 
-if [  -d "libDir" ]; then
-    echo "Runtimes library does not exist - make sure you are running the "
-    echo "archive with 'dist-' in the name, not the one labeled: 'source'."
-    exit
+if [ ! -d "$libDir" ]; then
+    echo "Diagnostic executable not found:"
+    echo ""
+    echo "Please make sure that you are running with the archive ending with"
+    echo "'-dist.zip' in the name and not the one labeled 'Source code'."
+    echo ""
+    echo "Download at https://github.com/elastic/support-diagnostics/releases/latest"
+    exit 400
 fi
 
-if [ -x "$JAVA_HOME/bin/java" ]; then
-    JAVA="$JAVA_HOME/bin/java"
+if [ -x "${JAVA_HOME}/bin/java" ]; then
+    JAVA="${JAVA_HOME}/bin/java"
 else
     JAVA=`which java`
 fi
@@ -23,9 +27,9 @@ if [ ! -x "$JAVA" ]; then
     exit 1
 fi
 
-[[ ${DIAG_DEBUG} != "" ]] && export DIAG_DEBUG_OPTS=" -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=y"
+[[ "${DIAG_DEBUG}" != "" ]] && export DIAG_DEBUG_OPTS="-Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=y"
 
-[[ ${DIAG_JAVA_OPTS} == "" ]] && export DIAG_JAVA_OPTS="-Xms8g -Xmx8g"
+[[ "${DIAG_JAVA_OPTS}" == "" ]] && export DIAG_JAVA_OPTS="-Xms8g -Xmx8g"
 
 echo "Using ${DIAG_JAVA_OPTS} ${DIAG_DEBUG_OPTS} for options."
-"$JAVA" $DIAG_JAVA_OPTS ${DIAG_DEBUG_OPTS} -cp ${scriptDir}/config:${scriptDir}/lib/* co.elastic.support.scrub.ScrubApp "$@"
+"$JAVA" $DIAG_JAVA_OPTS ${DIAG_DEBUG_OPTS} -cp "${scriptDir}/config:${scriptDir}/lib/*" co.elastic.support.scrub.ScrubApp "$@"
