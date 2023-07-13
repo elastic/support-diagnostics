@@ -27,7 +27,7 @@ jobs:
 #         settings-path: ${{ github.workspace }} # location for the settings.xml file
 
     - name: Build with Maven
-      run: mvn package --batch-mode -DskipTests
+      run: mvn -B package -DskipTests
       
     - name: Add output files to the Github release
       shell: bash
