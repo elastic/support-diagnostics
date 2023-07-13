@@ -30,4 +30,4 @@ jobs:
         cache: maven
         
     - name: Maven test
-      run: mvn test
+      run: mvn test --batch-mode
