@@ -67,6 +67,10 @@ kibana_fleet_agent_policies:
   versions:
     ">= 7.10.0": "/api/fleet/agent_policies"
 
+kibana_fleet_health:
+  versions:
+    ">= 7.14.0": "/api/fleet/health_check"
+
 kibana_fleet_packages:
   versions:
     ">=7.11.0": "/api/fleet/epm/packages?experimental=true"
