@@ -22,7 +22,7 @@ import org.apache.logging.log4j.core.layout.PatternLayout;
 
 import java.io.File;
 
-public abstract  class BaseService {
+public abstract class BaseService {
 
     private Logger logger = LogManager.getLogger(BaseService.class);
     protected String logPath;
@@ -34,7 +34,7 @@ public abstract  class BaseService {
         logger.info(Constants.CONSOLE, "Closing loggers.");
 
         Appender appndr = logConfig.getAppender("diag");
-        if(appndr != null && appndr.isStarted()){
+        if (appndr != null && appndr.isStarted()) {
             appndr.stop();
         }
 
@@ -65,7 +65,7 @@ public abstract  class BaseService {
         Appender diagAppender = builder.build();
 
         Appender oldAppender = logConfig.getAppender("packaged");
-        if(oldAppender != null && oldAppender.isStarted()){
+        if (oldAppender != null && oldAppender.isStarted()) {
             oldAppender.stop();
             logConfig.getRootLogger().removeAppender("packaged");
         }
@@ -79,9 +79,9 @@ public abstract  class BaseService {
 
     }
 
-    public File createArchive(String tempDir, ArchiveType archiveType) throws DiagnosticException {
+    public File createArchive(String tempDir) throws DiagnosticException {
         logger.info(Constants.CONSOLE, "Archiving diagnostic results.");
-        return ArchiveUtils.createArchive(tempDir, SystemProperties.getFileDateString(), archiveType);
+        return ArchiveUtils.createZipArchive(tempDir, SystemProperties.getFileDateString());
     }
 
 }
