@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -67,13 +68,13 @@ class TestDiagnosticService {
     }
 
     private DiagConfig newDiagConfig() {
-        Map diagMap = Collections.emptyMap();
         try {
-            diagMap = JsonYamlUtils.readYamlFromClasspath(Constants.DIAG_CONFIG, true);
+            return new DiagConfig(
+                    JsonYamlUtils.readYamlFromClasspath(Constants.DIAG_CONFIG, true));
         } catch (DiagnosticException e) {
             fail(e);
+            return null; // unreachable because of fail(e)
         }
-        return new DiagConfig(diagMap);
     }
 
     private DiagnosticInputs newDiagnosticInputs() {
@@ -123,23 +124,32 @@ class TestDiagnosticService {
     }
 
     public HashMap<String, ZipEntry> zipFileContents(File result) throws IOException {
-        ZipFile zipFile = new ZipFile(result, ZipFile.OPEN_READ);
-        HashMap<String, ZipEntry> contents = new HashMap<>();
+        try (ZipFile zipFile = new ZipFile(result, ZipFile.OPEN_READ)) {
+            HashMap<String, ZipEntry> contents = new HashMap<>();
 
-        Enumeration<? extends ZipEntry> entries = zipFile.entries();
+            Enumeration<? extends ZipEntry> entries = zipFile.entries();
 
-        while (entries.hasMoreElements()) {
-            ZipEntry entry = entries.nextElement();
-            // Add file path without leading directory
-            contents.put(entry.getName().replaceFirst("/[^/]*/", ""), entry);
+            while (entries.hasMoreElements()) {
+                ZipEntry entry = entries.nextElement();
+
+                if (!entry.isDirectory()) {
+                    // Add file path without leading directory
+                    contents.put(entry.getName().replaceFirst("^(\\.\\/.+\\/)(.+)", "$2"), entry);
+                }
+            }
+
+            return contents;
         }
-        return contents;
     }
 
     public void checkResult(File result, Boolean withLogFile) {
         assertTrue(result.toString().matches(".*\\.zip$"), result.toString());
         try {
             HashMap<String, ZipEntry> contents = zipFileContents(result);
+
+            assertTrue(contents.containsKey("diagnostic_manifest.json"),
+                    () -> contents.keySet().stream().collect(Collectors.joining(", ")));
+
             assertTrue(contents.containsKey("manifest.json"));
             if (withLogFile) {
                 assertTrue(contents.containsKey("diagnostics.log"));
@@ -160,7 +170,7 @@ class TestDiagnosticService {
     public void testWithExtraHeaders() {
         setupResponse(true);
 
-        Map extraHeaders = new HashMap<String, String>();
+        Map<String, String> extraHeaders = new HashMap<>();
         extraHeaders.put(headerKey1, headerVal1);
         extraHeaders.put(headerKey2, headerVal2);
         DiagConfig diagConfig = newDiagConfig();
@@ -238,10 +248,11 @@ class TestDiagnosticService {
         try {
             Enumeration<File> resultFiles = results.elements();
             // Take one zip file to use as a reference for comparisons with the other ones
-            HashMap<String, ZipEntry> reference = zipFileContents(resultFiles.nextElement());
+            Map<String, ZipEntry> reference = zipFileContents(resultFiles.nextElement());
             while (resultFiles.hasMoreElements()) {
-                HashMap<String, ZipEntry> other = zipFileContents(resultFiles.nextElement());
-                assertEquals(reference.keySet(), other.keySet());
+                Map<String, ZipEntry> other = zipFileContents(resultFiles.nextElement());
+                assertEquals(reference.keySet(), other.keySet(), () -> reference.keySet().stream()
+                        .filter(file -> !other.containsKey(file)).collect(Collectors.joining(", ")));
                 reference.keySet().forEach((key) -> {
                     if (!key.equals("manifest.json") && !key.equals("diagnostic_manifest.json")) {
                         assertEquals(reference.get(key).getSize(), other.get(key).getSize(), key);

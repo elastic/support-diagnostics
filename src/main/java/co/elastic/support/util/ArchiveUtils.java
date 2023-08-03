@@ -30,7 +30,7 @@ public class ArchiveUtils {
       try (
             FileOutputStream fout = new FileOutputStream(filename);
             ZipArchiveOutputStream taos = new ZipArchiveOutputStream(fout)) {
-         archiveResultsZip(archiveFileName, taos, srcDir, "", true);
+         archiveResultsZip(archiveFileName, taos, srcDir, ".", true);
          logger.info(Constants.CONSOLE, "Archive: " + filename + " was created");
          return file;
       } catch (IOException ioe) {
@@ -38,28 +38,30 @@ public class ArchiveUtils {
       }
    }
 
-   private static void archiveResultsZip(String archiveFilename, ZipArchiveOutputStream taos, File file, String path,
+   private static void archiveResultsZip(
+         String archiveFilename,
+         ZipArchiveOutputStream zipFileStream,
+         File file,
+         String path,
          boolean append) {
-      String relPath = "";
+      String relPath = path + "/" + file.getName();
 
       try {
          if (append) {
-            relPath = path + "/" + file.getName() + "-" + archiveFilename;
-         } else {
-            relPath = path + "/" + file.getName();
+            relPath += "-" + archiveFilename;
          }
-         ZipArchiveEntry tae = new ZipArchiveEntry(file, relPath);
-         taos.putArchiveEntry(tae);
+
+         zipFileStream.putArchiveEntry(new ZipArchiveEntry(file, relPath));
 
          if (file.isFile()) {
             try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file))) {
-               IOUtils.copy(bis, taos);
-               taos.closeArchiveEntry();
+               IOUtils.copy(bis, zipFileStream);
+               zipFileStream.closeArchiveEntry();
             }
          } else if (file.isDirectory()) {
-            taos.closeArchiveEntry();
+            zipFileStream.closeArchiveEntry();
             for (File childFile : file.listFiles()) {
-               archiveResultsZip(archiveFilename, taos, childFile, relPath, false);
+               archiveResultsZip(archiveFilename, zipFileStream, childFile, relPath, false);
             }
          }
       } catch (IOException e) {
@@ -68,7 +70,6 @@ public class ArchiveUtils {
    }
 
    public static void extractArchive(String filename, String targetDir) throws IOException {
-      final int bufferSize = 1024;
       ArchiveInputStream ais = null;
       try {
          InputStream inputStream = new FileInputStream(new File(filename));
