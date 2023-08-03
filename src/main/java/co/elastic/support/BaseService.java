@@ -29,9 +29,9 @@ public abstract class BaseService {
     protected void closeLogs() {
         logger.info(Constants.CONSOLE, "Closing loggers.");
 
-        Appender appnder = logConfig.getAppender("diag");
-        if (appnder != null && appnder.isStarted()) {
-            appnder.stop();
+        Appender appender = logConfig.getAppender("diag");
+        if (appender != null && appender.isStarted()) {
+            appender.stop();
         }
 
         logConfig.getRootLogger().removeAppender("File");
