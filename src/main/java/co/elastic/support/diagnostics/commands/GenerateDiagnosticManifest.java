@@ -22,8 +22,6 @@ import java.util.Map;
 /**
  * Generate a manifest containing the basic runtime info for the diagnostic
  * runtime.
- * Some of the values we get, like the Diagnostic version will be used again
- * downstream.
  */
 public class GenerateDiagnosticManifest implements Command {
    private final Logger logger = LogManager.getLogger(GenerateDiagnosticManifest.class);
