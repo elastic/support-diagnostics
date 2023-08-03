@@ -229,6 +229,12 @@ Elasticseach, Kibana, and Logstash each have three distinct execution modes avai
  </tr>
 
  <tr>
+   <td width="20%" align="left" valign="top">--mode</td>
+   <td width="50%" align="left" valign="top">Designates whether to collect a minimal or full set of data. Enter light or full. Defaults to full.</td>
+   <td width="30%" align="left" valign="top">--mode light</td>
+ </tr>
+
+ <tr>
    <td width="20%" align="left" valign="top">--noVerify</td>
    <td width="50%" align="left" valign="top">Bypass hostname verification for the certificate when using the --ssl option.  This can be unsafe in some cases, but can be used to bypass issues with an incorrect or missing hostname in the certificate. Default value is false.</td>
    <td width="30%" align="left" valign="top">Option only - no value.</td>
