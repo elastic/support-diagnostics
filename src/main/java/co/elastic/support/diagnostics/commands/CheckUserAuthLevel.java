@@ -14,7 +14,6 @@ import co.elastic.support.rest.RestClient;
 import co.elastic.support.rest.RestEntry;
 import co.elastic.support.rest.RestResult;
 import co.elastic.support.util.JsonYamlUtils;
-import co.elastic.support.util.ResourceCache;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vdurmont.semver4j.Semver;
@@ -30,24 +29,26 @@ public class CheckUserAuthLevel implements Command {
 
     @Override
     public void execute(DiagnosticContext context) {
-        // No user, it's not secured so no auth level.
-        if (StringUtils.isEmpty(context.diagnosticInputs.user)) {
+        final String inputUsername = context.diagnosticInputs.user;
+
+        // No user, it's not secured so no auth level or built-in admin role.
+        if (StringUtils.isEmpty(inputUsername) || "elastic".equals(inputUsername)) {
             return;
         }
 
         // Unlike most APIs, the username is passed as a part of the URL and
         // thus it needs to be URL-encoded for the rare instance where special
         // characters are used
-        String username = UrlUtils.encodeValue(context.diagnosticInputs.user);
+        String username = UrlUtils.encodeValue(inputUsername);
 
         // Should already be there.
         RestClient restClient = context.resourceCache.getRestClient(Constants.restInputHost);
 
         boolean hasAuthorization = false;
         Semver version = context.version;
-        Map<String, RestEntry> calls = context.elasticRestCalls;
-        RestEntry entry =  calls.get("security_users");
-        String url = entry.getUrl().replace("?pretty", "/" + username);
+        Map<String, RestEntry> calls = context.fullElasticRestCalls;
+        RestEntry entry = calls.get("security_users");
+        String url = entry.getUrl() + "/" + username;
 
         RestResult result = restClient.execQuery(url);
 
@@ -60,14 +61,13 @@ public class CheckUserAuthLevel implements Command {
         context.isAuthorized = hasAuthorization;
     }
 
-    public boolean checkForAuth(int major, String user, JsonNode userNode){
+    public boolean checkForAuth(int major, String user, JsonNode userNode) {
         JsonNode rolesNode = userNode.path(user).path("roles");
-        List<String> roles = null;
         boolean hasAuthorization = false;
 
         if (rolesNode.isArray()) {
             ObjectMapper mapper = new ObjectMapper();
-            roles = mapper.convertValue(rolesNode, List.class);
+            List<?> roles = mapper.convertValue(rolesNode, List.class);
 
             if (major <= 2) {
                 hasAuthorization = roles.contains("admin");

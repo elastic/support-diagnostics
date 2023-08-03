@@ -16,6 +16,7 @@ import co.elastic.support.diagnostics.commands.CollectDockerInfo;
 import co.elastic.support.diagnostics.commands.CollectKibanaLogs;
 import co.elastic.support.diagnostics.commands.CollectLogs;
 import co.elastic.support.diagnostics.commands.CollectSystemCalls;
+import co.elastic.support.diagnostics.commands.GenerateDiagnosticManifest;
 import co.elastic.support.diagnostics.commands.GenerateLogstashDiagnostics;
 import co.elastic.support.diagnostics.commands.GenerateManifest;
 import co.elastic.support.diagnostics.commands.KibanaGetDetails;
@@ -30,105 +31,106 @@ public class DiagnosticChainExec {
     public static void runDiagnostic(DiagnosticContext context, String type) throws DiagnosticException {
         new CheckDiagnosticVersion().execute(context);
 
-        switch (type){
-            case Constants.api :
+        switch (type) {
+            case Constants.api:
                 new CheckElasticsearchVersion().execute(context);
                 new CheckUserAuthLevel().execute(context);
                 // Removed temporarily due to issues with finding and accessing cloud master
-                //new CheckPlatformDetails().execute(context);
+                // new CheckPlatformDetails().execute(context);
                 new RunClusterQueries().execute(context);
                 break;
 
-            case Constants.local :
+            case Constants.local:
                 new CheckElasticsearchVersion().execute(context);
                 new CheckUserAuthLevel().execute(context);
                 new CheckPlatformDetails().execute(context);
                 new RunClusterQueries().execute(context);
-                if(context.runSystemCalls){
+                if (context.runSystemCalls) {
                     new CollectSystemCalls().execute(context);
                     new CollectLogs().execute(context);
                     new RetrieveSystemDigest().execute(context);
                 }
-                if(context.dockerPresent){
+                if (context.dockerPresent) {
                     new CollectDockerInfo().execute(context);
                 }
                 break;
 
-            case Constants.remote :
+            case Constants.remote:
                 new CheckElasticsearchVersion().execute(context);
                 new CheckUserAuthLevel().execute(context);
                 new CheckPlatformDetails().execute(context);
                 new RunClusterQueries().execute(context);
-                if(context.runSystemCalls){
+                if (context.runSystemCalls) {
                     new CollectSystemCalls().execute(context);
                     new CollectLogs().execute(context);
                 }
-                if(context.dockerPresent){
+                if (context.dockerPresent) {
                     new CollectDockerInfo().execute(context);
                 }
                 break;
 
-            case Constants.logstashLocal :
+            case Constants.logstashLocal:
                 new RunLogstashQueries().execute(context);
                 new GenerateLogstashDiagnostics().execute(context);
-                if(context.runSystemCalls){
+                if (context.runSystemCalls) {
                     new CollectSystemCalls().execute(context);
                     new RetrieveSystemDigest().execute(context);
                 }
-                if(context.dockerPresent){
+                if (context.dockerPresent) {
                     new CollectDockerInfo().execute(context);
                 }
                 break;
 
-            case Constants.logstashRemote :
+            case Constants.logstashRemote:
                 new RunLogstashQueries().execute(context);
                 new GenerateLogstashDiagnostics().execute(context);
-                if(context.runSystemCalls){
+                if (context.runSystemCalls) {
                     new CollectSystemCalls().execute(context);
                 }
-                if(context.dockerPresent){
+                if (context.dockerPresent) {
                     new CollectDockerInfo().execute(context);
                 }
                 break;
 
-            case Constants.logstashApi :
+            case Constants.logstashApi:
                 new RunLogstashQueries().execute(context);
                 break;
 
-            case Constants.kibanaLocal :
+            case Constants.kibanaLocal:
                 new CheckKibanaVersion().execute(context);
                 new KibanaGetDetails().execute(context);
                 new RunKibanaQueries().execute(context);
-                if(context.runSystemCalls){
+                if (context.runSystemCalls) {
                     new CollectSystemCalls().execute(context);
                     new CollectKibanaLogs().execute(context);
                     new RetrieveSystemDigest().execute(context);
                 }
-                if(context.dockerPresent){
+                if (context.dockerPresent) {
                     new CollectDockerInfo().execute(context);
                 }
                 break;
 
-            case Constants.kibanaRemote :
+            case Constants.kibanaRemote:
                 new CheckKibanaVersion().execute(context);
                 new KibanaGetDetails().execute(context);
                 new RunKibanaQueries().execute(context);
-                if(context.runSystemCalls){
+                if (context.runSystemCalls) {
                     new CollectSystemCalls().execute(context);
                     new CollectKibanaLogs().execute(context);
                 }
-                if(context.dockerPresent){
+                if (context.dockerPresent) {
                     new CollectDockerInfo().execute(context);
                 }
                 break;
 
-             case Constants.kibanaApi :
+            case Constants.kibanaApi:
                 new CheckKibanaVersion().execute(context);
                 new RunKibanaQueries().execute(context);
                 break;
-            }
+        }
 
         new GenerateManifest().execute(context);
+        new GenerateDiagnosticManifest().execute(context);
     }
 
 }

@@ -44,7 +44,8 @@ class TestDiagnosticService {
     @BeforeAll
     public void globalSetup() {
         mockServer = startClientAndServer(9880);
-        // mockserver by default is in verbose mode (useful when creating new test), move it to warning.
+        // mockserver by default is in verbose mode (useful when creating new test),
+        // move it to warning.
         ConfigurationProperties.disableSystemOut(true);
         ConfigurationProperties.logLevel("WARN");
     }
@@ -56,8 +57,8 @@ class TestDiagnosticService {
 
     @BeforeEach
     public void setup() throws IOException {
-         folder = new TemporaryFolder();
-         folder.create();
+        folder = new TemporaryFolder();
+        folder.create();
     }
 
     @AfterEach
@@ -82,7 +83,7 @@ class TestDiagnosticService {
         try {
             File outputDir = folder.newFolder();
             diagnosticInputs.outputDir = outputDir.toString();
-        } catch(IOException e) {
+        } catch (IOException e) {
             fail("Unable to create temp directory", e);
         }
         return diagnosticInputs;
@@ -92,8 +93,7 @@ class TestDiagnosticService {
         if (withHeaders) {
             return request().withHeaders(
                     new Header(headerKey1, headerVal1),
-                    new Header(headerKey2, headerVal2)
-            );
+                    new Header(headerKey2, headerVal2));
         } else {
             return request();
         }
@@ -103,29 +103,23 @@ class TestDiagnosticService {
         mockServer
                 .when(
                         myRequest(withHeaders)
-                                .withPath("/")
-                )
+                                .withPath("/"))
                 .respond(
                         response()
-                                .withBody("{\"version\": {\"number\": \"7.14.0\"}}")
-                );
+                                .withBody("{\"version\": {\"number\": \"7.14.0\"}}"));
         mockServer
                 .when(
                         myRequest(withHeaders)
-                                .withPath("/_nodes/os,process,settings,transport,http")
-                )
+                                .withPath("/_nodes/os,process,settings,transport,http"))
                 .respond(
                         response()
-                                .withBody("{}")
-                );
+                                .withBody("{}"));
         mockServer
                 .when(
-                        myRequest(withHeaders)
-                )
+                        myRequest(withHeaders))
                 .respond(
                         response()
-                                .withBody("some_response_body")
-                );
+                                .withBody("some_response_body"));
     }
 
     public HashMap<String, ZipEntry> zipFileContents(File result) throws IOException {
@@ -173,9 +167,8 @@ class TestDiagnosticService {
         diagConfig.extraHeaders = extraHeaders;
         DiagnosticService diag = new DiagnosticService();
 
-        try(
-            ResourceCache resourceCache = new ResourceCache();
-        ) {
+        try (
+                ResourceCache resourceCache = new ResourceCache();) {
             DiagnosticContext context = new DiagnosticContext(diagConfig, newDiagnosticInputs(), resourceCache, true);
             File result = diag.exec(context);
             checkResult(result, true);
@@ -190,10 +183,10 @@ class TestDiagnosticService {
 
         DiagnosticService diag = new DiagnosticService();
 
-        try(
-            ResourceCache resourceCache = new ResourceCache();
-        ) {
-            DiagnosticContext context = new DiagnosticContext(newDiagConfig(), newDiagnosticInputs(), resourceCache, true);
+        try (
+                ResourceCache resourceCache = new ResourceCache();) {
+            DiagnosticContext context = new DiagnosticContext(newDiagConfig(), newDiagnosticInputs(), resourceCache,
+                    true);
             File result = diag.exec(context);
             checkResult(result, true);
         } catch (DiagnosticException e) {
@@ -212,8 +205,9 @@ class TestDiagnosticService {
             public void run() {
                 DiagnosticService diag = new DiagnosticService();
 
-                try(ResourceCache resourceCache = new ResourceCache()) {
-                    DiagnosticContext context = new DiagnosticContext(newDiagConfig(), newDiagnosticInputs(), resourceCache, false);
+                try (ResourceCache resourceCache = new ResourceCache()) {
+                    DiagnosticContext context = new DiagnosticContext(newDiagConfig(), newDiagnosticInputs(),
+                            resourceCache, false);
                     File result = diag.exec(context);
                     results.put(i, result);
                 } catch (DiagnosticException e) {
@@ -227,7 +221,7 @@ class TestDiagnosticService {
         Arrays.setAll(threads, i -> new Thread(task.apply(i)));
         Arrays.stream(threads).forEach(Thread::start);
 
-        for (Thread t: threads) {
+        for (Thread t : threads) {
             try {
                 t.join(3000);
             } catch (InterruptedException e) {
@@ -249,7 +243,7 @@ class TestDiagnosticService {
                 HashMap<String, ZipEntry> other = zipFileContents(resultFiles.nextElement());
                 assertEquals(reference.keySet(), other.keySet());
                 reference.keySet().forEach((key) -> {
-                    if (!key.equals("manifest.json")) {
+                    if (!key.equals("manifest.json") && !key.equals("diagnostic_manifest.json")) {
                         assertEquals(reference.get(key).getSize(), other.get(key).getSize(), key);
                         assertEquals(reference.get(key).getCrc(), other.get(key).getCrc(), key);
                     }

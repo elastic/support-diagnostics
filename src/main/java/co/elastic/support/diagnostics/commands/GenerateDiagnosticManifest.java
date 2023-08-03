@@ -25,11 +25,19 @@ import java.util.Map;
  * Some of the values we get, like the Diagnostic version will be used again
  * downstream.
  */
-public class GenerateManifest implements Command {
-   private final Logger logger = LogManager.getLogger(GenerateManifest.class);
+public class GenerateDiagnosticManifest implements Command {
+   private final Logger logger = LogManager.getLogger(GenerateDiagnosticManifest.class);
 
    public void execute(DiagnosticContext context) {
-      logger.info(Constants.CONSOLE, "Writing legacy [manifest.json].");
+      logger.info(Constants.CONSOLE, "Writing [diagnostic_manifest.json].");
+
+      String product = "elasticsearch";
+
+      if (context.diagnosticInputs.diagType.startsWith("kibana")) {
+         product = "kibana";
+      } else if (context.diagnosticInputs.diagType.startsWith("logstash")) {
+         product = "logstash";
+      }
 
       try {
          ObjectMapper mapper = new ObjectMapper();
@@ -37,15 +45,22 @@ public class GenerateManifest implements Command {
 
          Map<String, Object> manifest = new HashMap<>();
 
-         manifest.put(Constants.DIAG_VERSION, context.diagVersion);
-         manifest.put("Product Version", context.version);
-         manifest.put("collectionDate", SystemProperties.getUtcDateTimeString());
-         manifest.put("diagnosticInputs", context.diagnosticInputs.toString());
+         manifest.put("diagnostic", context.diagVersion);
+         manifest.put("type", product + "_diagnostic");
+         manifest.put("product", product);
+         // Logstash does not lookup a version currently
+         manifest.put("version",
+               context.version != null ? context.version.getOriginalValue() : "0.0.0");
+         manifest.put("timestamp", SystemProperties.getUtcDateTimeString());
+         manifest.put("flags", context.diagnosticInputs.toString());
          manifest.put("runner", context.diagnosticInputs.runner);
+         manifest.put("mode", context.diagnosticInputs.mode);
 
-         mapper.writeValue(new File(context.tempDir + SystemProperties.fileSeparator + "manifest.json"), manifest);
+         mapper.writeValue(
+               new File(context.tempDir + SystemProperties.fileSeparator + "diagnostic_manifest.json"),
+               manifest);
       } catch (Exception e) {
-         logger.info(Constants.CONSOLE, "Error creating the manifest file", e);
+         logger.info(Constants.CONSOLE, "Error creating [diagnostic_manifest.json]", e);
       }
    }
 }

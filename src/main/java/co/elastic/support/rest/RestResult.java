@@ -36,15 +36,13 @@ public class RestResult implements Cloneable {
     // to disk or the body is stored as a string and the status retained as well.
     public RestResult(HttpResponse response, String url) {
         this.url = url;
-        try{
+        try {
             processCodes(response);
             responseString = EntityUtils.toString(response.getEntity());
-        }
-        catch (Exception e){
-            logger.error( "Error Processing Response", e);
+        } catch (Exception e) {
+            logger.error("Error Processing Response", e);
             throw new RuntimeException();
-        }
-        finally {
+        } finally {
             HttpClientUtils.closeQuietly(response);
         }
     }
@@ -53,35 +51,31 @@ public class RestResult implements Cloneable {
 
         this.url = url;
 
-        // If the query got a success status stream the result immediately to the target file.
-        // If not, the result should be small and contain diagnostic info so stgre it in the response string.
+        // If the query got a success status stream the result immediately to the target
+        // file.
+        // If not, the result should be small and contain diagnostic info so stgre it in
+        // the response string.
         File output = new File(fileName);
-        if(output.exists()){
+        if (output.exists()) {
             FileUtils.deleteQuietly(output);
         }
 
-        try(OutputStream out = new FileOutputStream(fileName)){
+        try (OutputStream out = new FileOutputStream(fileName)) {
             processCodes(response);
-            if (status == 200) {
-                response.getEntity().writeTo(out);
-            } else {
-                responseString = EntityUtils.toString(response.getEntity());
-                IOUtils.write(reason + SystemProperties.lineSeparator + responseString, out, Constants.UTF_8);
-            }
+            response.getEntity().writeTo(out);
         } catch (Exception e) {
-            logger.error( "Error Streaming Response To OutputStream", e);
+            logger.error("Error Streaming Response To OutputStream", e);
             throw new RuntimeException();
-        }
-        finally {
+        } finally {
             HttpClientUtils.closeQuietly(response);
         }
     }
 
-    private void processCodes(HttpResponse response){
+    private void processCodes(HttpResponse response) {
         status = response.getStatusLine().getStatusCode();
         if (status == 400) {
             reason = "Bad Request. Rejected";
-           isRetryable = true;
+            isRetryable = true;
         } else if (status == 401) {
             reason = "Authentication failure. Invalid login credentials.";
             isRetryable = false;
@@ -97,9 +91,9 @@ public class RestResult implements Cloneable {
         }
     }
 
-    public String formatStatusMessage(String msg){
+    public String formatStatusMessage(String msg) {
 
-        if(StringUtils.isNotEmpty(msg)){
+        if (StringUtils.isNotEmpty(msg)) {
             msg = msg + " ";
         }
 
@@ -109,11 +103,11 @@ public class RestResult implements Cloneable {
                 reason);
     }
 
-    public int getStatus(){
+    public int getStatus() {
         return status;
     }
 
-    public String getReason(){
+    public String getReason() {
         return reason;
     }
 
@@ -121,17 +115,16 @@ public class RestResult implements Cloneable {
         return responseString;
     }
 
-    public void toFile(String fileName){
+    public void toFile(String fileName) {
         File output = new File(fileName);
-        if(output.exists()){
+        if (output.exists()) {
             FileUtils.deleteQuietly(output);
         }
 
-        try(FileOutputStream fs = new FileOutputStream(output)){
+        try (FileOutputStream fs = new FileOutputStream(output)) {
             IOUtils.write(reason + SystemProperties.lineSeparator + responseString, fs, Constants.UTF_8);
-        }
-        catch (Exception e){
-            logger.error( "Error writing Response To OutputStream", e);
+        } catch (Exception e) {
+            logger.error("Error writing Response To OutputStream", e);
         }
     }
 
@@ -139,8 +132,8 @@ public class RestResult implements Cloneable {
         return isRetryable;
     }
 
-    public boolean isValid(){
-        if(status == 200){
+    public boolean isValid() {
+        if (status == 200) {
             return true;
         }
         return false;
