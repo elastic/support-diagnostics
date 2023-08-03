@@ -54,7 +54,6 @@ Once the REST calls are complete, system calls such as top, netstat, iostat, etc
 
 The application can be run from any directory on the machine. It does not require installation to a specific location, and the only requirement is that the user has read access to the Elasticsearch artifacts, write access to the chosen output directory, and sufficient disk space for the generated archive.
 
-
 ## License
 
 This software is licensed under [Elastic License v2](https://www.elastic.co/licensing/elastic-license).
@@ -65,7 +64,7 @@ This software is licensed under [Elastic License v2](https://www.elastic.co/lice
 
 - JDK - Oracle or OpenJDK, 1.8-13.
   - The IBM JDK is not supported due to JSSE related issues that can cause TLS errors.
-  - **Important Note For Elasticsearch Version 7:** Elasticsearch now includes a bundled JVM that is used by default. For the diagnostic to retrieve thread dumps via  `Jstack` it must be executed with the same JVM that was used to run Elasticsearch. The diagnostic utility will attempt to find the location of the JVM that was used to run the process it is interrogating. If it is unable to do so, you may need to manually configure the location by setting `JAVA_HOME` to the directory containing the `/bin` directory for the included JDK. For example, `<path to Elasticsearch 7 deployment>/jdk/Contents/Home`.
+  - **Important Note For Elasticsearch Version 7:** Elasticsearch now includes a bundled JVM that is used by default. For the diagnostic to retrieve thread dumps via `Jstack` it must be executed with the same JVM that was used to run Elasticsearch. The diagnostic utility will attempt to find the location of the JVM that was used to run the process it is interrogating. If it is unable to do so, you may need to manually configure the location by setting `JAVA_HOME` to the directory containing the `/bin` directory for the included JDK. For example, `<path to Elasticsearch 7 deployment>/jdk/Contents/Home`.
 - The system user account for that host(not the elasticsearch login) must have sufficient authorization to run these commands and access the logs (usually in `/var/log/elasticsearch`) in order to obtain a full collection of diagnostics.
 - If you are authenticating using the built in Security, the supplied user id must have permission to execute the diagnostic URL's. The superuser role is recommended unless you are familar enough with the calls being made to tailor your own accounts and roles.
 
@@ -101,7 +100,7 @@ If you are in a rush and don't mind going through a Q&A process you can execute 
 
 - Input parameters may be specified in any order.
 - As previously stated, to ensure that all artifacts are collected it is recommended that you run the tool with elevated privileges. This means sudo on Linux type platforms and via an Administor Prompt in Windows. This is not set in stone, and is entirely dependent upon the privileges of the account running the diagnostic. Logs can be especially problematic to collect on Linux systems where Elasticsearch was installed via a package manager. When determining how to run, it is suggested you try copying one or more log files from the configured log directory to the user home of the running account. If that works you probably have sufficient authority to run without sudo or the administrative role.
-- An archive with the format `<diagnostic type>-diagnostics`-`<DateTimeStamp>`.tar.gz will be created in the working directory or an output directory you have specified.
+- An archive with the format `<diagnostic type>-diagnostics`-`<DateTimeStamp>`.zip will be created in the working directory or an output directory you have specified.
 - A truststore does not need to be specified - it's assumed you are running this against a node that you set up and if you didn't trust it you wouldn't be running this.
 - You can specify additional Java options such as a higher `-Xmx` value by setting them via the environment variable: `DIAG_JAVA_OPTS`.
 
@@ -160,13 +159,13 @@ Elasticseach, Kibana, and Logstash each have three distinct execution modes avai
    <td width="70%" align="left" valign="top">Similar to Elasticsearch local mode, this runs against a Kibana process running on the same host as the installed diagnostic utility. Retrieves Kibana REST API dignostic information as well as the output from the same system calls and the logs if stored in the default path `var/log/kibana` or in the `journalctl` for linux and mac.
    </td>
  </tr>
- 
+
  <tr>
    <td width="30%" align="left" valign="top">kibana-remote</td>
    <td width="70%" align="left" valign="top">Queries a Kibana processes running on a different host than the utility. Similar to the Elasticsearch remote option. Collects the same artifacts as the kibana-local option.
    </td>
  </tr>
- 
+
  <tr>
    <td width="30%" align="left" valign="top">kibana-api</td>
    <td width="70%" align="left" valign="top">Collects the REST API information only from a running Kibana process. Similar to the Elasticsearch type (This is the method that need to be used when collecting the data for Kibana in **Elastic cloud**).
@@ -241,12 +240,6 @@ Elasticseach, Kibana, and Logstash each have three distinct execution modes avai
    written to this location. Quotes must be used for paths with spaces. If not supplied, the working directory will be used unless it is running in a container, in which case
    the configured volume name will be used.</td>
    <td width="30%" align="left" valign="top">-o "/User/someuser/diagnostics" <br/> -o "C:\temp\My Diagnostics"</td>
- </tr>
-
-<tr>
-   <td width="20%" align="left" valign="top">--archiveType</td>
-   <td width="50%" align="left" valign="top">File type that will be used to compress the output directory. Choose between: 'zip', 'tar' or 'any'. 'any' will try to zip first and fallback to tar if the zip fails. Defaults to any.</td>
-   <td width="30%" align="left" valign="top">--archiveType zip</td>
  </tr>
 
  <tr>
@@ -418,17 +411,17 @@ sudo ./diagnostics.sh --host 10.0.0.20 --type logstash-local --port 9607
 ```
 
 Executing Kibana diagnostics locally from the same server where Kibana is running
- 
+
 ```$xslt
 sudo ./diagnostics.sh --host localhost --port 5601 --type kibana-local
 ```
 
 Running the `kibana-api` type to suppress system call and log collection and explicitly configuring an output directory (this is also the option that needs to be used when collecting the diagnostic for Kibana in **Elastic Cloud**).
- 
+
 ```$xslt
 sudo ./diagnostics.sh --host 2775abprd8230d55d11e5edc86752260dd.us-east-1.aws.found.io --port 9243 --type kibana-api -u elastic --password --ssl -o /home/user1/diag-out
 ```
- 
+
 Executing against a remote host with full collection, using sudo, and enabling trust where there's no known host entry. Note that the diagnostic is not executed via sudo because all the privileged access is on a different host.
 
 ```$xslt
@@ -451,7 +444,7 @@ Executing against a Cloud, ECE, or ECK cluster. Note that in this case we use 92
 
 ##### The Config Directory
 
-All configuration used by the utility is located on the  `/config` under the folder created when the diagnostic utility was unzipped. These can be modified to change some behaviors in the diagnostic utility.
+All configuration used by the utility is located on the `/config` under the folder created when the diagnostic utility was unzipped. These can be modified to change some behaviors in the diagnostic utility.
 
 The `*-rest.yml` files all contain queries that are executed against the cluster being diagnosed. They are versioned and the Elasticsearch calls have additional modifiers that can be used to further customize the retrievals. The `diags.yml` file has generalized configuration information and `scrub.yml` can be used to drive the sanitization (scrub) function.
 
@@ -541,7 +534,7 @@ After it has checked for IP and MAC addresses it will use any configured tokens.
  </tr>
  </table>
 
- See `./scrub.sh --help` for other options.
+See `./scrub.sh --help` for other options.
 
 #### Sanitization Examples
 
@@ -577,7 +570,7 @@ While the standard diagnostic is often useful in providing the background necess
 
 Time series data will be availalble if Elasticsearch Monitoring is enabled, but in order to view it anywhere other than locally you would need to snapshot the relevant monitoring indices or have the person wishing to view it do so via a screen sharing session. Both of these have issues of scale and utility if there is an urgent issue or multiple individuals need to be involved.
 
-This utility allows you to extract a subset of monitoring data for interval of up to 12 hours at a time. It will package this into a tar.gz file, much like the current diagnostic. After it is uploaded, a support engineer can import that data into their own monitoring cluster so it can be investigated outside of a screen share, and be easily viewed by other engineers and developers. It has the advantage of providing a view of the cluster state prior to when an issue occurred so that a better idea of what led up to the issue can be gained.
+This utility allows you to extract a subset of monitoring data for interval of up to 12 hours at a time. It will package this into a zip file, much like the current diagnostic. After it is uploaded, a support engineer can import that data into their own monitoring cluster so it can be investigated outside of a screen share, and be easily viewed by other engineers and developers. It has the advantage of providing a view of the cluster state prior to when an issue occurred so that a better idea of what led up to the issue can be gained.
 
 Not all the information contained in the standard diagnostic is going to be available in the monitoring extraction. That is because it does not collect the same quantity of data. But what it does have should be sufficient to see a number of important trends, particularly when investigating peformance related issues.
 
@@ -737,7 +730,7 @@ Once the data is imported you should be able to view the new data via monitoring
  <tr>
    <td width="20%" align="left" valign="top">-i <br></br>--input</td>
    <td width="50%" align="left" valign="top">The absolute path the to archive containing extracted monitoring data. Paths with spaces should be contained in quotes.</td>
-   <td width="30%" align="left" valign="top">--input /data/monitoring-export-20200106-161558.tar.gz</td>
+   <td width="30%" align="left" valign="top">--input /data/monitoring-export-20200106-161558.zip</td>
  </tr>
 
  <tr>
