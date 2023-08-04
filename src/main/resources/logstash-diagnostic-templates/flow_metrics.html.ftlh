@@ -60,6 +60,8 @@
         InputAdornment,
         IconButton,
         Tooltip,
+        ToggleButtonGroup,
+        ToggleButton
     } = MaterialUI;
 
     const theme = createTheme({});
@@ -96,11 +98,47 @@
         );
     };
 
+    const ComparisonUnitButtonGroup = ({comparisonValue, setComparisonValue}) => {
+        const handleChange = (event, nextValue) => {
+            if (nextValue !== null) {
+                setComparisonValue(nextValue);
+            }
+        };
+
+        return (
+            <ToggleButtonGroup size="small" sx={{m: 1, mt: 3}}  value={comparisonValue} exclusive onChange={handleChange}>
+                <ToggleButton value="LifetimePercentageComparisonValue">
+                    <Tooltip title="View comparison values as percentages">
+                        <Icon>percent</Icon>
+                    </Tooltip>
+                </ToggleButton>
+                <ToggleButton value="LifetimeComparisonValue">
+                    <Tooltip title="View comparison values as numbers">
+                        <Icon>numbers</Icon>
+                    </Tooltip>
+                </ToggleButton>
+            </ToggleButtonGroup>
+        );
+    }
+
+    const columnOrderByProperty = (column) => {
+        return column.orderBy || column.id
+    }
+
+    const resolveProperty = (obj, path) => {
+        return path.split('.').reduce(function(prev, curr) {
+            return prev ? prev[curr] : null
+        }, obj || self)
+    }
+
     const createDescendingComparator = (a, b, orderBy) => {
-        if (b[orderBy] < a[orderBy]) {
+        let valueA = resolveProperty(a, orderBy);
+        let valueB = resolveProperty(b, orderBy);
+
+        if (valueB < valueA) {
             return -1;
         }
-        if (b[orderBy] > a[orderBy]) {
+        if (valueB > valueA) {
             return 1;
         }
         return 0;
@@ -121,7 +159,13 @@
         }
     }
 
-    const createComparisonFormatter = (analysisWindow, flow, flowMetricName, Component = LifetimePercentageComparisonValue) => {
+    const createComparisonFormatter = (
+        analysisWindow,
+        flow,
+        flowMetricName,
+        Component,
+        colors = DefaultColors
+    ) => {
         let lifetime = _try(() => flow[flowMetricName].lifetime, undefined);
         let current = _try(() => flow[flowMetricName][analysisWindow], undefined);
 
@@ -140,10 +184,22 @@
             current = Infinity;
         }
 
-        return <Component lifetime={lifetime} current={current} />
+        return <Component lifetime={lifetime} current={current} colors={colors} />
     }
 
-    const LifetimeComparisonValue = ({lifetime, current}) => {
+    const DefaultColors = {
+        upward: 'green',
+        downward: 'red',
+        equals: 'gray'
+    }
+
+    const ReversedColors = {
+        upward: 'red',
+        downward: 'green',
+        equals: 'gray'
+    }
+
+    const LifetimeComparisonValue = ({lifetime, current, colors = DefaultColors}) => {
         let difference;
         if (current === Infinity || lifetime === Infinity) {
             difference = Infinity
@@ -151,7 +207,7 @@
             difference = current - lifetime;
         }
 
-        let color = difference < 0 ? 'red' : difference > 0 ? 'green' : 'gray';
+        let color = difference < 0 ? colors.downward : difference > 0 ? colors.upward : colors.equals;
         let tooltipTitle = "Compared to the lifetime value " + lifetime.toFixed(5);
 
         return (
@@ -173,15 +229,16 @@
         )
     }
 
-    const LifetimePercentageComparisonValue = ({lifetime, current}) => {
+    const LifetimePercentageComparisonValue = ({lifetime, current, colors = DefaultColors}) => {
         let difference;
         if (current === Infinity || lifetime === Infinity) {
             difference = Infinity
         } else {
             difference = (100 * (current - lifetime)/((current + lifetime)/2));
+            difference = Number.isNaN(difference) ? 0 : difference;
         }
 
-        let color = difference < 0 ? 'red' : difference > 0 ? 'green' : 'gray';
+        let color = difference < 0 ? colors.downward : difference > 0 ? colors.upward : colors.equals;
         let tooltipTitle = "Compared to the lifetime value " + lifetime.toFixed(4) + "%";
 
         return (
@@ -203,31 +260,47 @@
         )
     }
 
-    const PipelinesAnalysisTable = ({analysisWindow, selectableColumn = 'name', onSelectableColumnClick}) => {
-        const [orderDirection, setOrderDirection] = React.useState('asc');
-        const [orderBy, setOrderBy] = React.useState('worker_utilization');
-        const [searchQuery, setSearchQuery] = React.useState('');
-
-        const createPipelineComparisonFormatter = (pipeline, flowMetricName, component = LifetimePercentageComparisonValue) => {
-            return createComparisonFormatter(analysisWindow, _try(() => data.stats.pipelines[pipeline].flow, {}), flowMetricName, component);
+    const PipelinesAnalysisTable = ({
+                                        analysisWindow, selectableColumn = 'name',
+                                        onSelectableColumnClick,
+                                        orderDirection,
+                                        setOrderDirection,
+                                        orderBy,
+                                        setOrderBy,
+                                        searchQuery,
+                                        setSearchQuery,
+                                        comparisonComponent
+                                    }) => {
+        const createPipelineComparisonFormatter = (row, flowMetricName, component = comparisonComponent, colors = DefaultColors) => {
+            return createComparisonFormatter(analysisWindow, _try(() => data.stats.pipelines[row.name].flow, {}), flowMetricName, component, colors);
         }
 
-        const createCombinedComparisonFormatter = (flowMetricName, component = LifetimePercentageComparisonValue) => {
-            return createComparisonFormatter(analysisWindow, _try(() => data.stats.flow, {}), flowMetricName, component);
+        const createCombinedComparisonFormatter = (flowMetricName, component = comparisonComponent, colors = DefaultColors) => {
+            return createComparisonFormatter(analysisWindow, _try(() => data.stats.flow, {}), flowMetricName, component, colors);
         }
 
-        const columns = [
+        const columns = React.useMemo(() => [
             {id: 'name', label: 'Pipeline', minWidth: 170},
-            {id: 'input', label: 'Input', minWidth: 100, format: (row) => createPipelineComparisonFormatter(row.name, 'input_throughput')},
-            {id: 'filter', label: 'Filter', minWidth: 100, format: (row) => createPipelineComparisonFormatter(row.name, 'filter_throughput')},
-            {id: 'output', label: 'Output', minWidth: 100, format: (row) => createPipelineComparisonFormatter(row.name, 'output_throughput')},
-            {id: 'queue_backpressure', label: 'Queue Backpressure', minWidth: 100, format: (row) => createPipelineComparisonFormatter(row.name, 'queue_backpressure')},
-            {id: 'worker_concurrency', label: 'Worker concurrency', minWidth: 100, format: (row) => createPipelineComparisonFormatter(row.name, 'worker_concurrency', LifetimeComparisonValue)},
-        ];
+            {id: 'input', label: 'Input', minWidth: 100, format: (row) => createPipelineComparisonFormatter(row,'input_throughput')},
+            {id: 'filter', label: 'Filter', minWidth: 100, format: (row) => createPipelineComparisonFormatter(row, 'filter_throughput')},
+            {id: 'output', label: 'Output', minWidth: 100, format: (row) => createPipelineComparisonFormatter(row, 'output_throughput')},
+            {id: 'queue_backpressure', label: 'Queue Backpressure', minWidth: 100, format: (row) => createPipelineComparisonFormatter(row, 'queue_backpressure', comparisonComponent, ReversedColors)},
+            {id: 'worker_concurrency', label: 'Worker concurrency', minWidth: 100, format: (row) => createPipelineComparisonFormatter(row, 'worker_concurrency', comparisonComponent, ReversedColors)},
+        ]);
 
         let rows = [];
         for (let name in data.stats.pipelines) {
-            rows.push({...data.stats.pipelines[name], id: name, name: name});
+            let pipeline = data.stats.pipelines[name];
+            rows.push({
+                pipeline: pipeline,
+                id: name,
+                name: name,
+                input: _try(() => data.stats.pipelines[name].flow.input_throughput[analysisWindow]),
+                filter: _try(() => data.stats.pipelines[name].flow.filter_throughput[analysisWindow]),
+                output: _try(() => data.stats.pipelines[name].flow.output_throughput[analysisWindow]),
+                queue_backpressure: _try(() => data.stats.pipelines[name].flow.queue_backpressure[analysisWindow]),
+                worker_concurrency: _try(() => data.stats.pipelines[name].flow.worker_concurrency[analysisWindow]),
+            });
         }
 
         let selectableColumnIndex = columns.findIndex((c) => c.id === selectableColumn);
@@ -243,27 +316,30 @@
             }
         }
 
-        const createSortHandler = (property) => (event) => {
-            const isAsc = orderBy === property && orderDirection === 'asc';
+        const createSortHandler = (column) => (event) => {
+            let orderByProperty = columnOrderByProperty(column);
+            const isAsc = orderBy === orderByProperty && orderDirection === 'asc';
             setOrderDirection(isAsc ? 'desc' : 'asc');
-            setOrderBy(property);
+            setOrderBy(orderByProperty);
         };
 
         const visibleRows = React.useMemo(() =>
                 rows.filter((row) => searchQuery === '' || row[selectableColumn].toLowerCase().indexOf(searchQuery.toLowerCase()) > -1)
                     .sort((a, b) => {
-                        const order = createSortComparator(orderDirection, orderBy)(a, b);
+                        let order = createSortComparator(orderDirection, orderBy)(a, b);
                         if (order !== 0) {
                             return order;
                         }
-                        return a[1] - b[1];
+
+                        order = a[orderBy] - b[orderBy]
+                        return order !== undefined && !Number.isNaN(order) ? order : 0;
                     }),
             [orderDirection, orderBy, searchQuery, rows],
         );
 
         return (
             <Paper sx={{width: '99%'}}>
-                <TableContainer sx={{maxHeight: 600}}>
+                <TableContainer sx={{height: window.innerHeight - 150}}>
                     <Table stickyHeader aria-label="sticky table">
                         <TableHead>
                             <TableRow>
@@ -278,7 +354,7 @@
                                     </Typography>
                                 </TableCell>
                                 <TableCell colSpan={1}>
-                                    <SearchInput value=""
+                                    <SearchInput value={searchQuery}
                                                  onChange={(event) => setSearchQuery(event.target.value)}
                                                  placeholder="Search pipeline"/>
                                 </TableCell>
@@ -297,12 +373,12 @@
                                         key={column.id}
                                         align={column.align}
                                         style={{top: 57, minWidth: column.minWidth}}
-                                        sortDirection={orderBy === column.id ? orderDirection : false}
+                                        sortDirection={orderBy === columnOrderByProperty(column) ? orderDirection : false}
                                     >
                                         <TableSortLabel
-                                            active={orderBy === column.id}
-                                            direction={orderBy === column.id ? orderDirection : 'asc'}
-                                            onClick={createSortHandler(column.id)}
+                                            active={orderBy === columnOrderByProperty(column)}
+                                            direction={orderBy === columnOrderByProperty(column) ? orderDirection : 'asc'}
+                                            onClick={createSortHandler(column)}
                                         >
                                             {column.label}
                                         </TableSortLabel>
@@ -340,19 +416,19 @@
                                     Combined
                                 </TableCell>
                                 <TableCell>
-                                    {createCombinedComparisonFormatter('input_throughput')}
+                                    {createCombinedComparisonFormatter('input_throughput', comparisonComponent)}
                                 </TableCell>
                                 <TableCell>
-                                    {createCombinedComparisonFormatter('filter_throughput')}
+                                    {createCombinedComparisonFormatter('filter_throughput', comparisonComponent)}
                                 </TableCell>
                                 <TableCell>
-                                    {createCombinedComparisonFormatter('output_throughput')}
+                                    {createCombinedComparisonFormatter('output_throughput', comparisonComponent)}
                                 </TableCell>
                                 <TableCell>
-                                    {createCombinedComparisonFormatter('queue_backpressure')}
+                                    {createCombinedComparisonFormatter('queue_backpressure', comparisonComponent, ReversedColors)}
                                 </TableCell>
                                 <TableCell>
-                                    {createCombinedComparisonFormatter('worker_concurrency', LifetimeComparisonValue)}
+                                    {createCombinedComparisonFormatter('worker_concurrency', comparisonComponent, ReversedColors)}
                                 </TableCell>
                             </TableRow>
                         </TableBody>
@@ -369,10 +445,14 @@
                                                      hideFilters = false,
                                                      headerTableRowTitle,
                                                      columnsDefinition = [],
+                                                     rowPropertiesMapper = (plugin, type) => {},
+                                                     initialOrder = 'worker_utilization',
+                                                     initialOrderDirection = 'desc',
+                                                     pluginsTableSx = {maxHeight: 600}
                                                  }) => {
 
-        const [orderDirection, setOrderDirection] = React.useState('asc');
-        const [orderBy, setOrderBy] = React.useState('worker_utilization');
+        const [orderDirection, setOrderDirection] = React.useState(initialOrderDirection);
+        const [orderBy, setOrderBy] = React.useState(initialOrder);
         const [searchQuery, setSearchQuery] = React.useState('');
         const [pluginTypeFilter, setPluginTypeFilter] = React.useState('all');
 
@@ -401,32 +481,43 @@
         let outputs = _try(() => data.stats.pipelines[selectedPipeline.name].plugins.outputs, [])
             .map((p) => Object.assign(p, { type: 'output', statsProperty: 'outputs' }) );
 
-        let rows = [...inputs, ...filters, ...outputs];
+        let rows = [...inputs, ...filters, ...outputs].map((plugin) => {
+            return {
+                id: plugin.id,
+                name: plugin.name,
+                type: plugin.type,
+                plugin: plugin,
+                ...rowPropertiesMapper(plugin, plugin.type)
+            };
+        });
 
-        const createSortHandler = (property) => (event) => {
-            const isAsc = orderBy === property && orderDirection === 'asc';
+        const createSortHandler = (column) => (event) => {
+            let orderByProperty = columnOrderByProperty(column);
+            const isAsc = orderBy === orderByProperty && orderDirection === 'asc';
             setOrderDirection(isAsc ? 'desc' : 'asc');
-            setOrderBy(property);
+            setOrderBy(orderByProperty);
         };
 
         const visibleRows = React.useMemo(() =>
                 rows
                     .filter((row) => (searchQuery === '' || row.name.toLowerCase().indexOf(searchQuery.toLowerCase()) > -1) &&
                         (pluginTypeFilter === 'all' || row.type === pluginTypeFilter) &&
-                        (filter === undefined || filter(row) === true))
+                        (filter === undefined || filter(row.plugin) === true))
                     .sort((a, b) => {
-                        const order = createSortComparator(orderDirection, orderBy)(a, b);
+                        let order = createSortComparator(orderDirection, orderBy)(a, b);
                         if (order !== 0) {
                             return order;
                         }
-                        return a[1] - b[1];
+
+                        order = a[orderBy] - b[orderBy]
+                        return order !== undefined && !Number.isNaN(order) ? order : 0;
                     }),
             [orderDirection, orderBy, searchQuery, pluginTypeFilter, rows, analysisWindow],
         );
 
         return (
             <Paper sx={{width: '99%'}}>
-                <TableContainer sx={{maxHeight: 600}}>
+                <TableContainer sx={pluginsTableSx}>
                     <Table stickyHeader aria-label="sticky table">
                         <TableHead>
                             <TableRow>
@@ -483,12 +574,12 @@
                                         key={column.id}
                                         align={column.align}
                                         style={{top: 57, minWidth: column.minWidth, maxWidth: column.maxWidth}}
-                                        sortDirection={orderBy === column.id ? orderDirection : false}
+                                        sortDirection={orderBy === columnOrderByProperty(column) ? orderDirection : false}
                                     >
                                         <TableSortLabel
-                                            active={orderBy === column.id}
-                                            direction={orderBy === column.id ? orderDirection : 'asc'}
-                                            onClick={createSortHandler(column.id)}
+                                            active={orderBy === columnOrderByProperty(column)}
+                                            direction={orderBy === columnOrderByProperty(column) ? orderDirection : 'asc'}
+                                            onClick={createSortHandler(column)}
                                         >
                                             {column.label}
                                         </TableSortLabel>
@@ -507,7 +598,7 @@
                                             return (
                                                 <TableCell key={column.id}
                                                            align={column.align}>
-                                                    {column.format ? column.format(row, value) : value}
+                                                    {column.format ? column.format(row.plugin, value) : value}
                                                 </TableCell>
                                             );
                                         })}
@@ -629,26 +720,42 @@
         );
     }
 
-    const PipelineDetailsPage = ({analysisWindow, selectedPipeline, setSelectedPipeline}) => {
+    const PipelineDetailsPage = ({analysisWindow, selectedPipeline, setSelectedPipeline, comparisonComponent}) => {
         let inputPluginsColumns = [
             { id: 'throughput', label: 'Throughput', minWidth: 100, format: (row) =>
                     createComparisonFormatter(
                         analysisWindow,
                         _try(() => data.stats.pipelines[selectedPipeline.name].plugins.inputs.find((p) => p.id === row.id).flow),
                         'throughput',
-                        LifetimeComparisonValue
+                        comparisonComponent
                     )
             }
         ]
 
-        const createPipelinePluginComparisonFormatter = (row, flowMetricName, component = LifetimePercentageComparisonValue) => {
-            return createComparisonFormatter(analysisWindow, row.flow, flowMetricName, component);
+        const createPipelinePluginComparisonFormatter = (row, flowMetricName, component = comparisonComponent, colors = DefaultColors) => {
+            return createComparisonFormatter(analysisWindow, row.flow, flowMetricName, component, colors);
         }
 
         let otherPluginsColumns = [
-            {id: 'worker_millis_per_event', label: 'Worker millis per event', minWidth: 100, format: (row) => createPipelinePluginComparisonFormatter(row, 'worker_millis_per_event', LifetimeComparisonValue)},
-            {id: 'worker_utilization', label: 'Worker utilization', minWidth: 100, format: (row) => createPipelinePluginComparisonFormatter(row, 'worker_utilization', LifetimeComparisonValue)},
+            {id: 'worker_millis_per_event', label: 'Worker millis per event', minWidth: 100, format: (row) =>
+                    createPipelinePluginComparisonFormatter(row, 'worker_millis_per_event', comparisonComponent, ReversedColors)},
+            {id: 'worker_utilization', label: 'Worker utilization', minWidth: 100, format: (row) =>
+                    createPipelinePluginComparisonFormatter(row, 'worker_utilization', comparisonComponent, ReversedColors)},
         ]
+
+        let pluginsRowPropertiesMapper = (plugin, type) => {
+            let pluginFlowMetrics = _try(() => data.stats.pipelines[selectedPipeline.name].plugins[plugin.statsProperty].find((p) => p.id === plugin.id).flow);
+            if (!pluginFlowMetrics) return {};
+
+            if (type === 'input') {
+                return { throughput: _try(() => pluginFlowMetrics.throughput[analysisWindow]) };
+            }
+
+            return {
+                worker_millis_per_event: _try(() => pluginFlowMetrics.worker_millis_per_event[analysisWindow]),
+                worker_utilization: _try(() => pluginFlowMetrics.worker_utilization[analysisWindow]),
+            };
+        }
 
         return (
             <Stack spacing={2}>
@@ -732,20 +839,36 @@
                                                      title="Inputs"
                                                      filter={(row) => row.type && row.type === 'input'}
                                                      hideFilters={true}
-                                                     columnsDefinition={inputPluginsColumns} />
+                                                     columnsDefinition={inputPluginsColumns}
+                                                     rowPropertiesMapper={pluginsRowPropertiesMapper}
+                                                     initialOrder="throughput"
+                />
+
                 <SelectedPipelinePluginAnalysisTable
                     selectedPipeline={selectedPipeline}
                     analysisWindow={analysisWindow}
                     columnsDefinition={otherPluginsColumns}
-                    filter={(row) => row.type && row.type !== 'input'} />
+                    rowPropertiesMapper={pluginsRowPropertiesMapper}
+                    filter={(row) => row.type && row.type !== 'input'}
+                    pluginsTableSx={{}}
+                />
             </Stack>
         )
     }
 
     function App() {
-
         const [analysisWindow, setAnalysisWindow] = React.useState('current');
         const [selectedPipeline, setSelectedPipeline] = React.useState('');
+        const [orderDirection, setOrderDirection] = React.useState('desc');
+        const [orderBy, setOrderBy] = React.useState('worker_concurrency');
+        const [searchQuery, setSearchQuery] = React.useState('');
+        const [comparisonComponentName, setComparisonComponentName] = React.useState("LifetimePercentageComparisonValue")
+
+        const comparisonComponent = () => {
+            return comparisonComponentName === 'LifetimePercentageComparisonValue'
+                ? LifetimePercentageComparisonValue
+                : LifetimeComparisonValue;
+        }
 
         return (
             <div>
@@ -794,18 +917,29 @@
                                 <ReportInformationBox/>
                             </Grid>
                             <Grid item xs={9}>
-                                <Stack>
+                                <Stack direction="row" alignItems="center">
                                     <AnalysisWindowSelect value={analysisWindow}
                                                           onValueChange={setAnalysisWindow}/>
-
+                                    <ComparisonUnitButtonGroup comparisonValue={comparisonComponentName} setComparisonValue={setComparisonComponentName} />
+                                </Stack>
+                                <Stack>
                                     {selectedPipeline === ''
                                         ? <PipelinesAnalysisTable
                                             onSelectableColumnClick={setSelectedPipeline}
-                                            analysisWindow={analysisWindow}/>
+                                            analysisWindow={analysisWindow}
+                                            orderBy={orderBy}
+                                            setOrderBy={setOrderBy}
+                                            orderDirection={orderDirection}
+                                            setOrderDirection={setOrderDirection}
+                                            searchQuery={searchQuery}
+                                            setSearchQuery={setSearchQuery}
+                                            comparisonComponent={comparisonComponent()}
+                                        />
                                         : <PipelineDetailsPage
                                             selectedPipeline={selectedPipeline}
                                             setSelectedPipeline={setSelectedPipeline}
-                                            analysisWindow={analysisWindow}/>
+                                            analysisWindow={analysisWindow}
+                                            comparisonComponent={comparisonComponent()}/>
                                     }
                                 </Stack>
                             </Grid>
