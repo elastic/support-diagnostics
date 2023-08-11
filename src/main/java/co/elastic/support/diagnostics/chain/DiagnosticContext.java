@@ -30,7 +30,7 @@ public class DiagnosticContext {
    public String tempDir = "";
    public String diagVersion;
 
-   //public RestClient esRestClient;
+   // public RestClient esRestClient;
    public DiagConfig diagsConfig;
    public DiagnosticInputs diagnosticInputs;
    public ProcessProfile targetNode;
@@ -38,10 +38,12 @@ public class DiagnosticContext {
 
    public List<String> dockerContainers = new ArrayList<String>();
    public Map<String, RestEntry> elasticRestCalls;
+   public Map<String, RestEntry> fullElasticRestCalls;
 
    public ResourceCache resourceCache;
 
-   public DiagnosticContext(DiagConfig diagConfig, DiagnosticInputs diagnosticInputs, ResourceCache resourceCache, boolean includeLogs) {
+   public DiagnosticContext(DiagConfig diagConfig, DiagnosticInputs diagnosticInputs, ResourceCache resourceCache,
+         boolean includeLogs) {
       this.diagsConfig = diagConfig;
       this.diagnosticInputs = diagnosticInputs;
       this.resourceCache = resourceCache;

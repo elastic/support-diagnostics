@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -44,7 +45,8 @@ class TestDiagnosticService {
     @BeforeAll
     public void globalSetup() {
         mockServer = startClientAndServer(9880);
-        // mockserver by default is in verbose mode (useful when creating new test), move it to warning.
+        // mockserver by default is in verbose mode (useful when creating new test),
+        // move it to warning.
         ConfigurationProperties.disableSystemOut(true);
         ConfigurationProperties.logLevel("WARN");
     }
@@ -56,8 +58,8 @@ class TestDiagnosticService {
 
     @BeforeEach
     public void setup() throws IOException {
-         folder = new TemporaryFolder();
-         folder.create();
+        folder = new TemporaryFolder();
+        folder.create();
     }
 
     @AfterEach
@@ -66,13 +68,13 @@ class TestDiagnosticService {
     }
 
     private DiagConfig newDiagConfig() {
-        Map diagMap = Collections.emptyMap();
         try {
-            diagMap = JsonYamlUtils.readYamlFromClasspath(Constants.DIAG_CONFIG, true);
+            return new DiagConfig(
+                    JsonYamlUtils.readYamlFromClasspath(Constants.DIAG_CONFIG, true));
         } catch (DiagnosticException e) {
             fail(e);
+            return null; // unreachable because of fail(e)
         }
-        return new DiagConfig(diagMap);
     }
 
     private DiagnosticInputs newDiagnosticInputs() {
@@ -82,7 +84,7 @@ class TestDiagnosticService {
         try {
             File outputDir = folder.newFolder();
             diagnosticInputs.outputDir = outputDir.toString();
-        } catch(IOException e) {
+        } catch (IOException e) {
             fail("Unable to create temp directory", e);
         }
         return diagnosticInputs;
@@ -92,8 +94,7 @@ class TestDiagnosticService {
         if (withHeaders) {
             return request().withHeaders(
                     new Header(headerKey1, headerVal1),
-                    new Header(headerKey2, headerVal2)
-            );
+                    new Header(headerKey2, headerVal2));
         } else {
             return request();
         }
@@ -103,49 +104,52 @@ class TestDiagnosticService {
         mockServer
                 .when(
                         myRequest(withHeaders)
-                                .withPath("/")
-                )
+                                .withPath("/"))
                 .respond(
                         response()
-                                .withBody("{\"version\": {\"number\": \"7.14.0\"}}")
-                );
+                                .withBody("{\"version\": {\"number\": \"7.14.0\"}}"));
         mockServer
                 .when(
                         myRequest(withHeaders)
-                                .withPath("/_nodes/os,process,settings,transport,http")
-                )
+                                .withPath("/_nodes/os,process,settings,transport,http"))
                 .respond(
                         response()
-                                .withBody("{}")
-                );
+                                .withBody("{}"));
         mockServer
                 .when(
-                        myRequest(withHeaders)
-                )
+                        myRequest(withHeaders))
                 .respond(
                         response()
-                                .withBody("some_response_body")
-                );
+                                .withBody("some_response_body"));
     }
 
     public HashMap<String, ZipEntry> zipFileContents(File result) throws IOException {
-        ZipFile zipFile = new ZipFile(result, ZipFile.OPEN_READ);
-        HashMap<String, ZipEntry> contents = new HashMap<>();
+        try (ZipFile zipFile = new ZipFile(result, ZipFile.OPEN_READ)) {
+            HashMap<String, ZipEntry> contents = new HashMap<>();
 
-        Enumeration<? extends ZipEntry> entries = zipFile.entries();
+            Enumeration<? extends ZipEntry> entries = zipFile.entries();
 
-        while (entries.hasMoreElements()) {
-            ZipEntry entry = entries.nextElement();
-            // Add file path without leading directory
-            contents.put(entry.getName().replaceFirst("/[^/]*/", ""), entry);
+            while (entries.hasMoreElements()) {
+                ZipEntry entry = entries.nextElement();
+
+                if (!entry.isDirectory()) {
+                    // Add file path without leading directory
+                    contents.put(entry.getName().replaceFirst("^(\\.\\/.+\\/)(.+)", "$2"), entry);
+                }
+            }
+
+            return contents;
         }
-        return contents;
     }
 
     public void checkResult(File result, Boolean withLogFile) {
         assertTrue(result.toString().matches(".*\\.zip$"), result.toString());
         try {
             HashMap<String, ZipEntry> contents = zipFileContents(result);
+
+            assertTrue(contents.containsKey("diagnostic_manifest.json"),
+                    () -> contents.keySet().stream().collect(Collectors.joining(", ")));
+
             assertTrue(contents.containsKey("manifest.json"));
             if (withLogFile) {
                 assertTrue(contents.containsKey("diagnostics.log"));
@@ -166,16 +170,15 @@ class TestDiagnosticService {
     public void testWithExtraHeaders() {
         setupResponse(true);
 
-        Map extraHeaders = new HashMap<String, String>();
+        Map<String, String> extraHeaders = new HashMap<>();
         extraHeaders.put(headerKey1, headerVal1);
         extraHeaders.put(headerKey2, headerVal2);
         DiagConfig diagConfig = newDiagConfig();
         diagConfig.extraHeaders = extraHeaders;
         DiagnosticService diag = new DiagnosticService();
 
-        try(
-            ResourceCache resourceCache = new ResourceCache();
-        ) {
+        try (
+                ResourceCache resourceCache = new ResourceCache();) {
             DiagnosticContext context = new DiagnosticContext(diagConfig, newDiagnosticInputs(), resourceCache, true);
             File result = diag.exec(context);
             checkResult(result, true);
@@ -190,10 +193,10 @@ class TestDiagnosticService {
 
         DiagnosticService diag = new DiagnosticService();
 
-        try(
-            ResourceCache resourceCache = new ResourceCache();
-        ) {
-            DiagnosticContext context = new DiagnosticContext(newDiagConfig(), newDiagnosticInputs(), resourceCache, true);
+        try (
+                ResourceCache resourceCache = new ResourceCache();) {
+            DiagnosticContext context = new DiagnosticContext(newDiagConfig(), newDiagnosticInputs(), resourceCache,
+                    true);
             File result = diag.exec(context);
             checkResult(result, true);
         } catch (DiagnosticException e) {
@@ -212,8 +215,9 @@ class TestDiagnosticService {
             public void run() {
                 DiagnosticService diag = new DiagnosticService();
 
-                try(ResourceCache resourceCache = new ResourceCache()) {
-                    DiagnosticContext context = new DiagnosticContext(newDiagConfig(), newDiagnosticInputs(), resourceCache, false);
+                try (ResourceCache resourceCache = new ResourceCache()) {
+                    DiagnosticContext context = new DiagnosticContext(newDiagConfig(), newDiagnosticInputs(),
+                            resourceCache, false);
                     File result = diag.exec(context);
                     results.put(i, result);
                 } catch (DiagnosticException e) {
@@ -227,7 +231,7 @@ class TestDiagnosticService {
         Arrays.setAll(threads, i -> new Thread(task.apply(i)));
         Arrays.stream(threads).forEach(Thread::start);
 
-        for (Thread t: threads) {
+        for (Thread t : threads) {
             try {
                 t.join(3000);
             } catch (InterruptedException e) {
@@ -244,12 +248,13 @@ class TestDiagnosticService {
         try {
             Enumeration<File> resultFiles = results.elements();
             // Take one zip file to use as a reference for comparisons with the other ones
-            HashMap<String, ZipEntry> reference = zipFileContents(resultFiles.nextElement());
+            Map<String, ZipEntry> reference = zipFileContents(resultFiles.nextElement());
             while (resultFiles.hasMoreElements()) {
-                HashMap<String, ZipEntry> other = zipFileContents(resultFiles.nextElement());
-                assertEquals(reference.keySet(), other.keySet());
+                Map<String, ZipEntry> other = zipFileContents(resultFiles.nextElement());
+                assertEquals(reference.keySet(), other.keySet(), () -> reference.keySet().stream()
+                        .filter(file -> !other.containsKey(file)).collect(Collectors.joining(", ")));
                 reference.keySet().forEach((key) -> {
-                    if (!key.equals("manifest.json")) {
+                    if (!key.equals("manifest.json") && !key.equals("diagnostic_manifest.json")) {
                         assertEquals(reference.get(key).getSize(), other.get(key).getSize(), key);
                         assertEquals(reference.get(key).getCrc(), other.get(key).getCrc(), key);
                     }

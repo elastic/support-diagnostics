@@ -4,7 +4,7 @@
 
     <groupId>co.elastic.support</groupId>
     <artifactId>diagnostics</artifactId>
-    <version>8.5.1-SNAPSHOT</version>
+    <version>9.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>Support Diagnostics Utilities</name>
     <description>Elastic Support Diagnostics Utilities</description>
@@ -99,7 +99,7 @@
         <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
-            <version>1.33</version>
+            <version>2.0</version>
         </dependency>
 
         <dependency>

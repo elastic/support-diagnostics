@@ -51,7 +51,8 @@ public class RunLogstashQueries extends BaseQuery {
             queries.addAll(entries.values());
             runQueries(client, queries, context.tempDir, 0, 0);
 
-            // Get the information we need to run system calls. It's easier to just get it off disk after all the REST calls run.
+            // Get the information we need to run system calls. It's easier to just get it
+            // off disk after all the REST calls run.
             ProcessProfile nodeProfile = new ProcessProfile();
             context.targetNode = nodeProfile;
 
@@ -69,10 +70,9 @@ public class RunLogstashQueries extends BaseQuery {
             switch (context.diagnosticInputs.diagType) {
                 case Constants.logstashRemote:
                     String targetOS;
-                    if(context.dockerPresent){
+                    if (context.dockerPresent) {
                         targetOS = Constants.linuxPlatform;
-                    }
-                    else{
+                    } else {
                         targetOS = nodeProfile.os;
                     }
                     syscmd = new RemoteSystem(
@@ -85,8 +85,7 @@ public class RunLogstashQueries extends BaseQuery {
                             context.diagnosticInputs.pkiKeystorePass,
                             context.diagnosticInputs.knownHostsFile,
                             context.diagnosticInputs.trustRemote,
-                            context.diagnosticInputs.isSudo
-                    );
+                            context.diagnosticInputs.isSudo);
                     context.resourceCache.addSystemCommand(Constants.systemCommands, syscmd);
                     break;
 
@@ -101,15 +100,16 @@ public class RunLogstashQueries extends BaseQuery {
                     break;
 
                 default:
-                    // If it's not one of the above types it shouldn't be here but try to keep going...
+                    // If it's not one of the above types it shouldn't be here but try to keep
+                    // going...
                     context.runSystemCalls = false;
-                    throw new RuntimeException("Host/Platform check error.");
             }
 
-
         } catch (Throwable t) {
-            logger.error( "Logstash Query error:", t);
-            throw new DiagnosticException(String.format("Error obtaining logstash output and/or process id - will bypass the rest of processing.. %s", Constants.CHECK_LOG));
+            logger.error("Logstash Query error:", t);
+            throw new DiagnosticException(String.format(
+                    "Error obtaining logstash output and/or process id - will bypass the rest of processing.. %s",
+                    Constants.CHECK_LOG));
         }
     }
 }

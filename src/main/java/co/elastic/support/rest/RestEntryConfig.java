@@ -18,46 +18,60 @@ public class RestEntryConfig {
 
     private static final Logger logger = LogManager.getLogger(RestEntryConfig.class);
 
-    Semver semver;
-    public RestEntryConfig(String version){
-        semver = new Semver(version, Semver.SemverType.NPM);
+    private final Semver semver;
+    private final String mode;
+
+    public RestEntryConfig(String version) {
+        this(version, "full");
     }
 
-    public Map<String, RestEntry> buildEntryMap(Map<String, Object> config){
-        Map entries = new LinkedHashMap<>();
-        for(Map.Entry<String, Object> entry: config.entrySet()){
-            RestEntry re = build(entry);
-            if(re.getUrl().equals(RestEntry.MISSING) ){
-                logger.warn( "{} was bypassed due by version check.", re.getName());
-            }
-            else{
-                entries.put(re.getName(), re);
+    public RestEntryConfig(String version, String mode) {
+        this.semver = new Semver(version, Semver.SemverType.NPM);
+        this.mode = mode;
+    }
+
+    public Map<String, RestEntry> buildEntryMap(Map<String, Object> config) {
+        Map<String, RestEntry> entries = new LinkedHashMap<>();
+        for (Map.Entry<String, Object> entry : config.entrySet()) {
+            final String name = entry.getKey();
+            final RestEntry re = build(entry);
+
+            if (re == null) {
+                logger.warn("{} was bypassed due to mode", name);
+            } else if (re.getUrl().equals(RestEntry.MISSING)) {
+                logger.warn("{} was bypassed due to version check.", name);
+            } else {
+                entries.put(name, re);
             }
         }
         return entries;
     }
 
-    public RestEntry build(Map.Entry<String, Object> entry){
-
+    private RestEntry build(Map.Entry<String, Object> entry) {
         String name = entry.getKey();
-        Map<String, Object> values = (Map)entry.getValue();
+        Map<String, Object> values = (Map) entry.getValue();
+
+        // only some diagnostics provide a mode (currently only Elasticsearch)
+        // currently "tags" is a simple string, but if we ever need it to be an
+        // array, then naturally this will need to change
+        if ("full".equals(mode) == false && mode.equals(values.get("tags")) == false) {
+            return null;
+        }
 
         String subdir = (String) ObjectUtils.defaultIfNull(values.get("subdir"), "");
-        String extension = (String)ObjectUtils.defaultIfNull(values.get("extension"), ".json");
-        Boolean retry = (Boolean)ObjectUtils.defaultIfNull(values.get("retry"), false);
-        Boolean showErrors = (Boolean)ObjectUtils.defaultIfNull(values.get("showErrors"), true);
-        Map<String, String> versions = (Map)values.get("versions");
+        String extension = (String) ObjectUtils.defaultIfNull(values.get("extension"), ".json");
+        Boolean retry = (Boolean) ObjectUtils.defaultIfNull(values.get("retry"), false);
+        Boolean showErrors = (Boolean) ObjectUtils.defaultIfNull(values.get("showErrors"), true);
+        Map<String, String> versions = (Map) values.get("versions");
 
         String url = getVersionSpecificUrl(versions);
 
         return new RestEntry(name, subdir, extension, retry, url, showErrors);
-
     }
 
-
-    private String getVersionSpecificUrl(Map<String, String> versions){
-        for(Map.Entry<String, String> urlVersion: versions.entrySet()){
-            if(semver.satisfies(urlVersion.getKey())){
+    private String getVersionSpecificUrl(Map<String, String> versions) {
+        for (Map.Entry<String, String> urlVersion : versions.entrySet()) {
+            if (semver.satisfies(urlVersion.getKey())) {
                 return urlVersion.getValue();
             }
         }

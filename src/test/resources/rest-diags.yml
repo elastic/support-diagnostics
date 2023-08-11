@@ -56,11 +56,10 @@ require-retry:
 
 rest-calls:
   common:
-    nodes: "/_nodes?pretty&human"
+    nodes: "/_nodes?human"
 
   versions:
     major-1:
     major-2:
     major-5:
     major-6:
-

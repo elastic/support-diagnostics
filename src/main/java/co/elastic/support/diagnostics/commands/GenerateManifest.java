@@ -16,25 +16,19 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TimeZone;
 
+/**
+ * Generate a manifest containing the basic runtime info for the diagnostic
+ * runtime.
+ */
 public class GenerateManifest implements Command {
-   /**
-    * Generate a manifest containing the basic runtime info for the diagnostic runtime.
-    * Some of the values we get, like the Diagnostic version will be used again
-    * downstream.
-    */
    private final Logger logger = LogManager.getLogger(GenerateManifest.class);
 
    public void execute(DiagnosticContext context) {
+      logger.info(Constants.CONSOLE, "Writing legacy [manifest.json].");
 
-      // Dump out background information to provide information for potentially debugging the diagnostic if an issue occurs.
-      logger.info(Constants.CONSOLE, "Writing diagnostic manifest.");
       try {
          ObjectMapper mapper = new ObjectMapper();
          mapper.enable(SerializationFeature.INDENT_OUTPUT);
@@ -47,8 +41,7 @@ public class GenerateManifest implements Command {
          manifest.put("diagnosticInputs", context.diagnosticInputs.toString());
          manifest.put("runner", context.diagnosticInputs.runner);
 
-         File manifestFile = new File(context.tempDir + SystemProperties.fileSeparator + "manifest.json");
-         mapper.writeValue(manifestFile, manifest);
+         mapper.writeValue(new File(context.tempDir + SystemProperties.fileSeparator + "manifest.json"), manifest);
       } catch (Exception e) {
          logger.info(Constants.CONSOLE, "Error creating the manifest file", e);
       }

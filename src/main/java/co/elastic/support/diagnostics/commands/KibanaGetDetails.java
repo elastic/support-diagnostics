@@ -24,19 +24,22 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.util.List;
 import java.util.ArrayList;
 
-
 /**
- * {@code KibanaGetDetails} uses the network configuration defined in Kibana Stats API
+ * {@code KibanaGetDetails} uses the network configuration defined in Kibana
+ * Stats API
  * to connect to the Local or Remote instance.
  *
- * If this request fails, then the rest of the diagnostic cannot proceed, as we need to
+ * If this request fails, then the rest of the diagnostic cannot proceed, as we
+ * need to
  * have enough details to connect to Kibana instace.
  */
 public class KibanaGetDetails extends CheckPlatformDetails {
 
     /**
-     * Collect server details from Kibana using the configured {@code context}, and store
+     * Collect server details from Kibana using the configured {@code context}, and
+     * store
      * updated details back into the {@code context}.
+     * 
      * @param context The diagnostic context
      */
     @Override
@@ -54,16 +57,18 @@ public class KibanaGetDetails extends CheckPlatformDetails {
             isKibanaRemoteSystem(context, profiles);
             isKibanaLocalSystem(context, profiles);
 
-           if (context.targetNode == null) {
-                // If it's not one of the above types it shouldn't be here but try to keep going...
+            if (context.targetNode == null) {
+                // If it's not one of the above types it shouldn't be here but try to keep
+                // going...
                 context.runSystemCalls = false;
-                logger.warn(Constants.CONSOLE, "Error occurred checking the network hosts information. Bypassing system calls.");
+                logger.warn(Constants.CONSOLE,
+                        "Error occurred checking the network hosts information. Bypassing system calls.");
                 throw new RuntimeException("Host/Platform check error.");
-           }
+            }
 
         } catch (Exception e) {
             // Try to keep going even if this didn't work.
-            logger.error(Constants.CONSOLE,"Error: {}", e.getMessage());
+            logger.error(Constants.CONSOLE, "Error: {}", e.getMessage());
             logger.error("Error fetching Kibana server details.", e);
             context.runSystemCalls = false;
         }
@@ -74,10 +79,12 @@ public class KibanaGetDetails extends CheckPlatformDetails {
      * we need to check if is a docker process or if is running as any other process
      * Then create a remote system to request the Kibana process
      *
-     * @param  context The current diagnostic context as set in the DiagnosticService class
-     * @param  profiles list of network information for each kibana instance running
+     * @param context  The current diagnostic context as set in the
+     *                 DiagnosticService class
+     * @param profiles list of network information for each kibana instance running
      */
-    private void isKibanaRemoteSystem(DiagnosticContext context, List<ProcessProfile> profiles) throws DiagnosticException {
+    private void isKibanaRemoteSystem(DiagnosticContext context, List<ProcessProfile> profiles)
+            throws DiagnosticException {
         if (!context.diagnosticInputs.diagType.equals(Constants.kibanaRemote)) {
             return;
         }
@@ -87,10 +94,10 @@ public class KibanaGetDetails extends CheckPlatformDetails {
             context.runSystemCalls = false;
             // We really don't have any way of really knowing
             // what the enclosing platform is. So this may fail...
-            logger.warn(Constants.CONSOLE, "Docker detected on remote platform. Linux will be used but if another operating system is present the diagnostic calls may fail.");
+            logger.warn(Constants.CONSOLE,
+                    "Docker detected on remote platform. Linux will be used but if another operating system is present the diagnostic calls may fail.");
             targetOS = Constants.linuxPlatform;
-        }
-        else{
+        } else {
             context.targetNode = findTargetNode(profiles);
             targetOS = context.targetNode.os;
         }
@@ -105,23 +112,22 @@ public class KibanaGetDetails extends CheckPlatformDetails {
                 context.diagnosticInputs.keyfilePassword,
                 context.diagnosticInputs.knownHostsFile,
                 context.diagnosticInputs.trustRemote,
-                context.diagnosticInputs.isSudo
-        ));
+                context.diagnosticInputs.isSudo));
     }
-
 
     /**
      * If Kibana process is running on the same server
      * add a loca system command to be able to execute the API requests
      *
-     * @param  context The current diagnostic context as set in the DiagnosticService class
-     * @param  profiles list of network information for each kibana instance running
+     * @param context  The current diagnostic context as set in the
+     *                 DiagnosticService class
+     * @param profiles list of network information for each kibana instance running
      */
     private void isKibanaLocalSystem(DiagnosticContext context, List<ProcessProfile> profiles) {
         if (!context.diagnosticInputs.diagType.equals(Constants.kibanaLocal)) {
             return;
         }
-        if(context.dockerPresent){
+        if (context.dockerPresent) {
             context.runSystemCalls = false;
             // We do need a system command local to run the docker calls
             SystemCommand syscmd = new LocalSystem(SystemUtils.parseOperatingSystemName(SystemProperties.osName));
@@ -140,11 +146,10 @@ public class KibanaGetDetails extends CheckPlatformDetails {
         context.resourceCache.addSystemCommand(Constants.systemCommands, syscmd);
     }
 
-
     /**
      * Map Kibana / stats API results to the ProcessProfile object.
      *
-     * @param  processInfo all the context sent by the kibana stats API
+     * @param processInfo all the context sent by the kibana stats API
      * @return The network info as defined in the kibana stats API
      */
     public List<ProcessProfile> getNodeNetworkAndLogInfo(JsonNode processInfo) {
@@ -180,13 +185,14 @@ public class KibanaGetDetails extends CheckPlatformDetails {
     /**
      * Get the Kibana server instance's profile.
      *
-     * @param  context
-     * @param  profiles list of network information for each kibana instance running
+     * @param context
+     * @param profiles list of network information for each kibana instance running
      * @return return the profile for the kibana process
      * @throws RuntimeException if there is not exactly one profile.
      */
     private void IsRunningInDocker(DiagnosticContext context, List<ProcessProfile> profiles) {
-        // See if this process is dockerized - if so, don't bother checking for a master to go to
+        // See if this process is dockerized - if so, don't bother checking for a master
+        // to go to
         // because the port information in its output is not reliable.
         for (ProcessProfile profile : profiles) {
             if (profile.isDocker) {
@@ -209,7 +215,7 @@ public class KibanaGetDetails extends CheckPlatformDetails {
             throw new RuntimeException("Unable to get Kibana process profile.");
         }
 
-        return  profiles.get(0);
+        return profiles.get(0);
     }
 
     /**
@@ -222,16 +228,14 @@ public class KibanaGetDetails extends CheckPlatformDetails {
     public JsonNode getStats(DiagnosticContext context) throws DiagnosticException {
 
         RestClient restClient = context.resourceCache.getRestClient(Constants.restInputHost);
-        String url = context.elasticRestCalls.get("kibana_stats").getUrl();
+        String url = context.fullElasticRestCalls.get("kibana_stats").getUrl();
         RestResult result = restClient.execQuery(url);
 
         if (result.getStatus() != 200) {
             throw new DiagnosticException(
-                String.format(
-                    "Kibana responded with [%d] for [%s]. Unable to proceed.",
-                    result.getStatus(), url
-                )
-            );
+                    String.format(
+                            "Kibana responded with [%d] for [%s]. Unable to proceed.",
+                            result.getStatus(), url));
         }
 
         return JsonYamlUtils.createJsonNodeFromString(result.toString());

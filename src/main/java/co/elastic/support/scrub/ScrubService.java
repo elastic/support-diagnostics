@@ -7,7 +7,6 @@
 package co.elastic.support.scrub;
 
 import co.elastic.support.diagnostics.DiagnosticException;
-import co.elastic.support.util.ArchiveUtils;
 import co.elastic.support.util.FileTaskEntry;
 import co.elastic.support.util.SystemProperties;
 import co.elastic.support.util.SystemUtils;
@@ -15,7 +14,6 @@ import co.elastic.support.util.TaskEntry;
 import co.elastic.support.util.ZipFileTaskEntry;
 import co.elastic.support.BaseService;
 import co.elastic.support.Constants;
-import co.elastic.support.util.ArchiveUtils.ArchiveType;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.apache.commons.io.FileUtils;
@@ -53,13 +51,6 @@ public class ScrubService extends BaseService {
             Vector<TaskEntry> entriesToScrub;
             String nodeString = "";
             switch (inputs.type) {
-                case "tar":
-                case "tar.gz":
-                    String extractTarget = inputs.outputDir + SystemProperties.fileSeparator + "extract";
-                    ArchiveUtils.extractArchive(inputs.scrub, extractTarget);
-                    entriesToScrub = collectDirEntries(inputs.scrub, scrubDir);
-                    nodeString = getNodeInfoFromDir(extractTarget);
-                    break;
                 case "zip":
                     entriesToScrub = collectZipEntries(inputs.scrub, scrubDir);
                     nodeString = getNodeInfoFromZip(inputs.scrub);
@@ -69,25 +60,25 @@ public class ScrubService extends BaseService {
                     nodeString = getNodeInfoFromDir(inputs.scrub);
                     break;
                 default:
-                    String rootDir = inputs.scrub.substring(0, inputs.scrub.lastIndexOf(SystemProperties.fileSeparator));
+                    String rootDir = inputs.scrub.substring(0,
+                            inputs.scrub.lastIndexOf(SystemProperties.fileSeparator));
                     entriesToScrub = collectDirEntries(inputs.scrub, rootDir);
             }
 
             ScrubProcessor processor;
-            if(StringUtils.isNotEmpty(nodeString)){
+            if (StringUtils.isNotEmpty(nodeString)) {
                 processor = new ScrubProcessor(nodeString);
-            }
-            else {
+            } else {
                 processor = new ScrubProcessor();
             }
 
             ArrayList<ScrubTask> tasks = new ArrayList<>();
-            for(TaskEntry entry: entriesToScrub ){
+            for (TaskEntry entry : entriesToScrub) {
                 tasks.add(new ScrubTask(processor, entry, scrubDir));
             }
 
             List<Future<String>> futures = executorService.invokeAll(tasks);
-            futures.forEach ( e -> {
+            futures.forEach(e -> {
                 try {
                     logger.debug("processed: " + e.get());
                 } catch (Exception ex) {
@@ -96,7 +87,7 @@ public class ScrubService extends BaseService {
             });
 
             // Finish up by zipping it.
-            return createArchive(scrubDir, ArchiveType.fromString(inputs.archiveType));
+            return createArchive(scrubDir);
         } catch (Throwable throwable) {
             throw new DiagnosticException("Could not scrub archive", throwable);
         } finally {
@@ -118,10 +109,9 @@ public class ScrubService extends BaseService {
             FileUtils.listFiles(file, null, true)
                     .forEach(f -> {
                         TaskEntry te = new FileTaskEntry(f, path);
-                        if(f.isDirectory()){
+                        if (f.isDirectory()) {
                             new File(scrubDir + SystemProperties.fileSeparator + te.entryName()).mkdir();
-                        }
-                        else{
+                        } else {
                             entries.add(te);
                         }
                     });
@@ -140,10 +130,9 @@ public class ScrubService extends BaseService {
             while (entries.hasMoreElements()) {
                 ZipArchiveEntry zae = entries.nextElement();
                 TaskEntry te = new ZipFileTaskEntry(zf, zae, archiveName);
-                if(zae.isDirectory()){
+                if (zae.isDirectory()) {
                     new File(scrubDir + SystemProperties.fileSeparator + te.entryName()).mkdir();
-                }
-                else{
+                } else {
                     archiveEntries.add(te);
                 }
             }
@@ -174,7 +163,7 @@ public class ScrubService extends BaseService {
 
         try {
             File target = new File(dir + SystemProperties.fileSeparator + "nodes.json");
-            if(target.exists()){
+            if (target.exists()) {
                 return FileUtils.readFileToString(target, "UTF-8");
             }
         } catch (IOException e) {

@@ -10,7 +10,6 @@ import co.elastic.support.Constants;
 import co.elastic.support.diagnostics.chain.Command;
 import co.elastic.support.diagnostics.chain.DiagnosticContext;
 import co.elastic.support.util.LocalSystem;
-import co.elastic.support.util.ResourceCache;
 import co.elastic.support.util.SystemCommand;
 import co.elastic.support.util.SystemProperties;
 import co.elastic.support.util.SystemUtils;
@@ -48,11 +47,12 @@ public class CollectDockerInfo implements Command {
 
         // Determine where Docker is located
         String dockerPath = getDockerPath(systemCommand, platform);
-        //String kubePath = getKubectlPath(dockerPath);
+        // String kubePath = getKubectlPath(dockerPath);
 
         // Run the global calls. It's a single pass
         runDockerCalls(targetDir, context.diagsConfig.dockerGlobal, systemCommand, "", dockerPath);
-        //runDockerCalls(targetDir, context.diagsConfig.kubernates, systemCommand, "", kubePath);
+        // runDockerCalls(targetDir, context.diagsConfig.kubernates, systemCommand, "",
+        // kubePath);
 
         String idsCmd = context.diagsConfig.dockerContainerIds;
 
@@ -75,12 +75,12 @@ public class CollectDockerInfo implements Command {
                     return lines;
 
                 } catch (Exception e) {
-                    logger.error( "Error getting directory listing.", e);
+                    logger.error("Error getting directory listing.", e);
                 }
             }
 
         } catch (Exception e) {
-            logger.error( "Error obtaining Docker Container Id's");
+            logger.error("Error obtaining Docker Container Id's");
         }
 
         // If anything happened just bypass processing and continue with the rest.
@@ -88,7 +88,8 @@ public class CollectDockerInfo implements Command {
 
     }
 
-    private void runDockerCalls(String targetDir, Map<String, String> commandMap, SystemCommand sysCmd, String token, String dockerPath) {
+    private void runDockerCalls(String targetDir, Map<String, String> commandMap, SystemCommand sysCmd, String token,
+            String dockerPath) {
         String suffix = "";
         if (StringUtils.isNotEmpty(token)) {
             suffix = "-" + token;
@@ -100,7 +101,8 @@ public class CollectDockerInfo implements Command {
                 cmd = cmd.replace("{{dockerPath}}", dockerPath);
 
                 String output = sysCmd.runCommand(cmd);
-                SystemUtils.writeToFile(output, targetDir + SystemProperties.fileSeparator + entry.getKey() + suffix + ".txt");
+                SystemUtils.writeToFile(output,
+                        targetDir + SystemProperties.fileSeparator + entry.getKey() + suffix + ".txt");
             } catch (Exception e) {
                 logger.error(Constants.CONSOLE, e.getMessage());
             }
@@ -114,11 +116,11 @@ public class CollectDockerInfo implements Command {
             return "docker";
         }
 
-        for(String path: Constants.exePaths){
+        for (String path : Constants.exePaths) {
             String expectedPath = path + "docker";
             String dockerPath = systemCommand.runCommand("ls " + expectedPath);
             dockerPath = dockerPath.trim();
-            if(expectedPath.equalsIgnoreCase(dockerPath)){
+            if (expectedPath.equalsIgnoreCase(dockerPath)) {
                 return dockerPath;
             }
         }
@@ -126,7 +128,7 @@ public class CollectDockerInfo implements Command {
         return "docker";
     }
 
-    private String getKubectlPath(String dockerPath){
+    private String getKubectlPath(String dockerPath) {
 
         return dockerPath.replace("docker", "kubectl");
 

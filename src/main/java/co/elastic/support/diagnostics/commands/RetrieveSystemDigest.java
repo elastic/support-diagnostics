@@ -35,24 +35,24 @@ public class RetrieveSystemDigest implements Command {
     public void execute(DiagnosticContext context) {
         try {
             SystemInfo si = new SystemInfo();
-            HardwareAbstractionLayer hal = si.getHardware();
-            OperatingSystem os = si.getOperatingSystem();
             File sysFileJson = new File(context.tempDir + SystemProperties.fileSeparator + "system-digest.json");
 
             try (
-                OutputStream outputStreamJson = new FileOutputStream(sysFileJson);
-                BufferedWriter jsonWriter = new BufferedWriter(new OutputStreamWriter(outputStreamJson));
-            ) {
-                String jsonInfo = si.toPrettyJSON();
-                jsonWriter.write(jsonInfo);
+                    OutputStream outputStreamJson = new FileOutputStream(sysFileJson);
+                    BufferedWriter jsonWriter = new BufferedWriter(new OutputStreamWriter(outputStreamJson));) {
+                jsonWriter.write(si.toPrettyJSON());
+            } catch (Exception | Error e) {
+                logger.info("Failed saving [system-digest.json] file.", e);
             }
 
             File sysFile = new File(context.tempDir + SystemProperties.fileSeparator + "system-digest.txt");
 
             try (
-                OutputStream outputStream = new FileOutputStream(sysFile);
-                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream));
-            ) {
+                    OutputStream outputStream = new FileOutputStream(sysFile);
+                    BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream));) {
+                HardwareAbstractionLayer hal = si.getHardware();
+                OperatingSystem os = si.getOperatingSystem();
+
                 printComputerSystem(writer, hal.getComputerSystem());
                 writer.newLine();
 
@@ -82,13 +82,14 @@ public class RetrieveSystemDigest implements Command {
             }
 
             logger.info("Finished querying SysInfo.");
-        } catch (final Exception e) {
+        } catch (final Exception | Error e) {
             logger.info("Failed saving system-digest.txt file.", e);
         }
 
     }
 
-    private static void printComputerSystem(BufferedWriter writer, final ComputerSystem computerSystem) throws Exception {
+    private static void printComputerSystem(BufferedWriter writer, final ComputerSystem computerSystem)
+            throws Exception {
 
         writer.write("Computer System");
         writer.newLine();
@@ -164,7 +165,8 @@ public class RetrieveSystemDigest implements Command {
 
     }
 
-    private static void printProcesses(BufferedWriter writer, OperatingSystem os, GlobalMemory memory) throws Exception {
+    private static void printProcesses(BufferedWriter writer, OperatingSystem os, GlobalMemory memory)
+            throws Exception {
         writer.write("Processes");
         writer.newLine();
         writer.write("----------");
@@ -213,7 +215,6 @@ public class RetrieveSystemDigest implements Command {
                 "Context Switches/Interrupts: " + processor.getContextSwitches() + " / " + processor.getInterrupts());
         writer.newLine();
 
-
         long[] prevTicks = processor.getSystemCpuLoadTicks();
 
         writer.write("CPU, IOWait, and IRQ ticks @ 0 sec:" + Arrays.toString(prevTicks));
@@ -242,7 +243,8 @@ public class RetrieveSystemDigest implements Command {
                 100d * iowait / totalCpu, 100d * irq / totalCpu, 100d * softirq / totalCpu, 100d * steal / totalCpu));
         writer.newLine();
 
-        writer.write(String.format("CPU load: %.1f%% (counting ticks)%n", processor.getSystemCpuLoadBetweenTicks() * 100));
+        writer.write(
+                String.format("CPU load: %.1f%% (counting ticks)%n", processor.getSystemCpuLoadBetweenTicks() * 100));
         writer.write(String.format("CPU load: %.1f%% (OS MXBean)%n", processor.getSystemCpuLoad() * 100));
         double[] loadAverage = processor.getSystemLoadAverage(3);
         writer.write("CPU load averages:" + (loadAverage[0] < 0 ? " N/A" : String.format(" %.2f", loadAverage[0]))
@@ -267,7 +269,8 @@ public class RetrieveSystemDigest implements Command {
 
         for (HWDiskStore disk : diskStores) {
             boolean readwrite = disk.getReads() > 0 || disk.getWrites() > 0;
-            writer.write(String.format(" %s: (model: %s - S/N: %s) size: %s, reads: %s (%s), writes: %s (%s), xfer: %s ms%n",
+            writer.write(String.format(
+                    " %s: (model: %s - S/N: %s) size: %s, reads: %s (%s), writes: %s (%s), xfer: %s ms%n",
                     disk.getName(), disk.getModel(), disk.getSerial(),
                     disk.getSize() > 0 ? FormatUtil.formatBytesDecimal(disk.getSize()) : "?",
                     readwrite ? disk.getReads() : "?", readwrite ? FormatUtil.formatBytes(disk.getReadBytes()) : "?",
@@ -298,7 +301,8 @@ public class RetrieveSystemDigest implements Command {
         for (OSFileStore fs : fsArray) {
             long usable = fs.getUsableSpace();
             long total = fs.getTotalSpace();
-            writer.write(String.format(" %s (%s) [%s] %s of %s free (%.1f%%) is %s and is mounted at %s%n", fs.getName(),
+            writer.write(String.format(" %s (%s) [%s] %s of %s free (%.1f%%) is %s and is mounted at %s%n",
+                    fs.getName(),
                     fs.getDescription().isEmpty() ? "file system" : fs.getDescription(), fs.getType(),
                     FormatUtil.formatBytes(usable), FormatUtil.formatBytes(fs.getTotalSpace()), 100d * usable / total,
                     fs.getVolume(), fs.getMount()));
@@ -327,7 +331,8 @@ public class RetrieveSystemDigest implements Command {
         for (NetworkIF net : networkIFs) {
             writer.write(String.format(" Name: %s (%s)%n", net.getName(), net.getDisplayName()));
             writer.write(String.format("   MAC Address: %s %n", net.getMacaddr()));
-            writer.write(String.format("   MTU: %s, Speed: %s %n", net.getMTU(), FormatUtil.formatValue(net.getSpeed(), "bps")));
+            writer.write(String.format("   MTU: %s, Speed: %s %n", net.getMTU(),
+                    FormatUtil.formatValue(net.getSpeed(), "bps")));
             writer.write(String.format("   IPv4: %s %n", Arrays.toString(net.getIPv4addr())));
             writer.write(String.format("   IPv6: %s %n", Arrays.toString(net.getIPv6addr())));
             boolean hasData = net.getBytesRecv() > 0 || net.getBytesSent() > 0 || net.getPacketsRecv() > 0
@@ -344,5 +349,3 @@ public class RetrieveSystemDigest implements Command {
     }
 
 }
-
-

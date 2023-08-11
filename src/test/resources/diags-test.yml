@@ -53,7 +53,7 @@ retries:
 rest-calls:
 
   common:
-    alias: "/_alias?pretty&human"
+    alias: "/_alias?human"
     cat_indices: "/_cat/indices?v"
 
   versions:
@@ -67,7 +67,7 @@ rest-calls:
 
     major-5:
       minor-0:
-        allocation_explain: "/_cluster/allocation/explain?pretty"
+        allocation_explain: "/_cluster/allocation/explain"
       minor-2:
         cat_indices: "_cat/indices?v&s=index"
 
@@ -75,21 +75,21 @@ rest-calls:
       minor-0:
         nodes_usage: "/_nodes/usage"
       minor-5:
-        security_priv: "/_xpack/security/privilege?pretty"
+        security_priv: "/_xpack/security/privilege"
 
 elastic-threads:
-  nodes: "/_nodes?pretty&human"
+  nodes: "/_nodes?human"
   nodes_hot_threads: "/_nodes/hot_threads?threads=10000"
 
 thread-dump:
   jstack: "jstack PID"
 
 logstash:
-  logstash_version: "/?pretty"
-  logstash_node: "/_node?pretty"
-  logstash_node_stats: "/_node/stats?pretty"
+  logstash_version: "/"
+  logstash_node: "/_node"
+  logstash_node_stats: "/_node/stats"
   logstash_nodes_hot_threads: "/_node/hot_threads?human=true&threads=10000"
-  logstash_plugins: "/_node/plugins?pretty"
+  logstash_plugins: "/_node/plugins"
 
 linuxOS:
   top: "top -b -n1"
@@ -131,5 +131,3 @@ winOS:
 winOS-dep:
   jps: "JAVA_HOME\\bin\\jps -l -m -v"
   jstack: "JAVA_HOME\\bin\\jstack PID"
-
-

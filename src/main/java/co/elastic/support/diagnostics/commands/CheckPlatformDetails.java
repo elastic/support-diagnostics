@@ -41,9 +41,9 @@ public class CheckPlatformDetails implements Command {
             RestClient restClient = context.resourceCache.getRestClient(Constants.restInputHost);
 
             // Populate the node metadata
-            Map<String, RestEntry> calls = context.elasticRestCalls;
+            Map<String, RestEntry> calls = context.fullElasticRestCalls;
             RestEntry entry = calls.get("nodes");
-            String url = entry.getUrl().replace("?pretty", "/os,process,settings,transport,http?pretty&human");
+            String url = entry.getUrl().replace("?human", "/os,process,settings,transport,http?human");
             RestResult result = restClient.execQuery(url);
 
             // Initialize to empty node which mimimizes NPE opportunities
@@ -56,7 +56,8 @@ public class CheckPlatformDetails implements Command {
 
             List<ProcessProfile> nodeProfiles = getNodeNetworkAndLogInfo(infoNodes);
 
-            // See if this cluster is dockerized - if so, don't bother checking for a master to go to
+            // See if this cluster is dockerized - if so, don't bother checking for a master
+            // to go to
             // because the port information in its output is not reliable.
             for (ProcessProfile profile : nodeProfiles) {
                 if (profile.isDocker) {
@@ -66,44 +67,50 @@ public class CheckPlatformDetails implements Command {
             }
 
             // Removed temporarily until I put in an option to bypass this feature due to
-            // issue where master was inaccessible via http from another node even though it had http configured.
-/*            if (!context.dockerPresent) {
-                // Get the master node id and flag the master node profile
-                entry = calls.get("master");
-                result = restClient.execQuery(entry.getUrl());
-                JsonNode currentMaster = JsonYamlUtils.mapper.createObjectNode();
-                if (result.getStatus() == 200) {
-                    // Strip off the array brackets since there's only one at each end
-                    String mod = result.toString();
-                    mod = mod.substring(1, (mod.length() - 1));
-                    currentMaster = JsonYamlUtils.createJsonNodeFromString(mod);
-                }
-                String currentMasterId = currentMaster.path("id").asText();
-                ProcessProfile masterNode = findMasterNode(currentMasterId, nodeProfiles);
-
-                // If the master node has an http listener configured then we'll use that for the
-                // REST calls. Set up a rest client and add it to the resources.
-                if (differentInstances(context.diagnosticInputs.host, context.diagnosticInputs.port, masterNode.host, masterNode.httpPort) && masterNode.isHttp) {
-                    RestClient masterRestClient = RestClient.getClient(
-                            masterNode.host,
-                            masterNode.httpPort,
-                            context.diagnosticInputs.scheme,
-                            context.diagnosticInputs.user,
-                            context.diagnosticInputs.password,
-                            context.diagnosticInputs.proxyHost,
-                            context.diagnosticInputs.proxyPort,
-                            context.diagnosticInputs.proxyUser,
-                            context.diagnosticInputs.proxyPassword,
-                            context.diagnosticInputs.pkiKeystore,
-                            context.diagnosticInputs.pkiKeystorePass,
-                            context.diagnosticInputs.skipVerification,
-                            context.diagsConfig.connectionTimeout,
-                            context.diagsConfig.connectionRequestTimeout,
-                            context.diagsConfig.socketTimeout);
-
-                    ResourceCache.addRestClient(Constants.restTargetHost, masterRestClient);
-                }
-            }*/
+            // issue where master was inaccessible via http from another node even though it
+            // had http configured.
+            /*
+             * if (!context.dockerPresent) {
+             * // Get the master node id and flag the master node profile
+             * entry = calls.get("master");
+             * result = restClient.execQuery(entry.getUrl());
+             * JsonNode currentMaster = JsonYamlUtils.mapper.createObjectNode();
+             * if (result.getStatus() == 200) {
+             * // Strip off the array brackets since there's only one at each end
+             * String mod = result.toString();
+             * mod = mod.substring(1, (mod.length() - 1));
+             * currentMaster = JsonYamlUtils.createJsonNodeFromString(mod);
+             * }
+             * String currentMasterId = currentMaster.path("id").asText();
+             * ProcessProfile masterNode = findMasterNode(currentMasterId, nodeProfiles);
+             *
+             * // If the master node has an http listener configured then we'll use that for
+             * the
+             * // REST calls. Set up a rest client and add it to the resources.
+             * if (differentInstances(context.diagnosticInputs.host,
+             * context.diagnosticInputs.port, masterNode.host, masterNode.httpPort) &&
+             * masterNode.isHttp) {
+             * RestClient masterRestClient = RestClient.getClient(
+             * masterNode.host,
+             * masterNode.httpPort,
+             * context.diagnosticInputs.scheme,
+             * context.diagnosticInputs.user,
+             * context.diagnosticInputs.password,
+             * context.diagnosticInputs.proxyHost,
+             * context.diagnosticInputs.proxyPort,
+             * context.diagnosticInputs.proxyUser,
+             * context.diagnosticInputs.proxyPassword,
+             * context.diagnosticInputs.pkiKeystore,
+             * context.diagnosticInputs.pkiKeystorePass,
+             * context.diagnosticInputs.skipVerification,
+             * context.diagsConfig.connectionTimeout,
+             * context.diagsConfig.connectionRequestTimeout,
+             * context.diagsConfig.socketTimeout);
+             *
+             * ResourceCache.addRestClient(Constants.restTargetHost, masterRestClient);
+             * }
+             * }
+             */
 
             SystemCommand syscmd = null;
             switch (context.diagnosticInputs.diagType) {
@@ -114,11 +121,11 @@ public class CheckPlatformDetails implements Command {
                         context.runSystemCalls = false;
                         // We really don't have any way of really knowing
                         // what the enclosing platform is. So this may fail...
-                        logger.warn(Constants.CONSOLE, "Docker containers detected on remote platform - unable to determine host OS. Linux will be used but if another operating system is present the Docker diagnostic calls may fail.");
+                        logger.warn(Constants.CONSOLE,
+                                "Docker containers detected on remote platform - unable to determine host OS. Linux will be used but if another operating system is present the Docker diagnostic calls may fail.");
                         targetOS = Constants.linuxPlatform;
-                        //break;
-                    }
-                    else{
+                        // break;
+                    } else {
                         // check for input host in bound addresses
                         context.targetNode = findRemoteTargetNode(
                                 context.diagnosticInputs.host, nodeProfiles);
@@ -135,14 +142,13 @@ public class CheckPlatformDetails implements Command {
                             context.diagnosticInputs.keyfilePassword,
                             context.diagnosticInputs.knownHostsFile,
                             context.diagnosticInputs.trustRemote,
-                            context.diagnosticInputs.isSudo
-                    );
+                            context.diagnosticInputs.isSudo);
                     context.resourceCache.addSystemCommand(Constants.systemCommands, syscmd);
 
                     break;
 
                 case Constants.local:
-                    if(context.dockerPresent){
+                    if (context.dockerPresent) {
                         context.runSystemCalls = false;
 
                         // We do need a system command local to run the docker calls
@@ -167,17 +173,19 @@ public class CheckPlatformDetails implements Command {
                     break;
 
                 default:
-                    // If it's not one of the above types it shouldn't be here but try to keep going...
+                    // If it's not one of the above types it shouldn't be here but try to keep
+                    // going...
                     context.runSystemCalls = false;
-                    logger.warn(Constants.CONSOLE, "Error occurred checking the network hosts information. Bypassing system calls.");
+                    logger.warn(Constants.CONSOLE,
+                            "Error occurred checking the network hosts information. Bypassing system calls.");
                     throw new RuntimeException("Host/Platform check error.");
 
             }
 
         } catch (Exception e) {
             // Try to keep going even if this didn't work.
-            logger.error(Constants.CONSOLE,"Error: {}", e.getMessage());
-            logger.error( "Error checking node metadata and deployment info.", e);
+            logger.error(Constants.CONSOLE, "Error: {}", e.getMessage());
+            logger.error("Error checking node metadata and deployment info.", e);
             context.runSystemCalls = false;
         }
     }
@@ -199,12 +207,12 @@ public class CheckPlatformDetails implements Command {
         return targetNode;
     }
 
-   /**
-    * Map and extract information for Elasticsearch API / nodes API.
-    *
-    * @param nodesInfo JSON representing <code>GET /_nodes</code>
-    * @return Never {@code null}. Can be empty if no nodes are defined.
-    */
+    /**
+     * Map and extract information for Elasticsearch API / nodes API.
+     *
+     * @param nodesInfo JSON representing <code>GET /_nodes</code>
+     * @return Never {@code null}. Can be empty if no nodes are defined.
+     */
     public List<ProcessProfile> getNodeNetworkAndLogInfo(JsonNode nodesInfo) {
 
         List<ProcessProfile> nodeNetworkInfo = new ArrayList<>();
@@ -254,8 +262,8 @@ public class CheckPlatformDetails implements Command {
                         String addr = bnd.asText();
                         // See if the bound address is a loopback. If so, we don't need it
                         boolean notLoopBack = true;
-                        for(String loopback: Constants.localAddressList){
-                            if(addr.contains(loopback)){
+                        for (String loopback : Constants.localAddressList) {
+                            if (addr.contains(loopback)) {
                                 notLoopBack = false;
                             }
                         }
@@ -269,7 +277,7 @@ public class CheckPlatformDetails implements Command {
                 nodeNetworkInfo.add(diagNode);
             }
         } catch (Exception e) {
-            logger.error( "Error extracting node network addresses from nodes output", e);
+            logger.error("Error extracting node network addresses from nodes output", e);
         }
 
         return nodeNetworkInfo;
@@ -283,7 +291,8 @@ public class CheckPlatformDetails implements Command {
                 .orElse(null);
 
         if (targetNode == null) {
-            logger.warn(Constants.CONSOLE, "Could not match node publish address to specified host. Bypassing system calls");
+            logger.warn(Constants.CONSOLE,
+                    "Could not match node publish address to specified host. Bypassing system calls");
             throw new RuntimeException();
         }
 
@@ -293,13 +302,17 @@ public class CheckPlatformDetails implements Command {
 
     public ProcessProfile findLocalTargetNode(String inputHost, List<ProcessProfile> nodeProfiles) {
 
-        logger.info(Constants.CONSOLE, "Checking the supplied hostname against the node information retrieved to verify location. This may take some time.");
+        logger.info(Constants.CONSOLE,
+                "Checking the supplied hostname against the node information retrieved to verify location. This may take some time.");
 
-        // If the input host was a loopback we need to compare each of the none loopback addresses present
-        // on this host to the set of bound http addresses in each node. If if a non-loopback was input
+        // If the input host was a loopback we need to compare each of the none loopback
+        // addresses present
+        // on this host to the set of bound http addresses in each node. If if a
+        // non-loopback was input
         // we can get away with just comparing that to the bound address list.
-        Set<String> localNetworkInterfaces = excludeLoopback(SystemUtils.getNetworkInterfaces());;
-        if (! Constants.localAddressList.contains(inputHost)) {
+        Set<String> localNetworkInterfaces = excludeLoopback(SystemUtils.getNetworkInterfaces());
+        ;
+        if (!Constants.localAddressList.contains(inputHost)) {
             localNetworkInterfaces.add(inputHost);
         }
 
@@ -328,7 +341,8 @@ public class CheckPlatformDetails implements Command {
         // we extracted.
         for (String localAddr : localAddrs) {
             for (ProcessProfile node : nodeAddrs) {
-                // If this addresses bound to the nics on this host are contained on the current node
+                // If this addresses bound to the nics on this host are contained on the current
+                // node
                 // send back the data object containing the required info.
                 if (node.boundAddresses.contains(localAddr)) {
                     return node;
@@ -337,7 +351,7 @@ public class CheckPlatformDetails implements Command {
         }
 
         // If we got this far and came up empty, signal our displeasure
-        logger.error( "Comparison did not result in an IP or Host match. {} {}", localAddrs, nodeAddrs);
+        logger.error("Comparison did not result in an IP or Host match. {} {}", localAddrs, nodeAddrs);
         throw new RuntimeException("Could not find the target node.");
     }
 
@@ -350,4 +364,3 @@ public class CheckPlatformDetails implements Command {
     }
 
 }
-

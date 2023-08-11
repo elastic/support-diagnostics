@@ -137,7 +137,7 @@ nodes_hot_threads:
 ## Common JSON API's
 alias:
   versions:
-    ">= 0.9.0": "/_alias?pretty&human"
+    ">= 0.9.0": "/_alias?human"
 
 allocation:
   versions:
@@ -145,13 +145,14 @@ allocation:
   showErrors: false
 
 allocation_explain:
+  tags: light
   versions:
-    ">= 5.0.0": "/_cluster/allocation/explain?pretty"
+    ">= 5.0.0": "/_cluster/allocation/explain"
   showErrors: false
 
 allocation_explain_disk:
   versions:
-    ">= 5.0.0": "/_cluster/allocation/explain?include_disk_info=true&pretty"
+    ">= 5.0.0": "/_cluster/allocation/explain?include_disk_info=true"
 
 component_templates:
   retry: true
@@ -164,19 +165,20 @@ count:
 
 cluster_health:
   versions:
-    ">= 0.9.0": "/_cluster/health?pretty"
+    ">= 0.9.0": "/_cluster/health"
 
 cluster_pending_tasks:
   versions:
-    ">= 0.9.0": "/_cluster/pending_tasks?pretty&human"
+    ">= 0.9.0": "/_cluster/pending_tasks?human"
 
 cluster_settings:
   versions:
-    ">= 0.9.0": "/_cluster/settings?pretty&flat_settings"
+    ">= 0.9.0": "/_cluster/settings?flat_settings"
 
 cluster_settings_defaults:
+  tags: light
   versions:
-    ">= 6.4.0": "/_cluster/settings?include_defaults&pretty&flat_settings"
+    ">= 6.4.0": "/_cluster/settings?include_defaults&flat_settings"
 
 cluster_state:
   retry: true
@@ -184,27 +186,29 @@ cluster_state:
     ">= 0.9.0": "/_cluster/state?human"
 
 cluster_stats:
+  tags: light
   versions:
-    ">= 0.9.0": "/_cluster/stats?pretty&human"
+    ">= 0.9.0": "/_cluster/stats?human"
 
 dangling_indices:
   versions:
-    ">= 7.9.0": "/_dangling?pretty&human"
+    ">= 7.9.0": "/_dangling?human"
 
 fielddata:
   versions:
-    ">= 0.9.0": "/_cat/fielddata?format=json&bytes&pretty"
+    ">= 0.9.0": "/_cat/fielddata?format=json&bytes"
 
 fielddata_stats:
   versions:
-    ">= 0.9.0 < 5.0.0": "/_nodes/stats/indices/fielddata?pretty=true&fields=*"
-    ">= 5.0.0": "/_nodes/stats/indices/fielddata?level=shards&pretty=true&fields=*"
+    ">= 0.9.0 < 5.0.0": "/_nodes/stats/indices/fielddata?fields=*"
+    ">= 5.0.0": "/_nodes/stats/indices/fielddata?level=shards&fields=*"
 
 geoip_stats:
   versions:
-    ">= 7.13.0": "/_ingest/geoip/stats?pretty"
+    ">= 7.13.0": "/_ingest/geoip/stats"
 
 index_templates:
+  tags: light
   retry: true
   versions:
     ">= 7.8.0": "/_index_template"
@@ -221,12 +225,13 @@ indices_stats:
     ">= 7.7.0": "/_stats?level=shards&human&expand_wildcards=all"
 
 internal_health:
+  tags: light
   retry: true
   versions:
-    ">= 8.2.0 < 8.3.0": "/_internal/_health?pretty"
-    ">= 8.3.0 < 8.3.0": "/_internal/_health?pretty&explain"
-    ">= 8.6.0 < 8.7.0": "/_internal/_health?pretty"
-    ">=8.7.0": "/_health_report?pretty"
+    ">= 8.2.0 < 8.3.0": "/_internal/_health"
+    ">= 8.3.0 < 8.3.0": "/_internal/_health?explain"
+    ">= 8.6.0 < 8.7.0": "/_internal/_health"
+    ">=8.7.0": "/_health_report"
 
 internal_desired_balance:
   retry: true
@@ -236,11 +241,12 @@ internal_desired_balance:
 licenses:
   versions:
     ">= 1.0.0 < 2.0.0": "/_licenses"
-    ">= 2.0.0 < 7.6.0": "/_license?pretty"
-    ">= 7.6.0 < 8.0.0": "/_license?pretty&accept_enterprise=true"
-    ">= 8.0.0": "/_license?pretty"
+    ">= 2.0.0 < 7.6.0": "/_license"
+    ">= 7.6.0 < 8.0.0": "/_license?accept_enterprise=true"
+    ">= 8.0.0": "/_license"
 
 mapping:
+  tags: light
   versions:
     ">= 0.9.0 < 7.7.0": "/_mapping"
     ">= 7.7.0": "/_mapping?expand_wildcards=all"
@@ -250,26 +256,29 @@ master:
     ">= 0.9.0": "/_cat/master?format=json"
 
 nodes:
+  tags: light
   retry: true
   versions:
-    ">= 0.9.0": "/_nodes?pretty&human"
+    ">= 0.9.0": "/_nodes?human"
 
 nodes_short:
   versions:
     ">= 0.9.0": "/_cat/nodes?format=json&v&full_id&h=name,id,master,ip,role"
 
 nodes_stats:
+  tags: light
   retry: true
   versions:
     ">= 0.9.0": "/_nodes/stats?human"
 
 nodes_usage:
   versions:
-    ">= 6.0.0": "/_nodes/usage?pretty"
+    ">= 6.0.0": "/_nodes/usage"
 
 pipelines:
+  tags: light
   versions:
-    ">= 5.0.0": "/_ingest/pipeline/*?pretty&human"
+    ">= 5.0.0": "/_ingest/pipeline/*?human"
 
 plugins:
   versions:
@@ -277,52 +286,58 @@ plugins:
 
 recovery:
   versions:
-    ">= 0.9.0": "/_recovery?pretty&human&detailed=true"
+    ">= 0.9.0": "/_recovery?human&detailed=true"
 
 remote_cluster_info:
   versions:
     ">= 6.0.0": "/_remote/info"
 
 repositories:
+  tags: light
   versions:
-    ">= 2.0.0": "/_snapshot?pretty"
+    ">= 2.0.0": "/_snapshot"
 
 segments:
   retry: true
   versions:
-    ">= 0.9.0": "/_segments?pretty&human"
+    ">= 0.9.0": "/_segments?human"
 
 settings:
+  tags: light
   retry: true
   versions:
-    ">= 0.9.0 < 7.7.0": "/_settings?pretty&human"
-    ">= 7.7.0": "/_settings?pretty&human&expand_wildcards=all"
+    ">= 0.9.0 < 7.7.0": "/_settings?human"
+    ">= 7.7.0": "/_settings?human&expand_wildcards=all"
 
 shard_stores:
   versions:
-    ">=2.0.0": "/_shard_stores?pretty"
+    ">=2.0.0": "/_shard_stores"
 
 shards:
+  tags: light
   retry: true
   versions:
-    ">=0.9.0": "/_cat/shards?format=json&bytes=b&pretty"
+    ">=0.9.0": "/_cat/shards?format=json&bytes=b"
 
 snapshot:
   versions:
     ">=7.15.0": "/_snapshot/*/*?verbose=false"
 
 ssl_certs:
+  tags: light
   versions:
     ">= 6.2.0 < 7.0.0": "/_xpack/ssl/certificates"
     ">= 7.0.0": "/_ssl/certificates"
 
 tasks:
+  tags: light
   versions:
-    ">=2.0.0": "/_tasks?pretty&human&detailed=true"
+    ">=2.0.0": "/_tasks?human&detailed=true"
 
 templates:
+  tags: light
   versions:
-    ">= 0.9.0": "/_template?pretty"
+    ">= 0.9.0": "/_template"
 
 version:
   retry: true
@@ -333,54 +348,57 @@ version:
 autoscaling_capacity:
   subdir: "commercial"
   versions:
-    ">= 7.11.0": "/_autoscaling/capacity?pretty"
+    ">= 7.11.0": "/_autoscaling/capacity"
 
 ccr_autofollow_patterns:
   subdir: "commercial"
   versions:
-    ">= 6.5.0": "/_ccr/auto_follow?pretty"
+    ">= 6.5.0": "/_ccr/auto_follow"
 
 ccr_follower_info:
   subdir: "commercial"
   versions:
-    ">= 6.7.0": "/_all/_ccr/info?pretty"
+    ">= 6.7.0": "/_all/_ccr/info"
 
 ccr_stats:
   subdir: "commercial"
   versions:
-    ">= 6.5.0": "/_ccr/stats?pretty"
+    ">= 6.5.0": "/_ccr/stats"
 
 enrich_policies:
   subdir: "commercial"
   versions:
-    ">= 7.5.0": "/_enrich/policy?pretty"
+    ">= 7.5.0": "/_enrich/policy"
 
 enrich_stats:
   subdir: "commercial"
   versions:
-    ">= 7.5.0": "/_enrich/_stats?pretty"
+    ">= 7.5.0": "/_enrich/_stats"
 
 ilm_explain:
+  tags: light
   subdir: "commercial"
   versions:
-    ">= 6.6.0 < 7.7.0": "/*/_ilm/explain?human&pretty"
-    ">= 7.7.0": "/*/_ilm/explain?human&pretty&expand_wildcards=all"
+    ">= 6.6.0 < 7.7.0": "/*/_ilm/explain?human"
+    ">= 7.7.0": "/*/_ilm/explain?human&expand_wildcards=all"
 
 ilm_explain_only_errors:
   subdir: "commercial"
   versions:
-    ">= 7.4.0 < 7.7.0": "/*/_ilm/explain?only_errors=true&human&pretty"
-    ">= 7.7.0": "/*/_ilm/explain?only_errors=true&human&pretty&expand_wildcards=all"
+    ">= 7.4.0 < 7.7.0": "/*/_ilm/explain?only_errors=true&human"
+    ">= 7.7.0": "/*/_ilm/explain?only_errors=true&human&expand_wildcards=all"
 
 ilm_policies:
+  tags: light
   subdir: "commercial"
   versions:
-    ">= 6.6.0": "/_ilm/policy?human&pretty"
+    ">= 6.6.0": "/_ilm/policy?human"
 
 ilm_status:
+  tags: light
   subdir: "commercial"
   versions:
-    ">= 6.6.0": "/_ilm/status?pretty"
+    ">= 6.6.0": "/_ilm/status"
 
 logstash_pipeline:
   subdir: "commercial"
@@ -390,56 +408,57 @@ logstash_pipeline:
 ml_anomaly_detectors:
   subdir: "commercial"
   versions:
-    ">= 5.0.0 < 7.0.0": "/_xpack/ml/anomaly_detectors?pretty"
-    ">= 7.0.0": "/_ml/anomaly_detectors?pretty"
+    ">= 5.0.0 < 7.0.0": "/_xpack/ml/anomaly_detectors"
+    ">= 7.0.0": "/_ml/anomaly_detectors"
 
 ml_datafeeds:
   subdir: "commercial"
   versions:
-    ">= 5.0.0 < 7.0.0": "/_xpack/ml/datafeeds?pretty"
-    ">= 7.0.0": "/_ml/datafeeds?pretty"
+    ">= 5.0.0 < 7.0.0": "/_xpack/ml/datafeeds"
+    ">= 7.0.0": "/_ml/datafeeds"
 
 ml_datafeeds_stats:
   subdir: "commercial"
   versions:
-    ">= 7.4.0": "/_ml/datafeeds/_stats?pretty"
+    ">= 7.4.0": "/_ml/datafeeds/_stats"
 
 ml_dataframe:
   subdir: "commercial"
   versions:
-    ">= 7.3.0": "/_ml/data_frame/analytics?pretty"
+    ">= 7.3.0": "/_ml/data_frame/analytics"
 
 ml_dataframe_stats:
   subdir: "commercial"
   versions:
-    ">= 7.3.0": "/_ml/data_frame/analytics/_stats?pretty"
+    ">= 7.3.0": "/_ml/data_frame/analytics/_stats"
 
 ml_info:
   subdir: "commercial"
   versions:
-    ">= 6.3.0 < 7.0.0": "/_xpack/ml/info?pretty"
-    ">= 7.0.0": "/_ml/info?pretty"
+    ">= 6.3.0 < 7.0.0": "/_xpack/ml/info"
+    ">= 7.0.0": "/_ml/info"
 
 ml_stats:
   subdir: "commercial"
   versions:
-    ">= 5.0.0 < 7.0.0": "/_xpack/ml/anomaly_detectors/_stats?pretty"
-    ">= 7.0.0": "/_ml/anomaly_detectors/_stats?pretty"
+    ">= 5.0.0 < 7.0.0": "/_xpack/ml/anomaly_detectors/_stats"
+    ">= 7.0.0": "/_ml/anomaly_detectors/_stats"
 
 ml_trained_models:
   subdir: "commercial"
   versions:
-    ">= 7.10.0": "/_ml/trained_models?pretty"
+    ">= 7.10.0": "/_ml/trained_models"
 
 ml_trained_models_stats:
   subdir: "commercial"
   versions:
-    ">= 7.10.0": "/_ml/trained_models/_stats?pretty"
+    ">= 7.10.0": "/_ml/trained_models/_stats"
 
 nodes_shutdown_status:
+  tags: light
   subdir: "commercial"
   versions:
-    ">= 7.15.0": "/_nodes/shutdown?pretty"
+    ">= 7.15.0": "/_nodes/shutdown"
 
 rollup_jobs:
   subdir: "commercial"
@@ -462,45 +481,47 @@ rollup_index_caps:
 searchable_snapshots_cache_stats:
   subdir: "commercial"
   versions:
-    ">= 7.13.0": "/_searchable_snapshots/cache/stats?pretty&human"
+    ">= 7.13.0": "/_searchable_snapshots/cache/stats?human"
 
 security_priv:
   subdir: "commercial"
   versions:
-    ">= 6.5.0 < 7.0.0": "/_xpack/security/privilege?pretty"
-    ">= 7.0.0": "/_security/privilege?pretty"
+    ">= 6.5.0 < 7.0.0": "/_xpack/security/privilege"
+    ">= 7.0.0": "/_security/privilege"
 
 security_roles:
   subdir: "commercial"
   versions:
-    ">= 2.0.0 < 5.0.0": "/_shield/role?pretty"
-    ">= 5.0.0 < 7.0.0": "/_xpack/security/role?pretty"
-    ">= 7.0.0": "/_security/role?pretty"
+    ">= 2.0.0 < 5.0.0": "/_shield/role"
+    ">= 5.0.0 < 7.0.0": "/_xpack/security/role"
+    ">= 7.0.0": "/_security/role"
 
 security_role_mappings:
   subdir: "commercial"
   versions:
-    ">= 5.0.0 < 7.0.0": "/_xpack/security/role_mapping?pretty"
-    ">= 7.0.0": "/_security/role_mapping?pretty"
+    ">= 5.0.0 < 7.0.0": "/_xpack/security/role_mapping"
+    ">= 7.0.0": "/_security/role_mapping"
 
 security_users:
   subdir: "commercial"
   versions:
-    ">= 2.0.0 < 5.0.0": "/_shield/user?pretty"
-    ">= 5.0.0 < 7.0.0": "/_xpack/security/user?pretty"
-    ">= 7.0.0": "/_security/user?pretty"
+    ">= 2.0.0 < 5.0.0": "/_shield/user"
+    ">= 5.0.0 < 7.0.0": "/_xpack/security/user"
+    ">= 7.0.0": "/_security/user"
 
 slm_policies:
+  tags: light
   subdir: "commercial"
   versions:
-    ">= 7.4.0": "/_slm/policy?pretty&human"
+    ">= 7.4.0": "/_slm/policy?human"
 
 slm_stats:
   subdir: "commercial"
   versions:
-    ">= 7.5.0": "/_slm/stats?pretty"
+    ">= 7.5.0": "/_slm/stats"
 
 slm_status:
+  tags: light
   subdir: "commercial"
   versions:
     ">= 7.6.0": "/_slm/status"
@@ -508,14 +529,14 @@ slm_status:
 transform:
   subdir: "commercial"
   versions:
-    ">= 7.2.0 < 7.5.0": "/_data_frame/transforms?pretty"
-    ">= 7.5.0": "/_transform?pretty"
+    ">= 7.2.0 < 7.5.0": "/_data_frame/transforms"
+    ">= 7.5.0": "/_transform"
 
 transform_stats:
   subdir: "commercial"
   versions:
-    ">= 7.2.0 < 7.5.0": "/_data_frame/transforms/_stats?pretty"
-    ">= 7.5.0": "/_transform/_stats?pretty"
+    ">= 7.2.0 < 7.5.0": "/_data_frame/transforms/_stats"
+    ">= 7.5.0": "/_transform/_stats"
 
 watcher_stats:
   subdir: "commercial"
@@ -534,10 +555,10 @@ watcher_stack:
 xpack:
   subdir: "commercial"
   versions:
-    ">= 5.0.0": "/_xpack/usage?pretty&human"
+    ">= 5.0.0": "/_xpack/usage?human"
 
 data_stream:
   subdir: "commercial"
   versions:
-    ">= 7.9.0 < 7.11.0": "/_data_stream?pretty"
-    ">= 7.11.0": "/_data_stream?pretty&expand_wildcards=all"
+    ">= 7.9.0 < 7.11.0": "/_data_stream"
+    ">= 7.11.0": "/_data_stream?expand_wildcards=all"

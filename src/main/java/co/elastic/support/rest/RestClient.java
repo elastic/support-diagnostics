@@ -42,8 +42,6 @@ import java.io.FileInputStream;
 import java.io.UnsupportedEncodingException;
 import java.security.KeyStore;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 public class RestClient implements Closeable {
 
@@ -56,7 +54,8 @@ public class RestClient implements Closeable {
 
     private Map<String, String> extraHeaders;
 
-    public RestClient(CloseableHttpClient client, HttpHost httpHost, HttpClientContext context, Map<String, String> extraHeaders) {
+    public RestClient(CloseableHttpClient client, HttpHost httpHost, HttpClientContext context,
+            Map<String, String> extraHeaders) {
         this.client = client;
         this.httpHost = httpHost;
         this.httpContext = context;
@@ -86,10 +85,10 @@ public class RestClient implements Closeable {
         try {
             return client.execute(httpHost, httpRequest, httpContext);
         } catch (HttpHostConnectException e) {
-            logger.error( "Host connection error.", e);
+            logger.error("Host connection error.", e);
             throw new RuntimeException("Host connection");
         } catch (Exception e) {
-            logger.error( "Unexpected Execution Error", e);
+            logger.error("Unexpected Execution Error", e);
             throw new RuntimeException(e.getMessage());
         }
     }
@@ -104,13 +103,13 @@ public class RestClient implements Closeable {
             logger.debug(uri + SystemProperties.fileSeparator + payload);
             return execRequest(httpPost);
         } catch (UnsupportedEncodingException e) {
-            logger.error(Constants.CONSOLE,  "Error with json body.", e);
+            logger.error(Constants.CONSOLE, "Error with json body.", e);
             throw new RuntimeException("Could not complete post request.");
         }
     }
 
     public HttpResponse execDelete(String uri) {
-        HttpDelete httpDelete = new HttpDelete( uri);
+        HttpDelete httpDelete = new HttpDelete(uri);
         logger.debug(uri);
 
         return execRequest(httpDelete);
@@ -122,7 +121,7 @@ public class RestClient implements Closeable {
                 client.close();
             }
         } catch (Exception e) {
-            logger.error( "Error occurred closing client connection.");
+            logger.error("Error occurred closing client connection.");
         }
     }
 
@@ -142,9 +141,9 @@ public class RestClient implements Closeable {
             Map<String, String> extraHeaders,
             int connectionTimeout,
             int connectionRequestTimeout,
-            int socketTimeout){
+            int socketTimeout) {
 
-        try{
+        try {
             HttpClientBuilder clientBuilder = HttpClients.custom();
             HttpHost httpHost = new HttpHost(host, port, scheme);
             HttpHost httpProxyHost = null;
@@ -162,14 +161,13 @@ public class RestClient implements Closeable {
                     .setConnectionRequestTimeout(connectionRequestTimeout).build());
 
             // If there's a proxy server, set it now.
-            if(StringUtils.isNotEmpty(proxyHost)){
+            if (StringUtils.isNotEmpty(proxyHost)) {
                 httpProxyHost = new HttpHost(proxyHost, proxyPort);
                 clientBuilder.setProxy(httpProxyHost);
                 basicAuth.processChallenge(new BasicHeader(AUTH.PROXY_AUTH, "BASIC realm=default"));
                 authCache.put(httpProxyHost, basicAuth);
 
-            }
-            else{
+            } else {
                 authCache.put(httpHost, basicAuth);
             }
 
@@ -177,18 +175,16 @@ public class RestClient implements Closeable {
             clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
 
             // If authentication was supplied
-            if(StringUtils.isNotEmpty(user) && StringUtils.isEmpty(proxyUser)){
+            if (StringUtils.isNotEmpty(user) && StringUtils.isEmpty(proxyUser)) {
                 context.setAuthCache(authCache);
                 credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(user, password));
-            }
-            else if(StringUtils.isNotEmpty(user) && StringUtils.isNotEmpty(proxyUser)){
+            } else if (StringUtils.isNotEmpty(user) && StringUtils.isNotEmpty(proxyUser)) {
                 context.setAuthCache(authCache);
                 credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(user, password));
                 credentialsProvider.setCredentials(
                         AuthScope.ANY,
                         new UsernamePasswordCredentials(proxyUser, proxyPassword));
-            }
-            else if (StringUtils.isNotEmpty(proxyUser)){
+            } else if (StringUtils.isNotEmpty(proxyUser)) {
                 context.setAuthCache(authCache);
                 credentialsProvider.setCredentials(
                         AuthScope.ANY,
@@ -197,7 +193,7 @@ public class RestClient implements Closeable {
 
             SSLContextBuilder sslContextBuilder = new SSLContextBuilder();
             sslContextBuilder.loadTrustMaterial(new TrustAllStrategy());
-            if(StringUtils.isNotEmpty(pkiKeystore) ) {
+            if (StringUtils.isNotEmpty(pkiKeystore)) {
                 // If they are using a PKI auth set it up now
                 KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
                 ks.load(new FileInputStream(pkiKeystore), pkiKeystorePass.toCharArray());
@@ -209,8 +205,7 @@ public class RestClient implements Closeable {
             SSLConnectionSocketFactory factory = null;
             if (bypassVerify) {
                 factory = new SSLConnectionSocketFactory(sslCtx, NoopHostnameVerifier.INSTANCE);
-            }
-            else{
+            } else {
                 factory = new SSLConnectionSocketFactory(sslCtx);
             }
             clientBuilder.setSSLSocketFactory(factory);
@@ -229,9 +224,8 @@ public class RestClient implements Closeable {
             RestClient restClient = new RestClient(httpClient, httpHost, context, extraHeaders);
 
             return restClient;
-        }
-        catch (Exception e){
-            logger.error( "Connection setup failed", e);
+        } catch (Exception e) {
+            logger.error("Connection setup failed", e);
             throw new RuntimeException("Error establishing http connection for: " + host, e);
         }
     }
