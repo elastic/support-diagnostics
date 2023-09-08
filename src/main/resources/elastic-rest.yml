@@ -460,6 +460,12 @@ nodes_shutdown_status:
   versions:
     ">= 7.15.0": "/_nodes/shutdown"
 
+profiling_status:
+  tags: light
+  subdir: "commercial"
+  versions:
+    ">= 8.9.0": "/_profiling/status"
+
 rollup_jobs:
   subdir: "commercial"
   versions:
