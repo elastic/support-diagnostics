@@ -32,7 +32,7 @@ jobs:
     - name: Add output files to the Github release
       shell: bash
       run: |
-        gh release upload $TAG target/diagnostics-${TAG:1}-dist.zip target/diagnostics-${TAG:1}-dist.zip.sha1
+        gh release upload $TAG target/diagnostics-${TAG:1}-dist.zip target/diagnostics-${TAG:1}-dist.zip.sha256
       env:
         GITHUB_TOKEN: ${{ github.TOKEN }}
         TAG: ${{ github.event.release.tag_name }}
