@@ -4,7 +4,7 @@
 
     <groupId>co.elastic.support</groupId>
     <artifactId>diagnostics</artifactId>
-    <version>9.0.0-SNAPSHOT</version>
+    <version>9.0.0</version>
     <packaging>jar</packaging>
     <name>Support Diagnostics Utilities</name>
     <description>Elastic Support Diagnostics Utilities</description>
