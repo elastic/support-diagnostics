@@ -12,8 +12,8 @@ Third party libraries used by the Support Diagnostics Utilities:
   Apache Commons Codec under Apache License, Version 2.0
   Apache Commons Collections under Apache License, Version 2.0
   Apache Commons Compress under Apache-2.0
-  Apache Commons IO under Apache License, Version 2.0
-  Apache Commons Lang under Apache License, Version 2.0
+  Apache Commons IO under Apache-2.0
+  Apache Commons Lang under Apache-2.0
   Apache Commons Logging under The Apache Software License, Version 2.0
   Apache Commons Text under Apache License, Version 2.0
   Apache FreeMarker under Apache License, Version 2.0
