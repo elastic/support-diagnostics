@@ -475,14 +475,18 @@ rollup_jobs:
 rollup_caps:
   subdir: "commercial"
   versions:
-    ">= 6.3.0 < 7.0.0": "/_xpack/rollup/data/_all"
-    ">= 7.0.0": "/_rollup/data/_all"
+    # This API was introduced in 6.3.0 but may be harmful to clusters prior to
+    # 8.10.0, see https://github.com/elastic/elasticsearch/issues/92179. If the
+    # fix is backported in future then enable this API on 7.17.x too.
+    ">= 8.10.0": "/_rollup/data/_all"
 
 rollup_index_caps:
   subdir: "commercial"
   versions:
-    ">= 6.5.0 < 7.0.0": "/*/_xpack/rollup/data"
-    ">= 7.0.0": "/*/_rollup/data"
+    # This API was introduced in 6.5.0 but may be harmful to clusters prior to
+    # 8.10.0, see https://github.com/elastic/elasticsearch/issues/92179. If the
+    # fix is backported in future then enable this API on 7.17.x too.
+    ">= 8.10.0": "/*/_rollup/data"
 
 searchable_snapshots_cache_stats:
   subdir: "commercial"
