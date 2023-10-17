@@ -106,7 +106,7 @@ If you are in a rush and don't mind going through a Q&A process you can execute 
 
 #### Diagnostic Types
 
-Elasticseach, Kibana, and Logstash each have three distinct execution modes available when running the diagnostic.
+Elasticsearch, Kibana, and Logstash each have three distinct execution modes available when running the diagnostic.
 
  <table>
  <thead>
@@ -374,7 +374,7 @@ Because there is no native equivalent of ssh or sftp on Windows, this functional
 
  <tr>
    <td width="20%" align="left" valign="top">--sudo</td>
-   <td width="50%" align="left" valign="top">Attempt to run the commands in the remote host via sudo. Only necessary if the account being used for remote access does not have sufficient authority to view the Elasticsearch log files(usually under /var/log/elasticseach). Defaults to false. If no remote password exists and public key was used it will attempt to use the command with no password. </td>
+   <td width="50%" align="left" valign="top">Attempt to run the commands in the remote host via sudo. Only necessary if the account being used for remote access does not have sufficient authority to view the Elasticsearch log files(usually under /var/log/elasticsearch). Defaults to false. If no remote password exists and public key was used it will attempt to use the command with no password. </td>
    <td width="30%" align="left" valign="top">Option only - no value.</td>
  </tr>
 
