@@ -48,7 +48,7 @@ The support diagnostic utility is a Java application that can interrogate a runn
 
 ## Overview - What It Does
 
-When the utility runs it will first check to see if there is a more current version and display an alert message if it is out of date. From there it will connect to the host input in the command line parameters, autheticate if necessary, check the Elasticsearch version, and get a listing of available nodes and their configurations. From there it will run a series of REST API calls specific to the version that was found. If the node configuration info shows a master with an HTTP listener configured all the REST calls will be run against that master. Otherwise the node on the host that was input will be used.
+When the utility runs it will first check to see if there is a more current version and display an alert message if it is out of date. From there it will connect to the host input in the command line parameters, authenticate if necessary, check the Elasticsearch version, and get a listing of available nodes and their configurations. From there it will run a series of REST API calls specific to the version that was found. If the node configuration info shows a master with an HTTP listener configured all the REST calls will be run against that master. Otherwise the node on the host that was input will be used.
 
 Once the REST calls are complete, system calls such as top, netstat, iostat, etc. will be run against the specified host for the appropriate input diagnostic type selected. See specific documentation for more details on those type options. It will also collect logs from the node on the targeted host unless it is in REST API only mode.
 
