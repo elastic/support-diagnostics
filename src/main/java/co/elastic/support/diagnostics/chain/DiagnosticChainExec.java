@@ -10,6 +10,7 @@ import co.elastic.support.diagnostics.DiagnosticException;
 import co.elastic.support.diagnostics.commands.CheckDiagnosticVersion;
 import co.elastic.support.diagnostics.commands.CheckElasticsearchVersion;
 import co.elastic.support.diagnostics.commands.CheckKibanaVersion;
+import co.elastic.support.diagnostics.commands.CheckLogstashVersion;
 import co.elastic.support.diagnostics.commands.CheckPlatformDetails;
 import co.elastic.support.diagnostics.commands.CheckUserAuthLevel;
 import co.elastic.support.diagnostics.commands.CollectDockerInfo;
@@ -70,6 +71,7 @@ public class DiagnosticChainExec {
                 break;
 
             case Constants.logstashLocal:
+                new CheckLogstashVersion().execute(context);
                 new RunLogstashQueries().execute(context);
                 new GenerateLogstashDiagnostics().execute(context);
                 if (context.runSystemCalls) {
@@ -82,6 +84,7 @@ public class DiagnosticChainExec {
                 break;
 
             case Constants.logstashRemote:
+                new CheckLogstashVersion().execute(context);
                 new RunLogstashQueries().execute(context);
                 new GenerateLogstashDiagnostics().execute(context);
                 if (context.runSystemCalls) {
@@ -93,6 +96,7 @@ public class DiagnosticChainExec {
                 break;
 
             case Constants.logstashApi:
+                new CheckLogstashVersion().execute(context);
                 new RunLogstashQueries().execute(context);
                 break;
 

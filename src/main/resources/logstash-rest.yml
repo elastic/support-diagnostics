@@ -26,6 +26,10 @@ logstash_node_stats:
   versions:
     "> 0.0.0": "/_node/stats"
 
+logstash_node_pipelines_graph:
+  versions:
+    ">= 7.6.0": "/_node/pipelines?graph=true"
+
 logstash_nodes_hot_threads:
   versions:
     "> 0.0.0": "/_node/hot_threads?threads=10000"
