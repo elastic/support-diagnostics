@@ -30,7 +30,7 @@ public class ArchiveUtils {
       try (
             FileOutputStream fout = new FileOutputStream(filename);
             ZipArchiveOutputStream taos = new ZipArchiveOutputStream(fout)) {
-         archiveResultsZip(archiveFileName, taos, srcDir, ".", true);
+         archiveResultsZip(archiveFileName, taos, srcDir, null, true);
          logger.info(Constants.CONSOLE, "Archive: " + filename + " was created");
          return file;
       } catch (IOException ioe) {
@@ -44,7 +44,7 @@ public class ArchiveUtils {
          File file,
          String path,
          boolean append) {
-      String relPath = path + "/" + file.getName();
+      String relPath = (path == null ? "" : path + "/") + file.getName();
 
       try {
          if (append) {
