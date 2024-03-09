@@ -61,6 +61,7 @@ public class RunKibanaQueries extends BaseQuery {
             "kibana_security_endpoint_metadata",
             "kibana_security_endpoint_trusted_apps",
             "kibana_security_exception_list",
+            "kibana_synthetics_monitors",
         }
     );
 
@@ -116,7 +117,8 @@ public class RunKibanaQueries extends BaseQuery {
 
         if (
             action.getName().equals("kibana_fleet_agents") ||
-            action.getName().equals("kibana_fleet_agent_policies")
+            action.getName().equals("kibana_fleet_agent_policies") ||
+            action.getName().equals("kibana_synthetics_monitors")
         ) {
             perPageField = "perPage";
         } else if (
