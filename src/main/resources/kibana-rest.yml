@@ -143,9 +143,30 @@ kibana_status:
   versions:
     ">= 5.0.0": "/api/status"
 
+kibana_synthetics_monitor_filters:
+  versions:
+    ">= 8.12.0": "/internal/synthetics/monitor/filters"
+
+# Disabled pending review
+#kibana_synthetics_monitors:
+#  versions:
+#    ">= 8.12.0": "/internal/synthetics/service/monitors"
+
+kibana_synthetics_private_locations:
+  versions:
+    ">= 8.12.0": "/api/synthetics/private_locations"
+
 kibana_task_manager_health:
   versions:
     ">= 7.11.0": "/api/task_manager/_health"
+
+kibana_uptime_locations:
+  versions:
+    ">= 8.12.0": "/internal/uptime/service/locations"
+
+kibana_uptime_settings:
+  versions:
+    ">= 8.12.0": "/api/uptime/settings"
 
 kibana_user:
   versions:
