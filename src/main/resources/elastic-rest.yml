@@ -548,6 +548,11 @@ transform_stats:
     ">= 7.2.0 < 7.5.0": "/_data_frame/transforms/_stats"
     ">= 7.5.0": "/_transform/_stats"
 
+transform_basic_stats:
+  subdir: "commercial"
+  versions:
+    ">= 8.13.0": "/_transform/_stats?basic=true"
+
 watcher_stats:
   subdir: "commercial"
   versions:
