@@ -222,7 +222,7 @@ indices_stats:
   retry: true
   versions:
     ">= 0.9.0 < 7.7.0": "/_stats?level=shards&human"
-    ">= 7.7.0": "/_stats?level=shards&human&expand_wildcards=all"
+    ">= 7.7.0": "/_stats?level=shards&human&expand_wildcards=all&ignore_unavailable=true"
 
 internal_health:
   tags: light
