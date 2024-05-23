@@ -52,8 +52,7 @@ public class DiagnosticApp {
         } catch (ShowHelpException she){
             SystemUtils.quitApp();
         } catch (Exception e) {
-            logger.error(Constants.CONSOLE,"\nFATAL ERROR occurred: {}. {}", e.getMessage(), Constants.CHECK_LOG);
-            logger.error( e);
+            logger.error(Constants.CONSOLE,"FATAL ERROR occurred: {}. {}", e.getMessage(), Constants.CHECK_LOG, e);
         }
     }
 
