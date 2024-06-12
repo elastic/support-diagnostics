@@ -553,6 +553,11 @@ transform_basic_stats:
   versions:
     ">= 8.13.0": "/_transform/_stats?basic=true"
 
+transform_node_stats:
+  subdir: "commercial"
+  versions:
+    ">= 8.15.0": "/_transform/_node_stats"
+
 watcher_stats:
   subdir: "commercial"
   versions:
