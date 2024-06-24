@@ -131,10 +131,11 @@ class TestDiagnosticService {
 
             while (entries.hasMoreElements()) {
                 ZipEntry entry = entries.nextElement();
+                assertFalse(entry.getName().startsWith("./"), entry.getName());
 
                 if (!entry.isDirectory()) {
                     // Add file path without leading directory
-                    contents.put(entry.getName().replaceFirst("^(\\.\\/.+\\/)(.+)", "$2"), entry);
+                    contents.put(entry.getName().replaceFirst("^(.+\\/)(.+)", "$2"), entry);
                 }
             }
 
