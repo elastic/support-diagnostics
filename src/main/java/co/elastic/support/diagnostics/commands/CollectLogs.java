@@ -23,6 +23,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.File;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -71,7 +72,7 @@ public  class CollectLogs implements Command {
                 return;
             }
 
-            fileList.add(logListing);
+            fileList.addAll(Arrays.asList(logListing.split("\n")));
             logStatement = logCalls.get("elastic-arc");
             logStatement = logStatement.replace("{{CLUSTERNAME}}", clusterName);
             logStatement = logStatement.replace("{{LOGPATH}}", logDir);
