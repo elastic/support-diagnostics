@@ -8,55 +8,77 @@ Foundation (http://www.apache.org/).
 Third party libraries used by the Support Diagnostics Utilities:
 ================================================================
 
+  Angus Activation Registries under EDL 1.0
   Apache Commons BeanUtils under Apache License, Version 2.0
   Apache Commons Codec under Apache License, Version 2.0
   Apache Commons Collections under Apache License, Version 2.0
   Apache Commons Compress under Apache-2.0
+  Apache Commons Digester under The Apache Software License, Version 2.0
   Apache Commons IO under Apache-2.0
   Apache Commons Lang under Apache-2.0
-  Apache Commons Logging under The Apache Software License, Version 2.0
+  Apache Commons Logging under Apache-2.0
   Apache Commons Text under Apache License, Version 2.0
   Apache FreeMarker under Apache License, Version 2.0
   Apache HttpClient under Apache License, Version 2.0
   Apache HttpCore under Apache License, Version 2.0
-  Apache Log4j API under Apache License, Version 2.0
-  Apache Log4j Commons Logging Bridge under Apache License, Version 2.0
-  Apache Log4j Core under Apache License, Version 2.0
-  Apache Log4j SLF4J Binding under Apache License, Version 2.0
+  Apache Log4j API under Apache-2.0
+  Apache Log4j Commons Logging Bridge under Apache-2.0
+  Apache Log4j Core under Apache-2.0
+  Apache Log4j SLF4J Binding under Apache-2.0
   Apache Velocity - Engine under Apache License, Version 2.0
   Apache Velocity - JSR 223 Scripting under Apache License, Version 2.0
+  Apache Velocity Tools - Generic tools under Apache License, Version 2.0
+  asm under BSD-3-Clause
   ASM based accessors helper used by json-smart under The Apache Software License, Version 2.0
-  ASM Core under BSD
+  Bouncy Castle ASN.1 Extension and Utility APIs under Bouncy Castle Licence
   Bouncy Castle PKIX, CMS, EAC, TSP, PKCS, OCSP, CMP, and CRMF APIs under Bouncy Castle Licence
   Bouncy Castle Provider under Bouncy Castle Licence
+  btf under Lesser General Public License, version 3 or greater or Apache Software License, version 2.0
+  Checker Qual under The MIT License
+  ClassGraph under The MIT License (MIT)
+  Disruptor Framework under The Apache Software License, Version 2.0
+  error-prone annotations under Apache 2.0
   FindBugs-jsr305 under The Apache Software License, Version 2.0
-  Guava: Google Core Libraries for Java under The Apache Software License, Version 2.0
+  Guava InternalFutureFailureAccess and InternalFutures under The Apache Software License, Version 2.0
+  Guava ListenableFuture only under The Apache Software License, Version 2.0
+  Guava: Google Core Libraries for Java under Apache License, Version 2.0
   Hamcrest Core under New BSD License
+  Internet Time Utility under Apache License, Version 2.0
   istack common utility code runtime under Eclipse Distribution License - v 1.0
+  J2ObjC Annotations under The Apache Software License, Version 2.0
+  Jackson datatype: JSR310 under The Apache Software License, Version 2.0
   Jackson-annotations under The Apache Software License, Version 2.0
   Jackson-core under The Apache Software License, Version 2.0
   jackson-coreutils under Lesser General Public License, version 3 or greater or Apache Software License, version 2.0
+  jackson-coreutils-equivalence under Lesser General Public License, version 3 or greater or Apache Software License, version 2.0
   jackson-databind under The Apache Software License, Version 2.0
+  Jackson-dataformat-YAML under The Apache Software License, Version 2.0
   Jakarta Activation under EDL 1.0
+  Jakarta Activation API under EDL 1.0
+  Jakarta Bean Validation API under Apache License 2.0
   Jakarta XML Binding API under Eclipse Distribution License - v 1.0
   Java Native Access under LGPL, version 2.1 or Apache License v2.0
   Java Native Access Platform under LGPL, version 2.1 or Apache License v2.0
   Java Servlet API under CDDL + GPLv2 with classpath exception
-  JavaBeans Activation Framework (JAF) under Common Development and Distribution License (CDDL) v1.0
+  Java UUID Generator under The Apache Software License, Version 2.0
   JavaBeans Activation Framework API jar under CDDL/GPLv2+CE
-  JavaMail API jar under CDDL or GPLv2+CE
+  JavaMail API (no providers) under CDDL/GPLv2+CE
   JAXB Runtime under Eclipse Distribution License - v 1.0
   jaxb-api under CDDL 1.1 or GPL2 w/ CPE
+  JCIP Annotations under Apache License under Apache License, Version 2.0
   jcommander under Apache License, Version 2.0
   JLine under The BSD License
-  Joda-Time under Apache 2
+  jmustache under The (New) BSD License
+  Joda-Time under Apache License, Version 2.0
   JOpt Simple under The MIT License
-  JSch under Revised BSD
-  JSON library from Android SDK under Apache License 2.0
+  JSch under Revised BSD or Revised BSD or ISC
   JSON Small and Fast Parser under The Apache Software License, Version 2.0
+  json-patch under Lesser General Public License, version 3 or greater or Apache Software License, version 2.0
   json-schema-core under Lesser General Public License, version 3 or greater or Apache Software License, version 2.0
   json-schema-validator under Lesser General Public License, version 3 or greater or Apache Software License, version 2.0
-  JSONassert under The Apache Software License, Version 2.0
+  json-unit-core under The Apache Software License, Version 2.0
+  JSON.simple under The Apache Software License, Version 2.0
+  JsonSchemaValidator under Apache License Version 2.0
   JSR 353 (JSON Processing) Default Provider under Dual license consisting of the CDDL v1.1 and GPL v2
   JUnit under Eclipse Public License 1.0
   JUnit Jupiter API under Eclipse Public License v2.0
@@ -74,22 +96,36 @@ Third party libraries used by the Support Diagnostics Utilities:
   Module awt-color-factory under GNU General Public License, version 2, with the Classpath Exception
   Module text-io under The Apache Software License, Version 2.0
   Mozilla Rhino under Mozilla Public License, Version 2.0
+  msg-simple under Lesser General Public License, version 3 or greater or Apache Software License, version 2.0
   Netty/Buffer under Apache License, Version 2.0
   Netty/Codec under Apache License, Version 2.0
   Netty/Codec/HTTP under Apache License, Version 2.0
+  Netty/Codec/HTTP2 under Apache License, Version 2.0
   Netty/Codec/Socks under Apache License, Version 2.0
   Netty/Common under Apache License, Version 2.0
   Netty/Handler under Apache License, Version 2.0
   Netty/Handler/Proxy under Apache License, Version 2.0
   Netty/Resolver under Apache License, Version 2.0
+  Netty/TomcatNative [BoringSSL - Static] under The Apache Software License, Version 2.0
+  Netty/TomcatNative [OpenSSL - Classes] under The Apache Software License, Version 2.0
   Netty/Transport under Apache License, Version 2.0
-  null under Lesser General Public License, version 3 or greater or Apache Software License, version 2.0
+  Netty/Transport/Native/Unix/Common under Apache License, Version 2.0
+  Nimbus JOSE+JWT under The Apache Software License, Version 2.0
+  Old JAXB Core under Eclipse Distribution License - v 1.0
+  Old JAXB Runtime under Eclipse Distribution License - v 1.0
   org.apiguardian:apiguardian-api under The Apache License, Version 2.0
   org.opentest4j:opentest4j under The Apache License, Version 2.0
   org.xmlunit:xmlunit-core under The Apache Software License, Version 2.0
+  org.xmlunit:xmlunit-placeholders under The Apache Software License, Version 2.0
   oshi-core under MIT License
   oshi-json under MIT License
   project ':json-path' under The Apache Software License, Version 2.0
+  Prometheus Java Simpleclient under The Apache Software License, Version 2.0
+  Prometheus Java Simpleclient Common under The Apache Software License, Version 2.0
+  Prometheus Java Simpleclient Httpserver under The Apache Software License, Version 2.0
+  Prometheus Java Span Context Supplier - Common under The Apache Software License, Version 2.0
+  Prometheus Java Span Context Supplier - OpenTelemetry under The Apache Software License, Version 2.0
+  Prometheus Java Span Context Supplier - OpenTelemetry Agent under The Apache Software License, Version 2.0
   semver4j under The MIT License
   Shared Java 5 Provider Base under Apache License, Version 2.0
   SLF4J API Module under MIT License
@@ -97,5 +133,13 @@ Third party libraries used by the Support Diagnostics Utilities:
   Support Diagnostics Utilities under Elastic License
   SureFire API under Apache License, Version 2.0
   SureFire Logger API under Apache License, Version 2.0
+  swagger-annotations under Apache License 2.0
+  swagger-compat-spec-parser under Apache License 2.0
+  swagger-core under Apache License 2.0
+  swagger-models under Apache License 2.0
+  swagger-parser under Apache License 2.0
+  swagger-parser-v2-converter under Apache License 2.0
+  swagger-parser-v3 under Apache License 2.0
   TXW2 Runtime under Eclipse Distribution License - v 1.0
+  uri-template under Lesser General Public License, version 3 or greater or Apache Software License, version 2.0
 
