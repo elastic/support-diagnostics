@@ -11,7 +11,7 @@ import co.elastic.support.diagnostics.ProcessProfile;
 import co.elastic.support.rest.RestEntry;
 import co.elastic.support.diagnostics.DiagConfig;
 import co.elastic.support.util.ResourceCache;
-import com.vdurmont.semver4j.Semver;
+import org.semver4j.Semver;
 
 import java.util.ArrayList;
 import java.util.List;

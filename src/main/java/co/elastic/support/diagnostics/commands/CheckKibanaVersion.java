@@ -16,10 +16,10 @@ import co.elastic.support.rest.RestResult;
 import co.elastic.support.util.JsonYamlUtils;
 import co.elastic.support.util.SystemProperties;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.vdurmont.semver4j.Semver;
-import com.vdurmont.semver4j.SemverException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.semver4j.Semver;
+import org.semver4j.SemverException;
 
 import java.util.Map;
 
@@ -66,7 +66,7 @@ public class CheckKibanaVersion implements Command {
             // Add it to the global cache - automatically closed on exit.
             context.resourceCache.addRestClient(Constants.restInputHost, restClient);
             context.version = getKibanaVersion(restClient);
-            String version = context.version.getValue();
+            String version = context.version.getVersion();
             RestEntryConfig builder = new RestEntryConfig(version);
             Map restCalls = JsonYamlUtils.readYamlFromClasspath(Constants.KIBANA_REST, true);
 
@@ -107,7 +107,7 @@ public class CheckKibanaVersion implements Command {
         logger.info(Constants.CONSOLE, String.format("Kibana Version is :%s", version));
 
         try {
-            return new Semver(version, Semver.SemverType.NPM);
+            return new Semver(version);
         } catch (SemverException ex) {
             throw new DiagnosticException(
                     String.format("Kibana version format is wrong - unable to continue. (%s)", version));

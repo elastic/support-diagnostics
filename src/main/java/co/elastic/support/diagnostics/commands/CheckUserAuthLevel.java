@@ -16,17 +16,13 @@ import co.elastic.support.rest.RestResult;
 import co.elastic.support.util.JsonYamlUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vdurmont.semver4j.Semver;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.semver4j.Semver;
 
 import java.util.List;
 import java.util.Map;
 
 public class CheckUserAuthLevel implements Command {
-    Logger logger = LogManager.getLogger(CheckUserAuthLevel.class);
-
     @Override
     public void execute(DiagnosticContext context) {
         final String inputUsername = context.diagnosticInputs.user;

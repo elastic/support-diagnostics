@@ -18,9 +18,9 @@ import co.elastic.support.rest.RestResult;
 import co.elastic.support.util.JsonYamlUtils;
 import co.elastic.support.util.SystemProperties;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.vdurmont.semver4j.Semver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.semver4j.Semver;
 
 import java.util.Map;
 
@@ -65,7 +65,7 @@ public class CheckElasticsearchVersion implements Command {
             // Add it to the global cache - automatically closed on exit.
             context.resourceCache.addRestClient(Constants.restInputHost, restClient);
             context.version = getElasticsearchVersion(restClient);
-            String version = context.version.getValue();
+            String version = context.version.getVersion();
             RestEntryConfig builder = new RestEntryConfig(version, inputs.mode);
             Map restCalls = JsonYamlUtils.readYamlFromClasspath(Constants.ES_REST, true);
 
@@ -89,6 +89,6 @@ public class CheckElasticsearchVersion implements Command {
         String result = res.toString();
         JsonNode root = JsonYamlUtils.createJsonNodeFromString(result);
         String version = root.path("version").path("number").asText();
-        return new Semver(version, Semver.SemverType.NPM);
+        return new Semver(version);
     }
 }

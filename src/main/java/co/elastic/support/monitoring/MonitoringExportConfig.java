@@ -10,9 +10,9 @@ package co.elastic.support.monitoring;
 import co.elastic.support.util.SystemProperties;
 import co.elastic.support.BaseConfig;
 import co.elastic.support.Constants;
-import com.vdurmont.semver4j.Semver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.semver4j.Semver;
 
 import java.io.BufferedReader;
 import java.io.IOException;

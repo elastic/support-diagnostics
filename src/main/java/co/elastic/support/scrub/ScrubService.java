@@ -123,7 +123,7 @@ public class ScrubService extends BaseService {
     public Vector<TaskEntry> collectZipEntries(String filename, String scrubDir) {
         Vector<TaskEntry> archiveEntries = new Vector<>();
         try {
-            ZipFile zf = new ZipFile(new File(filename));
+            ZipFile zf = new ZipFile.Builder().setFile(filename).get();
             Enumeration<ZipArchiveEntry> entries = zf.getEntries();
             ZipArchiveEntry ent = entries.nextElement();
             String archiveName = ent.getName();
@@ -148,7 +148,7 @@ public class ScrubService extends BaseService {
     private String getNodeInfoFromZip(String zipFile) {
 
         try {
-            ZipFile zf = new ZipFile(new File(zipFile));
+            ZipFile zf = new ZipFile.Builder().setFile(zipFile).get();
             String rootPath = zf.getEntriesInPhysicalOrder().nextElement().getName();
             ZipArchiveEntry nodeEntry = zf.getEntry(rootPath + "nodes.json");
             return IOUtils.toString(zf.getInputStream(nodeEntry), "UTF-8");

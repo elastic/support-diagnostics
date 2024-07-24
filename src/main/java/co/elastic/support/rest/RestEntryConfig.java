@@ -6,10 +6,10 @@
  */
 package co.elastic.support.rest;
 
-import com.vdurmont.semver4j.Semver;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.semver4j.Semver;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -26,7 +26,7 @@ public class RestEntryConfig {
     }
 
     public RestEntryConfig(String version, String mode) {
-        this.semver = new Semver(version, Semver.SemverType.NPM);
+        this.semver = new Semver(version);
         this.mode = mode;
     }
 

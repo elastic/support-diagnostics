@@ -9,11 +9,9 @@ package co.elastic.support.diagnostics.commands;
 import co.elastic.support.diagnostics.DiagnosticException;
 import org.junit.jupiter.api.Test;
 import org.mockserver.integration.ClientAndServer;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.*;
 import co.elastic.support.rest.RestClient;
-import com.vdurmont.semver4j.Semver;
+import org.semver4j.Semver;
 
 import java.util.Collections;
 
@@ -24,8 +22,6 @@ import static org.mockserver.model.HttpResponse.response;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class TestCheckKibanaVersion {
-
-    private static final Logger logger = LogManager.getLogger(RestClient.class);
     private ClientAndServer mockServer;
     private RestClient httpRestClient, httpsRestClient;
 
@@ -104,14 +100,14 @@ public class TestCheckKibanaVersion {
     public void testQueriesForKibanaWhenStats() throws DiagnosticException {
         initializeKibanaStats("8.1.2");
         Semver version = new CheckKibanaVersion().getKibanaVersion(httpRestClient);
-        assertEquals("8.1.2", version.getValue());
+        assertEquals("8.1.2", version.getVersion());
     }
 
     @Test
     public void testQueriesForKibanaWhenStatsWithRC() throws DiagnosticException {
         initializeKibanaStats("8.0.0-rc2");
         Semver version = new CheckKibanaVersion().getKibanaVersion(httpRestClient);
-        assertEquals("8.0.0-rc2", version.getValue());
+        assertEquals("8.0.0-rc2", version.getVersion());
     }
 
     @Test
@@ -119,7 +115,7 @@ public class TestCheckKibanaVersion {
         initializeKibanaStats("6.5.0");
         initializeKibanaSettings("6.5.0");
         Semver version = new CheckKibanaVersion().getKibanaVersion(httpRestClient);
-        assertEquals("6.5.0", version.getValue());
+        assertEquals("6.5.0", version.getVersion());
     }
 
     /**

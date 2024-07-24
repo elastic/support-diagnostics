@@ -81,7 +81,7 @@ public class MonitoringExportService extends ElasticRestClientService {
                     config.socketTimeout);
 
             config.semver = CheckElasticsearchVersion.getElasticsearchVersion(client);
-            String version = config.semver.getValue();
+            String version = config.semver.getVersion();
             RestEntryConfig builder = new RestEntryConfig(version);
             Map restCalls = JsonYamlUtils.readYamlFromClasspath(Constants.MONITORING_REST, true);
             Map<String, RestEntry> versionedRestCalls = builder.buildEntryMap(restCalls);

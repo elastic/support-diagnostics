@@ -47,8 +47,7 @@ public class GenerateDiagnosticManifest implements Command {
          manifest.put("type", product + "_diagnostic");
          manifest.put("product", product);
          // Logstash does not lookup a version currently
-         manifest.put("version",
-               context.version != null ? context.version.getOriginalValue() : "0.0.0");
+         manifest.put("version", context.version != null ? context.version.getVersion() : "0.0.0");
          manifest.put("timestamp", SystemProperties.getUtcDateTimeString());
          manifest.put("flags", context.diagnosticInputs.toString());
          manifest.put("runner", context.diagnosticInputs.runner);

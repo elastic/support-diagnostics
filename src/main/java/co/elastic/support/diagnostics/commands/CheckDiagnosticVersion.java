@@ -14,10 +14,10 @@ import co.elastic.support.diagnostics.chain.DiagnosticContext;
 import co.elastic.support.rest.RestClient;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.vdurmont.semver4j.Semver;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.semver4j.Semver;
 
 import java.util.List;
 import java.util.Scanner;
@@ -79,7 +79,7 @@ public class CheckDiagnosticVersion implements Command {
             // newer tags are prefixed with `v`, so remove it
             String ver = rootNode.path("tag_name").asText().replaceAll("^v", "");
 
-            Semver diagVer = new Semver(context.diagVersion, Semver.SemverType.NPM);
+            Semver diagVer = new Semver(context.diagVersion);
             String rule = ">= " + ver;
 
             if (!diagVer.satisfies(rule)) {

@@ -15,19 +15,17 @@ import co.elastic.support.util.ArchiveUtils;
 import co.elastic.support.util.JsonYamlUtils;
 import co.elastic.support.util.SystemProperties;
 import co.elastic.support.util.SystemUtils;
-import com.vdurmont.semver4j.Semver;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.semver4j.Semver;
 
 import java.io.File;
 import java.util.Map;
 import java.util.Vector;
 
 public class MonitoringImportService extends ElasticRestClientService {
-
     private Logger logger = LogManager.getLogger(MonitoringImportService.class);
-    private static final String SCROLL_ID = "{ \"scroll_id\" : \"{{scrollId}}\" }";
 
     void execImport(MonitoringImportInputs inputs) throws DiagnosticException {
         Map<String, Object> configMap = JsonYamlUtils.readYamlFromClasspath(Constants.DIAG_CONFIG, true);
