@@ -1,4 +1,4 @@
-FROM maven:3.9.8-eclipse-temurin-17@sha256:411266e0bddf6be39c6fada1c8dc144468a2badbeb32e8effb5b11f0c5a76c33 as builder
+FROM maven:3.9.8-eclipse-temurin-17@sha256:d62e34e458c64b13e7a38ec055264082b4235a1ea2c3b3d881ad04d6ca20311e as builder
 COPY . /support-diagnostics
 WORKDIR /support-diagnostics
 # TODO: fix tests and remove `-DskipTests`
