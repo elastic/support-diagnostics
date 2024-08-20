@@ -106,3 +106,8 @@ buildNumber.properties
 
 
 ./diagnostic-output
+### VSCode
+.vscode/launch.json
+
+### Temporary diags
+*.zip

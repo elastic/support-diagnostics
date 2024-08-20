@@ -13,7 +13,6 @@ import co.elastic.support.diagnostics.chain.DiagnosticContext;
 import co.elastic.support.rest.RestClient;
 import co.elastic.support.rest.RestResult;
 import co.elastic.support.util.JsonYamlUtils;
-import co.elastic.support.util.ResourceCache;
 import co.elastic.support.util.LocalSystem;
 import co.elastic.support.util.RemoteSystem;
 import co.elastic.support.util.SystemProperties;

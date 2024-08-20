@@ -21,12 +21,13 @@ import co.elastic.support.util.SystemProperties;
 import co.elastic.support.util.SystemUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Iterator;
@@ -34,8 +35,7 @@ import java.util.Iterator;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URI;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.nio.file.Paths;
 
 /**
  * RunKibanaQueries executes the version-dependent REST API calls against Kibana.
@@ -43,27 +43,6 @@ import java.util.regex.Pattern;
 public class RunKibanaQueries extends BaseQuery {
 
     private static final Logger logger = LogManager.getLogger(RunKibanaQueries.class);
-
-    /**
-     * Paged actions are explicitally called out because they behave differently
-     * than normal diagnostic behaviors because they need to be called
-     * repeatedly in order to fetch all of the data.
-     */
-    private static final List<String> pagedActions = Arrays.asList(
-        new String[] {
-            "kibana_alerts",
-            "kibana_detection_engine_rules_installed",
-            "kibana_fleet_agent_policies",
-            "kibana_fleet_agents",
-            "kibana_security_endpoint_event_filters",
-            "kibana_security_endpoint_exception_items",
-            "kibana_security_endpoint_host_isolation",
-            "kibana_security_endpoint_metadata",
-            "kibana_security_endpoint_trusted_apps",
-            "kibana_security_exception_list",
-            "kibana_synthetics_monitors",
-        }
-    );
 
     /**
      * Create a new ProcessProfile object and extract the information from fileName to get PID and OS.
@@ -82,6 +61,32 @@ public class RunKibanaQueries extends BaseQuery {
         return profile;
     }
 
+    private List<String> getKibanaSpacesIds(DiagnosticContext context) throws DiagnosticException {
+        RestClient restClient = context.resourceCache.getRestClient(Constants.restInputHost);
+        String url = context.fullElasticRestCalls.get("kibana_spaces").getUrl();
+        RestResult result = restClient.execQuery(url);
+        
+        if (result.getStatus() != 200) {
+            throw new DiagnosticException(String.format(
+                "Kibana responded with [%d] for [%s]. Unable to proceed.",
+                result.getStatus(), url));
+        }
+
+        JsonNode spacesResponse = JsonYamlUtils.createJsonNodeFromString(result.toString());
+        if (!spacesResponse.isArray()) {
+            throw new DiagnosticException("Kibana Spaces API returned an invalid response. A list of Spaces was expected.");
+        }
+        ArrayNode arrayNode = (ArrayNode) spacesResponse;
+        List<String> spacesIds = new ArrayList<>();
+        for (JsonNode node : arrayNode) {
+            JsonNode idNode = node.path("id");
+            if(!idNode.isMissingNode()) {
+                spacesIds.add(idNode.asText());
+            }
+        }
+        return spacesIds;
+    }
+
 
     /**
      * CheckKibanaVersion (executed before) defined/set the context.elasticRestCalls.
@@ -93,17 +98,35 @@ public class RunKibanaQueries extends BaseQuery {
      * @param  context  The current diagnostic context as set in the DiagnosticService class
      * @return Number of HTTP request that will be executed.
      */
-    public int runBasicQueries(RestClient client, DiagnosticContext context) throws DiagnosticException {
+    public int runBasicQueries(RestClient client, DiagnosticContext context, List<String> spacesIds) throws DiagnosticException {
         int totalRetries = 0;
         List<RestEntry> queries = new ArrayList<>();
 
         for (Map.Entry<String, RestEntry> entry : context.elasticRestCalls.entrySet()) {
-            String actionName = entry.getValue().getName().toString();
-
-            if (pagedActions.contains(actionName)) {
-                getAllPages(client, queries, context.perPage, entry.getValue());
+            KibanaUrl url = KibanaUrl.parse(entry.getValue().getUrl());
+            // Remove the modifiers #...
+            entry.getValue().url = url.getUrl();
+            if(url.isSpaceAware()) {
+                for(String spaceId : spacesIds) {
+                    RestEntry tmp = new RestEntry(entry.getValue());
+                    // The calls made for the default Space will be written without a subpath
+                    if(!spaceId.equals("default")) {
+                        tmp.url = String.format("/s/%s%s", spaceId, tmp.getUrl());
+                        // Sanitizing the spaceId to make it "safe" for a filepath
+                        tmp.subdir = Paths.get(tmp.subdir, spaceId.replaceAll("[^a-zA-Z0-9-_]", "")).normalize().toString();
+                    }
+                    if(url.isPaginated()) {
+                        getAllPages(client, queries, context.perPage, tmp, url.getPaginationFieldName());
+                    } else {
+                        queries.add(tmp);
+                    }
+                }
             } else {
-                queries.add(entry.getValue());
+                if(url.isPaginated()) {
+                    getAllPages(client, queries, context.perPage, entry.getValue(),url.getPaginationFieldName());
+                } else {
+                    queries.add(entry.getValue());
+                }
             }
         }
         totalRetries = runQueries(client, queries, context.tempDir, 0, 0);
@@ -111,21 +134,8 @@ public class RunKibanaQueries extends BaseQuery {
         return totalRetries;
     }
 
-    private String getPageUrl(RestEntry action, int page, int perPage) {
+    private String getPageUrl(RestEntry action, int page, int perPage, String perPageField) {
         String actionUrl = action.getUrl();
-        String perPageField = "per_page";
-
-        if (
-            action.getName().equals("kibana_fleet_agents") ||
-            action.getName().equals("kibana_fleet_agent_policies") ||
-            action.getName().equals("kibana_synthetics_monitors")
-        ) {
-            perPageField = "perPage";
-        } else if (
-            action.getName().equals("kibana_security_endpoint_metadata")
-        ) {
-            perPageField = "pageSize";
-        }
 
         final String querystringPrefix = URI.create(actionUrl).getQuery() != null ? "&" : "?";
         final String params = "page=" + page + "&" + perPageField + "=" + perPage;
@@ -143,10 +153,11 @@ public class RunKibanaQueries extends BaseQuery {
      * @param queries we will store the list of queries that need to be executed
      * @param perPage  Number of docusment we reques to the API
      * @param action Kibana API name we are running
+     * @param perPageField 
      */
-    public void getAllPages(RestClient client, List<RestEntry> queries, int perPage, RestEntry action) throws DiagnosticException {
+    public void getAllPages(RestClient client, List<RestEntry> queries, int perPage, RestEntry action, String perPageField) throws DiagnosticException {
         // get the values needed to the pagination (only need the total)
-        String url = getPageUrl(action, 1, 1);
+        String url = getPageUrl(action, 1, 1, perPageField);
 
         // get the values needed to the pagination.
         RestResult res = client.execQuery(url);
@@ -159,11 +170,11 @@ public class RunKibanaQueries extends BaseQuery {
         }
 
         // guarantee at least one page is returned regardless of total
-        queries.add(getNewEntryPage(perPage, 1, action));
+        queries.add(getNewEntryPage(perPage, 1, action, perPageField));
 
         if (totalPages > 1) {
             for (int currentPage = 2; currentPage <= totalPages; ++currentPage) {
-                queries.add(getNewEntryPage(perPage, currentPage, action));
+                queries.add(getNewEntryPage(perPage, currentPage, action, perPageField));
             }
         }
     }
@@ -174,10 +185,18 @@ public class RunKibanaQueries extends BaseQuery {
     * @param  perPage how many events need to be retreived in the response
     * @param  page the apge we are requesting
     * @param  action Kibana API name we are running
+    * @param perPageField 
     * @return new object with the API and params that need to be executed.
     */
-    private RestEntry getNewEntryPage(int perPage, int page, RestEntry action) {
-        return new RestEntry(String.format("%s_%s", action.getName(), page), "", ".json", false, getPageUrl(action, page, perPage), false);
+    private RestEntry getNewEntryPage(int perPage, int page, RestEntry action, String perPageField) {
+        return new RestEntry(
+            String.format("%s_%s", action.getName(), page),
+            action.getSubdir(),
+            action.getExtension(),
+            false,
+            getPageUrl(action, page, perPage, perPageField),
+            false
+        );
     }
 
 
@@ -299,7 +318,8 @@ public class RunKibanaQueries extends BaseQuery {
         try {
             context.perPage         = 100;
             RestClient client       = context.resourceCache.getRestClient(Constants.restInputHost);
-            int totalRetries        = runBasicQueries(client, context);
+            List<String> spacesIds  = getKibanaSpacesIds(context);
+            int totalRetries        = runBasicQueries(client, context, spacesIds);
             filterActionsHeaders(context);
             execSystemCommands(context);
 

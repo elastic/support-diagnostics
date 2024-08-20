@@ -25,6 +25,16 @@ public class RestEntry {
         this.showErrors = showErrors;
     }
 
+    // Copy constructor
+    public RestEntry(RestEntry other) {
+        this.name = other.name;
+        this.subdir = other.subdir;
+        this.extension = other.extension;
+        this.retry = other.retry;
+        this.url = other.url;
+        this.showErrors = other.showErrors;
+    }
+
     public String name;
 
     public String getName() {

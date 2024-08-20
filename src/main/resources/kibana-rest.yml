@@ -11,6 +11,10 @@
 #   NPM mode is the only one used: https://github.com/vdurmont/semver4j
 #   NPM Versioning rules are documented here: https://github.com/npm/node-semver
 #
+#   The API request can be optionally appended with (in order):
+#     * #spaceaware - the API will be collected for every Space of the Kibana instance. The files will be stored in a
+#       dedicated sub-directory having the same name of the Space id
+#     * #paginate[paginationField] - the API must be paginated using the parameter name paginationField
 #   Note to those adding entries: within each group, cat API's, json API's, and commercial, they are in alphabetical order.
 #   Please adhere to this convention when submitting pull requests.
 
@@ -20,7 +24,7 @@ kibana_actions:
 
 kibana_alerts:
   versions:
-    ">= 7.9.0": "/api/alerts/_find"
+    ">= 7.9.0": "/api/alerts/_find#spaceaware#paginate[per_page]"
 
 kibana_alerts_health:
   versions:
@@ -49,7 +53,7 @@ kibana_detection_engine_privileges:
 # Scope: current/default Kibana space.
 kibana_detection_engine_rules_installed:
   versions:
-    ">= 7.6.0": "/api/detection_engine/rules/_find?sort_field=enabled&sort_order=asc"
+    ">= 7.6.0": "/api/detection_engine/rules/_find?sort_field=enabled&sort_order=asc#paginate[per_page]"
 
 # Returns status of prebuilt detection rules: how many of them are installed, can be installed, can be upgraded, etc.
 # Scope: current/default Kibana space.
@@ -61,11 +65,11 @@ kibana_detection_engine_rules_prebuilt_status:
 
 kibana_fleet_agents:
   versions:
-    ">= 7.10.0": "/api/fleet/agents"
+    ">= 7.10.0": "/api/fleet/agents#paginate[perPage]"
 
 kibana_fleet_agent_policies:
   versions:
-    ">= 7.10.0": "/api/fleet/agent_policies"
+    ">= 7.10.0": "/api/fleet/agent_policies#paginate[perPage]"
 
 kibana_fleet_packages:
   versions:
@@ -95,28 +99,28 @@ kibana_roles:
 # These endpoints will return 404 if there are no exceptions
 kibana_security_endpoint_host_isolation:
   versions:
-    ">= 7.14.0": "/api/exception_lists/items/_find?list_id=endpoint_host_isolation_exceptions&namespace_type=agnostic"
+    ">= 7.14.0": "/api/exception_lists/items/_find?list_id=endpoint_host_isolation_exceptions&namespace_type=agnostic#paginate[per_page]"
 
 kibana_security_endpoint_event_filters:
   versions:
-    ">= 7.14.0": "/api/exception_lists/items/_find?list_id=endpoint_event_filters&namespace_type=agnostic"
+    ">= 7.14.0": "/api/exception_lists/items/_find?list_id=endpoint_event_filters&namespace_type=agnostic#paginate[per_page]"
 
 kibana_security_endpoint_exception_items:
   versions:
-    ">= 7.14.0": "/api/exception_lists/items/_find?list_id=endpoint_list&namespace_type=agnostic"
+    ">= 7.14.0": "/api/exception_lists/items/_find?list_id=endpoint_list&namespace_type=agnostic#paginate[per_page]"
 
 kibana_security_endpoint_metadata:
   versions:
-    ">= 8.0.0": "/api/endpoint/metadata"
+    ">= 8.0.0": "/api/endpoint/metadata#paginate[pageSize]"
 
 kibana_security_endpoint_trusted_apps:
   versions:
     ">= 7.10.0 < 7.14.0": "/api/endpoint/trusted_apps"
-    ">= 7.14.0": "/api/exception_lists/items/_find?list_id=endpoint_trusted_apps&namespace_type=agnostic"
+    ">= 7.14.0": "/api/exception_lists/items/_find?list_id=endpoint_trusted_apps&namespace_type=agnostic#paginate[per_page]"
 
 kibana_security_exception_list:
   versions:
-    ">= 7.10.0": "/api/exception_lists/_find?namespace_type=agnostic"
+    ">= 7.10.0": "/api/exception_lists/_find?namespace_type=agnostic#paginate[per_page]"
 
 kibana_security_packages:
   versions:
@@ -150,7 +154,7 @@ kibana_synthetics_monitor_filters:
 # Disabled pending review
 #kibana_synthetics_monitors:
 #  versions:
-#    ">= 8.12.0": "/internal/synthetics/service/monitors"
+#    ">= 8.12.0": "/internal/synthetics/service/monitors#paginate[perPage]"
 
 kibana_synthetics_private_locations:
   versions:
