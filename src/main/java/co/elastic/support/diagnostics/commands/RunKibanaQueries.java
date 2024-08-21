@@ -111,7 +111,7 @@ public class RunKibanaQueries extends BaseQuery {
                     if(!spaceId.equals("default")) {
                         tmp.url = String.format("/s/%s%s", spaceId, tmp.getUrl());
                         // Sanitizing the spaceId to make it "safe" for a filepath
-                        tmp.subdir = Paths.get(tmp.subdir, spaceId.replaceAll("[^a-zA-Z0-9-_]", "")).normalize().toString();
+                        tmp.subdir = Paths.get(tmp.subdir, "space_" + spaceId.replaceAll("[^a-zA-Z0-9-_]", "_")).normalize().toString();
                     }
                     if(current.isPageable()) {
                         getAllPages(client, queries, context.perPage, tmp, current.getPageableFieldName());
