@@ -199,7 +199,9 @@ kibana_synthetics_monitor_filters:
 # Disabled pending review
 #kibana_synthetics_monitors:
 #  versions:
-#    ">= 8.12.0": "/internal/synthetics/service/monitors#paginate[perPage]"
+#    ">= 8.12.0": 
+#      url: "/internal/synthetics/service/monitors"
+#      paginate: perPage
 
 kibana_synthetics_private_locations:
   versions:
