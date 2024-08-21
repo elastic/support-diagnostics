@@ -12,7 +12,6 @@ import co.elastic.support.diagnostics.DiagnosticException;
 import co.elastic.support.diagnostics.chain.DiagnosticContext;
 import co.elastic.support.rest.RestClient;
 import co.elastic.support.rest.RestEntry;
-import co.elastic.support.util.ResourceCache;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

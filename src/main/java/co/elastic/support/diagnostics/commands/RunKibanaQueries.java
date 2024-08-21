@@ -103,27 +103,25 @@ public class RunKibanaQueries extends BaseQuery {
         List<RestEntry> queries = new ArrayList<>();
 
         for (Map.Entry<String, RestEntry> entry : context.elasticRestCalls.entrySet()) {
-            KibanaUrl url = KibanaUrl.parse(entry.getValue().getUrl());
-            // Remove the modifiers #...
-            entry.getValue().url = url.getUrl();
-            if(url.isSpaceAware()) {
+            RestEntry current = entry.getValue();
+            if(current.isSpaceAware()) {
                 for(String spaceId : spacesIds) {
-                    RestEntry tmp = new RestEntry(entry.getValue());
+                    RestEntry tmp = new RestEntry(current);
                     // The calls made for the default Space will be written without a subpath
                     if(!spaceId.equals("default")) {
                         tmp.url = String.format("/s/%s%s", spaceId, tmp.getUrl());
                         // Sanitizing the spaceId to make it "safe" for a filepath
                         tmp.subdir = Paths.get(tmp.subdir, spaceId.replaceAll("[^a-zA-Z0-9-_]", "")).normalize().toString();
                     }
-                    if(url.isPaginated()) {
-                        getAllPages(client, queries, context.perPage, tmp, url.getPaginationFieldName());
+                    if(current.isPageable()) {
+                        getAllPages(client, queries, context.perPage, tmp, current.getPageableFieldName());
                     } else {
                         queries.add(tmp);
                     }
                 }
             } else {
-                if(url.isPaginated()) {
-                    getAllPages(client, queries, context.perPage, entry.getValue(),url.getPaginationFieldName());
+                if(current.isPageable()) {
+                    getAllPages(client, queries, context.perPage, entry.getValue(), current.getPageableFieldName());
                 } else {
                     queries.add(entry.getValue());
                 }

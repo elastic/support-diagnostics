@@ -57,27 +57,37 @@ public class RestEntryConfig {
         if ("full".equals(mode) == false && mode.equals(values.get("tags")) == false) {
             return null;
         }
+        
+        RestEntry tmp = new RestEntry(
+            name,
+            (String) ObjectUtils.defaultIfNull(values.get("subdir"), ""),
+            (String) ObjectUtils.defaultIfNull(values.get("extension"), ".json"),
+            (Boolean) ObjectUtils.defaultIfNull(values.get("retry"), false),
+            RestEntry.MISSING,
+            (Boolean) ObjectUtils.defaultIfNull(values.get("showErrors"), true)
+        );
+        Map<String, Object> versions = (Map) values.get("versions");
+        populateVersionSpecificUrlAndModifiers(versions, tmp);
 
-        String subdir = (String) ObjectUtils.defaultIfNull(values.get("subdir"), "");
-        String extension = (String) ObjectUtils.defaultIfNull(values.get("extension"), ".json");
-        Boolean retry = (Boolean) ObjectUtils.defaultIfNull(values.get("retry"), false);
-        Boolean showErrors = (Boolean) ObjectUtils.defaultIfNull(values.get("showErrors"), true);
-        Map<String, String> versions = (Map) values.get("versions");
-
-        String url = getVersionSpecificUrl(versions);
-
-        return new RestEntry(name, subdir, extension, retry, url, showErrors);
+        return tmp;
     }
 
-    private String getVersionSpecificUrl(Map<String, String> versions) {
-        for (Map.Entry<String, String> urlVersion : versions.entrySet()) {
+    private void populateVersionSpecificUrlAndModifiers(Map<String, Object> versions, RestEntry entry) {
+        for (Map.Entry<String, Object> urlVersion : versions.entrySet()) {
             if (semver.satisfies(urlVersion.getKey())) {
-                return urlVersion.getValue();
+                // We allow it to be String,String or String,Map(url,paginate,spaceaware)
+                if(urlVersion.getValue() instanceof Map) {
+                    Map<String, Object> info = (Map) urlVersion.getValue();
+                    entry.url = (String) ObjectUtils.defaultIfNull(info.get("url"), RestEntry.MISSING);
+                    entry.setPageableFieldName((String)ObjectUtils.defaultIfNull(info.get("paginate"), null));
+                    entry.setSpaceAware((boolean)ObjectUtils.defaultIfNull(info.get("spaceaware"), false));
+                    return;
+                } else if (urlVersion.getValue() instanceof String){
+                    entry.url = (String) urlVersion.getValue();
+                    return;
+                }
             }
         }
-
-        // This can happen if it's older
-        return RestEntry.MISSING;
     }
 
 }
