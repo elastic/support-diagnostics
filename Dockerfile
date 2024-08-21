@@ -5,7 +5,7 @@ WORKDIR /support-diagnostics
 RUN mvn package -DskipTests  
 
 
-FROM eclipse-temurin:21@sha256:1b04dc7cd430939b9444293463363201011379364c4176746a771959f27d90bd_7-jre@sha256:ff6b565d2c0b9050faa7633344421bf09ba3547c8d17e9a85416cbd6a1b66450
+FROM eclipse-temurin:21@sha256:1b04dc7cd430939b9444293463363201011379364c4176746a771959f27d90bd
 RUN mkdir /support-diagnostics
 COPY --from=builder /support-diagnostics/scripts /support-diagnostics
 COPY --from=builder /support-diagnostics/target/lib /support-diagnostics/lib
