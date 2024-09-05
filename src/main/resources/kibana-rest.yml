@@ -27,6 +27,10 @@ kibana_alerts_health:
     ">= 7.11.0 < 7.13.0": "/api/alerts/_health"
     ">= 7.13.0": "/api/alerting/_health"
 
+kibana_data_views:
+  versions:
+    ">= 8.0.0": "/api/data_views"
+
 # Calculates health of Detection Engine and returns a health snapshot.
 # Scope: the whole cluster = all detection rules in all Kibana spaces.
 # https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/common/detection_engine/rule_monitoring/api/detection_engine_health/README.md
