@@ -11,31 +11,45 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class RestEntry {
-
-    private static final Logger logger = LogManager.getLogger(RestEntry.class);
-
     public static final String MISSING = "missing";
 
     public RestEntry(String name, String subdir, String extension, boolean retry, String url, boolean showErrors) {
+        this(name, subdir, extension, retry, url, showErrors, null, false);
+    }
+
+    public RestEntry(
+        String name,
+        String subdir,
+        String extension,
+        boolean retry,
+        String url,
+        boolean showErrors,
+        String pageableFieldName,
+        boolean isSpaceAware
+    ) {
         this.name = name;
         this.subdir = subdir;
         this.extension = extension;
         this.retry = retry;
         this.url = url;
         this.showErrors = showErrors;
+        this.isPageable = pageableFieldName != null;
+        this.pageableFieldName = pageableFieldName;
+        this.isSpaceAware = isSpaceAware;
     }
 
     // Copy constructor
     public RestEntry(RestEntry other) {
-        this.name = other.name;
-        this.subdir = other.subdir;
-        this.extension = other.extension;
-        this.retry = other.retry;
-        this.url = other.url;
-        this.showErrors = other.showErrors;
-        this.isPageable = other.isPageable;
-        this.pageableFieldName = other.pageableFieldName;
-        this.isSpaceAware = other.isSpaceAware;
+        this(
+            other.name,
+            other.subdir,
+            other.extension,
+            other.retry,
+            other.url,
+            other.showErrors,
+            other.pageableFieldName,
+            other.isSpaceAware
+        );
     }
 
     public String name;
@@ -44,7 +58,7 @@ public class RestEntry {
         return name;
     }
 
-    public String  url;
+    public String url;
 
     public String getUrl() {
         return url;
@@ -93,9 +107,7 @@ public class RestEntry {
     }
 
     public void setPageableFieldName(String pageableFieldName) {
-        if(pageableFieldName != null) {
-            this.pageableFieldName = pageableFieldName;
-            this.isPageable = true;
-        }
+        this.pageableFieldName = pageableFieldName;
+        this.isPageable = pageableFieldName != null;
     }
 }
