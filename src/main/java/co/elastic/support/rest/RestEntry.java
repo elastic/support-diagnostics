@@ -38,20 +38,6 @@ public class RestEntry {
         this.isSpaceAware = isSpaceAware;
     }
 
-    // Copy constructor
-    public RestEntry(RestEntry other) {
-        this(
-            other.name,
-            other.subdir,
-            other.extension,
-            other.retry,
-            other.url,
-            other.showErrors,
-            other.pageableFieldName,
-            other.isSpaceAware
-        );
-    }
-
     public String name;
 
     public String getName() {
@@ -109,5 +95,9 @@ public class RestEntry {
     public void setPageableFieldName(String pageableFieldName) {
         this.pageableFieldName = pageableFieldName;
         this.isPageable = pageableFieldName != null;
+    }
+
+    public RestEntry copy() {
+        return new RestEntry(name, subdir, extension, retry, url, showErrors, pageableFieldName, isSpaceAware);
     }
 }
