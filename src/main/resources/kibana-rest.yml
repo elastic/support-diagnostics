@@ -11,7 +11,7 @@
 #         * url - required field representing the API to be used
 #         * spaceaware - optional boolean option representing the fact the field is space aware. IF set, the API will be scraped for each space
 #         * paginate - optional string option representing the pagination field name. If set, the API will be paginated using the field name
-#   
+#
 #   The "semver rules" within "versions" must resolve EXACTLY TO ONE "url/api"
 #   NPM mode is the only one used: https://github.com/vdurmont/semver4j
 #   NPM Versioning rules are documented here: https://github.com/npm/node-semver
@@ -65,8 +65,8 @@ kibana_detection_engine_rules_installed:
 # Scope: current/default Kibana space.
 kibana_detection_engine_rules_prebuilt_status:
   versions:
-    ">= 7.10.0 < 7.15.0":  "/api/detection_engine/prepackaged"
-    ">= 7.15.0 < 8.9.0":  "/api/detection_engine/rules/prepackaged/_status"
+    ">= 7.10.0 < 7.15.0": "/api/detection_engine/prepackaged"
+    ">= 7.15.0 < 8.9.0": "/api/detection_engine/rules/prepackaged/_status"
     ">= 8.9.0": "/internal/detection_engine/prebuilt_rules/status"
 
 kibana_fleet_agents:
