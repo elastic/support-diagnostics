@@ -33,16 +33,27 @@ public class TestRestConfigFileValidity {
         for (Map.Entry<String, Object> entry : config.entrySet()) {
 
             Map<String, Object> values = (Map<String, Object>) entry.getValue();
-            Map<String, String> urls = (Map<String, String>) values.get("versions");
+            Map<String, Object> versions = (Map<String, Object>) values.get("versions");
 
             int valid = 0;
 
             // Urls should have a leading /
             // For each entry there should be at most 1 valid url.
-            for (Map.Entry<String, String> url : urls.entrySet()) {
-                assertTrue(url.getValue().startsWith("/"), url.getValue());
-                if (sem.satisfies(url.getKey())) {
+            for (Map.Entry<String, Object> versionNode : versions.entrySet()) {
+                if (sem.satisfies(versionNode.getKey())) {
                     valid++;
+                }
+                if (versionNode.getValue() instanceof String) {
+                    String urlTmp = (String) versionNode.getValue();
+                    assertTrue(urlTmp.startsWith("/"), urlTmp);
+                } else if (versionNode.getValue() instanceof Map) {
+                    Map<String,Object> tmp = (Map) versionNode.getValue();
+                    String urlTmp = (String) tmp.get("url");
+                    Object spaceawareTmp = tmp.getOrDefault("spaceaware", null);
+                    Object paginate = tmp.getOrDefault("paginate", null);
+                    assertTrue(urlTmp.startsWith("/"), urlTmp);
+                    assertTrue(spaceawareTmp == null || spaceawareTmp instanceof Boolean, "spaceawareTmp is not a Boolean");
+                    assertTrue(paginate == null || paginate instanceof String, "paginate is not a String");
                 }
             }
 

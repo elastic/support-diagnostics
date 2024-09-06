@@ -9,7 +9,6 @@ package co.elastic.support.diagnostics.commands;
 import co.elastic.support.util.JsonYamlUtils;
 import co.elastic.support.util.LocalSystem;
 import co.elastic.support.util.RemoteSystem;
-import co.elastic.support.util.ResourceCache;
 import co.elastic.support.util.SystemCommand;
 import co.elastic.support.util.SystemProperties;
 import co.elastic.support.Constants;
