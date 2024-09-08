@@ -47,9 +47,9 @@ public class RestEntryConfig {
         return entries;
     }
 
+    @SuppressWarnings("unchecked")
     private RestEntry build(Map.Entry<String, Object> entry) {
-        String name = entry.getKey();
-        Map<String, Object> values = (Map) entry.getValue();
+        Map<String, Object> values = (Map<String, Object>) entry.getValue();
 
         // only some diagnostics provide a mode (currently only Elasticsearch)
         // currently "tags" is a simple string, but if we ever need it to be an
@@ -57,37 +57,41 @@ public class RestEntryConfig {
         if ("full".equals(mode) == false && mode.equals(values.get("tags")) == false) {
             return null;
         }
-        
-        RestEntry tmp = new RestEntry(
-            name,
-            (String) ObjectUtils.defaultIfNull(values.get("subdir"), ""),
-            (String) ObjectUtils.defaultIfNull(values.get("extension"), ".json"),
-            (Boolean) ObjectUtils.defaultIfNull(values.get("retry"), false),
-            RestEntry.MISSING,
-            (Boolean) ObjectUtils.defaultIfNull(values.get("showErrors"), true)
-        );
-        Map<String, Object> versions = (Map) values.get("versions");
-        populateVersionSpecificUrlAndModifiers(versions, tmp);
 
-        return tmp;
+        return buildRestEntryForVersion(entry.getKey(), values);
     }
 
-    private void populateVersionSpecificUrlAndModifiers(Map<String, Object> versions, RestEntry entry) {
+    @SuppressWarnings("unchecked")
+    private RestEntry buildRestEntryForVersion(String name, Map<String, Object> entry) {
+        String subdir = (String) ObjectUtils.defaultIfNull(entry.get("subdir"), "");
+        String extension = (String) ObjectUtils.defaultIfNull(entry.get("extension"), ".json");
+        boolean retry = (boolean) ObjectUtils.defaultIfNull(entry.get("retry"), false);
+        boolean showErrors = (boolean) ObjectUtils.defaultIfNull(entry.get("showErrors"), true);
+
+        Map<String, Object> versions = (Map<String, Object>) entry.get("versions");
+
         for (Map.Entry<String, Object> urlVersion : versions.entrySet()) {
             if (semver.satisfies(urlVersion.getKey())) {
-                // We allow it to be String,String or String,Map(url,paginate,spaceaware)
-                if(urlVersion.getValue() instanceof Map) {
-                    Map<String, Object> info = (Map) urlVersion.getValue();
-                    entry.url = (String) ObjectUtils.defaultIfNull(info.get("url"), RestEntry.MISSING);
-                    entry.setPageableFieldName((String)ObjectUtils.defaultIfNull(info.get("paginate"), null));
-                    entry.setSpaceAware((boolean)ObjectUtils.defaultIfNull(info.get("spaceaware"), false));
-                    return;
-                } else if (urlVersion.getValue() instanceof String){
-                    entry.url = (String) urlVersion.getValue();
-                    return;
+                if (urlVersion.getValue() instanceof String) {
+                    return new RestEntry(name, subdir, extension, retry, (String) urlVersion.getValue(), showErrors);
+                    // We allow it to be String,String or String,Map(url,paginate,spaceaware)
+                } else if (urlVersion.getValue() instanceof Map) {
+                    Map<String, Object> info = (Map<String, Object>) urlVersion.getValue();
+
+                    String url = (String) ObjectUtils.defaultIfNull(info.get("url"), null);
+
+                    if (url == null) {
+                        throw new RuntimeException("Undefined URL for REST entry (route)");
+                    }
+
+                    String pageableFieldName = (String) ObjectUtils.defaultIfNull(info.get("paginate"), null);
+                    boolean spaceAware = (boolean) ObjectUtils.defaultIfNull(info.get("spaceaware"), false);
+
+                    return new RestEntry(name, subdir, extension, retry, url, showErrors, pageableFieldName, spaceAware);
                 }
             }
         }
-    }
 
+        return null;
+    }
 }

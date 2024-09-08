@@ -14,6 +14,7 @@ import org.semver4j.Semver;
 import java.util.Arrays;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TestRestConfigFileValidity {
@@ -31,7 +32,6 @@ public class TestRestConfigFileValidity {
     @SuppressWarnings("unchecked")
     private void validateEntries(String file, Map<String, Object> config) {
         for (Map.Entry<String, Object> entry : config.entrySet()) {
-
             Map<String, Object> values = (Map<String, Object>) entry.getValue();
             Map<String, Object> versions = (Map<String, Object>) values.get("versions");
 
@@ -43,23 +43,25 @@ public class TestRestConfigFileValidity {
                 if (sem.satisfies(versionNode.getKey())) {
                     valid++;
                 }
+
                 if (versionNode.getValue() instanceof String) {
-                    String urlTmp = (String) versionNode.getValue();
-                    assertTrue(urlTmp.startsWith("/"), urlTmp);
+                    String url = (String) versionNode.getValue();
+                    assertTrue(url.startsWith("/"), url);
                 } else if (versionNode.getValue() instanceof Map) {
-                    Map<String,Object> tmp = (Map) versionNode.getValue();
-                    String urlTmp = (String) tmp.get("url");
-                    Object spaceawareTmp = tmp.getOrDefault("spaceaware", null);
-                    Object paginate = tmp.getOrDefault("paginate", null);
-                    assertTrue(urlTmp.startsWith("/"), urlTmp);
-                    assertTrue(spaceawareTmp == null || spaceawareTmp instanceof Boolean, "spaceawareTmp is not a Boolean");
+                    Map<String,Object> entryVersion = (Map<String,Object>) versionNode.getValue();
+                    String url = (String) entryVersion.get("url");
+                    Object spaceaware = entryVersion.get("spaceaware");
+                    Object paginate = entryVersion.get("paginate");
+
+                    assertNotNull(url, entry.getKey() + "[" + versionNode.getKey() + "]");
+                    assertTrue(url.startsWith("/"), url);
+                    assertTrue(spaceaware == null || spaceaware instanceof Boolean, "spaceaware is not a Boolean");
                     assertTrue(paginate == null || paginate instanceof String, "paginate is not a String");
                 }
             }
 
             // should be at most 1 valid URL (0 if it's not available anymore)
             assertTrue(valid <= 1, "[" + file +  "][" + entry.getKey() + "] matches " + valid);
-
         }
 
     }

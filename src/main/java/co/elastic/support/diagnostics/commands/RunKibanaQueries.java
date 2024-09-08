@@ -99,37 +99,39 @@ public class RunKibanaQueries extends BaseQuery {
      * @return Number of HTTP request that will be executed.
      */
     public int runBasicQueries(RestClient client, DiagnosticContext context, List<String> spacesIds) throws DiagnosticException {
-        int totalRetries = 0;
         List<RestEntry> queries = new ArrayList<>();
 
         for (Map.Entry<String, RestEntry> entry : context.elasticRestCalls.entrySet()) {
             RestEntry current = entry.getValue();
-            if(current.isSpaceAware()) {
-                for(String spaceId : spacesIds) {
-                    RestEntry tmp = new RestEntry(current);
+            if (current.isSpaceAware()) {
+                for (String spaceId : spacesIds) {
+                    RestEntry restEntry = current;
+
                     // The calls made for the default Space will be written without a subpath
-                    if(!spaceId.equals("default")) {
-                        tmp.url = String.format("/s/%s%s", spaceId, tmp.getUrl());
-                        // Sanitizing the spaceId to make it "safe" for a filepath
-                        tmp.subdir = Paths.get(tmp.subdir, "space_" + spaceId.replaceAll("[^a-zA-Z0-9-_]", "_")).normalize().toString();
+                    if (!"default".equals(spaceId)) {
+                        String url = String.format("/s/%s%s", spaceId, restEntry.getUrl());
+                        String subdir = Paths.get(
+                            restEntry.getSubdir(),
+                            "space_" + spaceId.replaceAll("[^a-zA-Z0-9-_]", "_")
+                        ).normalize().toString();
+
+                        restEntry = current.copyWithNewUrl(url, subdir);
                     }
-                    if(current.isPageable()) {
-                        getAllPages(client, queries, context.perPage, tmp, current.getPageableFieldName());
+
+                    if (restEntry.isPageable()) {
+                        getAllPages(client, queries, context.perPage, restEntry, current.getPageableFieldName());
                     } else {
-                        queries.add(tmp);
+                        queries.add(restEntry);
                     }
                 }
+            } else if (current.isPageable()) {
+                getAllPages(client, queries, context.perPage, entry.getValue(), current.getPageableFieldName());
             } else {
-                if(current.isPageable()) {
-                    getAllPages(client, queries, context.perPage, entry.getValue(), current.getPageableFieldName());
-                } else {
-                    queries.add(entry.getValue());
-                }
+                queries.add(entry.getValue());
             }
         }
-        totalRetries = runQueries(client, queries, context.tempDir, 0, 0);
 
-        return totalRetries;
+        return runQueries(client, queries, context.tempDir, 0, 0);
     }
 
     private String getPageUrl(RestEntry action, int page, int perPage, String perPageField) {
