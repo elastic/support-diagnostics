@@ -85,7 +85,7 @@ public class MonitoringExportService extends ElasticRestClientService {
             RestEntryConfig builder = new RestEntryConfig(version);
             Map restCalls = JsonYamlUtils.readYamlFromClasspath(Constants.MONITORING_REST, true);
             Map<String, RestEntry> versionedRestCalls = builder.buildEntryMap(restCalls);
-            monitoringUri = versionedRestCalls.get("monitoring-uri").url;
+            monitoringUri = versionedRestCalls.get("monitoring-uri").getUrl();
 
             if (inputs.listClusters) {
                 logger.info(Constants.CONSOLE, "Displaying a list of available clusters.");
@@ -226,9 +226,9 @@ public class MonitoringExportService extends ElasticRestClientService {
         List<String> statsFields = config.getStatsByType(inputs.type);
 
         String monitoringScroll = Long.toString(config.monitoringScrollSize);
-        String monitoringStartUri = restCalls.get("monitoring-start-scroll-uri").url;
-        String metricbeatStartUri = restCalls.get("metricbeat-start-scroll-uri").url;
-        String monitoringScrollUri = restCalls.get("monitoring-scroll-uri").url;
+        String monitoringStartUri = restCalls.get("monitoring-start-scroll-uri").getUrl();
+        String metricbeatStartUri = restCalls.get("metricbeat-start-scroll-uri").getUrl();
+        String monitoringScrollUri = restCalls.get("monitoring-scroll-uri").getUrl();
 
         for (String stat : statsFields) {
             String startUri;

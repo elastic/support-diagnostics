@@ -109,11 +109,13 @@ public class RunKibanaQueries extends BaseQuery {
 
                     // The calls made for the default Space will be written without a subpath
                     if (!"default".equals(spaceId)) {
-                        restEntry = current.copy();
+                        String url = String.format("/s/%s%s", spaceId, restEntry.getUrl());
+                        String subdir = Paths.get(
+                            restEntry.getSubdir(),
+                            "space_" + spaceId.replaceAll("[^a-zA-Z0-9-_]", "_")
+                        ).normalize().toString();
 
-                        restEntry.url = String.format("/s/%s%s", spaceId, restEntry.getUrl());
-                        // Sanitizing the spaceId to make it "safe" for a filepath
-                        restEntry.subdir = Paths.get(restEntry.subdir, "space_" + spaceId.replaceAll("[^a-zA-Z0-9-_]", "_")).normalize().toString();
+                        restEntry = current.copyWithNewUrl(url, subdir);
                     }
 
                     if (restEntry.isPageable()) {
