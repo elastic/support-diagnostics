@@ -1,5 +1,6 @@
 # Build files
 build
+diagnostic-output
 target
 
 # Support files
