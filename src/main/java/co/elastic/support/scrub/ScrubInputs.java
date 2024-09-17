@@ -20,16 +20,21 @@ import java.io.File;
 import java.util.Collections;
 import java.util.List;
 
-
 public class ScrubInputs extends BaseInputs {
 
-    private static Logger logger = LogManager.getLogger(ScrubInputs.class);
+    private static final Logger logger = LogManager.getLogger(ScrubInputs.class);
 
     // Start Input Fields
-    @Parameter(names = {"-i", "--input"}, description = "Required field. Full path to the archive file, directory, or individual file to be scrubbed.")
+    @Parameter(
+        names = { "-i", "--input" },
+        description = "Required field. Full path to the archive file, directory, or individual file to be scrubbed."
+    )
     public String scrub;
 
-    @Parameter(names = {"--workers"}, description = "Optional field. How many processing instances to run. Defaults to the number of detected cores.")
+    @Parameter(
+        names = { "--workers" },
+        description = "Optional field. How many processing instances to run. Defaults to the number of detected cores."
+    )
     public int workers = Runtime.getRuntime().availableProcessors();
 
     // End Input Fields
@@ -41,17 +46,20 @@ public class ScrubInputs extends BaseInputs {
     public boolean runInteractive(TextIOManager textIOManager) {
 
         scrub = textIOManager.textIO.newStringInputReader()
-                .withInputTrimming(true)
-                .withValueChecker((String val, String propname) -> validateScrubInput(val))
-                .read("Enter the full path of the archive you wish to import.");
+            .withInputTrimming(true)
+            .withValueChecker((String val, String propname) -> validateScrubInput(val))
+            .read("Enter the full path of the archive you wish to import.");
 
         workers = textIOManager.textIO.newIntInputReader()
-                .withMinVal(0)
-                .withDefaultValue(workers)
-                .read("Enter the number of workers to run in parallel. Defaults to the detected number of processors: " + workers);
+            .withMinVal(0)
+            .withDefaultValue(workers)
+            .read("Enter the number of workers to run in parallel. Defaults to the detected number of processors: " + workers);
 
         logger.info(Constants.CONSOLE, "");
-        logger.info(Constants.CONSOLE, "The utility will obfuscate IP and MAC addresses by default. You do NOT need to configure that functionality.");
+        logger.info(
+            Constants.CONSOLE,
+            "The utility will obfuscate IP and MAC addresses by default. You do NOT need to configure that functionality."
+        );
         logger.info(Constants.CONSOLE, "If you wish to extend for additional masking you MUST explicitly enter a file to input.");
         logger.info(Constants.CONSOLE, "Note that for docker containers this must be a file within the configured volume.");
 
@@ -69,46 +77,42 @@ public class ScrubInputs extends BaseInputs {
         List<String> errors = super.parseInputs(textIOManager, args);
 
         List valid = validateScrubInput(scrub);
-        if(valid != null){
+        if (valid != null) {
             errors.addAll(valid);
         }
 
         return errors;
     }
 
-    public List<String> validateScrubInput(String val) {
-        if (StringUtils.isEmpty(val.trim())) {
+    public List<String> validateScrubInput(String path) {
+        if (StringUtils.isEmpty(path.trim())) {
             return Collections.singletonList("Input archive, directory, or single file is required.");
         }
 
-        File file = new File(val);
+        File file = new File(path);
 
-        if (!file.exists() ) {
+        if (!file.exists()) {
             return Collections.singletonList("Specified required file location could not be located or is a directory.");
         }
-        int filePosition = scrub.lastIndexOf(SystemProperties.fileSeparator);
+        int filePosition = path.lastIndexOf(SystemProperties.fileSeparator);
 
-        if( scrub.endsWith(".zip")){
+        if (path.endsWith(".zip")) {
             this.type = "zip";
-            scrubbedFileBaseName = (scrub.substring(filePosition + 1)).replace(".zip", "");
-        }
-        else if(scrub.endsWith(".tar.gz")){
+            scrubbedFileBaseName = path.substring(filePosition + 1).replace(".zip", "");
+        } else if (path.endsWith(".tar.gz")) {
             this.type = "tar.gz";
-            scrubbedFileBaseName = (scrub.substring(filePosition + 1)).replace(".tar.gz", "");
-        }
-        else if(scrub.endsWith(".tar")){
+            scrubbedFileBaseName = path.substring(filePosition + 1).replace(".tar.gz", "");
+        } else if (path.endsWith(".tar")) {
             this.type = "tar";
-            scrubbedFileBaseName = (scrub.substring(filePosition + 1)).replace(".tar", "");
-        }
-        else if(file.isDirectory()){
+            scrubbedFileBaseName = path.substring(filePosition + 1).replace(".tar", "");
+        } else if (file.isDirectory()) {
             this.type = "dir";
             isArchive = false;
-            scrubbedFileBaseName = scrub.substring(filePosition + 1);
-        }
-        else{
+            scrubbedFileBaseName = path.substring(filePosition + 1);
+        } else {
             this.type = "file";
             isArchive = false;
-            scrubbedFileBaseName = scrub.substring(filePosition + 1, scrub.lastIndexOf("."));
+            scrubbedFileBaseName = path.substring(filePosition + 1, path.lastIndexOf("."));
         }
 
         return null;
@@ -117,8 +121,6 @@ public class ScrubInputs extends BaseInputs {
 
     @Override
     public String toString() {
-        return "ScrubInputs{" +
-                "input='" + scrub + '\'' +
-                '}';
+        return "ScrubInputs{" + "input='" + scrub + '\'' + '}';
     }
 }
