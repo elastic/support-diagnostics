@@ -1,7 +1,6 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
-scriptDir="$0"
-scriptDir="${scriptDir/\/import-monitoring.sh/$''}"
+scriptDir="$(cd -- "$(dirname -- "$0")" && pwd)"
 libDir="$scriptDir"'/lib'
 
 if [ ! -d "$libDir" ]; then
@@ -11,7 +10,7 @@ if [ ! -d "$libDir" ]; then
     echo "'-dist.zip' in the name and not the one labeled 'Source code'."
     echo ""
     echo "Download at https://github.com/elastic/support-diagnostics/releases/latest"
-    exit 400
+    exit 4
 fi
 
 if [ -x "${JAVA_HOME}/bin/java" ]; then
@@ -27,9 +26,9 @@ if [ ! -x "$JAVA" ]; then
     exit 1
 fi
 
-[[ "${DIAG_DEBUG}" != "" ]] && export DIAG_DEBUG_OPTS="-Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=y"
+[ "${DIAG_DEBUG}" != "" ] && export DIAG_DEBUG_OPTS="-Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=y"
 
-[[ "${DIAG_JAVA_OPTS}" == "" ]] && export DIAG_JAVA_OPTS="-Xms256m -Xmx2000m"
+[ "${DIAG_JAVA_OPTS}" = "" ] && export DIAG_JAVA_OPTS="-Xms2g -Xmx2g"
 
 echo "Using ${DIAG_JAVA_OPTS} ${DIAG_DEBUG_OPTS} for options."
-"$JAVA" $DIAG_JAVA_OPTS ${DIAG_DEBUG_OPTS} -cp "${scriptDir}/config:${scriptDir}/lib/*" co.elastic.support.monitoring.MonitoringImportApp "$@"
+"$JAVA" ${DIAG_JAVA_OPTS} ${DIAG_DEBUG_OPTS} -cp "${scriptDir}/config:${scriptDir}/lib/*" co.elastic.support.monitoring.MonitoringImportApp "$@"

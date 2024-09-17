@@ -17,7 +17,7 @@ COPY ./ ./
 
 RUN mvn package
 
-FROM docker.elastic.co/wolfi/jdk:openjdk-21 as runner
+FROM docker.elastic.co/wolfi/jdk:openjdk-21 AS runner
 
 ########################
 # Prepare the code to run

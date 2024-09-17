@@ -9,4 +9,4 @@
 # to create the output files.
 #
 
-docker run --network host -it -v ${PWD}/diagnostic-output:/diagnostic-output support-diagnostics-app bash
+docker run --network host -it -v ${PWD}/diagnostic-output:/diagnostic-output support-diagnostics-app sh

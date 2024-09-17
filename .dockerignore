@@ -1,0 +1,8 @@
+# Build files
+build
+target
+
+# Support files
+.github
+.idea
+.vscode
