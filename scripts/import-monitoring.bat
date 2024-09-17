@@ -29,7 +29,7 @@ if defined DIAG_DEBUG (
 )
 
 if not defined DIAG_JAVA_OPTS (
-  set DIAG_JAVA_OPTS=-Xms256m -Xmx2000m
+  set DIAG_JAVA_OPTS=-Xms2g -Xmx2g
 )
 
 echo Using %DIAG_JAVA_OPTS% %DIAG_DEBUG_OPTS% for options.
