@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
 scriptDir="$(cd -- "$(dirname -- "$0")" && pwd)"
 libDir="$scriptDir"'/lib'
