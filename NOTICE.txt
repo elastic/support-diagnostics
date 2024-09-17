@@ -10,7 +10,7 @@ Third party libraries used by the Support Diagnostics Utilities:
 
   Angus Activation Registries under EDL 1.0
   Apache Commons BeanUtils under Apache License, Version 2.0
-  Apache Commons Codec under Apache License, Version 2.0
+  Apache Commons Codec under Apache-2.0
   Apache Commons Collections under Apache License, Version 2.0
   Apache Commons Compress under Apache-2.0
   Apache Commons Digester under The Apache Software License, Version 2.0
@@ -24,7 +24,6 @@ Third party libraries used by the Support Diagnostics Utilities:
   Apache Log4j API under Apache-2.0
   Apache Log4j Commons Logging Bridge under Apache-2.0
   Apache Log4j Core under Apache-2.0
-  Apache Log4j SLF4J Binding under Apache-2.0
   Apache Velocity - Engine under Apache License, Version 2.0
   Apache Velocity - JSR 223 Scripting under Apache License, Version 2.0
   Apache Velocity Tools - Generic tools under Apache License, Version 2.0
@@ -63,6 +62,7 @@ Third party libraries used by the Support Diagnostics Utilities:
   Java UUID Generator under The Apache Software License, Version 2.0
   JavaBeans Activation Framework API jar under CDDL/GPLv2+CE
   JavaMail API (no providers) under CDDL/GPLv2+CE
+  JAXB Core under Eclipse Distribution License - v 1.0
   JAXB Runtime under Eclipse Distribution License - v 1.0
   jaxb-api under CDDL 1.1 or GPL2 w/ CPE
   JCIP Annotations under Apache License under Apache License, Version 2.0
@@ -120,6 +120,7 @@ Third party libraries used by the Support Diagnostics Utilities:
   oshi-core under MIT License
   oshi-json under MIT License
   project ':json-path' under The Apache Software License, Version 2.0
+  Project Lombok under The MIT License
   Prometheus Java Simpleclient under The Apache Software License, Version 2.0
   Prometheus Java Simpleclient Common under The Apache Software License, Version 2.0
   Prometheus Java Simpleclient Httpserver under The Apache Software License, Version 2.0
@@ -128,6 +129,7 @@ Third party libraries used by the Support Diagnostics Utilities:
   Prometheus Java Span Context Supplier - OpenTelemetry Agent under The Apache Software License, Version 2.0
   semver4j under The MIT License
   Shared Java 5 Provider Base under Apache License, Version 2.0
+  SLF4J 1 Binding for Log4j API under Apache-2.0
   SLF4J API Module under MIT License
   SnakeYAML under Apache License, Version 2.0
   Support Diagnostics Utilities under Elastic License
