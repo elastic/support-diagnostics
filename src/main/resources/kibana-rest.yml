@@ -106,6 +106,10 @@ kibana_fleet_settings:
   versions:
     ">= 7.14.0": "/api/fleet/settings"
 
+kibana_reporting_diagnose_browser:
+  versions:
+    ">= 8.16.0": "/internal/reporting/diagnose/browser"
+
 kibana_roles:
   versions:
     ">= 6.4.0": "/api/security/role"
