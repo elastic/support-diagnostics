@@ -41,6 +41,7 @@ import java.io.Closeable;
 import java.io.FileInputStream;
 import java.io.UnsupportedEncodingException;
 import java.security.KeyStore;
+import java.util.Arrays;
 import java.util.Map;
 
 public class RestClient implements Closeable {
@@ -122,6 +123,8 @@ public class RestClient implements Closeable {
                 httpRequest.setHeader(entry.getKey(), entry.getValue());
             }
         }
+
+        logger.debug("Executing request with headers: " + Arrays.toString(httpRequest.getAllHeaders()) + " url " + httpRequest);
 
         try {
             return client.execute(httpHost, httpRequest, httpContext);
