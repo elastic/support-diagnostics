@@ -119,13 +119,13 @@ public class RunKibanaQueries extends BaseQuery {
                     }
 
                     if (restEntry.isPageable()) {
-                        getAllPages(client, queries, context.perPage, restEntry, current.getPageableFieldName());
+                        getAllPages(client, queries, context.perPage, restEntry, current.getPageableFieldName(), context);
                     } else {
                         queries.add(restEntry);
                     }
                 }
             } else if (current.isPageable()) {
-                getAllPages(client, queries, context.perPage, entry.getValue(), current.getPageableFieldName());
+                getAllPages(client, queries, context.perPage, entry.getValue(), current.getPageableFieldName(), context);
             } else {
                 queries.add(entry.getValue());
             }
@@ -155,11 +155,12 @@ public class RunKibanaQueries extends BaseQuery {
      * @param action Kibana API name we are running
      * @param perPageField 
      */
-    public void getAllPages(RestClient client, List<RestEntry> queries, int perPage, RestEntry action, String perPageField) throws DiagnosticException {
+    public void getAllPages(RestClient client, List<RestEntry> queries, int perPage, RestEntry action, String perPageField, DiagnosticContext context) throws DiagnosticException {
         // get the values needed to the pagination (only need the total)
         String url = getPageUrl(action, 1, 1, perPageField);
 
         // get the values needed to the pagination.
+        client.setCurrentRestEntry(action);
         RestResult res = client.execQuery(url);
 
         int totalPages = 0;
@@ -177,6 +178,7 @@ public class RunKibanaQueries extends BaseQuery {
                 queries.add(getNewEntryPage(perPage, currentPage, action, perPageField));
             }
         }
+        client.setCurrentRestEntry(null);
     }
 
    /**
@@ -189,14 +191,16 @@ public class RunKibanaQueries extends BaseQuery {
     * @return new object with the API and params that need to be executed.
     */
     private RestEntry getNewEntryPage(int perPage, int page, RestEntry action, String perPageField) {
-        return new RestEntry(
-            String.format("%s_%s", action.getName(), page),
-            action.getSubdir(),
-            action.getExtension(),
-            false,
-            getPageUrl(action, page, perPage, perPageField),
-            false
+        RestEntry newEntry = new RestEntry(
+           String.format("%s_%s", action.getName(), page),
+           action.getSubdir(),
+           action.getExtension(),
+           false,
+           getPageUrl(action, page, perPage, perPageField),
+           false
         );
+        newEntry.setExtraHeaders(action.getExtraHeaders());
+        return newEntry;
     }
 
 
