@@ -49,6 +49,14 @@ public class RestEntry {
         this.spaceAware = spaceAware;
     }
 
+    public Map<String, String> getExtraHeaders() {
+        return extraHeaders;
+    }
+
+    public void setExtraHeaders(Map<String, String> extraHeaders) {
+        this.extraHeaders = extraHeaders;
+    }
+
     public RestEntry copyWithNewUrl(String url, String subdir) {
         return new RestEntry(name, subdir, extension, retry, url, showErrors, pageableFieldName, spaceAware);
     }
