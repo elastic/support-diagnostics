@@ -54,6 +54,9 @@ public class RestClient implements Closeable {
 
     private Map<String, String> extraHeaders;
 
+    private Map<String, RestEntry> restEntries;
+    private RestEntry currentRestEntry;
+
     public RestClient(CloseableHttpClient client, HttpHost httpHost, HttpClientContext context,
             Map<String, String> extraHeaders) {
         this.client = client;
