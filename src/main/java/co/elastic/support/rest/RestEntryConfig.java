@@ -74,20 +74,31 @@ public class RestEntryConfig {
             if (semver.satisfies(urlVersion.getKey())) {
                 if (urlVersion.getValue() instanceof String) {
                     return new RestEntry(name, subdir, extension, retry, (String) urlVersion.getValue(), showErrors);
-                    // We allow it to be String,String or String,Map(url,paginate,spaceaware)
+
                 } else if (urlVersion.getValue() instanceof Map) {
                     Map<String, Object> info = (Map<String, Object>) urlVersion.getValue();
-
                     String url = (String) ObjectUtils.defaultIfNull(info.get("url"), null);
-
                     if (url == null) {
                         throw new RuntimeException("Undefined URL for REST entry (route)");
                     }
-
                     String pageableFieldName = (String) ObjectUtils.defaultIfNull(info.get("paginate"), null);
                     boolean spaceAware = (boolean) ObjectUtils.defaultIfNull(info.get("spaceaware"), false);
 
-                    return new RestEntry(name, subdir, extension, retry, url, showErrors, pageableFieldName, spaceAware);
+                    // Construct the RestEntry object first
+                    RestEntry restEntry = new RestEntry(name, subdir, extension, retry, url, showErrors, pageableFieldName, spaceAware);
+
+                    // Logic for handling extra-headers, if they exist, after RestEntry is created
+                    if (info.containsKey("extra-headers")) {
+                        Object extraHeadersObj = info.get("extra-headers");
+                        if (extraHeadersObj instanceof Map) {
+                            Map<String, String> extraHeaders = (Map<String, String>) extraHeadersObj;
+                            // Add the extra headers to the restEntry (assuming this method is present on RestEntry)
+                            restEntry.setExtraHeaders(extraHeaders);
+                        }
+                    }
+
+                    // Return the constructed RestEntry with (potentially) extra headers
+                    return restEntry;
                 }
             }
         }
