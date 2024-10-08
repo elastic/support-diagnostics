@@ -7,6 +7,7 @@
 package co.elastic.support.rest;
 
 import lombok.Getter;
+import java.util.Map;
 
 @Getter
 public class RestEntry {
@@ -21,6 +22,7 @@ public class RestEntry {
     private final String pageableFieldName;
     private final boolean pageable;
     private final boolean spaceAware;
+    private Map<String, String> extraHeaders;
 
     public RestEntry(String name, String subdir, String extension, boolean retry, String url, boolean showErrors) {
         this(name, subdir, extension, retry, url, showErrors, null, false);
