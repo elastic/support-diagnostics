@@ -79,6 +79,11 @@ public class RestClient implements Closeable {
         return execRequest(httpGet);
     }
 
+    public void setCurrentRestEntry(RestEntry restEntry) {
+        this.currentRestEntry = restEntry;
+        logger.debug("Setting currentRestEntry with headers: {}", restEntry != null ? restEntry.getExtraHeaders() : "null");
+    }
+
     private HttpResponse execRequest(HttpRequestBase httpRequest) {
         if (extraHeaders != null) {
             for (Map.Entry<String, String> entry : extraHeaders.entrySet()) {
