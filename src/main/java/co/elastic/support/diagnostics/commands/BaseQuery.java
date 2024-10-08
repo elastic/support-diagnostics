@@ -78,6 +78,8 @@ public abstract class BaseQuery implements Command {
                     }
                 }
                 String fileName = subdir + SystemProperties.fileSeparator + entry.getName() + entry.getExtension();
+                restClient.setCurrentRestEntry(entry);
+                logger.debug("Execute RestClient: {} with extra headers: {}", entry.getName(), entry.getExtraHeaders());
                 RestResult restResult = restClient.execQuery(entry.getUrl(), fileName);
                 if (restResult.isValid()) {
                     logger.info(Constants.CONSOLE, "Results written to: {}", fileName);
