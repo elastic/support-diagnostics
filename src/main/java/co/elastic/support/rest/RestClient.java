@@ -66,17 +66,37 @@ public class RestClient implements Closeable {
     }
 
     public RestResult execQuery(String url) {
-        return new RestResult(execGet(url), url);
+        HttpRequestBase request = new HttpGet(url);
+
+        if (currentRestEntry != null && currentRestEntry.getExtraHeaders() != null) {
+            for (Map.Entry<String, String> header : currentRestEntry.getExtraHeaders().entrySet()) {
+                request.addHeader(header.getKey(), header.getValue());
+            }
+        }
+        logger.debug("Executing query: {} with currentRestEntry headers: {}", url, currentRestEntry != null ? currentRestEntry.getExtraHeaders() : "null");
+
+        return new RestResult(execGet(url, currentRestEntry), url);
     }
 
     public RestResult execQuery(String url, String fileName) {
-        return new RestResult(execGet(url), fileName, url);
+        HttpRequestBase request = new HttpGet(url);
+
+        if (currentRestEntry != null && currentRestEntry.getExtraHeaders() != null) {
+            for (Map.Entry<String, String> header : currentRestEntry.getExtraHeaders().entrySet()) {
+                request.addHeader(header.getKey(), header.getValue());
+            }
+        }
+        logger.debug("Executing query: {} with fileName: {} and currentRestEntry headers: {}", url, fileName, currentRestEntry != null ? currentRestEntry.getExtraHeaders() : "null");
+        return new RestResult(execGet(url, currentRestEntry), fileName, url);
     }
 
-    public HttpResponse execGet(String query) {
+    public HttpResponse execGet(String query, RestEntry restEntry) {
+        setCurrentRestEntry(restEntry);
         HttpGet httpGet = new HttpGet(query);
         logger.debug(query);
-        return execRequest(httpGet);
+        HttpResponse response = execRequest(httpGet);
+        setCurrentRestEntry(null);
+        return response;
     }
 
     public void setRestEntries(Map<String, RestEntry> restEntries) {
@@ -105,26 +125,44 @@ public class RestClient implements Closeable {
         }
     }
 
-    public HttpResponse execPost(String uri, String payload) {
+    public HttpResponse execPost(String uri, String payload, RestEntry restEntry) {
         try {
+            setCurrentRestEntry(restEntry);
             HttpPost httpPost = new HttpPost(uri);
             StringEntity entity = new StringEntity(payload);
             httpPost.setEntity(entity);
             httpPost.setHeader("Accept", "application/json");
             httpPost.setHeader("Content-type", "application/json");
             logger.debug(uri + SystemProperties.fileSeparator + payload);
-            return execRequest(httpPost);
+            HttpResponse response = execRequest(httpPost);
+            setCurrentRestEntry(null);
+            return response;
         } catch (UnsupportedEncodingException e) {
             logger.error(Constants.CONSOLE, "Error with json body.", e);
             throw new RuntimeException("Could not complete post request.");
         }
     }
 
-    public HttpResponse execDelete(String uri) {
+    public HttpResponse execDelete(String uri, RestEntry restEntry) {
+        setCurrentRestEntry(restEntry);
         HttpDelete httpDelete = new HttpDelete(uri);
         logger.debug(uri);
+        HttpResponse response = execRequest(httpDelete);
+        setCurrentRestEntry(null);
+        return response;
+    }
 
-        return execRequest(httpDelete);
+    // Add these methods to maintain backwards compatibility
+    public HttpResponse execGet(String query) {
+        return execGet(query, null);
+    }
+
+    public HttpResponse execPost(String uri, String payload) {
+        return execPost(uri, payload, null);
+    }
+
+    public HttpResponse execDelete(String uri) {
+        return execDelete(uri, null);
     }
 
     public void close() {
