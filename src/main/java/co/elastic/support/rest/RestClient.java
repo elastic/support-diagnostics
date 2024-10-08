@@ -114,6 +114,15 @@ public class RestClient implements Closeable {
                 httpRequest.addHeader(entry.getKey(), entry.getValue());
             }
         }
+
+        // Then, add (or overwrite) with the per-call extra headers if RestEntry is provided
+        if (currentRestEntry != null && currentRestEntry.getExtraHeaders() != null) {
+            logger.debug("Adding extra headers from currentRestEntry: {}", currentRestEntry.getExtraHeaders());
+            for (Map.Entry<String, String> entry : currentRestEntry.getExtraHeaders().entrySet()) {
+                httpRequest.setHeader(entry.getKey(), entry.getValue());
+            }
+        }
+
         try {
             return client.execute(httpHost, httpRequest, httpContext);
         } catch (HttpHostConnectException e) {
