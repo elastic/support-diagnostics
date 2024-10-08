@@ -42,7 +42,7 @@ public class RunLogstashQueries extends BaseQuery {
         try {
             RestClient client = context.resourceCache.getRestClient(Constants.restInputHost);
 
-            RestEntryConfig builder = new RestEntryConfig("1.0.0");
+            RestEntryConfig builder = new RestEntryConfig(context.version.getValue());
             Map restCalls = JsonYamlUtils.readYamlFromClasspath(Constants.LS_REST, true);
             Map<String, RestEntry> entries = builder.buildEntryMap(restCalls);
 
