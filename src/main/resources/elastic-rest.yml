@@ -188,7 +188,8 @@ cluster_state:
 cluster_stats:
   tags: light
   versions:
-    ">= 0.9.0": "/_cluster/stats?human"
+    ">= 0.9.0 < 8.16.0": "/_cluster/stats?human"
+    ">= 8.16.0": "/_cluster/stats?include_remotes=true&human"
 
 dangling_indices:
   versions:
