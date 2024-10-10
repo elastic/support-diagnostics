@@ -47,6 +47,8 @@ public class RunLogstashQueries extends BaseQuery {
             Map<String, RestEntry> entries = builder.buildEntryMap(restCalls);
 
             List<RestEntry> queries = new ArrayList<>();
+            // Set headers for each RestEntry
+            queries.forEach(client::setCurrentRestEntry);
             queries.addAll(entries.values());
             runQueries(client, queries, context.tempDir, 0, 0);
 
