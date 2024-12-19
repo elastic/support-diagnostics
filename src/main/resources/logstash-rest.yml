@@ -14,17 +14,13 @@
 #   Note to those adding entries: within each group, cat API's, json API's, and commercial, they are in alphabetical order.
 #   Please adhere to this convention when submitting pull requests.
 
-logstash_version:
+logstash_health_report:
   versions:
-    "> 0.0.0": "/"
+    ">= 8.16.0": "/_health_report"
 
 logstash_node:
   versions:
     "> 0.0.0": "/_node"
-
-logstash_node_stats:
-  versions:
-    "> 0.0.0": "/_node/stats"
 
 logstash_nodes_hot_threads:
   versions:
@@ -35,10 +31,14 @@ logstash_nodes_hot_threads_human:
   versions:
     "> 0.0.0": "/_node/hot_threads?human&threads=10000"
 
+logstash_node_stats:
+  versions:
+    "> 0.0.0": "/_node/stats"
+
 logstash_plugins:
   versions:
     "> 0.0.0": "/_node/plugins"
 
-logstash_health_report:
+logstash_version:
   versions:
-    "> 8.16.0": "/_health_report"
+    "> 0.0.0": "/"
