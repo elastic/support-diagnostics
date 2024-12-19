@@ -38,3 +38,7 @@ logstash_nodes_hot_threads_human:
 logstash_plugins:
   versions:
     "> 0.0.0": "/_node/plugins"
+
+logstash_health_report:
+  versions:
+    "> 8.16.0": "/_health_report"
