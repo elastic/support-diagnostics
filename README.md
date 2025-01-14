@@ -66,7 +66,7 @@ This software is licensed under [Elastic License v2](https://www.elastic.co/lice
   - The IBM JDK is not supported due to JSSE related issues that can cause TLS errors.
   - **Important Note For Elasticsearch Version 7:** Elasticsearch now includes a bundled JVM that is used by default. For the diagnostic to retrieve thread dumps via `Jstack` it must be executed with the same JVM that was used to run Elasticsearch. The diagnostic utility will attempt to find the location of the JVM that was used to run the process it is interrogating. If it is unable to do so, you may need to manually configure the location by setting `JAVA_HOME` to the directory containing the `/bin` directory for the included JDK. For example, `<path to Elasticsearch 7 deployment>/jdk/Contents/Home`.
 - The system user account for that host(not the elasticsearch login) must have sufficient authorization to run these commands and access the logs (usually in `/var/log/elasticsearch`) in order to obtain a full collection of diagnostics.
-- If you are authenticating using the built in Security, the supplied user id must have permission to execute the diagnostic URL's. The superuser role is recommended unless you are familar enough with the calls being made to tailor your own accounts and roles.
+- If you are authenticating using the built in Security, the supplied user id must have permission to execute the diagnostic URL's. The superuser role is recommended unless you are familiar enough with the calls being made to tailor your own accounts and roles.
 
 ### Downloading And Installing
 
