@@ -94,6 +94,7 @@ public class DiagnosticChainExec {
 
             case Constants.logstashApi:
                 new RunLogstashQueries().execute(context);
+                new GenerateLogstashDiagnostics().execute(context);
                 break;
 
             case Constants.kibanaLocal:
