@@ -35,6 +35,10 @@ public class RunClusterQueries extends BaseQuery {
             entries.addAll(context.elasticRestCalls.values());
             RestClient client;
             client = context.resourceCache.getRestClient(Constants.restInputHost);
+
+            // Set headers for each RestEntry
+            entries.forEach(client::setCurrentRestEntry);
+
 /*            if(ResourceCache.resourceExists(Constants.restTargetHost)){
                 client = ResourceCache.getRestClient(Constants.restTargetHost);
             }
