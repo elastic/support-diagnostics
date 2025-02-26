@@ -44,14 +44,20 @@ kibana_data_views:
 # https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/common/detection_engine/rule_monitoring/api/detection_engine_health/README.md
 kibana_detection_engine_health_cluster:
   versions:
-    ">= 8.8.2": "/internal/detection_engine/health/_cluster"
+    ">= 8.8.2":
+      url: "/internal/detection_engine/health/_cluster"
+      extra-headers:
+        elastic-api-version: "1"
 
 # Calculates health of Detection Engine and returns a health snapshot.
 # Scope: all detection rules in the current/default Kibana space.
 # https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/common/detection_engine/rule_monitoring/api/detection_engine_health/README.md
 kibana_detection_engine_health_space:
   versions:
-    ">= 8.8.2": "/internal/detection_engine/health/_space"
+    ">= 8.8.2":
+      url: "/internal/detection_engine/health/_space"
+      extra-headers:
+        elastic-api-version: "1"
 
 kibana_detection_engine_privileges:
   versions:
@@ -71,7 +77,10 @@ kibana_detection_engine_rules_prebuilt_status:
   versions:
     ">= 7.10.0 < 7.15.0": "/api/detection_engine/prepackaged"
     ">= 7.15.0 < 8.9.0": "/api/detection_engine/rules/prepackaged/_status"
-    ">= 8.9.0": "/internal/detection_engine/prebuilt_rules/status"
+    ">= 8.9.0":
+      url: "/internal/detection_engine/prebuilt_rules/status"
+      extra-headers:
+        elastic-api-version: "1"
 
 kibana_fleet_agents:
   versions:
@@ -96,7 +105,10 @@ kibana_fleet_agent_status:
 
 kibana_fleet_agents_current_upgrades:
   versions:
-    ">= 8.3.0": "/api/fleet/agents/current_upgrades"
+    ">= 8.3.0":
+      url: "/api/fleet/agents/current_upgrades"
+      extra-headers:
+        elastic-api-version: "2023-10-31"
 
 kibana_lists_privileges:
   versions:
