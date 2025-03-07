@@ -107,7 +107,9 @@ public class CheckKibanaVersion implements Command {
         logger.info(Constants.CONSOLE, String.format("Kibana Version is :%s", version));
 
         try {
-            return new Semver(version);
+            // Workaround for the semver issue with pre-release versions
+            // https://github.com/semver4j/semver4j/issues/307
+            return new Semver(version).withClearedPreRelease();
         } catch (SemverException ex) {
             throw new DiagnosticException(
                     String.format("Kibana version format is wrong - unable to continue. (%s)", version));

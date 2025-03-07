@@ -105,9 +105,9 @@ public class TestCheckKibanaVersion {
 
     @Test
     public void testQueriesForKibanaWhenStatsWithRC() throws DiagnosticException {
-        initializeKibanaStats("8.0.0-rc2");
+        initializeKibanaStats("9.0.0-beta1");
         Semver version = new CheckKibanaVersion().getKibanaVersion(httpRestClient);
-        assertEquals("8.0.0-rc2", version.getVersion());
+        assertEquals("9.0.0", version.getVersion());
     }
 
     @Test
