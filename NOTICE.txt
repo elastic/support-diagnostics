@@ -79,6 +79,7 @@ Third party libraries used by the Support Diagnostics Utilities:
   json-unit-core under The Apache Software License, Version 2.0
   JSON.simple under The Apache Software License, Version 2.0
   JsonSchemaValidator under Apache License Version 2.0
+  JSpecify annotations under The Apache License, Version 2.0
   JSR 353 (JSON Processing) Default Provider under Dual license consisting of the CDDL v1.1 and GPL v2
   JUnit under Eclipse Public License 1.0
   JUnit Jupiter API under Eclipse Public License v2.0
