@@ -439,6 +439,11 @@ ml_info:
     ">= 6.3.0 < 7.0.0": "/_xpack/ml/info"
     ">= 7.0.0": "/_ml/info"
 
+ml_memory_stats:
+  subdir: "commercial"
+  versions:
+    ">= 8.2.0": "/_ml/memory/_stats"
+
 ml_stats:
   subdir: "commercial"
   versions:
