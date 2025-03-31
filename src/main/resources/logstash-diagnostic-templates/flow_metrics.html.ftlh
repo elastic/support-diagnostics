@@ -14,7 +14,7 @@
             src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
     <script crossorigin="anonymous"
-            src="https://cdn.jsdelivr.net/npm/@mui/material@5.13.7/umd/material-ui.development.js"></script>
+            src="https://cdn.jsdelivr.net/npm/@mui/material@5.13.7/umd/material-ui.production.min.js"></script>
     <script crossorigin="anonymous"
             src="https://unpkg.com/babel-standalone@6.26.0/babel.min.js"></script>
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
