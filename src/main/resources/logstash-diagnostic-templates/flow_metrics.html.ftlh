@@ -13,6 +13,7 @@
     <script crossorigin="anonymous"
             src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mui/material@5.13.7/umd/material-ui.development.js"></script>
     <script crossorigin="anonymous"
             src="https://unpkg.com/@mui/material@5.13.7/umd/material-ui.production.min.js"></script>
     <script crossorigin="anonymous"
