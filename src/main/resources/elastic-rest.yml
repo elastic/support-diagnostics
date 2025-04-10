@@ -499,6 +499,11 @@ searchable_snapshots_cache_stats:
   versions:
     ">= 7.13.0": "/_searchable_snapshots/cache/stats?human"
 
+searchable_snapshots_stats:
+  subdir: "commercial"
+  versions:
+    ">= 7.13.0": "/_searchable_snapshots/stats?human"
+
 security_priv:
   subdir: "commercial"
   versions:
