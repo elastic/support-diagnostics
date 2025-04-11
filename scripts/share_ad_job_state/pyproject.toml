@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "ad-state-sharing"
+version = "0.1.0"
+description = ""
+authors = ["Valeriy Khakhutskyy <1292899+valeriy42@users.noreply.github.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+elasticsearch = "^8.15.1"
+loguru = "^0.7.2"
+tqdm = "^4.66.5"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
