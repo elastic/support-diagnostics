@@ -1,4 +1,4 @@
-FROM docker.elastic.co/wolfi/jdk:openjdk-23.0.2-r4-dev@sha256:f0ed618479972fe1e362ee5bc0f06242a2a44d3422d0434d2db60023559c615c AS builder
+FROM docker.elastic.co/wolfi/jdk:openjdk-23.0.2-r4-dev@sha256:caa7ac022c6c1715a69bd2693aaf7b8eddca372443df13dbf351f271bd1d2ad9 AS builder
 
 #####################
 # Install dev tools
@@ -17,7 +17,7 @@ COPY ./ ./
 
 RUN mvn package
 
-FROM docker.elastic.co/wolfi/jdk:openjdk-23.0.2-r4@sha256:8b6848a8fcbc6949d5cc8d36e16a1032e0bbb7a3c6743c1799512362499e6360 AS runner
+FROM docker.elastic.co/wolfi/jdk:openjdk-23.0.2-r4@sha256:79407ed0315212612f32373f5afc0bec596fd92d2cf25ed4ee59435ba88147c4 AS runner
 
 ########################
 # Prepare the code to run
