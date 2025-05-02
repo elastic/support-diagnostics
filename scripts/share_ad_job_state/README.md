@@ -1,11 +1,23 @@
 # Elasticsearch Anomaly Detection Job State Export and Import
 
-This project provides two Python scripts for exporting and importing anomlay detection job states in Elasticsearch:
+This project provides two Python scripts for exporting and importing anomaly detection job states in Elasticsearch:
 
-- **Export Script**: Extracts job states, job configurations, annotations, and input data from Elasticsearch and packages them into a tar.gz archive.
-- **Import Script**: Imports the archived data back into Elasticsearch, recreating the job and restoring its state.
+- **Export Script**: extracts job states, job configurations, annotations, and input data from Elasticsearch and packages them into a tar.gz archive.
+- **Import Script**: imports the archived data back into Elasticsearch, recreating the job and restoring its state.
 
 Both scripts are designed with security and best practices in mind, ensuring safe handling of sensitive data and secure connections to Elasticsearch.
+
+The export script extracts the following data from the customer's Elasticsearch instance:
+- **Job state**: the encoded model snapshot that contains the model state. It can include values for the categorical fields defined in the job configuration: `by_field_name`, `over_field_name`, `partition_field_name`, and `influencers` fields.
+- **Job configuration**: This is the result of `GET /_ml/anomaly_detectors/{job_id}` query
+- **Annotations**: Annotations contain information about model changes, such as detected trends and seasonalities. If the user manually annotates some anomaly detection results, it will also include those annotations.
+- **Input data**: Optionally, the user can provide a sample of the input data required for the job to run. To export input data, the flag `—include_inputs` must be explicitly specified, and only the fields required by the job configuration will be exported. The input data is stored in the file `{job_id}_input.ndjson` inside the archive to be easily inspected.
+
+**Disclaimer**
+
+The model **import** scripts are intended solely for use by Elastic developers for the purpose of reproducing issues or environments. These scripts are not designed for migrating machine learning job states between clusters.
+
+Please refrain from running the model **import** scripts in a production environment, as doing so may compromise system stability or lead to unintended disruptions.
 
 ## Table of Contents
 
