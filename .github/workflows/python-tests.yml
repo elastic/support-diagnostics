@@ -1,0 +1,33 @@
+name: Share AD Job State Tests
+on: pull_request
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: scripts/share_ad_job_state
+    # timeout after 5 minutes to limit costs in case of process leaking
+    timeout-minutes: 5
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+    - name: Checkout submodules
+      run: git submodule update --init --recursive
+    - name: Install poetry
+      run: pip install poetry==2.1.3
+    - name: Set up Python 3
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+        cache: 'poetry'
+    - name: Install nox
+      run:  pip install nox==2025.5.1
+    - name: Run linting
+      run: nox -s lint
+    - name: Run formatting
+      run: nox -s format
+    - name: Run tests
+      run: |
+        poetry install
+        poetry run pytest --cov tests/

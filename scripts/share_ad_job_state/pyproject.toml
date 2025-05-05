@@ -4,12 +4,20 @@ version = "0.1.0"
 description = ""
 authors = ["Valeriy Khakhutskyy <1292899+valeriy42@users.noreply.github.com>"]
 readme = "README.md"
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.12"
 elasticsearch = "^8.15.1"
 loguru = "^0.7.2"
 tqdm = "^4.66.5"
+
+[tool.poetry.group.dev.dependencies]
+coverage = {extras = ["toml"], version = "^7.2.0"}
+pytest-cov = "^4.0.0"
+black = "25.1.0"
+nox = "2025.5.1"
+isort = "^6.0.1"
 
 
 [build-system]
