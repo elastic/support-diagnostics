@@ -19,6 +19,7 @@ SOURCE_FILES = (
 @nox.session(python=["3.12"], reuse_venv=True)
 def format(session):
     session.install("black==25.1.0")
+    session.install("isort==6.0.1")
     session.run("black", "--target-version=py312", *SOURCE_FILES)
     session.run("isort", *SOURCE_FILES)
     lint(session)
@@ -27,6 +28,7 @@ def format(session):
 @nox.session(python=["3.12"], reuse_venv=True)
 def lint(session):
     session.install("black==25.1.0")
+    session.install("isort==6.0.1")
     session.run("black", "--check", "--diff", "--target-version=py312", *SOURCE_FILES)
     session.run("isort", "--check", "--diff", *SOURCE_FILES)
 
