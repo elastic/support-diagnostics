@@ -25,8 +25,6 @@ jobs:
       run:  pip install nox==2025.5.1
     - name: Run linting
       run: nox -s lint
-    - name: Run formatting
-      run: nox -s format
     - name: Run tests
       run: |
         poetry install
