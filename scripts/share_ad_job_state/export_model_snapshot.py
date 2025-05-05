@@ -12,12 +12,12 @@ from datetime import datetime
 from getpass import getpass
 from typing import Any, Dict, List, Optional, Set, Tuple
 
-# Disable noisy warning about missing certificate verification
 import urllib3
 from elasticsearch import ApiError, Elasticsearch, TransportError, helpers
 from loguru import logger
 from tqdm import tqdm
 
+# Disable noisy warning about missing certificate verification
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # Constants
