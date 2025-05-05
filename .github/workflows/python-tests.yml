@@ -12,8 +12,6 @@ jobs:
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v4
-    - name: Checkout submodules
-      run: git submodule update --init --recursive
     - name: Install poetry
       run: pip install poetry==2.1.3
     - name: Set up Python 3
