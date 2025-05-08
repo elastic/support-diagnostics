@@ -1,18 +1,23 @@
+# Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+#  or more contributor license agreements. Licensed under the Elastic License
+#  2.0; you may not use this file except in compliance with the Elastic License
+#  2.0.
+
 import argparse
 import json
 import os
 import re
 import tarfile
 from datetime import datetime
+from getpass import getpass
 from typing import Any, Dict, List, Optional, Set, Tuple
 
-from elasticsearch import Elasticsearch, helpers, ApiError, TransportError
-from getpass import getpass
+import urllib3
+from elasticsearch import ApiError, Elasticsearch, TransportError, helpers
 from loguru import logger
 from tqdm import tqdm
 
 # Disable noisy warning about missing certificate verification
-import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # Constants
@@ -189,7 +194,7 @@ def save_job_config(
         es_client (Elasticsearch): The Elasticsearch client.
 
     Returns:
-        Tuple[Optional[str], Optional[Dict[str, Any]]]: The filename containing the job 
+        Tuple[Optional[str], Optional[Dict[str, Any]]]: The filename containing the job
         configuration and the job configuration dictionary, or (None, None) if failed.
     """
     try:
@@ -504,7 +509,10 @@ def main() -> None:
         help="Include input data in the archive",
     )
     parser.add_argument(
-        "--ignore_certs", action="store_true", help="Disable SSL certificate verification")
+        "--ignore_certs",
+        action="store_true",
+        help="Disable SSL certificate verification",
+    )
     args = parser.parse_args()
 
     # Handle password securely
@@ -526,14 +534,14 @@ def main() -> None:
             es_client = Elasticsearch(
                 cloud_id=args.cloud_id,
                 basic_auth=(args.username, args.password),
-                verify_certs=(not args.ignore_certs)
+                verify_certs=(not args.ignore_certs),
             )
         else:
             logger.info("Connecting to Elasticsearch using URL")
             es_client = Elasticsearch(
                 [args.url],
                 basic_auth=(args.username, args.password),
-                verify_certs=(not args.ignore_certs) 
+                verify_certs=(not args.ignore_certs),
             )
     except (ApiError, TransportError) as e:
         logger.error(f"Failed to connect to Elasticsearch: {e}")

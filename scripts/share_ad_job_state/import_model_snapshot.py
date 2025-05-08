@@ -1,18 +1,24 @@
+# Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+# or more contributor license agreements. Licensed under the Elastic License
+# 2.0; you may not use this file except in compliance with the Elastic License
+# 2.0.
+
 import argparse
 import json
 import os
 import re
 import tarfile
 import time
-from typing import Any, Dict, List, Optional
-
-from elasticsearch import Elasticsearch, helpers, ApiError, TransportError
 from getpass import getpass
-from loguru import logger
+from typing import Any, Dict, List, Optional
 
 # Disable noisy warning about missing certificate verification
 import urllib3
+from elasticsearch import ApiError, Elasticsearch, TransportError, helpers
+from loguru import logger
+
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
 
 def sanitize_filename(name: str) -> str:
     """Sanitize filenames to prevent directory traversal and other security issues."""
