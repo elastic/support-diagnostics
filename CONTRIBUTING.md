@@ -42,10 +42,6 @@ Once created, you will need to create or modify your Maven `settings.xml`
       <activation>
         <activeByDefault>true</activeByDefault>
       </activation>
-      <properties>
-        <gpg.executable>gpg</gpg.executable>
-        <gpg.passphrase>your_xml_encoded_passphrase</gpg.passphrase>
-      </properties>
     </profile>
   </profiles>
   <servers>
