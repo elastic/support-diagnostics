@@ -19,8 +19,11 @@
             <directory>${project.basedir}/scripts</directory>
             <outputDirectory>.</outputDirectory>
             <includes>
-                <include>*</include>
+                <include>**/*</include>
             </includes>
+            <excludes>
+                <exclude>share_ad_job_state/tests/**</exclude>
+            </excludes>
         </fileSet>
 
         <fileSet>
