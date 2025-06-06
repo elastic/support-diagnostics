@@ -26,6 +26,23 @@ jobs:
 #         server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
 #         settings-path: ${{ github.workspace }} # location for the settings.xml file
 
+    - name: Import GPG key
+      run: |
+        echo "$GPG_PRIVATE_KEY" | gpg --batch --import
+      env:
+        GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+    
+    - name: Set up GPG for Maven
+      run: |
+        echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
+        echo RELOADAGENT | gpg-connect-agent
+        export GPG_TTY=$(tty)
+      shell: bash
+    
+    - name: Build and sign
+      run: |
+        mvn -B clean deploy -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }}
+
     - name: Build with Maven
       run: mvn -B deploy
       
