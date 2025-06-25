@@ -42,8 +42,8 @@ Please refrain from running the model **import** scripts in a production environ
 1. **Clone the Repository**
 
    ```bash
-   git clone https://github.com/yourusername/your-repo-name.git
-   cd your-repo-name
+   git clone https://github.com/elastic/support-diagnostics.git
+   cd support-diagnostics/scripts/share_ad_job_state
    ```
 
 2. **Install Dependencies with Poetry**
@@ -61,6 +61,7 @@ Please refrain from running the model **import** scripts in a production environ
 ### Export Script
 
 The export script extracts model states, job configurations, annotations, and input data from Elasticsearch and packages them into a tar.gz archive.
+It accepts either `--url` or `--cloud_id` for Elasticsearch destination. 
 
 #### Command
 
