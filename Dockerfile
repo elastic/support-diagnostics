@@ -1,4 +1,4 @@
-FROM docker.elastic.co/wolfi/jdk:openjdk-23.0.2-r4-dev@sha256:79038114e2a9eac1d83d53275b46afdaf29cb9a7e9b1b8e84d00ea7154be7fd7 AS builder
+FROM docker.elastic.co/wolfi/jdk:openjdk-23.0.2-r4-dev@sha256:3f54a069b372413915bc69fb472247f82f52573ae30eb7a127512eaa111ff9ca AS builder
 
 #####################
 # Install dev tools
