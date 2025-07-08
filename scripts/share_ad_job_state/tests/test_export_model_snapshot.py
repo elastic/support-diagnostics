@@ -171,11 +171,11 @@ def test_save_inputs(tmp_path, dummy_es, monkeypatch, passthrough_tqdm):
         _make_doc("idx‑1", f"id{i}", value=i, user="me", **{"@timestamp": 0})
         for i in range(2)
     ]
-    
+
     # Mock the PIT API calls
     dummy_es.open_point_in_time.return_value = {"id": "test-pit-id"}
     dummy_es.close_point_in_time.return_value = {"succeeded": True}
-    
+
     # First search response with sort values for search_after
     dummy_es.search.side_effect = [
         {
@@ -185,13 +185,14 @@ def test_save_inputs(tmp_path, dummy_es, monkeypatch, passthrough_tqdm):
                         "_index": doc["_index"],
                         "_id": doc["_id"],
                         "_source": doc["_source"],
-                        "sort": [0, i]  # [timestamp_val, seq_no]
-                    } for i, doc in enumerate(docs)
+                        "sort": [0, i],  # [timestamp_val, seq_no]
+                    }
+                    for i, doc in enumerate(docs)
                 ]
             }
         },
         # Empty response to end the loop
-        {"hits": {"hits": []}}
+        {"hits": {"hits": []}},
     ]
 
     filenames = ems.save_inputs(
@@ -204,20 +205,20 @@ def test_save_inputs(tmp_path, dummy_es, monkeypatch, passthrough_tqdm):
     # Handle case where filenames might be None
     if filenames is None:
         pytest.fail("Expected save_inputs to return a list of filenames, got None")
-    
+
     # Verify the PIT was opened and closed
     dummy_es.open_point_in_time.assert_called_once()
     dummy_es.close_point_in_time.assert_called_once()
-    
+
     # Verify search was called with appropriate parameters
     assert dummy_es.search.call_count == 2
     # First call should include PIT ID
     first_call_body = dummy_es.search.call_args_list[0][1]["body"]
     assert first_call_body["pit"]["id"] == "test-pit-id"
-    
+
     # There should be two calls to search, one for the initial fetch and one for the continuation
     assert len(dummy_es.search.call_args_list) == 2
-        
+
     for filename in filenames:
         assert filename and Path(filename).is_file()
         assert len(Path(filename).read_text().splitlines()) == 2 * len(

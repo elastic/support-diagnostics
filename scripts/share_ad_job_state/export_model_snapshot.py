@@ -6,11 +6,11 @@
 import argparse
 import json
 import os
-from pathlib import Path
 import re
 import tarfile
 from datetime import datetime
 from getpass import getpass
+from pathlib import Path
 from typing import Any, Dict, Iterator, List, Optional, Set, Tuple
 
 import urllib3
@@ -240,9 +240,13 @@ def save_annotations(
     index = ".ml-annotations-read"
     date_range = {}
     if before_date:
-        date_range["lte"] = int(before_date.timestamp() * 1000)  # Convert to milliseconds
+        date_range["lte"] = int(
+            before_date.timestamp() * 1000
+        )  # Convert to milliseconds
     if after_date:
-        date_range["gte"] = int(after_date.timestamp() * 1000)  # Convert to milliseconds
+        date_range["gte"] = int(
+            after_date.timestamp() * 1000
+        )  # Convert to milliseconds
 
     search_query = {
         "query": {
@@ -273,6 +277,7 @@ def save_annotations(
         logger.error(f"Failed to save annotations: {e}")
         return None
 
+
 def save_notifications(
     job_id: str,
     before_date: Optional[datetime],
@@ -294,9 +299,13 @@ def save_notifications(
     index = ".ml-notifications-*"
     date_range = {}
     if before_date:
-        date_range["lte"] = int(before_date.timestamp() * 1000)  # Convert to milliseconds
+        date_range["lte"] = int(
+            before_date.timestamp() * 1000
+        )  # Convert to milliseconds
     if after_date:
-        date_range["gte"] = int(after_date.timestamp() * 1000)  # Convert to milliseconds
+        date_range["gte"] = int(
+            after_date.timestamp() * 1000
+        )  # Convert to milliseconds
 
     search_query = {
         "query": {
@@ -309,7 +318,9 @@ def save_notifications(
         },
         "size": 10000,
     }
-    logger.debug(f"Searching for notifications for job {job_id} with query: {search_query}")
+    logger.debug(
+        f"Searching for notifications for job {job_id} with query: {search_query}"
+    )
 
     try:
         response = es_client.search(index=index, body=search_query)
@@ -325,6 +336,7 @@ def save_notifications(
     except (ApiError, TransportError, IOError) as e:
         logger.error(f"Failed to save notifications: {e}")
         return None
+
 
 def extract_field_names_from_json(
     query_json: Dict[str, Any], known_operators: Set[str]
@@ -359,7 +371,10 @@ MAX_DOCS_PER_FILE = 10_000
 PAGE_SIZE = 2_000
 PIT_KEEP_ALIVE = "1m"
 
-def extract_source_fields(job_config: Dict[str, Any], query: Dict[str, Any]) -> List[str]:
+
+def extract_source_fields(
+    job_config: Dict[str, Any], query: Dict[str, Any]
+) -> List[str]:
     """
     Collects and deduplicates all required _source fields from the job configuration and query.
     """
@@ -392,7 +407,9 @@ def extract_source_fields(job_config: Dict[str, Any], query: Dict[str, Any]) -> 
     return sorted(cleaned)
 
 
-def build_date_range(before: Optional[datetime], after: Optional[datetime]) -> Dict[str, str]:
+def build_date_range(
+    before: Optional[datetime], after: Optional[datetime]
+) -> Dict[str, str]:
     """
     Constructs an Elasticsearch range clause for the given dates.
     """
@@ -410,7 +427,7 @@ def scroll_batches(
     query: Dict[str, Any],
     source_fields: List[str],
     time_field: str,
-    date_range: Dict[str, str]
+    date_range: Dict[str, str],
 ) -> Iterator[Dict[str, Any]]:
     """
     Yields search hits using PIT + search_after, sorted by time and sequence number.
@@ -422,7 +439,7 @@ def scroll_batches(
         "pit": {"id": pit_id, "keep_alive": PIT_KEEP_ALIVE},
         "query": {"bool": {"must": [query, {"range": {time_field: date_range}}]}},
         "sort": [{time_field: "asc"}, {"_seq_no": "asc"}],
-        "size": PAGE_SIZE
+        "size": PAGE_SIZE,
     }
     search_after = None
 
@@ -443,9 +460,7 @@ def scroll_batches(
 
 
 def write_to_ndjson(
-    hits: Iterator[Dict[str, Any]],
-    output_dir: Path,
-    base_name: str
+    hits: Iterator[Dict[str, Any]], output_dir: Path, base_name: str
 ) -> List[str]:
     """
     Writes hits to chunked NDJSON files, returning a list of file paths.
@@ -505,11 +520,14 @@ def save_inputs(
         time_field = "@timestamp"
 
     try:
-        hits = scroll_batches(es_client, indices, query, source_fields, time_field, date_range)
+        hits = scroll_batches(
+            es_client, indices, query, source_fields, time_field, date_range
+        )
         return write_to_ndjson(hits, output_dir=Path("."), base_name=base_name)
     except Exception as exc:
         logger.error(f"Failed to save inputs: {exc}")
         return None
+
 
 def create_archive(job_id: str, files: List[Optional[str]]) -> None:
     """
@@ -627,7 +645,7 @@ def main() -> None:
         help="Search for the latest snapshot CREATED before the given date (format: YYYY-MM-DDTHH:MM:SS)",
     )
     parser.add_argument(
-        "--annotations_after_date", 
+        "--annotations_after_date",
         type=validate_date,
         required=False,
         help="Search for annotations and notifications after the specified date (format: YYYY-MM-DDTHH:MM:SS). Defaults to the job creation date.",
@@ -656,7 +674,6 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-
     # Handle password securely
     if not args.password:
         args.password = getpass(prompt="Enter Elasticsearch password: ")
@@ -667,9 +684,11 @@ def main() -> None:
     if confirm.lower() != "yes":
         logger.info("Operation aborted by the user.")
         return
-    
+
     # If --include_inputs is set, but no input dates are provided, warn the user
-    if args.include_inputs and (not args.inputs_after_date or not args.inputs_before_date):
+    if args.include_inputs and (
+        not args.inputs_after_date or not args.inputs_before_date
+    ):
         logger.warning(
             "Input data will be included, but no date range is specified. "
             "This may result in a large amount of data being extracted."
@@ -678,8 +697,6 @@ def main() -> None:
         if confirm.lower() != "yes":
             logger.info("Operation aborted by the user.")
             return
-        
-    
 
     logger.info("Connecting to Elasticsearch")
     # Connect to an Elasticsearch instance
@@ -725,12 +742,12 @@ def main() -> None:
     else:
         # If no annotations_after_date is provided, use the job creation date
         job_creation_timestamp = job_configuration.get("create_time")
-        logger.info(
-            f"Job configuration creation date: {job_creation_timestamp}"
-        )
+        logger.info(f"Job configuration creation date: {job_creation_timestamp}")
         if job_creation_timestamp:
             # date from timestamp
-            annotations_after_date = datetime.fromtimestamp(job_creation_timestamp / 1000.0)
+            annotations_after_date = datetime.fromtimestamp(
+                job_creation_timestamp / 1000.0
+            )
             logger.info(
                 f"Using job creation date {annotations_after_date} as annotations_after_date."
             )
@@ -748,7 +765,12 @@ def main() -> None:
     # Get the input data and store it
     if args.include_inputs:
         file_name_inputs = (
-            save_inputs(job_configuration, args.inputs_before_date, args.inputs_after_date, es_client)
+            save_inputs(
+                job_configuration,
+                args.inputs_before_date,
+                args.inputs_after_date,
+                es_client,
+            )
             if job_configuration
             else None
         )
@@ -762,13 +784,18 @@ def main() -> None:
     )
 
     # Create an archive with all generated files
-    files_to_archive = [
-        file_name_ml_anomalies,
-        file_name_job_config,
-        filename_snapshots,
-        file_name_annotations,
-        file_name_notifications,
-    ] + file_name_inputs if file_name_inputs else []
+    files_to_archive = (
+        [
+            file_name_ml_anomalies,
+            file_name_job_config,
+            filename_snapshots,
+            file_name_annotations,
+            file_name_notifications,
+        ]
+        + file_name_inputs
+        if file_name_inputs
+        else []
+    )
 
     create_archive(args.job_id, files_to_archive)
 

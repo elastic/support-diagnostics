@@ -205,10 +205,8 @@ def load_snapshot_stats(es_client: Elasticsearch, extracted_files: List[str]) ->
     """
     file_path = find_file("ml-anomalies-snapshot_doc", extracted_files)
     if file_path is None:
-        raise FileNotFoundError(
-            "Snapshot statistics file not found in the archive."
-        )
-    
+        raise FileNotFoundError("Snapshot statistics file not found in the archive.")
+
     logger.info(f"Loading snapshot statistics from {file_path}")
     try:
         with open(file_path, "r", encoding="utf-8") as f:
@@ -237,60 +235,71 @@ def find_file(file_name: str, extracted_files: List[str]) -> Optional[str]:
             return file
     return None
 
-def load_input_data(es_client: Elasticsearch, safe_job_id: str, extracted_files: List[str]) -> Optional[str]:
-        """
-        Loads input data from extracted files that match the input file pattern.
-        
-        Args:
-            es_client (Elasticsearch): The Elasticsearch client.
-            safe_job_id (str): The sanitized job ID used for index naming and file pattern matching.
-            extracted_files (List[str]): List of extracted file paths to search through.
-            
-        Returns:
-            Optional[str]: The input index name if input data was loaded, None otherwise.
-        """
-        input_file_pattern = safe_job_id + r"_input_\d+.ndjson"
-        contains_input = any(
-            re.match(input_file_pattern, os.path.basename(file)) for file in extracted_files
-        )
-        
-        if contains_input:
-            logger.info(f"Input data file pattern found: {input_file_pattern}")
-            input_index = f"{safe_job_id}-input"
-            create_input_index(es_client, input_index)
-            for file in extracted_files:
-                if re.match(input_file_pattern, os.path.basename(file)):
-                    logger.info(f"Importing input data from {file}")
-                    upload_data(es_client, input_index, file)
-            return input_index
-        else:
-            logger.warning(f"No input data files matching pattern {input_file_pattern} found.")
-            return None
 
-def load_job_configuration(es_client: Elasticsearch, job_config_file: str, extracted_files: List[str], input_index: Optional[str]) :
-        """
-        Loads and creates a job configuration from the extracted files.
-        
-        Args:
-            es_client (Elasticsearch): The Elasticsearch client.
-            job_config_file (str): The job configuration file name to look for.
-            extracted_files (List[str]): List of extracted file paths.
-            input_index (Optional[str]): The input index name if available.
-        """
-        file = find_file(job_config_file, extracted_files)
-        if file:
-            logger.info(f"Importing job configuration from {file}")
-            try:
-                with open(file, "r", encoding="utf-8") as f:
-                    job_config = json.load(f)
-                create_job_config(es_client, job_config, input_index)
-            except (IOError, json.JSONDecodeError) as e:
-                logger.error(f"Error reading job configuration: {e}")
-                raise e
-        else:
-            raise FileNotFoundError(
-                f"Job configuration file {job_config_file} not found in the archive."
-            )
+def load_input_data(
+    es_client: Elasticsearch, safe_job_id: str, extracted_files: List[str]
+) -> Optional[str]:
+    """
+    Loads input data from extracted files that match the input file pattern.
+
+    Args:
+        es_client (Elasticsearch): The Elasticsearch client.
+        safe_job_id (str): The sanitized job ID used for index naming and file pattern matching.
+        extracted_files (List[str]): List of extracted file paths to search through.
+
+    Returns:
+        Optional[str]: The input index name if input data was loaded, None otherwise.
+    """
+    input_file_pattern = safe_job_id + r"_input_\d+.ndjson"
+    contains_input = any(
+        re.match(input_file_pattern, os.path.basename(file)) for file in extracted_files
+    )
+
+    if contains_input:
+        logger.info(f"Input data file pattern found: {input_file_pattern}")
+        input_index = f"{safe_job_id}-input"
+        create_input_index(es_client, input_index)
+        for file in extracted_files:
+            if re.match(input_file_pattern, os.path.basename(file)):
+                logger.info(f"Importing input data from {file}")
+                upload_data(es_client, input_index, file)
+        return input_index
+    else:
+        logger.warning(
+            f"No input data files matching pattern {input_file_pattern} found."
+        )
+        return None
+
+
+def load_job_configuration(
+    es_client: Elasticsearch,
+    job_config_file: str,
+    extracted_files: List[str],
+    input_index: Optional[str],
+):
+    """
+    Loads and creates a job configuration from the extracted files.
+
+    Args:
+        es_client (Elasticsearch): The Elasticsearch client.
+        job_config_file (str): The job configuration file name to look for.
+        extracted_files (List[str]): List of extracted file paths.
+        input_index (Optional[str]): The input index name if available.
+    """
+    file = find_file(job_config_file, extracted_files)
+    if file:
+        logger.info(f"Importing job configuration from {file}")
+        try:
+            with open(file, "r", encoding="utf-8") as f:
+                job_config = json.load(f)
+            create_job_config(es_client, job_config, input_index)
+        except (IOError, json.JSONDecodeError) as e:
+            logger.error(f"Error reading job configuration: {e}")
+            raise e
+    else:
+        raise FileNotFoundError(
+            f"Job configuration file {job_config_file} not found in the archive."
+        )
 
 
 def import_model_state(
@@ -318,7 +327,7 @@ def import_model_state(
     try:
         # Load the input data if available
         input_index = load_input_data(es_client, safe_job_id, extracted_files)
-        
+
         # Load the job configuration
         load_job_configuration(es_client, job_config_file, extracted_files, input_index)
 
@@ -345,6 +354,7 @@ def import_model_state(
 
     logger.info(f"Import of job {job_id} completed successfully.")
 
+
 def load_snapshot_data(es_client, extracted_files, snapshot_docs_file):
     file = find_file(snapshot_docs_file, extracted_files)
     if file:
@@ -357,8 +367,7 @@ def load_snapshot_data(es_client, extracted_files, snapshot_docs_file):
 
 
 def main() -> None:
-    """Main function to import model state to Elasticsearch.
-    """
+    """Main function to import model state to Elasticsearch."""
     parser = argparse.ArgumentParser(description="Import model state to Elasticsearch.")
     parser.add_argument(
         "--url", type=str, default="https://localhost:9200", help="Elasticsearch URL"
