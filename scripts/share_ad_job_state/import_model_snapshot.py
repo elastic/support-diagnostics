@@ -165,8 +165,7 @@ def create_job_config(
     filtered_config = {key: job_config[key] for key in job_fields if key in job_config}
     job_id = filtered_config.get("job_id")
     if not job_id:
-        logger.error("Job ID not found in job configuration.")
-        return None
+        raise KeyError("Job ID not found in job configuration.")
 
     # Remove sensitive or irrelevant fields
     datafeed_config = filtered_config.get("datafeed_config", {})
@@ -190,10 +189,10 @@ def create_job_config(
         return job_id
     except (ApiError, TransportError) as e:
         logger.error(f"Error uploading job configuration: {e}")
-        return None
+        raise e
 
 
-def load_snapshot_stats(es_client: Elasticsearch, file_path: str) -> Optional[str]:
+def load_snapshot_stats(es_client: Elasticsearch, extracted_files: List[str]) -> str:
     """
     Loads snapshot statistics from the given file and indexes it in Elasticsearch.
 
@@ -202,16 +201,21 @@ def load_snapshot_stats(es_client: Elasticsearch, file_path: str) -> Optional[st
         file_path (str): The path to the snapshot statistics file.
 
     Returns:
-        Optional[str]: The snapshot ID if successful, None otherwise.
+        str: The snapshot ID.
     """
+    file_path = find_file("ml-anomalies-snapshot_doc", extracted_files)
+    if file_path is None:
+        raise FileNotFoundError(
+            "Snapshot statistics file not found in the archive."
+        )
+    
     logger.info(f"Loading snapshot statistics from {file_path}")
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             snapshot_stats = json.load(f)
             snapshot_id = snapshot_stats.get("snapshot_id")
         if not snapshot_id:
-            logger.error("Snapshot ID not found in snapshot statistics.")
-            return None
+            raise KeyError("Snapshot ID not found in snapshot statistics.")
 
         index_name = ".ml-anomalies-shared"
         # Extract ID from file name
@@ -223,7 +227,7 @@ def load_snapshot_stats(es_client: Elasticsearch, file_path: str) -> Optional[st
         return snapshot_id
     except (ApiError, TransportError, IOError, json.JSONDecodeError) as e:
         logger.error(f"Error indexing snapshot statistics: {e}")
-        return None
+        raise e
 
 
 def find_file(file_name: str, extracted_files: List[str]) -> Optional[str]:
@@ -232,6 +236,61 @@ def find_file(file_name: str, extracted_files: List[str]) -> Optional[str]:
         if file_name in file:
             return file
     return None
+
+def load_input_data(es_client: Elasticsearch, safe_job_id: str, extracted_files: List[str]) -> Optional[str]:
+        """
+        Loads input data from extracted files that match the input file pattern.
+        
+        Args:
+            es_client (Elasticsearch): The Elasticsearch client.
+            safe_job_id (str): The sanitized job ID used for index naming and file pattern matching.
+            extracted_files (List[str]): List of extracted file paths to search through.
+            
+        Returns:
+            Optional[str]: The input index name if input data was loaded, None otherwise.
+        """
+        input_file_pattern = safe_job_id + r"_input_\d+.ndjson"
+        contains_input = any(
+            re.match(input_file_pattern, os.path.basename(file)) for file in extracted_files
+        )
+        
+        if contains_input:
+            logger.info(f"Input data file pattern found: {input_file_pattern}")
+            input_index = f"{safe_job_id}-input"
+            create_input_index(es_client, input_index)
+            for file in extracted_files:
+                if re.match(input_file_pattern, os.path.basename(file)):
+                    logger.info(f"Importing input data from {file}")
+                    upload_data(es_client, input_index, file)
+            return input_index
+        else:
+            logger.warning(f"No input data files matching pattern {input_file_pattern} found.")
+            return None
+
+def load_job_configuration(es_client: Elasticsearch, job_config_file: str, extracted_files: List[str], input_index: Optional[str]) :
+        """
+        Loads and creates a job configuration from the extracted files.
+        
+        Args:
+            es_client (Elasticsearch): The Elasticsearch client.
+            job_config_file (str): The job configuration file name to look for.
+            extracted_files (List[str]): List of extracted file paths.
+            input_index (Optional[str]): The input index name if available.
+        """
+        file = find_file(job_config_file, extracted_files)
+        if file:
+            logger.info(f"Importing job configuration from {file}")
+            try:
+                with open(file, "r", encoding="utf-8") as f:
+                    job_config = json.load(f)
+                create_job_config(es_client, job_config, input_index)
+            except (IOError, json.JSONDecodeError) as e:
+                logger.error(f"Error reading job configuration: {e}")
+                raise e
+        else:
+            raise FileNotFoundError(
+                f"Job configuration file {job_config_file} not found in the archive."
+            )
 
 
 def import_model_state(
@@ -255,74 +314,26 @@ def import_model_state(
     input_index = None
     job_config_file = f"{safe_job_id}_config.json"
     snapshot_docs_file = f"{safe_job_id}_snapshot_docs.ndjson"
-    input_file = f"{safe_job_id}_input.ndjson"
-    snapshot_stats_file = None
 
-    # Find snapshot statistics file
-    for file in extracted_files:
-        if "ml-anomalies-snapshot_doc" in file:
-            snapshot_stats_file = file
-            break
-
-    # Load the input data if available
-    file = find_file(input_file, extracted_files)
-    if file:
-        logger.info(f"Importing input data from {file}")
-        input_index = f"{safe_job_id}-input"
-        create_input_index(es_client, input_index)
-        upload_data(es_client, input_index, file)
-    else:
-        logger.warning(f"Input data file {input_file} not found in the archive.")
-
-    # Load the job configuration
-    file = find_file(job_config_file, extracted_files)
-    if file:
-        logger.info(f"Importing job configuration from {file}")
-        try:
-            with open(file, "r", encoding="utf-8") as f:
-                job_config = json.load(f)
-            job_id = create_job_config(es_client, job_config, input_index)
-            if not job_id:
-                logger.error("Failed to create job configuration.")
-                return
-        except (IOError, json.JSONDecodeError) as e:
-            logger.error(f"Error reading job configuration: {e}")
-            return
-    else:
-        logger.error(
-            f"Job configuration file {job_config_file} not found in the archive."
-        )
-        return
-
-    # Load the job snapshot docs
-    file = find_file(snapshot_docs_file, extracted_files)
-    if file:
-        logger.info(f"Importing snapshots from {file}")
-        upload_data(es_client, ".ml-state-write", file)
-    else:
-        logger.error(
-            f"Snapshot documents file {snapshot_docs_file} not found in the archive."
-        )
-        return
-
-    # Load the snapshot stats
-    if snapshot_stats_file:
-        logger.info(f"Importing snapshot statistics from {snapshot_stats_file}")
-        snapshot_id = load_snapshot_stats(es_client, snapshot_stats_file)
-        if not snapshot_id:
-            logger.error("Failed to load snapshot statistics.")
-            return
-    else:
-        logger.error("Snapshot statistics file not found in the archive.")
-        return
-
-    # Revert the job to the snapshot
-    time.sleep(2)  # Wait for the snapshot to be indexed
     try:
+        # Load the input data if available
+        input_index = load_input_data(es_client, safe_job_id, extracted_files)
+        
+        # Load the job configuration
+        load_job_configuration(es_client, job_config_file, extracted_files, input_index)
+
+        # Load the job snapshot docs
+        load_snapshot_data(es_client, extracted_files, snapshot_docs_file)
+
+        # Load the snapshot stats
+        snapshot_id = load_snapshot_stats(es_client, extracted_files)
+
+        time.sleep(2)  # Wait for the snapshot to be indexed
+        # Revert the job to the snapshot
         es_client.ml.revert_model_snapshot(job_id=job_id, snapshot_id=snapshot_id)
         logger.info(f"Reverted job {job_id} to snapshot {snapshot_id}")
-    except (ApiError, TransportError) as e:
-        logger.error(f"Error reverting job to snapshot: {e}")
+    except Exception as e:
+        logger.error(f"Error importing model state: {e}")
     finally:
         # Clean up extracted files and directory
         try:
@@ -334,9 +345,20 @@ def import_model_state(
 
     logger.info(f"Import of job {job_id} completed successfully.")
 
+def load_snapshot_data(es_client, extracted_files, snapshot_docs_file):
+    file = find_file(snapshot_docs_file, extracted_files)
+    if file:
+        logger.info(f"Importing snapshots from {file}")
+        upload_data(es_client, ".ml-state-write", file)
+    else:
+        raise FileNotFoundError(
+            f"Snapshot documents file {snapshot_docs_file} not found in the archive."
+        )
+
 
 def main() -> None:
-    """Main function to import model state to Elasticsearch."""
+    """Main function to import model state to Elasticsearch.
+    """
     parser = argparse.ArgumentParser(description="Import model state to Elasticsearch.")
     parser.add_argument(
         "--url", type=str, default="https://localhost:9200", help="Elasticsearch URL"

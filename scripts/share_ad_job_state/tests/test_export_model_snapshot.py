@@ -165,24 +165,64 @@ def _minimal_job_config():
 
 
 def test_save_inputs(tmp_path, dummy_es, monkeypatch, passthrough_tqdm):
+    """Test saving of input data for an ML job to validate input file creation."""
     cfg = _minimal_job_config()
     docs = [
         _make_doc("idx‑1", f"id{i}", value=i, user="me", **{"@timestamp": 0})
         for i in range(2)
     ]
-    monkeypatch.setattr(ems.helpers, "scan", lambda *_, **__: docs)
+    
+    # Mock the PIT API calls
+    dummy_es.open_point_in_time.return_value = {"id": "test-pit-id"}
+    dummy_es.close_point_in_time.return_value = {"succeeded": True}
+    
+    # First search response with sort values for search_after
+    dummy_es.search.side_effect = [
+        {
+            "hits": {
+                "hits": [
+                    {
+                        "_index": doc["_index"],
+                        "_id": doc["_id"],
+                        "_source": doc["_source"],
+                        "sort": [0, i]  # [timestamp_val, seq_no]
+                    } for i, doc in enumerate(docs)
+                ]
+            }
+        },
+        # Empty response to end the loop
+        {"hits": {"hits": []}}
+    ]
 
-    filename = ems.save_inputs(
+    filenames = ems.save_inputs(
         job_config=cfg,
         before_date=None,
         after_date=None,
         es_client=dummy_es,
     )
 
-    assert filename and Path(filename).is_file()
-    assert len(Path(filename).read_text().splitlines()) == 2 * len(
-        docs
-    )  # action+source
+    # Handle case where filenames might be None
+    if filenames is None:
+        pytest.fail("Expected save_inputs to return a list of filenames, got None")
+    
+    # Verify the PIT was opened and closed
+    dummy_es.open_point_in_time.assert_called_once()
+    dummy_es.close_point_in_time.assert_called_once()
+    
+    # Verify search was called with appropriate parameters
+    assert dummy_es.search.call_count == 2
+    # First call should include PIT ID
+    first_call_body = dummy_es.search.call_args_list[0][1]["body"]
+    assert first_call_body["pit"]["id"] == "test-pit-id"
+    
+    # There should be two calls to search, one for the initial fetch and one for the continuation
+    assert len(dummy_es.search.call_args_list) == 2
+        
+    for filename in filenames:
+        assert filename and Path(filename).is_file()
+        assert len(Path(filename).read_text().splitlines()) == 2 * len(
+            docs
+        )  # action+source
 
 
 def test_create_archive_captures_and_removes_files(tmp_path):
@@ -215,7 +255,9 @@ def test_get_snapshot_info_success(dummy_es):
             {"snapshot_id": "snap1", "snapshot_doc_count": 42},
         ],
     }
-    snap_id, doc_count = ems.get_snapshot_info(dummy_es, "jobA")
+    result = ems.get_snapshot_info(dummy_es, "jobA")
+    assert result is not None
+    snap_id, doc_count = result
     assert snap_id == "snap1" and doc_count == 42
 
 

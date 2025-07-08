@@ -6,11 +6,12 @@
 import argparse
 import json
 import os
+from pathlib import Path
 import re
 import tarfile
 from datetime import datetime
 from getpass import getpass
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, Iterator, List, Optional, Set, Tuple
 
 import urllib3
 from elasticsearch import ApiError, Elasticsearch, TransportError, helpers
@@ -39,6 +40,7 @@ KNOWN_OPERATORS = {
     "fuzzy",
     "prefix",
     "multi_match",
+    "match_all",
     "match_phrase",
     "match_phrase_prefix",
     "simple_query_string",
@@ -238,9 +240,9 @@ def save_annotations(
     index = ".ml-annotations-read"
     date_range = {}
     if before_date:
-        date_range["lte"] = before_date.isoformat()
+        date_range["lte"] = int(before_date.timestamp() * 1000)  # Convert to milliseconds
     if after_date:
-        date_range["gte"] = after_date.isoformat()
+        date_range["gte"] = int(after_date.timestamp() * 1000)  # Convert to milliseconds
 
     search_query = {
         "query": {
@@ -253,6 +255,8 @@ def save_annotations(
         },
         "size": 10000,
     }
+
+    logger.debug(f"Searching annotations for job {job_id} with query: {search_query}")
 
     try:
         response = es_client.search(index=index, body=search_query)
@@ -269,6 +273,58 @@ def save_annotations(
         logger.error(f"Failed to save annotations: {e}")
         return None
 
+def save_notifications(
+    job_id: str,
+    before_date: Optional[datetime],
+    after_date: Optional[datetime],
+    es_client: Elasticsearch,
+) -> Optional[str]:
+    """
+    Retrieves notifications for the given job within the specified date range.
+
+    Args:
+        job_id (str): The ID of the job.
+        before_date (Optional[datetime]): The upper bound for the create_time.
+        after_date (Optional[datetime]): The lower bound for the create_time.
+        es_client (Elasticsearch): The Elasticsearch client.
+
+    Returns:
+        Optional[str]: The filename containing the notifications, or None if failed.
+    """
+    index = ".ml-notifications-*"
+    date_range = {}
+    if before_date:
+        date_range["lte"] = int(before_date.timestamp() * 1000)  # Convert to milliseconds
+    if after_date:
+        date_range["gte"] = int(after_date.timestamp() * 1000)  # Convert to milliseconds
+
+    search_query = {
+        "query": {
+            "bool": {
+                "must": [
+                    {"term": {"job_id": job_id}},
+                    {"range": {"timestamp": date_range}},
+                ]
+            }
+        },
+        "size": 10000,
+    }
+    logger.debug(f"Searching for notifications for job {job_id} with query: {search_query}")
+
+    try:
+        response = es_client.search(index=index, body=search_query)
+        notifications = response.get("hits", {}).get("hits", [])
+
+        safe_job_id = sanitize_filename(job_id)
+        filename = f"{safe_job_id}_notifications.ndjson"
+        with open(filename, "w", encoding="utf-8") as f:
+            for notification in notifications:
+                f.write(json.dumps(notification["_source"]) + "\n")
+        logger.info(f"Notifications for job {job_id} stored in {filename}")
+        return filename
+    except (ApiError, TransportError, IOError) as e:
+        logger.error(f"Failed to save notifications: {e}")
+        return None
 
 def extract_field_names_from_json(
     query_json: Dict[str, Any], known_operators: Set[str]
@@ -299,30 +355,14 @@ def extract_possible_field_names(query: Dict[str, Any]) -> Set[str]:
     return field_names
 
 
-def save_inputs(
-    job_config: Dict[str, Any],
-    before_date: Optional[datetime],
-    after_date: Optional[datetime],
-    es_client: Elasticsearch,
-) -> Optional[str]:
+MAX_DOCS_PER_FILE = 10_000
+PAGE_SIZE = 2_000
+PIT_KEEP_ALIVE = "1m"
+
+def extract_source_fields(job_config: Dict[str, Any], query: Dict[str, Any]) -> List[str]:
     """
-    Extracts input data based on the job configuration and date range.
-
-    Args:
-        job_config (Dict[str, Any]): The job configuration dictionary.
-        before_date (Optional[datetime]): The upper bound for the time range.
-        after_date (Optional[datetime]): The lower bound for the time range.
-        es_client (Elasticsearch): The Elasticsearch client.
-
-    Returns:
-        Optional[str]: The filename containing the input data, or None if failed.
+    Collects and deduplicates all required _source fields from the job configuration and query.
     """
-    indices = job_config["datafeed_config"]["indices"]
-    job_id = job_config["job_id"]
-    time_field = job_config["data_description"]["time_field"]
-    query = job_config["datafeed_config"].get("query", {"match_all": {}})
-
-    # Extract fields from detectors
     field_keys = [
         "field_name",
         "partition_field_name",
@@ -331,57 +371,145 @@ def save_inputs(
         "over_field_name",
         "summary_count_field_name",
     ]
+
     fields = {
         detector[key]
         for detector in job_config["analysis_config"]["detectors"]
         for key in field_keys
         if key in detector
     }
-    fields.update(job_config["analysis_config"].get("influencers", []))
+    influencers = job_config["analysis_config"].get("influencers", [])
+    fields.update(influencers)
+
+    time_field = job_config["data_description"]["time_field"]
+    if time_field == "timestamp":
+        time_field = "@timestamp"
     fields.add(time_field)
     fields.update(extract_possible_field_names(query))
 
-    # Remove any '.keyword' suffixes
-    fields = {field.split(".keyword")[0] for field in fields}
+    # Strip any '.keyword' suffix
+    cleaned = {f.split(".keyword")[0] for f in fields}
+    return sorted(cleaned)
 
-    date_range = {}
-    if before_date:
-        date_range["lte"] = before_date.isoformat()
-    if after_date:
-        date_range["gte"] = after_date.isoformat()
 
-    search_query = {
-        "_source": list(fields),
-        "query": {
-            "bool": {
-                "must": [
-                    query,
-                    {"range": {time_field: date_range}},
-                ]
-            }
-        },
-        "size": 1000,
+def build_date_range(before: Optional[datetime], after: Optional[datetime]) -> Dict[str, str]:
+    """
+    Constructs an Elasticsearch range clause for the given dates.
+    """
+    rng: Dict[str, str] = {}
+    if before:
+        rng["lte"] = before.isoformat()
+    if after:
+        rng["gte"] = after.isoformat()
+    return rng
+
+
+def scroll_batches(
+    es_client: Elasticsearch,
+    indices: List[str],
+    query: Dict[str, Any],
+    source_fields: List[str],
+    time_field: str,
+    date_range: Dict[str, str]
+) -> Iterator[Dict[str, Any]]:
+    """
+    Yields search hits using PIT + search_after, sorted by time and sequence number.
+    """
+    pit_resp = es_client.open_point_in_time(index=indices, keep_alive=PIT_KEEP_ALIVE)
+    pit_id = pit_resp["id"]
+    body = {
+        "_source": source_fields,
+        "pit": {"id": pit_id, "keep_alive": PIT_KEEP_ALIVE},
+        "query": {"bool": {"must": [query, {"range": {time_field: date_range}}]}},
+        "sort": [{time_field: "asc"}, {"_seq_no": "asc"}],
+        "size": PAGE_SIZE
     }
+    search_after = None
 
-    safe_job_id = sanitize_filename(job_id)
-    filename = f"{safe_job_id}_input.ndjson"
-    num_docs = 0
     try:
-        with open(filename, "w", encoding="utf-8") as f:
-            for doc in tqdm(
-                helpers.scan(es_client, index=indices, query=search_query),
-                desc="Saving input data",
-            ):
-                action = {"index": {"_index": doc["_index"], "_id": doc["_id"]}}
-                f.write(json.dumps(action) + "\n")
-                f.write(json.dumps(doc["_source"]) + "\n")
-                num_docs += 1
-        logger.info(f"{num_docs} input documents for job stored in {filename}")
-        return filename
-    except (ApiError, TransportError, IOError) as e:
-        logger.error(f"Failed to save input data: {e}")
-        return None
+        while True:
+            if search_after:
+                body["search_after"] = search_after
+            resp = es_client.search(body=body)
+            hits = resp.get("hits", {}).get("hits", [])
+            if not hits:
+                break
+            for hit in hits:
+                yield hit
+            search_after = hits[-1]["sort"]
+            body["pit"]["keep_alive"] = PIT_KEEP_ALIVE
+    finally:
+        es_client.close_point_in_time(body={"id": pit_id})
 
+
+def write_to_ndjson(
+    hits: Iterator[Dict[str, Any]],
+    output_dir: Path,
+    base_name: str
+) -> List[str]:
+    """
+    Writes hits to chunked NDJSON files, returning a list of file paths.
+    """
+    output_dir.mkdir(parents=True, exist_ok=True)
+    filenames: List[str] = []
+    file_count = 1
+    docs_written = 0
+    total_docs = 0
+
+    def new_file() -> Any:
+        nonlocal file_count, docs_written
+        path = output_dir / f"{base_name}_{file_count}.ndjson"
+        f = path.open("w", encoding="utf-8")
+        filenames.append(str(path))
+        docs_written = 0
+        return f
+
+    writer = new_file()
+    try:
+        for hit in hits:
+            if docs_written >= MAX_DOCS_PER_FILE:
+                writer.close()
+                file_count += 1
+                writer = new_file()
+
+            action = {"index": {"_index": hit["_index"], "_id": hit["_id"]}}
+            writer.write(json.dumps(action) + "\n")
+            writer.write(json.dumps(hit["_source"]) + "\n")
+
+            docs_written += 1
+            total_docs += 1
+    finally:
+        writer.close()
+    logger.info(f"Wrote {total_docs} docs across {len(filenames)} files.")
+    return filenames
+
+
+def save_inputs(
+    job_config: Dict[str, Any],
+    before_date: Optional[datetime],
+    after_date: Optional[datetime],
+    es_client: Elasticsearch,
+) -> Optional[List[str]]:
+    """
+    Orchestrates extraction of data via Elasticsearch PIT + search_after,
+    then writes results into chunked NDJSON files.
+    """
+    indices = job_config["datafeed_config"]["indices"]
+    base_name = sanitize_filename(job_config["job_id"]) + "_input"
+    query = job_config["datafeed_config"].get("query", {"match_all": {}})
+
+    source_fields = extract_source_fields(job_config, query)
+    date_range = build_date_range(before_date, after_date)
+    time_field = job_config["data_description"]["time_field"]
+    if time_field == "timestamp":
+        time_field = "@timestamp"
+
+    try:
+        hits = scroll_batches(es_client, indices, query, source_fields, time_field, date_range)
+        return write_to_ndjson(hits, output_dir=Path("."), base_name=base_name)
+    except Exception as exc:
+        logger.error(f"Failed to save inputs: {exc}")
+        return None
 
 def create_archive(job_id: str, files: List[Optional[str]]) -> None:
     """
@@ -451,7 +579,7 @@ def main() -> None:
     Main function to extract model state from Elasticsearch.
 
     Example usage:
-    python export_model_snapshot.py --url https://localhost:9200 --username user --job_id <job_id> --before_date 2023-05-10T00:00:00 --after_date 2023-01-01T00:00:00 --include_inputs
+    python export_model_snapshot.py --url https://localhost:9200 --username user --job_id <job_id> --snapshot_before_date 2023-05-10T00:00:00 --input_after_date 2023-01-01T00:00:00 --input_before_date 2023-06-01T00:00:00 --include_inputs
 
     Output:
     <job_id>_state.tar.gz archive with the following files:
@@ -459,6 +587,7 @@ def main() -> None:
     - <job_id>_config.json job configuration
     - <job_id>_snapshot_docs.ndjson snapshot documents
     - <job_id>_annotations.ndjson annotations
+    - <job_id>_notifications.ndjson notifications
     - <job_id>_input.ndjson input data (if --include_inputs flag is set)
     """
     parser = argparse.ArgumentParser(
@@ -492,16 +621,28 @@ def main() -> None:
         "--cloud_id", type=str, required=False, help="Cloud ID for Elasticsearch"
     )
     parser.add_argument(
-        "--before_date",
+        "--snapshot_before_date",
         type=validate_date,
         required=False,
         help="Search for the latest snapshot CREATED before the given date (format: YYYY-MM-DDTHH:MM:SS)",
     )
     parser.add_argument(
-        "--after_date",
+        "--annotations_after_date", 
         type=validate_date,
         required=False,
-        help="Search for input data and annotations after the specified date (format: YYYY-MM-DDTHH:MM:SS)",
+        help="Search for annotations and notifications after the specified date (format: YYYY-MM-DDTHH:MM:SS). Defaults to the job creation date.",
+    )
+    parser.add_argument(
+        "--inputs_after_date",
+        type=validate_date,
+        required=False,
+        help="Search for input data after the specified date (format: YYYY-MM-DDTHH:MM:SS)",
+    )
+    parser.add_argument(
+        "--inputs_before_date",
+        type=validate_date,
+        required=False,
+        help="Search for input data before the specified date (format: YYYY-MM-DDTHH:MM:SS)",
     )
     parser.add_argument(
         "--include_inputs",
@@ -515,6 +656,7 @@ def main() -> None:
     )
     args = parser.parse_args()
 
+
     # Handle password securely
     if not args.password:
         args.password = getpass(prompt="Enter Elasticsearch password: ")
@@ -525,6 +667,19 @@ def main() -> None:
     if confirm.lower() != "yes":
         logger.info("Operation aborted by the user.")
         return
+    
+    # If --include_inputs is set, but no input dates are provided, warn the user
+    if args.include_inputs and (not args.inputs_after_date or not args.inputs_before_date):
+        logger.warning(
+            "Input data will be included, but no date range is specified. "
+            "This may result in a large amount of data being extracted."
+        )
+        confirm = input("Do you wish to continue? (yes/no): ")
+        if confirm.lower() != "yes":
+            logger.info("Operation aborted by the user.")
+            return
+        
+    
 
     logger.info("Connecting to Elasticsearch")
     # Connect to an Elasticsearch instance
@@ -547,7 +702,7 @@ def main() -> None:
         logger.error(f"Failed to connect to Elasticsearch: {e}")
         return
 
-    snapshot_info = get_snapshot_info(es_client, args.job_id, args.before_date)
+    snapshot_info = get_snapshot_info(es_client, args.job_id, args.snapshot_before_date)
     if snapshot_info is None:
         logger.error("Failed to retrieve snapshot info.")
         return
@@ -565,14 +720,35 @@ def main() -> None:
         return
 
     # Get the annotations and store them
+    if args.annotations_after_date:
+        annotations_after_date = args.annotations_after_date
+    else:
+        # If no annotations_after_date is provided, use the job creation date
+        job_creation_timestamp = job_configuration.get("create_time")
+        logger.info(
+            f"Job configuration creation date: {job_creation_timestamp}"
+        )
+        if job_creation_timestamp:
+            # date from timestamp
+            annotations_after_date = datetime.fromtimestamp(job_creation_timestamp / 1000.0)
+            logger.info(
+                f"Using job creation date {annotations_after_date} as annotations_after_date."
+            )
+        else:
+            logger.error("Job creation date not found in job configuration.")
+            return
     file_name_annotations = save_annotations(
-        args.job_id, args.before_date, args.after_date, es_client
+        args.job_id, args.snapshot_before_date, annotations_after_date, es_client
+    )
+
+    file_name_notifications = save_notifications(
+        args.job_id, args.snapshot_before_date, annotations_after_date, es_client
     )
 
     # Get the input data and store it
     if args.include_inputs:
         file_name_inputs = (
-            save_inputs(job_configuration, args.before_date, args.after_date, es_client)
+            save_inputs(job_configuration, args.inputs_before_date, args.inputs_after_date, es_client)
             if job_configuration
             else None
         )
@@ -591,8 +767,9 @@ def main() -> None:
         file_name_job_config,
         filename_snapshots,
         file_name_annotations,
-        file_name_inputs,
-    ]
+        file_name_notifications,
+    ] + file_name_inputs if file_name_inputs else []
+
     create_archive(args.job_id, files_to_archive)
 
 
