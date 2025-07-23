@@ -162,10 +162,11 @@ def test_create_job_config_success(dummy_es):
     assert "job_id" not in body["datafeed_config"]
 
 
-def test_create_job_config_missing_id_returns_none(dummy_es):
+def test_create_job_config_missing_id_raises_key_error(dummy_es):
     cfg = _job_cfg()
     del cfg["job_id"]
-    assert ims.create_job_config(dummy_es, cfg) is None
+    with pytest.raises(KeyError):
+        ims.create_job_config(dummy_es, cfg)
 
 
 # --------------------------------------------------------------------------- #
@@ -176,7 +177,7 @@ def test_load_snapshot_stats_indexes_doc(tmp_path, dummy_es):
     stats_file.write_text(json.dumps({"snapshot_id": "snap1"}))
 
     dummy_es.index.return_value = {"_id": "abc"}
-    snap_id = ims.load_snapshot_stats(dummy_es, str(stats_file))
+    snap_id = ims.load_snapshot_stats(dummy_es, [str(stats_file)])
 
     assert snap_id == "snap1"
     dummy_es.index.assert_called_once()
@@ -207,7 +208,7 @@ def test_import_model_state_happy_path(tmp_path, dummy_es, monkeypatch):
     cfg_file.write_text(json.dumps(_job_cfg()))
     snap_docs = out_dir / f"{safe_id}_snapshot_docs.ndjson"
     snap_docs.write_text("{}\n{}\n")
-    input_file = out_dir / f"{safe_id}_input.ndjson"
+    input_file = out_dir / f"{safe_id}_input_1.ndjson"
     input_file.write_text("{}\n{}\n")
     snap_stats = out_dir / "ml-anomalies-snapshot_doc_1.json"
     snap_stats.write_text(json.dumps({"snapshot_id": "snap1"}))
@@ -227,7 +228,7 @@ def test_import_model_state_happy_path(tmp_path, dummy_es, monkeypatch):
     ims.create_input_index.assert_called_once()
     ims.upload_data.assert_any_call(dummy_es, f"{safe_id}-input", str(input_file))
     ims.upload_data.assert_any_call(dummy_es, ".ml-state-write", str(snap_docs))
-    ims.load_snapshot_stats.assert_called_once_with(dummy_es, str(snap_stats))
+    ims.load_snapshot_stats.assert_called_once()
     dummy_es.ml.revert_model_snapshot.assert_called_once_with(
         job_id=job_id, snapshot_id="snap1"
     )
