@@ -50,7 +50,6 @@ kibana_data_views:
 kibana_detection_engine_health_cluster:
   versions:
     ">= 8.8.2": "/internal/detection_engine/health/_cluster"
-    # ">= 9.0.0": "uri [/internal/detection_engine/health/_cluster] with method [get] exists but is not available with the current configuration"
 
 # Calculates health of Detection Engine and returns a health snapshot.
 # Scope: all detection rules in the current/default Kibana space.
@@ -58,7 +57,6 @@ kibana_detection_engine_health_cluster:
 kibana_detection_engine_health_space:
   versions:
     ">= 8.8.2": "/internal/detection_engine/health/_space"
-    # ">= 9.0.0": "uri [/internal/detection_engine/health/_space] with method [get] exists but is not available with the current configuration"
 
 kibana_detection_engine_privileges:
   versions:
@@ -79,7 +77,6 @@ kibana_detection_engine_rules_prebuilt_status:
     ">= 7.10.0 < 7.15.0": "/api/detection_engine/prepackaged"
     ">= 7.15.0 < 8.9.0": "/api/detection_engine/rules/prepackaged/_status"
     ">= 8.9.0": "/internal/detection_engine/prebuilt_rules/status"
-    # ">= 9.0.0": "uri [/internal/detection_engine/prebuilt_rules/status] with method [get] exists but is not available with the current configuration"
 
 kibana_fleet_agents:
   versions:
@@ -118,7 +115,6 @@ kibana_fleet_settings:
 kibana_reporting_diagnose_browser:
   versions:
     ">= 8.16.0": "/internal/reporting/diagnose/browser"
-    # ">= 9.0.0": "uri [/internal/reporting/diagnose/browser] with method [get] exists but is not available with the current configuration"
 
 kibana_roles:
   versions:
@@ -191,7 +187,6 @@ kibana_status:
 kibana_synthetics_monitor_filters:
   versions:
     ">= 8.12.0": "/internal/synthetics/monitor/filters"
-    # ">= 9.0.0": "uri [/internal/synthetics/monitor/filters] with method [get] exists but is not available with the current configuration"
 
 # Disabled pending review
 #kibana_synthetics_monitors:
@@ -220,9 +215,7 @@ kibana_user:
   versions:
     ">= 7.6.0": "/internal/security/me"
     ">= 5.0.0 < 7.6.0": "/api/security/v1/me"
-    # ">= 9.0.0": "uri [/internal/security/me] with method [get] exists but is not available with the current configuration"
 
 kibana_stack_monitoring_health:
   versions:
     ">= 8.3.1": "/api/monitoring/v1/_health"
-    # ">= 9.0.0": "uri [/api/monitoring/v1/_health] with method [get] exists but is not available with the current configuration"
