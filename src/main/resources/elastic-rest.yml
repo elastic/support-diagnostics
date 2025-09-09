@@ -433,6 +433,11 @@ ml_dataframe_stats:
   versions:
     ">= 7.3.0": "/_ml/data_frame/analytics/_stats"
 
+ml_inference:
+  subdir: "commercial"
+  versions:
+    ">= 8.11.0": "/_inference"
+
 ml_info:
   subdir: "commercial"
   versions:
