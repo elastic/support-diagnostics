@@ -553,7 +553,7 @@ Writing output from a diagnostic zip file to the working directory with the work
 Writing output from a diagnostic zip file in a directory with spaces to a specific directory with the workers determined dynamically:
 
 ```$xslt
-./scrub.sh -i '/Users/adminuser/diagnostic output/diagnostics-20180621-161231.zip' -o /home/adminuser/sanitized-diags -c /home/adminuser/sanitized-diags/scrub.yml
+./scrub.sh -i '/Users/adminuser/diagnostic output/diagnostics-20180621-161231.zip' -o /home/adminuser/sanitized-diags
 ```
 
 Processing a single log file and using a single worker:
