@@ -41,8 +41,7 @@ public class RunLogstashQueries extends BaseQuery {
 
         try {
             RestClient client = context.resourceCache.getRestClient(Constants.restInputHost);
-            List<RestEntry> entries = new ArrayList<>();
-            entries.addAll(context.elasticRestCalls.values());
+            List<RestEntry> entries = new ArrayList<>(context.elasticRestCalls.values());
             runQueries(client, entries, context.tempDir, 0, 0);
 
             // Get the information we need to run system calls. It's easier to just get it
