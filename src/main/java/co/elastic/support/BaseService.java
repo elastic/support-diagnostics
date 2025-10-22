@@ -29,12 +29,12 @@ public abstract class BaseService {
     protected void closeLogs() {
         logger.info(Constants.CONSOLE, "Closing loggers.");
 
-        Appender appender = logConfig.getAppender("diag");
+        Appender appender = logConfig.getAppender("packaged");
         if (appender != null && appender.isStarted()) {
             appender.stop();
         }
 
-        logConfig.getRootLogger().removeAppender("File");
+        logConfig.getRootLogger().removeAppender("packaged");
     }
 
     protected void createFileAppender(String logDir, String logFile) {
