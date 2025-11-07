@@ -20,25 +20,25 @@ logstash_health_report:
 
 logstash_node:
   versions:
-    "> 0.0.0": "/_node"
+    "> 5.0.0": "/_node"
 
 logstash_nodes_hot_threads:
   versions:
-    "> 0.0.0": "/_node/hot_threads?threads=10000"
+    "> 5.0.0": "/_node/hot_threads?threads=10000"
 
 logstash_nodes_hot_threads_human:
   extension: .txt
   versions:
-    "> 0.0.0": "/_node/hot_threads?human&threads=10000"
+    "> 5.0.0": "/_node/hot_threads?human&threads=10000"
 
 logstash_node_stats:
   versions:
-    "> 0.0.0": "/_node/stats"
+    "> 5.0.0": "/_node/stats"
 
 logstash_plugins:
   versions:
-    "> 0.0.0": "/_node/plugins"
+    "> 5.0.0": "/_node/plugins"
 
 logstash_version:
   versions:
-    "> 0.0.0": "/"
+    "> 5.0.0": "/"

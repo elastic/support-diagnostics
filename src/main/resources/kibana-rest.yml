@@ -21,8 +21,12 @@
 
 kibana_actions:
   versions:
-    ">= 7.0.0 < 9.0.0": "/api/actions"
-    ">= 9.0.0": "/api/actions/connectors"
+    ">= 7.0.0 < 9.0.0":
+      url: "/api/actions"
+      spaceaware: true
+    ">= 9.0.0":
+      url: "/api/actions/connectors"
+      spaceaware: true
 
 kibana_alerts:
   versions:
