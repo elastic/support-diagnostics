@@ -21,7 +21,9 @@
 
 kibana_actions:
   versions:
-    ">= 7.0.0": "/api/actions"
+    ">= 7.0.0": 
+      url: "/api/actions"
+      spaceaware: true
 
 kibana_alerts:
   versions:
