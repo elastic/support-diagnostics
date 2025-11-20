@@ -198,6 +198,10 @@ kibana_task_manager_health:
   versions:
     ">= 7.11.0": "/api/task_manager/_health"
 
+kibana_upgrade_assistant:
+  versions:
+    ">= 6.6.0": "/api/upgrade_assistant/status"
+
 kibana_uptime_locations:
   versions:
     ">= 8.12.0": "/internal/uptime/service/locations"
