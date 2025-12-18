@@ -39,7 +39,9 @@ kibana_alerts_health:
 
 kibana_data_views:
   versions:
-    ">= 8.0.0": "/api/data_views"
+    ">= 8.0.0":
+      url: "/api/data_views"
+      spaceaware: true
 
 # Calculates health of Detection Engine and returns a health snapshot.
 # Scope: the whole cluster = all detection rules in all Kibana spaces.
