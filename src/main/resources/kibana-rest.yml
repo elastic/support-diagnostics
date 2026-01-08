@@ -21,14 +21,21 @@
 
 kibana_actions:
   versions:
-    ">= 7.0.0": 
+    ">= 7.0.0 < 9.0.0":
       url: "/api/actions"
+      spaceaware: true
+    ">= 9.0.0":
+      url: "/api/actions/connectors"
       spaceaware: true
 
 kibana_alerts:
   versions:
-    ">= 7.9.0":
+    ">= 7.9.0 < 9.0.0":
       url: "/api/alerts/_find"
+      spaceaware: true
+      paginate: per_page
+    ">= 9.0.0":
+      url: "/api/alerting/rules/_find"
       spaceaware: true
       paginate: per_page
 
@@ -91,7 +98,8 @@ kibana_fleet_agent_policies:
 
 kibana_fleet_packages:
   versions:
-    ">= 7.11.0": "/api/fleet/epm/packages?experimental=true"
+    ">= 7.11.0 < 9.0.0": "/api/fleet/epm/packages?experimental=true"
+    ">= 9.0.0": "/api/fleet/epm/packages?withPackagePoliciesCount=true"
 
 kibana_fleet_agent_status:
   versions:
@@ -158,7 +166,8 @@ kibana_security_exception_list:
 
 kibana_security_packages:
   versions:
-    ">= 7.10.0": "/api/fleet/epm/packages?experimental=true&category=security"
+    ">= 7.10.0 < 9.0.0": "/api/fleet/epm/packages?experimental=true&category=security"
+    ">= 9.0.0": "/api/fleet/epm/packages?withPackagePoliciesCount=true&category=security"
 
 kibana_settings:
   versions:
