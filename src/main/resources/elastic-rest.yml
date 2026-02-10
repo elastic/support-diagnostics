@@ -345,6 +345,11 @@ version:
   versions:
     ">= 0.9.0": "/"
 
+deprecation_info:
+  tags: light
+  versions:
+    ">= 7.0.0": "/_migration/deprecations"
+
 ## Commercial Features
 autoscaling_capacity:
   subdir: "commercial"
@@ -598,3 +603,18 @@ data_stream:
   versions:
     ">= 7.9.0 < 7.11.0": "/_data_stream"
     ">= 7.11.0": "/_data_stream?expand_wildcards=all"
+
+connectors:
+  subdir: "commercial"
+  versions:
+    ">= 8.12.0": "/_connector"
+	
+ml_inference:
+  subdir: "commercial"
+  versions:
+    ">= 8.11.0": "/_inference"
+	
+ml_trained_models_deployment:
+  subdir: "commercial"
+  versions:
+    ">= 8.0.0": "/_ml/trained_models/_all/_stats"
