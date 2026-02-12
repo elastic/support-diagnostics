@@ -609,11 +609,6 @@ connectors:
   versions:
     ">= 8.12.0": "/_connector"
 	
-ml_inference:
-  subdir: "commercial"
-  versions:
-    ">= 8.11.0": "/_inference"
-	
 ml_trained_models_deployment:
   subdir: "commercial"
   versions:
