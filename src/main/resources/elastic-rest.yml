@@ -197,6 +197,11 @@ dangling_indices:
   versions:
     ">= 7.9.0": "/_dangling?human"
 
+deprecation_info:
+  tags: light
+  versions:
+    ">= 6.1.0": "/_migration/deprecations"
+
 fielddata:
   versions:
     ">= 0.9.0": "/_cat/fielddata?format=json&bytes"
@@ -367,6 +372,17 @@ ccr_stats:
   subdir: "commercial"
   versions:
     ">= 6.5.0": "/_ccr/stats"
+
+connectors:
+  subdir: "commercial"
+  versions:
+    ">= 8.12.0": "/_connector"
+
+data_stream:
+  subdir: "commercial"
+  versions:
+    ">= 7.9.0 < 7.11.0": "/_data_stream"
+    ">= 7.11.0": "/_data_stream?expand_wildcards=all"
 
 enrich_policies:
   subdir: "commercial"
@@ -594,9 +610,3 @@ xpack:
   subdir: "commercial"
   versions:
     ">= 5.0.0": "/_xpack/usage?human"
-
-data_stream:
-  subdir: "commercial"
-  versions:
-    ">= 7.9.0 < 7.11.0": "/_data_stream"
-    ">= 7.11.0": "/_data_stream?expand_wildcards=all"
