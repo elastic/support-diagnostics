@@ -21,7 +21,8 @@ cat_aliases:
   subdir: "cat"
   versions:
     ">= 0.9.0 < 5.1.1": "/_cat/aliases?v"
-    ">= 5.1.1": "/_cat/aliases?v&s=alias,index"
+    ">= 5.1.1 < 7.7.0": "/_cat/aliases?v&s=alias,index"
+    ">= 7.7.0": "/_cat/aliases?v&s=alias,index&expand_wildcards=all"
 
 cat_allocation:
   extension: ".txt"
@@ -137,7 +138,8 @@ nodes_hot_threads:
 ## Common JSON API's
 alias:
   versions:
-    ">= 0.9.0": "/_alias?human"
+    ">= 0.9.0 < 7.7.0": "/_alias?human&expand_wildcards=all"
+    ">= 7.7.0": "/_alias?human&expand_wildcards=all"
 
 allocation:
   versions:
