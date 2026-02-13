@@ -55,7 +55,6 @@ crashlytics-build.properties
 ### Eclipse ###
 *.pydevproject
 .metadata
-.gradle
 bin/
 tmp/
 *.tmp
@@ -91,6 +90,10 @@ local.properties
 .texlipse
 
 
+### Gradle ###
+.gradle/
+build/
+
 ### Maven ###
 target/
 pom.xml.tag
@@ -102,8 +105,6 @@ dependency-reduced-pom.xml
 buildNumber.properties
 
 .DS_Store
-
-
 
 ./diagnostic-output
 ### VSCode
