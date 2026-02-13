@@ -1,7 +1,4 @@
-# This workflow will build a package using Maven and then publish it to GitHub packages when a release is created
-# For more information see: https://github.com/actions/setup-java/blob/main/docs/advanced-usage.md#apache-maven-with-a-settings-path
-
-name: Maven Package
+name: Gradle Publish
 
 on:
   release:
@@ -25,7 +22,7 @@ jobs:
         distribution: 'zulu'
 
     - name: Build with Gradle
-      run: gradlew publish
+      run: ./gradlew publish
       
     - name: Add output files to the Github release
       shell: bash
