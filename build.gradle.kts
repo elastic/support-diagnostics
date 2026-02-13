@@ -97,6 +97,16 @@ tasks.jar {
 }
 
 // ---------------------------------------------------------------------------
+// Copy runtime dependencies to build/lib (used by Docker builds)
+// ---------------------------------------------------------------------------
+val copyDependencies by tasks.registering(Copy::class) {
+    group = "distribution"
+    description = "Copies runtime dependency jars to build/lib."
+    from(configurations.runtimeClasspath)
+    into(layout.buildDirectory.dir("lib"))
+}
+
+// ---------------------------------------------------------------------------
 // Distribution zip (mirrors src/main/assembly/assembly.xml)
 // ---------------------------------------------------------------------------
 val distZip by tasks.registering(Zip::class) {
@@ -154,9 +164,9 @@ val distZipChecksum by tasks.registering {
     }
 }
 
-// Wire distZip + checksum into the build lifecycle
+// Wire distribution tasks into the build lifecycle
 tasks.named("build") {
-    dependsOn(distZip, distZipChecksum)
+    dependsOn(distZip, distZipChecksum, copyDependencies)
 }
 
 // ---------------------------------------------------------------------------
