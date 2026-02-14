@@ -1,0 +1,10 @@
+steps:
+- label: ":docker: Build and Push Dockerfile"
+  commands:
+    - "vault kv get -field=password kv/ci-shared/opex/oci-registry-creds-prod | docker login -u $(vault kv get -field=username kv/ci-shared/opex/oci-registry-creds-prod) --password-stdin docker.elastic.co"
+    - "docker buildx create --use"
+    - "docker buildx build --platform linux/amd64,linux/arm64 --push -t docker.elastic.co/opex/diagnostics:latest ."
+  agents:
+    provider: "gcp"
+    imagePrefix: "core-ubuntu-2204"
+    machineType: "n2-standard-2"
