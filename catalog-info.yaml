@@ -1,0 +1,35 @@
+# Declare a Backstage Component that represents your application.
+---
+# yaml-language-server: $schema=https://json.schemastore.org/catalog-info.json
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: support-diagnostics
+spec:
+  type: tool # or service, library, etc.
+  owner: group:opex
+  system: autoops
+  lifecycle: production
+---
+# yaml-language-server: $schema=https://gist.githubusercontent.com/elasticmachine/988b80dae436cafea07d9a4a460a011d/raw/rre.schema.json
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: buildkite-pipeline-support-diagnostics
+  description: Buildkite Pipeline for support-diagnostics
+spec:
+  type: buildkite-pipeline
+  owner: group:opex
+  system: buildkite
+  implementation:
+    apiVersion: buildkite.elastic.dev/v1
+    kind: Pipeline
+    metadata:
+      name: Support Diagnostics Buildkite Pipeline
+    spec:
+      repository: elastic/support-diagnostics
+      teams:
+        opex:
+          access_level: MANAGE_BUILD_AND_READ
+        everyone:
+          access_level: READ_ONLY
