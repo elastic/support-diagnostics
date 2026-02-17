@@ -6,47 +6,53 @@
  */
 package co.elastic.support.diagnostics.commands;
 
+import co.elastic.support.Constants;
 import co.elastic.support.diagnostics.DiagConfig;
+import co.elastic.support.diagnostics.DiagnosticException;
 import co.elastic.support.diagnostics.DiagnosticInputs;
+import co.elastic.support.diagnostics.ProcessProfile;
+import co.elastic.support.diagnostics.chain.DiagnosticContext;
+import co.elastic.support.rest.RestClient;
+import co.elastic.support.rest.RestEntry;
+import co.elastic.support.rest.RestEntryConfig;
 import co.elastic.support.util.JsonYamlUtils;
 import co.elastic.support.util.ResourceCache;
-import co.elastic.support.Constants;
-import co.elastic.support.diagnostics.DiagnosticException;
-import co.elastic.support.diagnostics.ProcessProfile;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.github.tomakehurst.wiremock.WireMockServer;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import co.elastic.support.diagnostics.chain.DiagnosticContext;
-import co.elastic.support.rest.RestEntryConfig;
-import org.mockserver.integration.ClientAndServer;
+import org.junit.jupiter.api.TestInstance;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Map;
-import org.junit.jupiter.api.*;
-import co.elastic.support.rest.RestClient;
-import co.elastic.support.rest.RestEntry;
-import com.fasterxml.jackson.databind.JsonNode;
-
 import java.util.List;
+import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockserver.integration.ClientAndServer.startClientAndServer;
-import static org.mockserver.model.HttpRequest.request;
-import static org.mockserver.model.HttpResponse.response;
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class TestKibanaGetDetails {
 
-    private ClientAndServer mockServer;
+    private WireMockServer wireMockServer;
     private RestClient httpRestClient;
 
     @BeforeAll
     public void globalSetup() {
-        mockServer = startClientAndServer(9880);
+        wireMockServer = new WireMockServer(wireMockConfig().port(9880));
+        wireMockServer.start();
     }
 
     @AfterAll
-    public void globalTeardoown() {
-        mockServer.stop();
+    public void globalTeardown() {
+        wireMockServer.stop();
     }
 
     @BeforeEach
@@ -73,7 +79,7 @@ public class TestKibanaGetDetails {
 
     @AfterEach
     public void tearDown() {
-        mockServer.reset();
+        wireMockServer.resetAll();
     }
 
     @Test
@@ -143,19 +149,14 @@ public class TestKibanaGetDetails {
 
     @Test
     public void testFunctionGetStats() throws DiagnosticException {
-        mockServer
-                .when(
-                        request()
-                                .withMethod("GET")
-                                .withPath("/api/stats"))
-                .respond(
-                        response()
-                                .withBody(
-                                        "{\"process\":{\"memory\":{\"heap\":{\"total_bytes\":470466560,\"used_bytes\":343398224,\"size_limit\":1740165498},\"resident_set_size_bytes\":587878400},\"pid\":32,\"event_loop_delay\":0.280181884765625,\"uptime_ms\":97230924},\"os\":{\"platform\":\"linux\",\"platform_release\":\"linux-4.15.0-1032-gcp\",\"load\":{\"1m\":1.37451171875,\"5m\":1.43408203125,\"15m\":1.34375},\"memory\":{\"total_bytes\":147879931904,\"free_bytes\":45620334592,\"used_bytes\":102259597312},\"uptime_ms\":18093713000,\"distro\":\"Centos\",\"distro_release\":\"Centos-7.8.2003\"},\"requests\":{\"disconnects\":0,\"total\":1,\"status_codes\":{\"302\":1}},\"concurrent_connections\":8,\"timestamp\":\"2021-01-06T01:35:11.324Z\",\"kibana\":{\"uuid\":\"a4f369ef-fecd-46b7-8b16-c6c3f885d9ec\",\"name\":\"13d5e793ea51\",\"index\":\".kibana\",\"host\":\"0.0.0.0\",\"locale\":\"en\",\"transport_address\":\"0.0.0.0:18648\",\"version\":\"7.9.0\",\"snapshot\":false,\"status\":\"green\"},\"last_updated\":\"2021-01-06T01:35:15.911Z\",\"collection_interval_ms\":5000,\"cluster_uuid\":\"RfBRUssssadN4WZssnnog\"}")
-                                .withStatusCode(401));
+        wireMockServer.stubFor(get(urlEqualTo("/api/stats"))
+                .willReturn(aResponse()
+                        .withBody(
+                                "{\"process\":{\"memory\":{\"heap\":{\"total_bytes\":470466560,\"used_bytes\":343398224,\"size_limit\":1740165498},\"resident_set_size_bytes\":587878400},\"pid\":32,\"event_loop_delay\":0.280181884765625,\"uptime_ms\":97230924},\"os\":{\"platform\":\"linux\",\"platform_release\":\"linux-4.15.0-1032-gcp\",\"load\":{\"1m\":1.37451171875,\"5m\":1.43408203125,\"15m\":1.34375},\"memory\":{\"total_bytes\":147879931904,\"free_bytes\":45620334592,\"used_bytes\":102259597312},\"uptime_ms\":18093713000,\"distro\":\"Centos\",\"distro_release\":\"Centos-7.8.2003\"},\"requests\":{\"disconnects\":0,\"total\":1,\"status_codes\":{\"302\":1}},\"concurrent_connections\":8,\"timestamp\":\"2021-01-06T01:35:11.324Z\",\"kibana\":{\"uuid\":\"a4f369ef-fecd-46b7-8b16-c6c3f885d9ec\",\"name\":\"13d5e793ea51\",\"index\":\".kibana\",\"host\":\"0.0.0.0\",\"locale\":\"en\",\"transport_address\":\"0.0.0.0:18648\",\"version\":\"7.9.0\",\"snapshot\":false,\"status\":\"green\"},\"last_updated\":\"2021-01-06T01:35:15.911Z\",\"collection_interval_ms\":5000,\"cluster_uuid\":\"RfBRUssssadN4WZssnnog\"}")
+                        .withStatus(401)));
 
-        Map diagMap = JsonYamlUtils.readYamlFromClasspath(Constants.DIAG_CONFIG, true);
-        Map restCalls = JsonYamlUtils.readYamlFromClasspath(Constants.KIBANA_REST, true);
+        Map<String, Object> diagMap = JsonYamlUtils.readYamlFromClasspath(Constants.DIAG_CONFIG, true);
+        Map<String, Object> restCalls = JsonYamlUtils.readYamlFromClasspath(Constants.KIBANA_REST, true);
         RestEntryConfig builder = new RestEntryConfig("7.10.0");
         Map<String, RestEntry> entries = builder.buildEntryMap(restCalls);
 
