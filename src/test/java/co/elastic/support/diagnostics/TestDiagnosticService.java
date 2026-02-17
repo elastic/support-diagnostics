@@ -10,8 +10,11 @@ import co.elastic.support.Constants;
 import co.elastic.support.diagnostics.chain.DiagnosticContext;
 import co.elastic.support.util.JsonYamlUtils;
 import co.elastic.support.util.ResourceCache;
-import org.junit.jupiter.api.*;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockserver.configuration.ConfigurationProperties;
 import org.mockserver.integration.ClientAndServer;
 import org.mockserver.model.Header;
@@ -19,7 +22,13 @@ import org.mockserver.model.HttpRequest;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -35,12 +44,13 @@ import static org.mockserver.model.HttpResponse.response;
 class TestDiagnosticService {
     private ClientAndServer mockServer;
 
-    private TemporaryFolder folder;
+    @TempDir
+    private Path folder;
 
-    static private String headerKey1 = "k1";
-    static private String headerVal1 = "v1";
-    static private String headerKey2 = "k2";
-    static private String headerVal2 = "v2";
+    private static final String headerKey1 = "k1";
+    private static final String headerVal1 = "v1";
+    private static final String headerKey2 = "k2";
+    private static final String headerVal2 = "v2";
 
     @BeforeAll
     public void globalSetup() {
@@ -54,17 +64,6 @@ class TestDiagnosticService {
     @AfterAll
     public void globalTeardown() {
         mockServer.stop();
-    }
-
-    @BeforeEach
-    public void setup() throws IOException {
-        folder = new TemporaryFolder();
-        folder.create();
-    }
-
-    @AfterEach
-    public void tearDown() {
-        folder.delete();
     }
 
     private DiagConfig newDiagConfig() {
@@ -82,7 +81,7 @@ class TestDiagnosticService {
         diagnosticInputs.port = 9880;
         diagnosticInputs.diagType = Constants.api;
         try {
-            File outputDir = folder.newFolder();
+            Path outputDir = Files.createTempDirectory(folder, "diag");
             diagnosticInputs.outputDir = outputDir.toString();
         } catch (IOException e) {
             fail("Unable to create temp directory", e);
@@ -146,7 +145,7 @@ class TestDiagnosticService {
     public void checkResult(File result, Boolean withLogFile) {
         assertTrue(result.toString().matches(".*\\.zip$"), result.toString());
         try {
-            HashMap<String, ZipEntry> contents = zipFileContents(result);
+            Map<String, ZipEntry> contents = zipFileContents(result);
 
             assertTrue(contents.containsKey("diagnostic_manifest.json"),
                     () -> contents.keySet().stream().collect(Collectors.joining(", ")));
@@ -228,9 +227,8 @@ class TestDiagnosticService {
             }
         };
 
-        Thread[] threads = new Thread[3];
-        Arrays.setAll(threads, i -> new Thread(task.apply(i)));
-        Arrays.stream(threads).forEach(Thread::start);
+        List<Thread> threads = List.of(new Thread(task.apply(0)), new Thread(task.apply(1)), new Thread(task.apply(2)));
+        threads.forEach(Thread::start);
 
         for (Thread t : threads) {
             try {
@@ -244,7 +242,7 @@ class TestDiagnosticService {
                 }
             }
         }
-        assertEquals(results.size(), threads.length);
+        assertEquals(results.size(), threads.size());
         results.forEach((i, result) -> checkResult(result, false));
         try {
             Enumeration<File> resultFiles = results.elements();
