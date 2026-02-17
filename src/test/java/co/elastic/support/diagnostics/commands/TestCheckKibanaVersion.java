@@ -7,37 +7,43 @@
 package co.elastic.support.diagnostics.commands;
 
 import co.elastic.support.diagnostics.DiagnosticException;
-import org.junit.jupiter.api.Test;
-import org.mockserver.integration.ClientAndServer;
-import org.junit.jupiter.api.*;
 import co.elastic.support.rest.RestClient;
+import com.github.tomakehurst.wiremock.WireMockServer;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.semver4j.Semver;
 
-import java.util.Collections;
+import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockserver.integration.ClientAndServer.startClientAndServer;
-import static org.mockserver.model.HttpRequest.request;
-import static org.mockserver.model.HttpResponse.response;
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class TestCheckKibanaVersion {
-    private ClientAndServer mockServer;
-    private RestClient httpRestClient, httpsRestClient;
+    private WireMockServer wireMockServer;
+    private RestClient httpRestClient;
 
     @BeforeAll
     public void globalSetup() {
-        mockServer = startClientAndServer(9880);
+        wireMockServer = new WireMockServer(wireMockConfig().port(9880));
+        wireMockServer.start();
     }
 
     @AfterAll
-    public void globalTeardoown() {
-        mockServer.stop();
+    public void globalTeardown() {
+        wireMockServer.stop();
     }
 
     @BeforeEach
     public void setup() {
-        
         httpRestClient = RestClient.getClient(
             "localhost",
             9880,
@@ -51,49 +57,30 @@ public class TestCheckKibanaVersion {
             "",
             "",
             true,
-            Collections.emptyMap(),
-           3000,
-           3000,
-           3000);
+            Map.of(),
+            3000,
+            3000,
+            3000
+        );
     }
 
     @AfterEach
     public void tearDown() {
-        mockServer.reset();
+        wireMockServer.resetAll();
     }
 
     private void initializeKibanaSettings(String version) {
 
-        mockServer
-                .when(
-                        request()
-                                .withMethod("GET")
-                                .withPath("/api/settings")
-                )
-                .respond(
-                        response()
-                                .withBody("{\"cluster_uuid\":\"RLtzkhfBRUadN4WZ8fnnog\",\"settings\":{\"xpack\":{\"default_admin_email\":null},\"kibana\":{\"uuid\":\"a4f369ef-fecd-46b7-8b16-c6c3f885d9ec\",\"name\":\"13d5e793ea51\",\"index\":\".kibana\",\"host\":\"0.0.0.0\",\"port\":18648,\"locale\":\"en\",\"transport_address\":\"0.0.0.0:18648\",\"version\":\"" + version + "\",\"snapshot\":false,\"status\":\"green\"}}}")
-                                .withStatusCode(200)
-                );
-
-
+        wireMockServer.stubFor(get(urlEqualTo("/api/settings")).willReturn(aResponse().withBody(
+            "{\"cluster_uuid\":\"RLtzkhfBRUadN4WZ8fnnog\",\"settings\":{\"xpack\":{\"default_admin_email\":null},\"kibana\":{\"uuid\":\"a4f369ef-fecd-46b7-8b16-c6c3f885d9ec\",\"name\":\"13d5e793ea51\",\"index\":\".kibana\",\"host\":\"0.0.0.0\",\"port\":18648,\"locale\":\"en\",\"transport_address\":\"0.0.0.0:18648\",\"version\":\""
+                + version + "\",\"snapshot\":false,\"status\":\"green\"}}}").withStatus(200)));
     }
 
     private void initializeKibanaStats(String version) {
 
-        mockServer
-                .when(
-                        request()
-                                .withMethod("GET")
-                                .withPath("/api/stats")
-                )
-                .respond(
-                        response()
-                                .withBody("{\"kibana\":{\"uuid\":\"669ae985-31f7-493b-9910-522cac4d5479\",\"name\":\"6f5485cce678\",\"index\":\".kibana\",\"host\":\"0.0.0.0\",\"locale\":\"en\",\"transport_address\":\"0.0.0.0:18117\",\"version\":\"" + version + "\",\"snapshot\":false,\"status\":\"green\"}}")
-                                .withStatusCode(200)
-                );
-
-
+        wireMockServer.stubFor(get(urlEqualTo("/api/stats")).willReturn(aResponse().withBody(
+            "{\"kibana\":{\"uuid\":\"669ae985-31f7-493b-9910-522cac4d5479\",\"name\":\"6f5485cce678\",\"index\":\".kibana\",\"host\":\"0.0.0.0\",\"locale\":\"en\",\"transport_address\":\"0.0.0.0:18117\",\"version\":\""
+                + version + "\",\"snapshot\":false,\"status\":\"green\"}}").withStatus(200)));
     }
 
     @Test
@@ -124,21 +111,11 @@ public class TestCheckKibanaVersion {
     @Test
     public void testQueriesForKibanaEmptyVersion() {
         // The response body contains no version
-        mockServer
-                .when(
-                        request()
-                                .withMethod("GET")
-                                .withPath("/api/stats")
-                )
-                .respond(
-                        response()
-                                .withBody("{\"kibana\": {}}")
-                                .withStatusCode(200)
-                );
+        wireMockServer.stubFor(get(urlEqualTo("/api/stats")).willReturn(aResponse().withBody("{\"kibana\": {}}").withStatus(200)));
 
         try {
-            Semver version = new CheckKibanaVersion().getKibanaVersion(httpRestClient);
-            assertTrue(false);
+            new CheckKibanaVersion().getKibanaVersion(httpRestClient);
+            fail("Expected to fail");
         } catch (DiagnosticException e) {
             assertEquals(e.getMessage(), "Kibana version format is wrong - unable to continue. ()");
         }
@@ -152,9 +129,9 @@ public class TestCheckKibanaVersion {
     public void testQueriesForKibanaCorruptedVersion() {
         initializeKibanaStats("a.v.c");
         try {
-            Semver version = new CheckKibanaVersion().getKibanaVersion(httpRestClient);
+            new CheckKibanaVersion().getKibanaVersion(httpRestClient);
             // if they are more than one node in Kibana we need to throw an Exception
-            assertTrue(false);
+            fail("Expected to fail");
         } catch (DiagnosticException e) {
             assertEquals(e.getMessage(), "Kibana version format is wrong - unable to continue. (a.v.c)");
         }
@@ -167,22 +144,11 @@ public class TestCheckKibanaVersion {
     @Test
     public void testQueriesForKibanaTextWithVersion() {
         initializeKibanaStats("test-6.5.1");
-        mockServer
-                .when(
-                        request()
-                                .withMethod("GET")
-                                .withPath("/api/stats")
-                )
-                .respond(
-                        response()
-                                .withBody("{\"cluster_uuid\":\"RLtzkhfBRUadN4WZ8fnnog\",\"settings\":{\"xpack\":{\"default_admin_email\":null},\"kibana\":{\"uuid\":\"a4f369ef-fecd-46b7-8b16-c6c3f885d9ec\",\"name\":\"13d5e793ea51\",\"index\":\".kibana\",\"host\":\"0.0.0.0\",\"port\":18648,\"locale\":\"en\",\"transport_address\":\"0.0.0.0:18648\",\"version\":\"test-6.5.1\",\"snapshot\":false,\"status\":\"green\"}}}")
-                                .withStatusCode(200)
-                );
 
         try {
-            Semver version = new CheckKibanaVersion().getKibanaVersion(httpRestClient);
+            new CheckKibanaVersion().getKibanaVersion(httpRestClient);
             // if they are more than one node in Kibana we need to throw an Exception
-            assertTrue(false);
+            fail("Expected to fail");
         } catch (DiagnosticException e) {
             assertEquals(e.getMessage(), "Kibana version format is wrong - unable to continue. (test-6.5.1)");
         }

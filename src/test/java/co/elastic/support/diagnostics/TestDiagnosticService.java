@@ -10,21 +10,17 @@ import co.elastic.support.Constants;
 import co.elastic.support.diagnostics.chain.DiagnosticContext;
 import co.elastic.support.util.JsonYamlUtils;
 import co.elastic.support.util.ResourceCache;
+import com.github.tomakehurst.wiremock.WireMockServer;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.io.TempDir;
-import org.mockserver.configuration.ConfigurationProperties;
-import org.mockserver.integration.ClientAndServer;
-import org.mockserver.model.Header;
-import org.mockserver.model.HttpRequest;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -35,14 +31,20 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockserver.integration.ClientAndServer.startClientAndServer;
-import static org.mockserver.model.HttpRequest.request;
-import static org.mockserver.model.HttpResponse.response;
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.any;
+import static com.github.tomakehurst.wiremock.client.WireMock.anyUrl;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class TestDiagnosticService {
-    private ClientAndServer mockServer;
+    private WireMockServer wireMockServer;
 
     @TempDir
     private Path folder;
@@ -54,16 +56,13 @@ class TestDiagnosticService {
 
     @BeforeAll
     public void globalSetup() {
-        mockServer = startClientAndServer(9880);
-        // mockserver by default is in verbose mode (useful when creating new test),
-        // move it to warning.
-        ConfigurationProperties.disableSystemOut(true);
-        ConfigurationProperties.logLevel("WARN");
+        wireMockServer = new WireMockServer(wireMockConfig().port(9880));
+        wireMockServer.start();
     }
 
     @AfterAll
     public void globalTeardown() {
-        mockServer.stop();
+        wireMockServer.stop();
     }
 
     private DiagConfig newDiagConfig() {
@@ -79,6 +78,7 @@ class TestDiagnosticService {
     private DiagnosticInputs newDiagnosticInputs() {
         DiagnosticInputs diagnosticInputs = new DiagnosticInputs();
         diagnosticInputs.port = 9880;
+        diagnosticInputs.scheme = "http";
         diagnosticInputs.diagType = Constants.api;
         try {
             Path outputDir = Files.createTempDirectory(folder, "diag");
@@ -89,37 +89,36 @@ class TestDiagnosticService {
         return diagnosticInputs;
     }
 
-    private HttpRequest myRequest(Boolean withHeaders) {
+    private void setupResponse(boolean withHeaders) {
         if (withHeaders) {
-            return request().withHeaders(
-                    new Header(headerKey1, headerVal1),
-                    new Header(headerKey2, headerVal2));
+            wireMockServer.stubFor(any(urlEqualTo("/"))
+                    .withHeader(headerKey1, equalTo(headerVal1))
+                    .withHeader(headerKey2, equalTo(headerVal2))
+                    .willReturn(aResponse()
+                            .withBody("{\"version\": {\"number\": \"7.14.0\"}}")));
+            wireMockServer.stubFor(any(urlEqualTo("/_nodes/os,process,settings,transport,http"))
+                    .withHeader(headerKey1, equalTo(headerVal1))
+                    .withHeader(headerKey2, equalTo(headerVal2))
+                    .willReturn(aResponse()
+                            .withBody("{}")));
+            wireMockServer.stubFor(any(anyUrl())
+                    .withHeader(headerKey1, equalTo(headerVal1))
+                    .withHeader(headerKey2, equalTo(headerVal2))
+                    .atPriority(10)
+                    .willReturn(aResponse()
+                            .withBody("some_response_body")));
         } else {
-            return request();
+            wireMockServer.stubFor(any(urlEqualTo("/"))
+                    .willReturn(aResponse()
+                            .withBody("{\"version\": {\"number\": \"7.14.0\"}}")));
+            wireMockServer.stubFor(any(urlEqualTo("/_nodes/os,process,settings,transport,http"))
+                    .willReturn(aResponse()
+                            .withBody("{}")));
+            wireMockServer.stubFor(any(anyUrl())
+                    .atPriority(10)
+                    .willReturn(aResponse()
+                            .withBody("some_response_body")));
         }
-    }
-
-    private void setupResponse(Boolean withHeaders) {
-        mockServer
-                .when(
-                        myRequest(withHeaders)
-                                .withPath("/"))
-                .respond(
-                        response()
-                                .withBody("{\"version\": {\"number\": \"7.14.0\"}}"));
-        mockServer
-                .when(
-                        myRequest(withHeaders)
-                                .withPath("/_nodes/os,process,settings,transport,http"))
-                .respond(
-                        response()
-                                .withBody("{}"));
-        mockServer
-                .when(
-                        myRequest(withHeaders))
-                .respond(
-                        response()
-                                .withBody("some_response_body"));
     }
 
     public HashMap<String, ZipEntry> zipFileContents(File result) throws IOException {
@@ -134,7 +133,7 @@ class TestDiagnosticService {
 
                 if (!entry.isDirectory()) {
                     // Add file path without leading directory
-                    contents.put(entry.getName().replaceFirst("^(.+\\/)(.+)", "$2"), entry);
+                    contents.put(entry.getName().replaceFirst("^(.+/)(.+)", "$2"), entry);
                 }
             }
 
@@ -142,13 +141,13 @@ class TestDiagnosticService {
         }
     }
 
-    public void checkResult(File result, Boolean withLogFile) {
+    public void checkResult(File result, boolean withLogFile) {
         assertTrue(result.toString().matches(".*\\.zip$"), result.toString());
         try {
             Map<String, ZipEntry> contents = zipFileContents(result);
 
             assertTrue(contents.containsKey("diagnostic_manifest.json"),
-                    () -> contents.keySet().stream().collect(Collectors.joining(", ")));
+                    () -> String.join(", ", contents.keySet()));
 
             assertTrue(contents.containsKey("manifest.json"));
             if (withLogFile) {
@@ -177,8 +176,7 @@ class TestDiagnosticService {
         diagConfig.extraHeaders = extraHeaders;
         DiagnosticService diag = new DiagnosticService();
 
-        try (
-                ResourceCache resourceCache = new ResourceCache();) {
+        try (ResourceCache resourceCache = new ResourceCache()) {
             DiagnosticContext context = new DiagnosticContext(diagConfig, newDiagnosticInputs(), resourceCache, true);
             File result = diag.exec(context);
             checkResult(result, true);
@@ -193,8 +191,7 @@ class TestDiagnosticService {
 
         DiagnosticService diag = new DiagnosticService();
 
-        try (
-                ResourceCache resourceCache = new ResourceCache();) {
+        try (ResourceCache resourceCache = new ResourceCache()) {
             DiagnosticContext context = new DiagnosticContext(newDiagConfig(), newDiagnosticInputs(), resourceCache,
                     true);
             File result = diag.exec(context);
@@ -208,22 +205,19 @@ class TestDiagnosticService {
     public void testConcurrentExecutions() {
         setupResponse(false);
 
-        ConcurrentHashMap<Integer, File> results = new ConcurrentHashMap<Integer, File>();
+        ConcurrentHashMap<Integer, File> results = new ConcurrentHashMap<>();
 
-        Function<Integer, Runnable> task = (Integer i) -> new Runnable() {
-            @Override
-            public void run() {
-                DiagnosticService diag = new DiagnosticService();
+        Function<Integer, Runnable> task = (Integer i) -> () -> {
+            DiagnosticService diag = new DiagnosticService();
 
-                try (ResourceCache resourceCache = new ResourceCache()) {
-                    DiagnosticContext context = new DiagnosticContext(newDiagConfig(), newDiagnosticInputs(),
-                            resourceCache, false);
-                    File result = diag.exec(context);
-                    results.put(i, result);
-                } catch (DiagnosticException e) {
-                    System.out.println(e.getStackTrace());
-                    fail(e);
-                }
+            try (ResourceCache resourceCache = new ResourceCache()) {
+                DiagnosticContext context = new DiagnosticContext(newDiagConfig(), newDiagnosticInputs(),
+                        resourceCache, false);
+                File result = diag.exec(context);
+                results.put(i, result);
+            } catch (DiagnosticException e) {
+                System.out.println(e.getStackTrace());
+                fail(e);
             }
         };
 
