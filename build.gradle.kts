@@ -76,7 +76,7 @@ dependencies {
     implementation("org.glassfish.jaxb:jaxb-runtime:4.0.6")
 
     // Test
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.14.1")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:6.0.3")
     testImplementation("org.junit.vintage:junit-vintage-engine:5.14.1")
     testImplementation("org.junit.platform:junit-platform-launcher:1.14.1")
     testRuntimeOnly("org.junit.platform:junit-platform-surefire-provider:1.3.2")
