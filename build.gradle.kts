@@ -10,8 +10,8 @@ group = property("group") as String
 version = property("version") as String
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
     withSourcesJar()
     withJavadocJar()
 }
@@ -76,11 +76,9 @@ dependencies {
     implementation("org.glassfish.jaxb:jaxb-runtime:4.0.6")
 
     // Test
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.14.1")
-    testImplementation("org.junit.vintage:junit-vintage-engine:5.14.1")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:6.0.3")
     testImplementation("org.junit.platform:junit-platform-launcher:1.14.1")
-    testRuntimeOnly("org.junit.platform:junit-platform-surefire-provider:1.3.2")
-    testImplementation("org.mock-server:mockserver-netty:5.15.0")
+    testImplementation("org.wiremock:wiremock:3.13.2")
 }
 
 // ---------------------------------------------------------------------------
