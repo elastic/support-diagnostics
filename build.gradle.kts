@@ -71,10 +71,6 @@ dependencies {
     // Templating
     implementation("org.freemarker:freemarker:2.3.34")
 
-    // JAXB (needed since removal from JDK 9+)
-    implementation("javax.xml.bind:jaxb-api:2.3.1")
-    implementation("org.glassfish.jaxb:jaxb-runtime:4.0.6")
-
     // Test
     testImplementation("org.junit.jupiter:junit-jupiter-engine:6.0.3")
     testImplementation("org.junit.platform:junit-platform-launcher:1.14.1")
