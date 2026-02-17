@@ -78,7 +78,6 @@ dependencies {
     // Test
     testImplementation("org.junit.jupiter:junit-jupiter-engine:6.0.3")
     testImplementation("org.junit.platform:junit-platform-launcher:1.14.1")
-    testRuntimeOnly("org.junit.platform:junit-platform-surefire-provider:1.3.2")
     testImplementation("org.wiremock:wiremock:3.13.2")
 }
 
