@@ -62,7 +62,7 @@ This software is licensed under [Elastic License v2](https://www.elastic.co/lice
 
 ### Run Requirements
 
-- JDK - Oracle or OpenJDK, 1.8-13.
+- JDK - Oracle or OpenJDK 17 or newer.
   - The IBM JDK is not supported due to JSSE related issues that can cause TLS errors.
   - **Important Note For Elasticsearch Version 7:** Elasticsearch now includes a bundled JVM that is used by default. For the diagnostic to retrieve thread dumps via `Jstack` it must be executed with the same JVM that was used to run Elasticsearch. The diagnostic utility will attempt to find the location of the JVM that was used to run the process it is interrogating. If it is unable to do so, you may need to manually configure the location by setting `JAVA_HOME` to the directory containing the `/bin` directory for the included JDK. For example, `<path to Elasticsearch 7 deployment>/jdk/Contents/Home`.
 - The system user account for that host(not the elasticsearch login) must have sufficient authorization to run these commands and access the logs (usually in `/var/log/elasticsearch`) in order to obtain a full collection of diagnostics.
@@ -77,7 +77,7 @@ This software is licensed under [Elastic License v2](https://www.elastic.co/lice
 ### Building From Source
 
 - Clone or download the Github repo. In order to clone the repo you must have Git installed and running. See the instructions appropriate for your operating system.
-- Make sure you have a 1.8 JDK or greater. It **must** be a JDK, not a JRE or you will not be able to compile.
+- Make sure you have a JDK version 17 or greater. It **must** be a JDK, not a JRE or you will not be able to compile.
 - Set the `JAVA_HOME` environment variable to point to your JDK installation.
 - Make sure a recent version of Maven is installed on the build machine.
 - Create a `MAVEN_HOME` directory pointing to the location you've unzipped it to.
