@@ -5,7 +5,7 @@ import com.github.jk1.license.ModuleData
 import com.github.jk1.license.ProjectData
 import com.github.jk1.license.render.ReportRenderer
 import java.io.File
-import java.util.TreeSet
+import java.util.*
 
 /**
  * Custom renderer for the jk1 license-report plugin that generates a NOTICE.txt
@@ -30,7 +30,7 @@ class NoticeRenderer(
             throw IllegalStateException("NOTICE template not found: ${templateFile.absolutePath}")
         }
 
-        val entries = TreeSet<String>()
+        val entries = TreeSet(String.CASE_INSENSITIVE_ORDER)
 
         data.allDependencies.forEach { module ->
             val name = resolveModuleName(module)
