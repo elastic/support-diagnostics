@@ -4,6 +4,7 @@ plugins {
     java
     `maven-publish`
     signing
+    id("com.github.jk1.dependency-license-report")
 }
 
 group = property("group") as String
@@ -75,6 +76,15 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-engine:6.0.3")
     testImplementation("org.junit.platform:junit-platform-launcher:1.14.1")
     testImplementation("org.wiremock:wiremock:3.13.2")
+}
+
+// ---------------------------------------------------------------------------
+// Generate NOTICE.txt from NOTICE.template + runtime dependency licenses
+// ---------------------------------------------------------------------------
+licenseReport {
+    configurations = arrayOf("runtimeClasspath")
+    renderers = arrayOf(co.elastic.support.gradle.NoticeRenderer("NOTICE.template", "NOTICE.txt"))
+    excludeOwnGroup = true
 }
 
 // ---------------------------------------------------------------------------

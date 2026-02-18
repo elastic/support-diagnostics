@@ -1,0 +1,32 @@
+name: Check NOTICE.txt
+
+on:
+  pull_request:
+    paths:
+      - 'build.gradle.kts'
+      - 'NOTICE.template'
+      - 'NOTICE.txt'
+      - 'buildSrc/**'
+
+jobs:
+  check-notice:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5
+        with:
+          distribution: zulu
+          java-version: '25'
+          cache: gradle
+
+      - name: Generate NOTICE.txt
+        run: ./gradlew generateLicenseReport
+
+      - name: Check NOTICE.txt is up to date
+        run: |
+          if ! git diff --exit-code NOTICE.txt; then
+            echo "::error::NOTICE.txt is out of date. Run './gradlew generateLicenseReport' and commit the result."
+            exit 1
+          fi
