@@ -19,22 +19,22 @@ Third party libraries used by the Support Diagnostics Utilities:
   Apache Log4j API under Apache-2.0
   Apache Log4j Commons Logging Bridge under Apache-2.0
   Apache Log4j Core under Apache-2.0
-  JLine under The BSD License
-  JSR 353 (JSON Processing) Default Provider under Dual license consisting of the CDDL v1.1 and GPL v2
-  JSch under ISC or Revised BSD
-  JSpecify annotations under The Apache License, Version 2.0
   Jackson BOM under Apache License, Version 2.0 or The Apache Software License, Version 2.0
   Jackson-annotations under The Apache Software License, Version 2.0
   Jackson-core under Apache License, Version 2.0 or The Apache Software License, Version 2.0
+  jackson-databind under Apache License, Version 2.0 or The Apache Software License, Version 2.0
   Java Native Access Platform under Apache License v2.0 or LGPL, version 2.1
   Java Native Access under Apache License v2.0 or LGPL, version 2.1
+  jcommander under Apache License, Version 2.0
+  JLine under The BSD License
+  JSch under ISC or Revised BSD
+  JSpecify annotations under The Apache License, Version 2.0
+  JSR 353 (JSON Processing) Default Provider under Dual license consisting of the CDDL v1.1 and GPL v2
   Module awt-color-factory under GNU General Public License, version 2, with the Classpath Exception
   Module text-io under The Apache Software License, Version 2.0
-  SLF4J 1 Binding for Log4j API under Apache-2.0
-  SLF4J API Module under MIT License
-  SnakeYAML under Apache License, Version 2.0
-  jackson-databind under Apache License, Version 2.0 or The Apache Software License, Version 2.0
-  jcommander under Apache License, Version 2.0
   oshi-core under MIT License
   oshi-json under MIT License
   semver4j under The MIT License
+  SLF4J 1 Binding for Log4j API under Apache-2.0
+  SLF4J API Module under MIT License
+  SnakeYAML under Apache License, Version 2.0
