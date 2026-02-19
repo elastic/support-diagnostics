@@ -1,4 +1,4 @@
-FROM docker.elastic.co/wolfi/jdk:openjdk-25.0.2-r1-dev@sha256:f2ea861e8cd805d2935d8a0a8d95953437c8c4263cbcb22721742859e6a95aae AS builder
+FROM docker.elastic.co/wolfi/jdk:openjdk-25.0.2-r1-dev@sha256:7a72837159b65787e22db43f6dc9e0c26409cf2d0d331322bee0029daaa9e940 AS builder
 
 #####################
 # Build code
@@ -11,7 +11,7 @@ COPY ./ ./
 
 RUN ./gradlew build
 
-FROM docker.elastic.co/wolfi/jdk:openjdk-25.0.2-r1@sha256:499702a56ed18c16797a16a40cdb4fa2a86f8dcf6739d069aa361962ef539a2a AS runner
+FROM docker.elastic.co/wolfi/jdk:openjdk-25.0.2-r1@sha256:9651443fff17b64b7c40279f7273d42bb37801a8bbd9e9dabb691afc9f1259a4 AS runner
 
 ########################
 # Prepare the code to run
