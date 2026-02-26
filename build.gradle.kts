@@ -33,7 +33,7 @@ dependencies {
         exclude(group = "commons-codec", module = "commons-codec")
         exclude(group = "commons-logging", module = "commons-logging")
     }
-    implementation("commons-codec:commons-codec:1.20.0")
+    implementation("commons-codec:commons-codec:1.21.0")
 
     // JSON / Data
     implementation("com.fasterxml.jackson.core:jackson-databind:2.20.1")
