@@ -60,10 +60,10 @@ Note: `ossrh` matches the `id` used in the `pom.xml`. You can use any version of
 Once the `settings.xml` is setup, you can run
 
 ```
-mvn clean deploy
+./gradlew publish
 ```
 
-This will deploy based on the version in the `pom.xml` file (`-SNAPSHOT` creates
+This will deploy based on the version in the `gradle.properties` file (`-SNAPSHOT` creates
 it in their snapshot repository, which you should always do before a real
 release).
 
