@@ -43,6 +43,7 @@ kibana_alerts_health:
   versions:
     ">= 7.11.0 < 7.13.0": "/api/alerts/_health"
     ">= 7.13.0": "/api/alerting/_health"
+      spaceaware: true
 
 kibana_data_views:
   versions:
@@ -89,26 +90,31 @@ kibana_fleet_agents:
     ">= 7.10.0":
       url: "/api/fleet/agents"
       paginate: perPage
+      spaceaware: true
 
 kibana_fleet_agent_policies:
   versions:
     ">= 7.10.0":
       url: "/api/fleet/agent_policies"
       paginate: perPage
+      spaceaware: true
 
 kibana_fleet_packages:
   versions:
     ">= 7.11.0 < 9.0.0": "/api/fleet/epm/packages?experimental=true"
     ">= 9.0.0": "/api/fleet/epm/packages?withPackagePoliciesCount=true"
+      spaceaware: true
 
 kibana_fleet_agent_status:
   versions:
     ">= 7.11.0 < 8.0.0": "/api/fleet/agent-status"
     ">= 8.0.0": "/api/fleet/agent_status"
+      spaceaware: true
 
 kibana_fleet_agents_current_upgrades:
   versions:
     ">= 8.3.0": "/api/fleet/agents/current_upgrades"
+      spaceaware: true
 
 kibana_lists_privileges:
   versions:
@@ -117,6 +123,7 @@ kibana_lists_privileges:
 kibana_fleet_settings:
   versions:
     ">= 7.14.0": "/api/fleet/settings"
+      spaceaware: true
 
 kibana_reporting_diagnose_browser:
   versions:
@@ -132,24 +139,28 @@ kibana_security_endpoint_host_isolation:
     ">= 7.14.0":
       url: "/api/exception_lists/items/_find?list_id=endpoint_host_isolation_exceptions&namespace_type=agnostic"
       paginate: per_page
+      spaceaware: true
 
 kibana_security_endpoint_event_filters:
   versions:
     ">= 7.14.0":
       url: "/api/exception_lists/items/_find?list_id=endpoint_event_filters&namespace_type=agnostic"
       paginate: per_page
+      spaceaware: true
 
 kibana_security_endpoint_exception_items:
   versions:
     ">= 7.14.0":
       url: "/api/exception_lists/items/_find?list_id=endpoint_list&namespace_type=agnostic"
       paginate: per_page
+      spaceaware: true
 
 kibana_security_endpoint_metadata:
   versions:
     ">= 8.0.0":
       url: "/api/endpoint/metadata"
       paginate: pageSize
+      spaceaware: true
 
 kibana_security_endpoint_trusted_apps:
   versions:
@@ -157,17 +168,20 @@ kibana_security_endpoint_trusted_apps:
     ">= 7.14.0":
       url: "/api/exception_lists/items/_find?list_id=endpoint_trusted_apps&namespace_type=agnostic"
       paginate: per_page
+      spaceaware: true
 
 kibana_security_exception_list:
   versions:
     ">= 7.10.0":
       url: "/api/exception_lists/_find?namespace_type=agnostic"
       paginate: per_page
+      spaceaware: true
 
 kibana_security_packages:
   versions:
     ">= 7.10.0 < 9.0.0": "/api/fleet/epm/packages?experimental=true&category=security"
     ">= 9.0.0": "/api/fleet/epm/packages?withPackagePoliciesCount=true&category=security"
+      spaceaware: true
 
 kibana_settings:
   versions:
