@@ -834,6 +834,7 @@
                         </CardContent>
                     </Card>
 
+                    {_try(() => data.stats.pipelines[selectedPipeline.name].batch) && (
                     <Card variant="outlined" sx={{
                         height: '100%',
                         border: 'inherited',
@@ -902,6 +903,7 @@
                             </TableContainer>
                         </CardContent>
                     </Card>
+                    )}
                 </Paper>
                 <SelectedPipelinePluginAnalysisTable selectedPipeline={selectedPipeline}
                                                      analysisWindow={analysisWindow}

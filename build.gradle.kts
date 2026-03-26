@@ -5,11 +5,15 @@ plugins {
     `maven-publish`
     signing
     id("com.github.jk1.dependency-license-report")
+//    application
 }
 
 group = property("group") as String
 version = property("version") as String
 
+//application {
+//    mainClass.set("co.elastic.support.diagnostics.DiagnosticApp")
+//}
 java {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
@@ -171,6 +175,20 @@ val distZipChecksum by tasks.registering {
 // Wire distribution tasks into the build lifecycle
 tasks.named("build") {
     dependsOn(distZip, distZipChecksum, copyDependencies)
+}
+
+tasks.register<JavaExec>("runApplication") {
+    group = "Execution"
+    description = "Runs the specified main class"
+
+    // Set the full path to your main class
+    mainClass.set("co.elastic.support.diagnostics.DiagnosticApp")
+
+    // Use the compiled classes and dependencies as the classpath
+    classpath = sourceSets["main"].runtimeClasspath
+
+    // Optional: Pass command-line arguments
+    // args("arg1", "arg2")
 }
 
 // ---------------------------------------------------------------------------
