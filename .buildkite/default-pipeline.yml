@@ -1,23 +1,42 @@
 ---
 # $yaml-language-server: $schema=https://raw.githubusercontent.com/buildkite/pipeline-schema/main/schema.json
 steps:
-  - label: "Build"
-    command: "true"
-#  - label: ":docker: Build and Push Dockerfile"
-#    commands:
-#      - "vault kv get -field=password kv/ci-shared/opex/oci-registry-creds-prod | docker login -u $(vault kv get -field=username kv/ci-shared/opex/oci-registry-creds-prod) --password-stdin docker.elastic.co"
-#      - "docker buildx create --use"
-#      - "docker buildx build --platform linux/amd64,linux/arm64 --push -t docker.elastic.co/opex/diagnostics:latest ."
-#    agents:
-#      provider: "gcp"
-#      imagePrefix: "core-ubuntu-2204"
-#      machineType: "n2-standard-2"
+  - label: ":gradle: Test"
+    key: "gradle-test"
+    commands:
+      - ./gradlew test
+    plugins:
+      - docker#v5.11.0:
+          image: "docker.elastic.co/wolfi/jdk:openjdk-25.0.2-r2-dev@sha256:05e5fd81a2a335ca2872ee70dcd1cc6b183c412b0e559e5eca648a82872d281d"
+          volumes:
+            - "$$HOME/.gradle:/root/.gradle"
+    agents:
+      provider: "gcp"
+      imagePrefix: "core-ubuntu-2204"
+      machineType: "n2-standard-2"
 
-  - label: "Test"
-    command: "true"
-
-  - label: "Deploy"
-    command: "true"
-
-  - label: "Publish"
-    command: "true"
+  - label: ":docker: Build and Push Docker Image"
+    depends_on: "gradle-test"
+    if: build.branch == "main"
+    plugins:
+      - elastic/vault-secrets#v0.1.0:
+          path: 'kv/ci-shared/opex/oci-registry-creds-prod'
+          field: "username"
+          env_var: "DOCKER_REG_USER"
+      - elastic/vault-secrets#v0.1.0:
+          path: 'kv/ci-shared/opex/oci-registry-creds-prod'
+          field: "password"
+          env_var: "DOCKER_REG_PASS"
+      - elastic/vault-secrets#v0.1.0:
+          path: 'kv/ci-shared/opex/oci-registry-creds-prod'
+          field: "hostname"
+          env_var: "DOCKER_REG_HOSTNAME"
+    commands:
+      - VERSION=$(grep '^version=' gradle.properties | cut -d'=' -f2)
+      - set +x && echo "$$DOCKER_REG_PASS" | docker login -u "$$DOCKER_REG_USER" --password-stdin "$$DOCKER_REG_HOSTNAME"
+      - docker buildx create --use --name multiarch-builder --driver docker-container || docker buildx use multiarch-builder
+      - docker buildx build --platform linux/amd64,linux/arm64 --push -t "docker.elastic.co/support/diagnostics:$${VERSION}" .
+    agents:
+      provider: "gcp"
+      imagePrefix: "core-ubuntu-2204"
+      machineType: "n2-standard-2"
