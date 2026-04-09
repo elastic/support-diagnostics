@@ -21,7 +21,7 @@ repositories {
     mavenCentral()
 }
 
-val log4jVersion = "2.25.3"
+val log4jVersion = "2.25.4"
 
 dependencies {
     // Lombok
