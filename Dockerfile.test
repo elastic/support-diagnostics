@@ -6,4 +6,4 @@ WORKDIR /app
 
 COPY . .
 
-CMD ["./gradlew", "--no-daemon", "test"]
+CMD ["bash", "-c", "./gradlew --no-daemon test; rc=$?; find build/test-results -name '*.xml' -exec echo '=== {} ===' \\; -exec cat {} \\; 2>/dev/null; exit $rc"]
