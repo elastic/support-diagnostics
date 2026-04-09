@@ -179,6 +179,12 @@ tasks.named("build") {
 tasks.withType<Test> {
     useJUnitPlatform()
     jvmArgs("-Djava.net.preferIPv4Stack=true")
+    testLogging {
+        events("failed")
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+        showCauses = true
+        showStackTraces = true
+    }
 }
 
 tasks.withType<JavaCompile> {
