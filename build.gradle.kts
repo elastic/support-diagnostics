@@ -178,6 +178,7 @@ tasks.named("build") {
 // ---------------------------------------------------------------------------
 tasks.withType<Test> {
     useJUnitPlatform()
+    jvmArgs("-Djava.net.preferIPv4Stack=true")
 }
 
 tasks.withType<JavaCompile> {
