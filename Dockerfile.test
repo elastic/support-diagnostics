@@ -6,4 +6,6 @@ WORKDIR /app
 
 COPY . .
 
-CMD ["bash", "-c", "./gradlew --no-daemon --stacktrace test; rc=$?; find build/test-results -name '*.xml' -exec echo '=== {} ===' \\; -exec cat {} \\; 2>/dev/null; exit $rc"]
+ENV GRADLE_OPTS="-Xmx512m -XX:MaxMetaspaceSize=256m"
+
+CMD ["./gradlew", "test", "--no-daemon", "--stacktrace", "-Dorg.gradle.workers.max=1"]
