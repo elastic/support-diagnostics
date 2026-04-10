@@ -178,7 +178,8 @@ tasks.named("build") {
 // ---------------------------------------------------------------------------
 tasks.withType<Test> {
     useJUnitPlatform()
-    jvmArgs("-Djava.net.preferIPv4Stack=true")
+    jvmArgs("-Djava.net.preferIPv4Stack=true", "-Djava.security.egd=file:/dev/./urandom")
+    maxHeapSize = "512m"
 }
 
 tasks.withType<JavaCompile> {
