@@ -43,7 +43,7 @@ public class TestRestExecCalls {
 
     @BeforeAll
     public void globalSetup() {
-        wireMockServer = new WireMockServer(wireMockConfig().port(9880).httpsPort(9443));
+        wireMockServer = new WireMockServer(wireMockConfig().port(9880).bindAddress("127.0.0.1").httpsPort(9443));
         wireMockServer.start();
     }
 

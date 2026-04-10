@@ -1,0 +1,11 @@
+FROM docker.elastic.co/wolfi/jdk:openjdk-25.0.2-r2-dev@sha256:05e5fd81a2a335ca2872ee70dcd1cc6b183c412b0e559e5eca648a82872d281d
+
+USER root
+
+WORKDIR /app
+
+COPY . .
+
+ENV GRADLE_OPTS="-Xmx512m -XX:MaxMetaspaceSize=256m"
+
+CMD ["./gradlew", "test", "--no-daemon", "--stacktrace", "-Dorg.gradle.workers.max=1"]

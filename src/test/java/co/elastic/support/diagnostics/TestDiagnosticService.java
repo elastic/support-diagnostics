@@ -56,7 +56,7 @@ class TestDiagnosticService {
 
     @BeforeAll
     public void globalSetup() {
-        wireMockServer = new WireMockServer(wireMockConfig().port(9880));
+        wireMockServer = new WireMockServer(wireMockConfig().bindAddress("127.0.0.1").port(9880));
         wireMockServer.start();
     }
 

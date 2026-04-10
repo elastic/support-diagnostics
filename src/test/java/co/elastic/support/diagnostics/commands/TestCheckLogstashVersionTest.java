@@ -27,7 +27,7 @@ public class TestCheckLogstashVersionTest {
 
     @BeforeAll
     public void globalSetup() {
-        wireMockServer = new WireMockServer(wireMockConfig().port(9881));
+        wireMockServer = new WireMockServer(wireMockConfig().bindAddress("127.0.0.1").port(9881));
         wireMockServer.start();
     }
 

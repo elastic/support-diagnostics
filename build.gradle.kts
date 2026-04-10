@@ -74,7 +74,7 @@ dependencies {
 
     // Test
     testImplementation("org.junit.jupiter:junit-jupiter-engine:6.0.3")
-    testImplementation("org.junit.platform:junit-platform-launcher:1.14.3")
+    testImplementation("org.junit.platform:junit-platform-launcher:2.0.3")
     testImplementation("org.wiremock:wiremock:3.13.2")
 }
 
@@ -178,6 +178,8 @@ tasks.named("build") {
 // ---------------------------------------------------------------------------
 tasks.withType<Test> {
     useJUnitPlatform()
+    jvmArgs("-Djava.net.preferIPv4Stack=true", "-Djava.security.egd=file:/dev/./urandom")
+    maxHeapSize = "512m"
 }
 
 tasks.withType<JavaCompile> {
