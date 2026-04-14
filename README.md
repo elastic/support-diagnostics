@@ -79,7 +79,7 @@ This software is licensed under [Elastic License v2](https://www.elastic.co/lice
 - Clone or download the Github repo. In order to clone the repo you must have Git installed and running. See the instructions appropriate for your operating system.
 - Make sure you have a JDK version 17 or greater. It **must** be a JDK, not a JRE or you will not be able to compile.
 - Set the `JAVA_HOME` environment variable to point to your JDK installation.
-- `cd` to the top level repo directory and type `./gradlew package`.
+- `cd` to the top level repo directory and type `./gradlew build`.
 - The release artifacts will be contained in the `build/libs` directory.
 
 ### Creating A Docker Image
