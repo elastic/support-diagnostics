@@ -757,6 +757,11 @@
             };
         }
 
+        const hasBatchP50 = _try(() => data.stats.pipelines[selectedPipeline.name].batch.event_count.p50) !== ""
+            || _try(() => data.stats.pipelines[selectedPipeline.name].batch.byte_size.p50) !== "";
+        const hasBatchP90 = _try(() => data.stats.pipelines[selectedPipeline.name].batch.event_count.p90) !== ""
+            || _try(() => data.stats.pipelines[selectedPipeline.name].batch.byte_size.p90) !== "";
+
         return (
             <Stack spacing={2}>
                 <Stack direction="row" spacing={1} alignItems="center" justifyContent="flex-start" sx={{paddingBottom: 1, paddingTop: 1}}>
@@ -833,6 +838,89 @@
                             </Stack>
                         </CardContent>
                     </Card>
+
+                    {_try(() => data.stats.pipelines[selectedPipeline.name].batch) && (
+                    <Card variant="outlined" sx={{
+                        height: '100%',
+                        border: 'inherited',
+                        borderColor: theme.palette.primary[200] + 75,
+                        ':hover': {
+                            boxShadow: '0 2px 14px 0 rgb(32 40 45 / 8%)'
+                        }
+                    }}>
+                        <CardHeader title={<Typography
+                            sx={{flex: '1 1 100%'}}
+                            variant="h7"
+                            component="div"
+                            color="text.secondary"
+                        >
+                            Batch structure
+                        </Typography>} />
+                        <Divider />
+                        <CardContent >
+                            <TableContainer>
+                                <Table size="small" aria-label="Batch structure">
+                                    <TableHead>
+                                        <TableRow>
+                                            <TableCell>Metric</TableCell>
+                                            <TableCell align="right">Current</TableCell>
+                                            <TableCell align="right">Average</TableCell>
+                                            {hasBatchP50 && <TableCell align="center" colSpan={3}>p50</TableCell>}
+                                            {hasBatchP90 && <TableCell align="center" colSpan={3}>p90</TableCell>}
+                                        </TableRow>
+                                        <TableRow>
+                                            <TableCell />
+                                            <TableCell align="right" />
+                                            <TableCell align="right" />
+                                            {hasBatchP50 && <React.Fragment>
+                                                <TableCell align="right">1 min</TableCell>
+                                                <TableCell align="right">5 min</TableCell>
+                                                <TableCell align="right">15 min</TableCell>
+                                            </React.Fragment>}
+                                            {hasBatchP90 && <React.Fragment>
+                                                <TableCell align="right">1 min</TableCell>
+                                                <TableCell align="right">5 min</TableCell>
+                                                <TableCell align="right">15 min</TableCell>
+                                            </React.Fragment>}
+                                        </TableRow>
+                                    </TableHead>
+                                    <TableBody>
+                                        <TableRow>
+                                            <TableCell component="th" scope="row">Event count</TableCell>
+                                            <TableCell align="right">{_try(() => data.stats.pipelines[selectedPipeline.name].batch.event_count.current)}</TableCell>
+                                            <TableCell align="right">{_try(() => data.stats.pipelines[selectedPipeline.name].batch.event_count.average.lifetime)}</TableCell>
+                                            {hasBatchP50 && <React.Fragment>
+                                                <TableCell align="right">{_try(() => data.stats.pipelines[selectedPipeline.name].batch.event_count.p50.last_1_minute)}</TableCell>
+                                                <TableCell align="right">{_try(() => data.stats.pipelines[selectedPipeline.name].batch.event_count.p50.last_5_minutes)}</TableCell>
+                                                <TableCell align="right">{_try(() => data.stats.pipelines[selectedPipeline.name].batch.event_count.p50.last_15_minutes)}</TableCell>
+                                            </React.Fragment>}
+                                            {hasBatchP90 && <React.Fragment>
+                                                <TableCell align="right">{_try(() => data.stats.pipelines[selectedPipeline.name].batch.event_count.p90.last_1_minute)}</TableCell>
+                                                <TableCell align="right">{_try(() => data.stats.pipelines[selectedPipeline.name].batch.event_count.p90.last_5_minutes)}</TableCell>
+                                                <TableCell align="right">{_try(() => data.stats.pipelines[selectedPipeline.name].batch.event_count.p90.last_15_minutes)}</TableCell>
+                                            </React.Fragment>}
+                                        </TableRow>
+                                        <TableRow>
+                                            <TableCell component="th" scope="row">Byte size</TableCell>
+                                            <TableCell align="right">{_try(() => data.stats.pipelines[selectedPipeline.name].batch.byte_size.current)}</TableCell>
+                                            <TableCell align="right">{_try(() => data.stats.pipelines[selectedPipeline.name].batch.byte_size.average.lifetime)}</TableCell>
+                                            {hasBatchP50 && <React.Fragment>
+                                                <TableCell align="right">{_try(() => data.stats.pipelines[selectedPipeline.name].batch.byte_size.p50.last_1_minute)}</TableCell>
+                                                <TableCell align="right">{_try(() => data.stats.pipelines[selectedPipeline.name].batch.byte_size.p50.last_5_minutes)}</TableCell>
+                                                <TableCell align="right">{_try(() => data.stats.pipelines[selectedPipeline.name].batch.byte_size.p50.last_15_minutes)}</TableCell>
+                                            </React.Fragment>}
+                                            {hasBatchP90 && <React.Fragment>
+                                                <TableCell align="right">{_try(() => data.stats.pipelines[selectedPipeline.name].batch.byte_size.p90.last_1_minute)}</TableCell>
+                                                <TableCell align="right">{_try(() => data.stats.pipelines[selectedPipeline.name].batch.byte_size.p90.last_5_minutes)}</TableCell>
+                                                <TableCell align="right">{_try(() => data.stats.pipelines[selectedPipeline.name].batch.byte_size.p90.last_15_minutes)}</TableCell>
+                                            </React.Fragment>}
+                                        </TableRow>
+                                    </TableBody>
+                                </Table>
+                            </TableContainer>
+                        </CardContent>
+                    </Card>
+                    )}
                 </Paper>
                 <SelectedPipelinePluginAnalysisTable selectedPipeline={selectedPipeline}
                                                      analysisWindow={analysisWindow}
