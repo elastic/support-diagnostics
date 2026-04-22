@@ -159,21 +159,18 @@
         }
     }
 
-    const _batchByteSizeAverageRolling = (pipelineName) => {
-        try {
-            const a = data.stats.pipelines[pipelineName].batch.byte_size.average;
-            if (!a) return "N/A";
-            for (const k of ["last_1_minute", "last_5_minutes", "last_15_minutes"]) {
-                const v = a[k];
-                if (v !== null && v !== undefined && v !== "") return v;
-            }
-        } catch (e) {}
-        return "N/A";
-    }
+    const BatchMetricType = Object.freeze({
+        BYTE_SIZE: 'byte_size',
+        EVENT_COUNT: 'event_count',
+    });
 
-    const _batchEventCountAverageRolling = (pipelineName) => {
+    /**
+    * @param {string} pipelineName
+    * @param {string} metricType One of BatchMetricType.BYTE_SIZE or BatchMetricType.EVENT_COUNT.
+    */
+    const _batchAverageRollingFor = (pipelineName, metricType) => {
         try {
-            const a = data.stats.pipelines[pipelineName].batch.event_count.average;
+            const a = data.stats.pipelines[pipelineName].batch[metricType].average;
             if (!a) return "N/A";
             for (const k of ["last_1_minute", "last_5_minutes", "last_15_minutes"]) {
                 const v = a[k];
@@ -920,7 +917,7 @@
                                         <TableRow>
                                             <TableCell component="th" scope="row">Event count</TableCell>
                                             <TableCell align="right">{_try(() => data.stats.pipelines[selectedPipeline.name].batch.event_count.current)}</TableCell>
-                                            <TableCell align="right">{_batchEventCountAverageRolling(selectedPipeline.name)}</TableCell>
+                                            <TableCell align="right">{_batchAverageRollingFor(selectedPipeline.name, BatchMetricType.EVENT_COUNT)}</TableCell>
                                             {hasBatchP50 && <React.Fragment>
                                                 <TableCell align="right">{_try(() => data.stats.pipelines[selectedPipeline.name].batch.event_count.p50.last_1_minute)}</TableCell>
                                                 <TableCell align="right">{_try(() => data.stats.pipelines[selectedPipeline.name].batch.event_count.p50.last_5_minutes)}</TableCell>
@@ -943,7 +940,7 @@
                                         <TableRow>
                                             <TableCell component="th" scope="row">Byte size</TableCell>
                                             <TableCell align="right">{_try(() => data.stats.pipelines[selectedPipeline.name].batch.byte_size.current)}</TableCell>
-                                            <TableCell align="right">{_batchByteSizeAverageRolling(selectedPipeline.name)}</TableCell>
+                                            <TableCell align="right">{_batchAverageRollingFor(selectedPipeline.name, BatchMetricType.BYTE_SIZE)}</TableCell>
                                             {hasBatchP50 && <React.Fragment>
                                                 <TableCell align="right">{_try(() => data.stats.pipelines[selectedPipeline.name].batch.byte_size.p50.last_1_minute)}</TableCell>
                                                 <TableCell align="right">{_try(() => data.stats.pipelines[selectedPipeline.name].batch.byte_size.p50.last_5_minutes)}</TableCell>
