@@ -21,21 +21,32 @@
 
 kibana_actions:
   versions:
-    ">= 7.0.0": 
+    ">= 7.0.0 < 9.0.0":
       url: "/api/actions"
+      spaceaware: true
+    ">= 9.0.0":
+      url: "/api/actions/connectors"
       spaceaware: true
 
 kibana_alerts:
   versions:
-    ">= 7.9.0":
+    ">= 7.9.0 < 9.0.0":
       url: "/api/alerts/_find"
+      spaceaware: true
+      paginate: per_page
+    ">= 9.0.0":
+      url: "/api/alerting/rules/_find"
       spaceaware: true
       paginate: per_page
 
 kibana_alerts_health:
   versions:
-    ">= 7.11.0 < 7.13.0": "/api/alerts/_health"
-    ">= 7.13.0": "/api/alerting/_health"
+    ">= 7.11.0 < 7.13.0":
+      url: "/api/alerts/_health"
+      spaceaware: true
+    ">= 7.13.0":
+      url: "/api/alerting/_health"
+      spaceaware: true
 
 kibana_data_views:
   versions:
@@ -82,25 +93,38 @@ kibana_fleet_agents:
     ">= 7.10.0":
       url: "/api/fleet/agents"
       paginate: perPage
+      spaceaware: true
 
 kibana_fleet_agent_policies:
   versions:
     ">= 7.10.0":
       url: "/api/fleet/agent_policies"
       paginate: perPage
+      spaceaware: true
 
 kibana_fleet_packages:
   versions:
-    ">= 7.11.0": "/api/fleet/epm/packages?experimental=true"
+    ">= 7.11.0 < 9.0.0":
+      url: "/api/fleet/epm/packages?experimental=true"
+      spaceaware: true
+    ">= 9.0.0":
+      url: "/api/fleet/epm/packages?withPackagePoliciesCount=true"
+      spaceaware: true
 
 kibana_fleet_agent_status:
   versions:
-    ">= 7.11.0 < 8.0.0": "/api/fleet/agent-status"
-    ">= 8.0.0": "/api/fleet/agent_status"
+    ">= 7.11.0 < 8.0.0":
+      url: "/api/fleet/agent-status"
+      spaceaware: true
+    ">= 8.0.0":
+      url: "/api/fleet/agent_status"
+      spaceaware: true
 
 kibana_fleet_agents_current_upgrades:
   versions:
-    ">= 8.3.0": "/api/fleet/agents/current_upgrades"
+    ">= 8.3.0":
+      url: "/api/fleet/agents/current_upgrades"
+      spaceaware: true
 
 kibana_lists_privileges:
   versions:
@@ -108,7 +132,9 @@ kibana_lists_privileges:
 
 kibana_fleet_settings:
   versions:
-    ">= 7.14.0": "/api/fleet/settings"
+    ">= 7.14.0":
+      url: "/api/fleet/settings"
+      spaceaware: true
 
 kibana_reporting_diagnose_browser:
   versions:
@@ -124,24 +150,28 @@ kibana_security_endpoint_host_isolation:
     ">= 7.14.0":
       url: "/api/exception_lists/items/_find?list_id=endpoint_host_isolation_exceptions&namespace_type=agnostic"
       paginate: per_page
+      spaceaware: true
 
 kibana_security_endpoint_event_filters:
   versions:
     ">= 7.14.0":
       url: "/api/exception_lists/items/_find?list_id=endpoint_event_filters&namespace_type=agnostic"
       paginate: per_page
+      spaceaware: true
 
 kibana_security_endpoint_exception_items:
   versions:
     ">= 7.14.0":
       url: "/api/exception_lists/items/_find?list_id=endpoint_list&namespace_type=agnostic"
       paginate: per_page
+      spaceaware: true
 
 kibana_security_endpoint_metadata:
   versions:
     ">= 8.0.0":
       url: "/api/endpoint/metadata"
       paginate: pageSize
+      spaceaware: true
 
 kibana_security_endpoint_trusted_apps:
   versions:
@@ -149,16 +179,23 @@ kibana_security_endpoint_trusted_apps:
     ">= 7.14.0":
       url: "/api/exception_lists/items/_find?list_id=endpoint_trusted_apps&namespace_type=agnostic"
       paginate: per_page
+      spaceaware: true
 
 kibana_security_exception_list:
   versions:
     ">= 7.10.0":
       url: "/api/exception_lists/_find?namespace_type=agnostic"
       paginate: per_page
+      spaceaware: true
 
 kibana_security_packages:
   versions:
-    ">= 7.10.0": "/api/fleet/epm/packages?experimental=true&category=security"
+    ">= 7.10.0 < 9.0.0":
+      url: "/api/fleet/epm/packages?experimental=true&category=security"
+      spaceaware: true
+    ">= 9.0.0":
+      url: "/api/fleet/epm/packages?withPackagePoliciesCount=true&category=security"
+      spaceaware: true
 
 kibana_settings:
   versions:
@@ -194,7 +231,9 @@ kibana_synthetics_monitor_filters:
 
 kibana_synthetics_private_locations:
   versions:
-    ">= 8.12.0": "/api/synthetics/private_locations"
+    ">= 8.12.0":
+      url: "/api/synthetics/private_locations"
+      spaceaware: true
 
 kibana_task_manager_health:
   versions:
@@ -210,7 +249,9 @@ kibana_uptime_locations:
 
 kibana_uptime_settings:
   versions:
-    ">= 8.12.0": "/api/uptime/settings"
+    ">= 8.12.0":
+      url: "/api/uptime/settings"
+      spaceaware: true
 
 kibana_user:
   versions:
