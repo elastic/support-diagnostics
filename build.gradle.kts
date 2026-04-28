@@ -37,7 +37,7 @@ dependencies {
 
     // JSON / Data
     implementation("com.fasterxml.jackson.core:jackson-databind:2.20.1")
-    implementation("org.yaml:snakeyaml:2.5")
+    implementation("org.yaml:snakeyaml:2.6")
 
     // Logging
     implementation("org.apache.logging.log4j:log4j-api:$log4jVersion")
