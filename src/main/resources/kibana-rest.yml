@@ -231,7 +231,9 @@ kibana_synthetics_monitor_filters:
 
 kibana_synthetics_private_locations:
   versions:
-    ">= 8.12.0": "/api/synthetics/private_locations"
+    ">= 8.12.0":
+      url: "/api/synthetics/private_locations"
+      spaceaware: true
 
 kibana_task_manager_health:
   versions:
@@ -247,7 +249,9 @@ kibana_uptime_locations:
 
 kibana_uptime_settings:
   versions:
-    ">= 8.12.0": "/api/uptime/settings"
+    ">= 8.12.0":
+      url: "/api/uptime/settings"
+      spaceaware: true
 
 kibana_user:
   versions:
