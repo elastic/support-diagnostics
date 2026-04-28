@@ -51,7 +51,7 @@ dependencies {
     // Commons
     implementation("commons-io:commons-io:2.21.0")
     implementation("org.apache.commons:commons-compress:1.28.0")
-    implementation("org.apache.commons:commons-lang3:3.19.0")
+    implementation("org.apache.commons:commons-lang3:3.20.0")
 
     // System info
     implementation("com.github.oshi:oshi-json:3.13.6")
