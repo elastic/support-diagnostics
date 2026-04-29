@@ -49,7 +49,7 @@ dependencies {
     implementation("com.beust:jcommander:1.82")
 
     // Commons
-    implementation("commons-io:commons-io:2.21.0")
+    implementation("commons-io:commons-io:2.22.0")
     implementation("org.apache.commons:commons-compress:1.28.0")
     implementation("org.apache.commons:commons-lang3:3.20.0")
 
