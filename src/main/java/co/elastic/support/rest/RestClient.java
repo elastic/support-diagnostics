@@ -121,7 +121,7 @@ public class RestClient implements Closeable {
                 client.close();
             }
         } catch (Exception e) {
-            logger.error("Error occurred closing client connection.");
+            logger.error("Error occurred closing client connection.", e);
         }
     }
 
