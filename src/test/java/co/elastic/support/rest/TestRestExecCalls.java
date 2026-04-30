@@ -31,6 +31,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -187,6 +189,31 @@ public class TestRestExecCalls {
 
         String targetFilename = temp + SystemProperties.fileSeparator + "nodes.json";
         assertTrue(fileExistsWithText(targetFilename, "autherror_response_body"));
+    }
+
+    @Test
+    public void testConnectionRefusedPreservesCause() {
+        RestClient unreachableClient = RestClient.getClient(
+            "localhost",
+            19999,
+            "http",
+            "elastic",
+            "elastic",
+            "",
+            0,
+            "",
+            "",
+            "",
+            "",
+            true,
+            Collections.emptyMap(),
+            1000,
+            1000,
+            1000);
+
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                        () -> unreachableClient.execGet("/"));
+        assertNotNull(ex.getCause(), "RuntimeException must preserve original cause");
     }
 
     private boolean fileExistsWithText(String filename, String compare) {
