@@ -86,10 +86,10 @@ public class RestClient implements Closeable {
             return client.execute(httpHost, httpRequest, httpContext);
         } catch (HttpHostConnectException e) {
             logger.error("Host connection error.", e);
-            throw new RuntimeException("Host connection");
+            throw new RuntimeException("Host connection failed", e);
         } catch (Exception e) {
             logger.error("Unexpected Execution Error", e);
-            throw new RuntimeException(e.getMessage());
+            throw new RuntimeException("Unexpected error during HTTP execution", e);
         }
     }
 
@@ -104,7 +104,7 @@ public class RestClient implements Closeable {
             return execRequest(httpPost);
         } catch (UnsupportedEncodingException e) {
             logger.error(Constants.CONSOLE, "Error with json body.", e);
-            throw new RuntimeException("Could not complete post request.");
+            throw new RuntimeException("Could not complete post request.", e);
         }
     }
 
