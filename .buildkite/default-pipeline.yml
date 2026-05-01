@@ -8,6 +8,7 @@ steps:
       - docker run --rm -v "$$(pwd)/test-reports:/app/build/reports/tests" support-diagnostics-test
     artifact_paths:
       - "test-reports/test/**/*"
+      - "test-reports/e2eTest/**/*"
     agents:
       provider: "gcp"
       imagePrefix: "core-ubuntu-2204"
