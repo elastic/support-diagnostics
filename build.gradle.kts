@@ -57,7 +57,7 @@ dependencies {
     implementation("com.github.oshi:oshi-json:3.13.6")
 
     // SSH
-    implementation("com.github.mwiede:jsch:2.28.0")
+    implementation("com.github.mwiede:jsch:2.28.2")
 
     // Versioning
     implementation("org.semver4j:semver4j:6.0.0")
