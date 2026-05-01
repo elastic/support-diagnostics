@@ -208,7 +208,7 @@ val e2eTest by tasks.registering(Test::class) {
 
 tasks.withType<JavaCompile> {
     options.compilerArgs.addAll(listOf("-Xlint:deprecation", "-Xlint:unchecked"))
-    options.isFork = true
+    options.isFork = true // fork to guarantee that Lombok does not mess with the Gradle JVM
     options.encoding = "UTF-8"
 }
 
