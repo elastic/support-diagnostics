@@ -8,7 +8,12 @@ package co.elastic.support.util;
 
 import co.elastic.support.Constants;
 import co.elastic.support.diagnostics.DiagnosticException;
-import com.jcraft.jsch.*;
+import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
+import com.jcraft.jsch.UserInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -81,11 +86,10 @@ public class RemoteSystem extends SystemCommand {
 
             UserInfo userInfo = new RemoteUserInfo(remoteUser, remotePassword, keyFilePass);
             session = jsch.getSession(remoteUser, host, port);
-            final Hashtable config = new Hashtable();
+            final Hashtable<String, String> config = new Hashtable<>();
 
             config.put("StrictHostKeyChecking", hostKeyChecking);
-            config.put("PreferredAuthentications",
-                    "publickey,keyboard-interactive,password");
+            config.put("PreferredAuthentications", "publickey,keyboard-interactive,password");
 
             session.setConfig(config);
             session.setUserInfo(userInfo);

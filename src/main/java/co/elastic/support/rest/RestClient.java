@@ -26,6 +26,7 @@ import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.HttpHostConnectException;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
@@ -55,11 +56,10 @@ public class RestClient implements Closeable {
     private static final Logger logger = LogManager.getLogger(RestClient.class);
     private static final int maxTotal = 100, defaultMaxPerRoute = 10;
 
-    private CloseableHttpClient client;
-    private HttpHost httpHost;
-    private HttpClientContext httpContext;
-
-    private Map<String, String> extraHeaders;
+    private final CloseableHttpClient client;
+    private final HttpHost httpHost;
+    private final HttpClientContext httpContext;
+    private final Map<String, String> extraHeaders;
 
     public RestClient(CloseableHttpClient client, HttpHost httpHost, HttpClientContext context,
             Map<String, String> extraHeaders) {
@@ -218,18 +218,18 @@ public class RestClient implements Closeable {
 
             // We need to create a registry for socket factories
             // for both http and https or pooling will not work.
-            Registry registry = RegistryBuilder.create()
-                    .register("https", factory)
-                    .register("http", PlainConnectionSocketFactory.getSocketFactory()).build();
+            Registry<ConnectionSocketFactory> registry = RegistryBuilder.<ConnectionSocketFactory>create()
+                .register("https", factory)
+                .register("http", PlainConnectionSocketFactory.getSocketFactory())
+                .build();
             PoolingHttpClientConnectionManager mgr = new PoolingHttpClientConnectionManager(registry);
             mgr.setDefaultMaxPerRoute(defaultMaxPerRoute);
             mgr.setMaxTotal(maxTotal);
             clientBuilder.setConnectionManager(mgr);
 
             CloseableHttpClient httpClient = clientBuilder.build();
-            RestClient restClient = new RestClient(httpClient, httpHost, context, extraHeaders);
 
-            return restClient;
+            return new RestClient(httpClient, httpHost, context, extraHeaders);
         } catch (Exception e) {
             logger.error("Connection setup failed", e);
             throw new RuntimeException("Error establishing http connection for: " + host, e);
