@@ -21,23 +21,23 @@ repositories {
     mavenCentral()
 }
 
-val log4jVersion = "2.25.3"
+val log4jVersion = "2.25.4"
 
 dependencies {
     // Lombok
-    compileOnly("org.projectlombok:lombok:1.18.42")
-    annotationProcessor("org.projectlombok:lombok:1.18.42")
+    compileOnly("org.projectlombok:lombok:1.18.44")
+    annotationProcessor("org.projectlombok:lombok:1.18.44")
 
     // HTTP
     implementation("org.apache.httpcomponents:httpclient:4.5.14") {
         exclude(group = "commons-codec", module = "commons-codec")
         exclude(group = "commons-logging", module = "commons-logging")
     }
-    implementation("commons-codec:commons-codec:1.20.0")
+    implementation("commons-codec:commons-codec:1.22.0")
 
     // JSON / Data
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.20.1")
-    implementation("org.yaml:snakeyaml:2.5")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.21.3")
+    implementation("org.yaml:snakeyaml:2.6")
 
     // Logging
     implementation("org.apache.logging.log4j:log4j-api:$log4jVersion")
@@ -51,13 +51,13 @@ dependencies {
     // Commons
     implementation("commons-io:commons-io:2.21.0")
     implementation("org.apache.commons:commons-compress:1.28.0")
-    implementation("org.apache.commons:commons-lang3:3.19.0")
+    implementation("org.apache.commons:commons-lang3:3.20.0")
 
     // System info
     implementation("com.github.oshi:oshi-json:3.13.6")
 
     // SSH
-    implementation("com.github.mwiede:jsch:2.27.7")
+    implementation("com.github.mwiede:jsch:2.28.0")
 
     // Versioning
     implementation("org.semver4j:semver4j:6.0.0")
@@ -76,6 +76,13 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-engine:6.0.3")
     testImplementation("org.junit.platform:junit-platform-launcher:2.0.3")
     testImplementation("org.wiremock:wiremock:3.13.2")
+
+    // Testcontainers
+    testImplementation(platform("org.testcontainers:testcontainers-bom:1.21.3"))
+    testImplementation("org.testcontainers:junit-jupiter")
+    testImplementation("org.testcontainers:testcontainers")
+    // SLF4J 2.x binding so Testcontainers debug logs are visible (log4j-slf4j-impl targets 1.x)
+    testImplementation("org.apache.logging.log4j:log4j-slf4j2-impl:$log4jVersion")
 }
 
 // ---------------------------------------------------------------------------
@@ -180,6 +187,23 @@ tasks.withType<Test> {
     useJUnitPlatform()
     jvmArgs("-Djava.net.preferIPv4Stack=true", "-Djava.security.egd=file:/dev/./urandom")
     maxHeapSize = "512m"
+}
+
+tasks.named<Test>("test") {
+    useJUnitPlatform { excludeTags("e2e") }
+}
+
+val e2eTest by tasks.registering(Test::class) {
+    description = "Runs end-to-end tests that require Docker (via Testcontainers)"
+    group = "verification"
+    useJUnitPlatform { includeTags("e2e") }
+    jvmArgs("-Djava.net.preferIPv4Stack=true", "-Djava.security.egd=file:/dev/./urandom")
+    maxHeapSize = "1g"
+    testClassesDirs = sourceSets["test"].output.classesDirs
+    classpath = sourceSets["test"].runtimeClasspath
+    // docker-java reads API version from the "api.version" system property (not env var).
+    // Docker Desktop 4.71+ requires >= 1.40; docker-java defaults to 1.32 without this.
+    jvmArgs("-Dapi.version=1.47")
 }
 
 tasks.withType<JavaCompile> {
