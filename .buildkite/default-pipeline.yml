@@ -5,9 +5,9 @@ steps:
     key: "gradle-test"
     commands:
       - docker build -f Dockerfile.test -t support-diagnostics-test .
-      - docker run --name support-diagnostics-test-run support-diagnostics-test; EXIT_CODE=$$?; docker cp support-diagnostics-test-run:/app/build/reports/tests . || true; docker rm support-diagnostics-test-run; exit $$EXIT_CODE
+      - docker run --rm -v "$$(pwd)/test-reports:/app/build/reports/tests" support-diagnostics-test
     artifact_paths:
-      - "tests/test/**/*"
+      - "test-reports/test/**/*"
     agents:
       provider: "gcp"
       imagePrefix: "core-ubuntu-2204"
