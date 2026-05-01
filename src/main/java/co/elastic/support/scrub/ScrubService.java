@@ -6,14 +6,14 @@
  */
 package co.elastic.support.scrub;
 
+import co.elastic.support.BaseService;
+import co.elastic.support.Constants;
 import co.elastic.support.diagnostics.DiagnosticException;
 import co.elastic.support.util.FileTaskEntry;
 import co.elastic.support.util.SystemProperties;
 import co.elastic.support.util.SystemUtils;
 import co.elastic.support.util.TaskEntry;
 import co.elastic.support.util.ZipFileTaskEntry;
-import co.elastic.support.BaseService;
-import co.elastic.support.Constants;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.apache.commons.io.FileUtils;
@@ -24,14 +24,16 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 public class ScrubService extends BaseService {
 
-    private Logger logger = LogManager.getLogger(ScrubService.class);
+    private final Logger logger = LogManager.getLogger(ScrubService.class);
 
     public File exec(ScrubInputs inputs) throws DiagnosticException {
         ExecutorService executorService = null;
@@ -48,7 +50,7 @@ public class ScrubService extends BaseService {
             logger.info(Constants.CONSOLE, "Threadpool configured with {} workers.", inputs.workers);
 
             // Get a collection of entries to send parcel out to the task collection
-            Vector<TaskEntry> entriesToScrub;
+            List<TaskEntry> entriesToScrub;
             String nodeString = "";
             switch (inputs.type) {
                 case "zip":
@@ -97,9 +99,9 @@ public class ScrubService extends BaseService {
         }
     }
 
-    public Vector<TaskEntry> collectDirEntries(String filename, String scrubDir) {
+    public List<TaskEntry> collectDirEntries(String filename, String scrubDir) {
 
-        Vector<TaskEntry> entries = new Vector<>();
+        List<TaskEntry> entries = new ArrayList<>();
         File file = new File(filename);
         String path = file.getAbsolutePath();
 
@@ -120,8 +122,8 @@ public class ScrubService extends BaseService {
         return entries;
     }
 
-    public Vector<TaskEntry> collectZipEntries(String filename, String scrubDir) {
-        Vector<TaskEntry> archiveEntries = new Vector<>();
+    public List<TaskEntry> collectZipEntries(String filename, String scrubDir) {
+        List<TaskEntry> archiveEntries = new ArrayList<>();
         try {
             ZipFile zf = new ZipFile.Builder().setFile(filename).get();
             Enumeration<ZipArchiveEntry> entries = zf.getEntries();
@@ -137,8 +139,7 @@ public class ScrubService extends BaseService {
                 }
             }
         } catch (IOException e) {
-            logger.error(Constants.CONSOLE, "Error obtaining zip file entries");
-            logger.error(e);
+            logger.error(Constants.CONSOLE, "Error obtaining zip file entries", e);
         }
 
         return archiveEntries;
@@ -153,8 +154,7 @@ public class ScrubService extends BaseService {
             ZipArchiveEntry nodeEntry = zf.getEntry(rootPath + "nodes.json");
             return IOUtils.toString(zf.getInputStream(nodeEntry), "UTF-8");
         } catch (IOException e) {
-            logger.error(Constants.CONSOLE, "Couldn't retrieve node artifacts for default scrub");
-            logger.error(e);
+            logger.error(Constants.CONSOLE, "Couldn't retrieve node artifacts for default scrub", e);
         }
         return "";
     }

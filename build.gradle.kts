@@ -74,8 +74,15 @@ dependencies {
 
     // Test
     testImplementation("org.junit.jupiter:junit-jupiter-engine:6.0.3")
-    testImplementation("org.junit.platform:junit-platform-launcher:1.14.4")
+    testImplementation("org.junit.platform:junit-platform-launcher:2.0.3")
     testImplementation("org.wiremock:wiremock:3.13.2")
+
+    // Testcontainers
+    testImplementation(platform("org.testcontainers:testcontainers-bom:1.21.3"))
+    testImplementation("org.testcontainers:junit-jupiter")
+    testImplementation("org.testcontainers:testcontainers")
+    // SLF4J 2.x binding so Testcontainers debug logs are visible (log4j-slf4j-impl targets 1.x)
+    testImplementation("org.apache.logging.log4j:log4j-slf4j2-impl:$log4jVersion")
 }
 
 // ---------------------------------------------------------------------------
@@ -178,6 +185,23 @@ tasks.named("build") {
 // ---------------------------------------------------------------------------
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+tasks.named<Test>("test") {
+    useJUnitPlatform { excludeTags("e2e") }
+}
+
+val e2eTest by tasks.registering(Test::class) {
+    description = "Runs end-to-end tests that require Docker (via Testcontainers)"
+    group = "verification"
+    useJUnitPlatform { includeTags("e2e") }
+    jvmArgs("-Djava.net.preferIPv4Stack=true", "-Djava.security.egd=file:/dev/./urandom")
+    maxHeapSize = "1g"
+    testClassesDirs = sourceSets["test"].output.classesDirs
+    classpath = sourceSets["test"].runtimeClasspath
+    // docker-java reads API version from the "api.version" system property (not env var).
+    // Docker Desktop 4.71+ requires >= 1.40; docker-java defaults to 1.32 without this.
+    jvmArgs("-Dapi.version=1.47")
 }
 
 tasks.withType<JavaCompile> {
