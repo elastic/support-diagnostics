@@ -49,9 +49,22 @@ class DiagnosticInputsTest {
     @Test
     void validateDiagType_valid() {
         DiagnosticInputs inputs = new DiagnosticInputs();
+        inputs.runningInDocker = false;
         for (String type : DiagnosticInputs.diagnosticTypeValues) {
             List<String> errors = inputs.validateDiagType(type);
             assertNull(errors, "Expected no errors for type: " + type);
+        }
+    }
+
+    @Test
+    void validateDiagType_localTypesInvalidInDocker() {
+        DiagnosticInputs inputs = new DiagnosticInputs();
+        inputs.runningInDocker = true;
+        String[] localTypes = { Constants.local, Constants.logstashLocal, Constants.kibanaLocal };
+        for (String type : localTypes) {
+            List<String> errors = inputs.validateDiagType(type);
+            assertNotNull(errors, "Expected error for local type in Docker: " + type);
+            assertEquals(1, errors.size());
         }
     }
 
