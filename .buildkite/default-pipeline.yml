@@ -9,8 +9,6 @@ steps:
       - echo $DOCKER_HOST
       - ls -l /var/run/docker.sock
       - docker run --rm -v "$$(pwd)/test-reports:/app/build/reports/tests" -v /var/run/docker.sock:/var/run/docker.sock support-diagnostics-test
-    environment:
-      DOCKER_HOST: unix:///var/run/docker.sock
     artifact_paths:
       - "test-reports/test/**/*"
       - "test-reports/e2eTest/**/*"
