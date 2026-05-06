@@ -1,4 +1,4 @@
-FROM docker.elastic.co/wolfi/jdk:openjdk-25.0.2-r2-dev@sha256:05e5fd81a2a335ca2872ee70dcd1cc6b183c412b0e559e5eca648a82872d281d
+FROM docker.elastic.co/wolfi/jdk:openjdk-25.0.3-r3-dev@sha256:c27921b4c9214d11de99d7371a857863faf431b16802dbffe087c74f49d74c3e
 
 USER root
 
