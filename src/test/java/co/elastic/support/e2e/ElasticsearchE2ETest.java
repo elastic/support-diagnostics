@@ -25,8 +25,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.time.Duration;
 
+import static co.elastic.support.testutil.ContainerTestHelper.CONTAINER_STARTUP_TIMEOUT;
 import static co.elastic.support.testutil.ContainerTestHelper.STACK_VERSION;
 import static co.elastic.support.testutil.ContainerTestHelper.assertZipContains;
 import static co.elastic.support.testutil.ContainerTestHelper.clientFor;
@@ -45,7 +45,7 @@ class ElasticsearchE2ETest {
             .withEnv("xpack.security.enabled", "false")
             .withEnv("ES_JAVA_OPTS", "-Xms512m -Xmx512m")
             .withExposedPorts(19200)
-            .waitingFor(Wait.forHttp("/").forStatusCode(200).withStartupTimeout(Duration.ofMinutes(3)));
+            .waitingFor(Wait.forHttp("/").forStatusCode(200).withStartupTimeout(CONTAINER_STARTUP_TIMEOUT));
 
     @Test
     void checkElasticsearchVersion() throws DiagnosticException {

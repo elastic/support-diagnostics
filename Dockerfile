@@ -9,7 +9,7 @@ WORKDIR /build
 
 COPY ./ ./
 
-RUN ./gradlew build
+RUN ./gradlew --no-daemon build
 
 FROM docker.elastic.co/wolfi/jdk:openjdk-25.0.3-r2@sha256:ef761f476e5f50b6755c17c7d679d7e08b8cca47ec3b8f12765adb7f863f0418 AS runner
 

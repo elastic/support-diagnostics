@@ -26,8 +26,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.time.Duration;
 
+import static co.elastic.support.testutil.ContainerTestHelper.CONTAINER_STARTUP_TIMEOUT;
 import static co.elastic.support.testutil.ContainerTestHelper.STACK_VERSION;
 import static co.elastic.support.testutil.ContainerTestHelper.assertZipContains;
 import static co.elastic.support.testutil.ContainerTestHelper.clientFor;
@@ -50,7 +50,7 @@ class KibanaE2ETest {
             .withNetwork(network)
             .withNetworkAliases("elasticsearch-diag")
             .withExposedPorts(19200)
-            .waitingFor(Wait.forHttp("/").forStatusCode(200).withStartupTimeout(Duration.ofMinutes(3)));
+            .waitingFor(Wait.forHttp("/").forStatusCode(200).withStartupTimeout(CONTAINER_STARTUP_TIMEOUT));
 
     @Container
     static final GenericContainer<?> KIBANA_CONTAINER = new GenericContainer<>("docker.elastic.co/kibana/kibana:" + STACK_VERSION)
@@ -61,7 +61,7 @@ class KibanaE2ETest {
         .withEnv("XPACK_REPORTING_ENCRYPTIONKEY", "abcdefghijklmnopqrstuvwxyz123456")
         .withNetwork(network)
         .withExposedPorts(15601)
-        .waitingFor(Wait.forHttp("/api/status").forStatusCode(200).withStartupTimeout(Duration.ofMinutes(5)));
+        .waitingFor(Wait.forHttp("/api/status").forStatusCode(200).withStartupTimeout(CONTAINER_STARTUP_TIMEOUT));
 
     @Test
     void checkKibanaVersion() throws DiagnosticException {

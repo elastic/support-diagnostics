@@ -19,6 +19,7 @@ import org.testcontainers.containers.GenericContainer;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
@@ -31,6 +32,11 @@ public class ContainerTestHelper {
 
     public static final String STACK_VERSION =
             System.getenv("ELASTIC_STACK_VERSION") != null ? System.getenv("ELASTIC_STACK_VERSION") : "9.3.0";
+
+    public static final Duration CONTAINER_STARTUP_TIMEOUT = Duration.ofMinutes(
+            System.getenv("E2E_CONTAINER_STARTUP_TIMEOUT_MINUTES") != null
+                    ? Long.parseLong(System.getenv("E2E_CONTAINER_STARTUP_TIMEOUT_MINUTES"))
+                    : 3);
 
     public static RestClient clientFor(GenericContainer<?> container, int internalPort) {
         DiagConfig config = loadDiagConfig();

@@ -25,8 +25,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.time.Duration;
 
+import static co.elastic.support.testutil.ContainerTestHelper.CONTAINER_STARTUP_TIMEOUT;
 import static co.elastic.support.testutil.ContainerTestHelper.STACK_VERSION;
 import static co.elastic.support.testutil.ContainerTestHelper.assertZipContains;
 import static co.elastic.support.testutil.ContainerTestHelper.clientFor;
@@ -44,7 +44,7 @@ class LogstashE2ETest {
             .withEnv("API_HTTP_PORT", "19600")
             .withEnv("LOG_LEVEL", "error")
             .withExposedPorts(19600)
-            .waitingFor(Wait.forHttp("/").forStatusCode(200).withStartupTimeout(Duration.ofMinutes(5)));
+            .waitingFor(Wait.forHttp("/").forStatusCode(200).withStartupTimeout(CONTAINER_STARTUP_TIMEOUT));
 
     @Test
     void checkLogstashVersion() throws DiagnosticException {
