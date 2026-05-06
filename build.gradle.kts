@@ -198,6 +198,9 @@ val e2eTest by tasks.registering(Test::class) {
     group = "verification"
     useJUnitPlatform { includeTags("e2e") }
     jvmArgs("-Djava.net.preferIPv4Stack=true", "-Djava.security.egd=file:/dev/./urandom")
+    environment("DOCKER_HOST", "unix:///var/run/docker.sock")
+    environment("TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE", "/var/run/docker.sock")
+    environment("TESTCONTAINERS_HOST_OVERRIDE", "localhost")
     maxHeapSize = "1g"
     testClassesDirs = sourceSets["test"].output.classesDirs
     classpath = sourceSets["test"].runtimeClasspath
