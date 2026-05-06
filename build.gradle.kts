@@ -213,7 +213,7 @@ tasks.register<Test>("e2eTest") {
     maxHeapSize = "1g"
     // docker-java reads API version from the "api.version" system property (not env var).
     // Docker Desktop 4.71+ requires >= 1.40; docker-java defaults to 1.32 without this.
-    jvmArgs("-Dapi.version=1.47")
+    jvmArgs("-Dapi.version=1.40")
 }
 
 tasks.withType<JavaCompile> {
