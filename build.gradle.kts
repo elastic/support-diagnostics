@@ -202,6 +202,9 @@ tasks.register<Test>("e2eTest") {
 
     useJUnitPlatform { includeTags("e2e") }
 
+    // does not require running 'test', but if they both run, this runs second
+    shouldRunAfter(tasks["test"])
+
     jvmArgs("-Djava.net.preferIPv4Stack=true", "-Djava.security.egd=file:/dev/./urandom")
     environment("DOCKER_HOST", "unix:///var/run/docker.sock")
     environment("TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE", "/var/run/docker.sock")
