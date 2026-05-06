@@ -5,10 +5,7 @@ steps:
     key: "gradle-test"
     commands:
       - docker build -f Dockerfile.test -t support-diagnostics-test .
-      - docker run --rm -v "$$(pwd)/test-reports:/app/build/reports/tests" -v /var/run/docker.sock:/var/run/docker.sock --group-add "$$(stat -c '%g' /var/run/docker.sock)" -e CONTAINER_STARTUP_TIMEOUT=5 support-diagnostics-test
-    artifact_paths:
-      - "test-reports/test/**/*"
-      - "test-reports/e2eTest/**/*"
+      - docker run --rm support-diagnostics-test
     agents:
       provider: "gcp"
       imagePrefix: "core-ubuntu-2204"
