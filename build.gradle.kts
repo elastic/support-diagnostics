@@ -205,7 +205,10 @@ tasks.register<Test>("e2eTest") {
     // does not require running 'test', but if both run, then e2eTest runs second
     shouldRunAfter(tasks["test"])
 
-    environment("E2E_STARTUP_TIMEOUT_MINUTES", System.getenv("E2E_STARTUP_TIMEOUT_MINUTES") ?: "3")
+    // passthru environment variables to help CI if needed, otherwise use code-level defaults
+    for (name in listOf("E2E_STARTUP_TIMEOUT_MINUTES", "ELASTIC_STACK_VERSION")) {
+        System.getenv(name)?.let { environment(name, it) }
+    }
 
     maxHeapSize = "1g"
 
