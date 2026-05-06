@@ -193,17 +193,21 @@ tasks.named<Test>("test") {
     useJUnitPlatform { excludeTags("e2e") }
 }
 
-val e2eTest by tasks.registering(Test::class) {
+tasks.register<Test>("e2eTest") {
     description = "Runs end-to-end tests that require Docker (via Testcontainers)"
     group = "verification"
+
+    testClassesDirs = sourceSets["test"].output.classesDirs
+    classpath = sourceSets["test"].runtimeClasspath
+
     useJUnitPlatform { includeTags("e2e") }
+
     jvmArgs("-Djava.net.preferIPv4Stack=true", "-Djava.security.egd=file:/dev/./urandom")
     environment("DOCKER_HOST", "unix:///var/run/docker.sock")
     environment("TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE", "/var/run/docker.sock")
     environment("TESTCONTAINERS_HOST_OVERRIDE", "localhost")
+    environment("TESTCONTAINERS_RYUK_DISABLED", "true")
     maxHeapSize = "1g"
-    testClassesDirs = sourceSets["test"].output.classesDirs
-    classpath = sourceSets["test"].runtimeClasspath
     // docker-java reads API version from the "api.version" system property (not env var).
     // Docker Desktop 4.71+ requires >= 1.40; docker-java defaults to 1.32 without this.
     jvmArgs("-Dapi.version=1.47")
