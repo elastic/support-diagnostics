@@ -6,7 +6,7 @@ steps:
     commands:
       - docker build -f Dockerfile.test -t support-diagnostics-test .
       - docker ps
-      - echo $DOCKER_HOST
+      - echo $$DOCKER_HOST
       - ls -l /var/run/docker.sock
       - docker run --rm -v "$$(pwd)/test-reports:/app/build/reports/tests" -v /var/run/docker.sock:/var/run/docker.sock support-diagnostics-test
     artifact_paths:
