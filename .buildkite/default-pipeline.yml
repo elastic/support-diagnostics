@@ -5,7 +5,7 @@ steps:
     key: "gradle-test"
     commands:
       - docker build -f Dockerfile.test -t support-diagnostics-test .
-      - docker run --rm support-diagnostics-test
+      - docker run --rm v /var/run/docker.sock:/var/run/docker.sock support-diagnostics-test
     agents:
       provider: "gcp"
       imagePrefix: "core-ubuntu-2204"
