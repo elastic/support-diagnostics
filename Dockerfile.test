@@ -8,4 +8,4 @@ COPY . .
 
 ENV GRADLE_OPTS="-Xmx512m -XX:MaxMetaspaceSize=256m"
 
-CMD ["./gradlew", "test", "e2eTest", "--no-daemon", "--stacktrace"]
+CMD ["./gradlew", "test", "e2eTest", "--no-daemon", "--info", "--stacktrace"]
