@@ -205,10 +205,7 @@ tasks.register<Test>("e2eTest") {
     // does not require running 'test', but if both run, then e2eTest runs second
     shouldRunAfter(tasks["test"])
 
-    environment("DOCKER_HOST", "unix:///var/run/docker.sock")
-    environment("TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE", "/var/run/docker.sock")
-    environment("TESTCONTAINERS_HOST_OVERRIDE", "localhost")
-    environment("TESTCONTAINERS_RYUK_DISABLED", "true")
+    environment("E2E_STARTUP_TIMEOUT_MINUTES", System.getenv("E2E_STARTUP_TIMEOUT_MINUTES") ?: "3")
 
     maxHeapSize = "1g"
 
