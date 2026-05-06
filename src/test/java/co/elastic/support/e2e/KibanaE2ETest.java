@@ -50,7 +50,7 @@ class KibanaE2ETest {
             .withNetwork(network)
             .withNetworkAliases("elasticsearch-diag")
             .withExposedPorts(19200)
-            .waitingFor(Wait.forHttp("/").forStatusCode(200).withStartupTimeout(Duration.ofMinutes(3)));
+            .waitingFor(Wait.forHttp("/").forStatusCode(200).withStartupTimeout(Duration.ofMinutes(10)));
 
     @Container
     static final GenericContainer<?> KIBANA_CONTAINER = new GenericContainer<>("docker.elastic.co/kibana/kibana:" + STACK_VERSION)
@@ -61,7 +61,7 @@ class KibanaE2ETest {
         .withEnv("XPACK_REPORTING_ENCRYPTIONKEY", "abcdefghijklmnopqrstuvwxyz123456")
         .withNetwork(network)
         .withExposedPorts(15601)
-        .waitingFor(Wait.forHttp("/api/status").forStatusCode(200).withStartupTimeout(Duration.ofMinutes(5)));
+        .waitingFor(Wait.forHttp("/api/status").forStatusCode(200).withStartupTimeout(Duration.ofMinutes(10)));
 
     @Test
     void checkKibanaVersion() throws DiagnosticException {

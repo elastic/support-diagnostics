@@ -44,7 +44,7 @@ class LogstashE2ETest {
             .withEnv("API_HTTP_PORT", "19600")
             .withEnv("LOG_LEVEL", "error")
             .withExposedPorts(19600)
-            .waitingFor(Wait.forHttp("/").forStatusCode(200).withStartupTimeout(Duration.ofMinutes(5)));
+            .waitingFor(Wait.forHttp("/").forStatusCode(200).withStartupTimeout(Duration.ofMinutes(10)));
 
     @Test
     void checkLogstashVersion() throws DiagnosticException {

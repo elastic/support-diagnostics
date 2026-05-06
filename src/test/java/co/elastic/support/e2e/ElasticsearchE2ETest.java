@@ -45,7 +45,7 @@ class ElasticsearchE2ETest {
             .withEnv("xpack.security.enabled", "false")
             .withEnv("ES_JAVA_OPTS", "-Xms512m -Xmx512m")
             .withExposedPorts(19200)
-            .waitingFor(Wait.forHttp("/").forStatusCode(200).withStartupTimeout(Duration.ofMinutes(3)));
+            .waitingFor(Wait.forHttp("/").forStatusCode(200).withStartupTimeout(Duration.ofMinutes(10)));
 
     @Test
     void checkElasticsearchVersion() throws DiagnosticException {
