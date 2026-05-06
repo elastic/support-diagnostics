@@ -74,7 +74,7 @@ dependencies {
 
     // Test
     testImplementation("org.junit.jupiter:junit-jupiter-engine:6.0.3")
-    testImplementation("org.junit.platform:junit-platform-launcher:2.0.3")
+    testImplementation("org.junit.platform:junit-platform-launcher:6.0.3")
     testImplementation("org.wiremock:wiremock:3.13.2")
 
     // Testcontainers
