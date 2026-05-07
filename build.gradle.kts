@@ -78,7 +78,7 @@ dependencies {
     testImplementation("org.wiremock:wiremock:3.13.2")
 
     // Testcontainers
-    testImplementation(platform("org.testcontainers:testcontainers-bom:1.21.3"))
+    testImplementation(platform("org.testcontainers:testcontainers-bom:1.21.4"))
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.testcontainers:testcontainers")
     // SLF4J 2.x binding so Testcontainers debug logs are visible (log4j-slf4j-impl targets 1.x)
