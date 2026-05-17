@@ -7,7 +7,7 @@ jobs:
   check-notice:
     runs-on: ubuntu-latest
     steps:
-      - uses: dorny/paths-filter@d1c1ffe0248fe513906c8e24db8ea791d46f8590 # v3
+      - uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d # v4
         id: changes
         with:
           # If any of these files changed, then we may need to update the NOTICE.txt
