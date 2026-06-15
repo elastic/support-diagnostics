@@ -159,6 +159,27 @@
         }
     }
 
+    const BatchMetricType = Object.freeze({
+        BYTE_SIZE: 'byte_size',
+        EVENT_COUNT: 'event_count',
+    });
+
+    /**
+    * @param {string} pipelineName
+    * @param {string} metricType One of BatchMetricType.BYTE_SIZE or BatchMetricType.EVENT_COUNT.
+    */
+    const _batchAverageRollingFor = (pipelineName, metricType) => {
+        try {
+            const a = data.stats.pipelines[pipelineName].batch[metricType].average;
+            if (!a) return "N/A";
+            for (const k of ["last_1_minute", "last_5_minutes", "last_15_minutes"]) {
+                const v = a[k];
+                if (v !== null && v !== undefined && v !== "") return v;
+            }
+        } catch (e) {}
+        return "N/A";
+    }
+
     const createComparisonFormatter = (
         analysisWindow,
         flow,
@@ -757,6 +778,10 @@
             };
         }
 
+        const hasBatchP50 = _try(() => data.stats.pipelines[selectedPipeline.name].batch.byte_size.p50) !== "";
+        const hasBatchP90 = _try(() => data.stats.pipelines[selectedPipeline.name].batch.byte_size.p90) !== "";
+        const hasBatchMax = _try(() => data.stats.pipelines[selectedPipeline.name].batch.byte_size.max) !== "";
+
         return (
             <Stack spacing={2}>
                 <Stack direction="row" spacing={1} alignItems="center" justifyContent="flex-start" sx={{paddingBottom: 1, paddingTop: 1}}>
@@ -833,6 +858,114 @@
                             </Stack>
                         </CardContent>
                     </Card>
+
+                    {_try(() => data.stats.pipelines[selectedPipeline.name].batch) && (
+                    <Card variant="outlined" sx={{
+                        height: '100%',
+                        border: 'inherited',
+                        borderColor: theme.palette.primary[200] + 75,
+                        ':hover': {
+                            boxShadow: '0 2px 14px 0 rgb(32 40 45 / 8%)'
+                        }
+                    }}>
+                        <CardHeader title={<Typography
+                            sx={{flex: '1 1 100%'}}
+                            variant="h7"
+                            component="div"
+                            color="text.secondary"
+                        >
+                            Batch structure
+                        </Typography>} />
+                        <Divider />
+                        <CardContent >
+                            <TableContainer>
+                                <Table size="small" aria-label="Batch structure">
+                                    <TableHead>
+                                        <TableRow>
+                                            <TableCell>Metric</TableCell>
+                                            <TableCell align="right">Current</TableCell>
+                                            <TableCell align="right">Average</TableCell>
+                                            {hasBatchP50 && <TableCell align="center" colSpan={4}>p50</TableCell>}
+                                            {hasBatchP90 && <TableCell align="center" colSpan={4}>p90</TableCell>}
+                                            {hasBatchMax && <TableCell align="center" colSpan={4}>max</TableCell>}
+                                        </TableRow>
+                                        <TableRow>
+                                            <TableCell />
+                                            <TableCell align="right" />
+                                            <TableCell align="right" />
+                                            {hasBatchP50 && <React.Fragment>
+                                                <TableCell align="right">1 min</TableCell>
+                                                <TableCell align="right">5 min</TableCell>
+                                                <TableCell align="right">15 min</TableCell>
+                                                <TableCell align="right">Lifetime</TableCell>
+                                            </React.Fragment>}
+                                            {hasBatchP90 && <React.Fragment>
+                                                <TableCell align="right">1 min</TableCell>
+                                                <TableCell align="right">5 min</TableCell>
+                                                <TableCell align="right">15 min</TableCell>
+                                                <TableCell align="right">Lifetime</TableCell>
+                                            </React.Fragment>}
+                                            {hasBatchMax && <React.Fragment>
+                                                <TableCell align="right">1 min</TableCell>
+                                                <TableCell align="right">5 min</TableCell>
+                                                <TableCell align="right">15 min</TableCell>
+                                                <TableCell align="right">Lifetime</TableCell>
+                                            </React.Fragment>}
+                                        </TableRow>
+                                    </TableHead>
+                                    <TableBody>
+                                        <TableRow>
+                                            <TableCell component="th" scope="row">Event count</TableCell>
+                                            <TableCell align="right">{_try(() => data.stats.pipelines[selectedPipeline.name].batch.event_count.current)}</TableCell>
+                                            <TableCell align="right">{_batchAverageRollingFor(selectedPipeline.name, BatchMetricType.EVENT_COUNT)}</TableCell>
+                                            {hasBatchP50 && <React.Fragment>
+                                                <TableCell align="right">{_try(() => data.stats.pipelines[selectedPipeline.name].batch.event_count.p50.last_1_minute)}</TableCell>
+                                                <TableCell align="right">{_try(() => data.stats.pipelines[selectedPipeline.name].batch.event_count.p50.last_5_minutes)}</TableCell>
+                                                <TableCell align="right">{_try(() => data.stats.pipelines[selectedPipeline.name].batch.event_count.p50.last_15_minutes)}</TableCell>
+                                                <TableCell align="right">N/A</TableCell>
+                                            </React.Fragment>}
+                                            {hasBatchP90 && <React.Fragment>
+                                                <TableCell align="right">{_try(() => data.stats.pipelines[selectedPipeline.name].batch.event_count.p90.last_1_minute)}</TableCell>
+                                                <TableCell align="right">{_try(() => data.stats.pipelines[selectedPipeline.name].batch.event_count.p90.last_5_minutes)}</TableCell>
+                                                <TableCell align="right">{_try(() => data.stats.pipelines[selectedPipeline.name].batch.event_count.p90.last_15_minutes)}</TableCell>
+                                                <TableCell align="right">N/A</TableCell>
+                                            </React.Fragment>}
+                                            {hasBatchMax && <React.Fragment>
+                                                <TableCell align="right">N/A</TableCell>
+                                                <TableCell align="right">N/A</TableCell>
+                                                <TableCell align="right">N/A</TableCell>
+                                                <TableCell align="right">N/A</TableCell>
+                                            </React.Fragment>}
+                                        </TableRow>
+                                        <TableRow>
+                                            <TableCell component="th" scope="row">Byte size</TableCell>
+                                            <TableCell align="right">{_try(() => data.stats.pipelines[selectedPipeline.name].batch.byte_size.current)}</TableCell>
+                                            <TableCell align="right">{_batchAverageRollingFor(selectedPipeline.name, BatchMetricType.BYTE_SIZE)}</TableCell>
+                                            {hasBatchP50 && <React.Fragment>
+                                                <TableCell align="right">{_try(() => data.stats.pipelines[selectedPipeline.name].batch.byte_size.p50.last_1_minute)}</TableCell>
+                                                <TableCell align="right">{_try(() => data.stats.pipelines[selectedPipeline.name].batch.byte_size.p50.last_5_minutes)}</TableCell>
+                                                <TableCell align="right">{_try(() => data.stats.pipelines[selectedPipeline.name].batch.byte_size.p50.last_15_minutes)}</TableCell>
+                                                <TableCell align="right">{_try(() => data.stats.pipelines[selectedPipeline.name].batch.byte_size.p50.lifetime)}</TableCell>
+                                            </React.Fragment>}
+                                            {hasBatchP90 && <React.Fragment>
+                                                <TableCell align="right">{_try(() => data.stats.pipelines[selectedPipeline.name].batch.byte_size.p90.last_1_minute)}</TableCell>
+                                                <TableCell align="right">{_try(() => data.stats.pipelines[selectedPipeline.name].batch.byte_size.p90.last_5_minutes)}</TableCell>
+                                                <TableCell align="right">{_try(() => data.stats.pipelines[selectedPipeline.name].batch.byte_size.p90.last_15_minutes)}</TableCell>
+                                                <TableCell align="right">{_try(() => data.stats.pipelines[selectedPipeline.name].batch.byte_size.p90.lifetime)}</TableCell>
+                                            </React.Fragment>}
+                                            {hasBatchMax && <React.Fragment>
+                                                <TableCell align="right">{_try(() => data.stats.pipelines[selectedPipeline.name].batch.byte_size.max.last_1_minute)}</TableCell>
+                                                <TableCell align="right">{_try(() => data.stats.pipelines[selectedPipeline.name].batch.byte_size.max.last_5_minutes)}</TableCell>
+                                                <TableCell align="right">{_try(() => data.stats.pipelines[selectedPipeline.name].batch.byte_size.max.last_15_minutes)}</TableCell>
+                                                <TableCell align="right">{_try(() => data.stats.pipelines[selectedPipeline.name].batch.byte_size.max.lifetime)}</TableCell>
+                                            </React.Fragment>}
+                                        </TableRow>
+                                    </TableBody>
+                                </Table>
+                            </TableContainer>
+                        </CardContent>
+                    </Card>
+                    )}
                 </Paper>
                 <SelectedPipelinePluginAnalysisTable selectedPipeline={selectedPipeline}
                                                      analysisWindow={analysisWindow}
