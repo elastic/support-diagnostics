@@ -17,10 +17,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 public class MonitoringImportProcessor {
 
@@ -46,7 +50,7 @@ public class MonitoringImportProcessor {
         checkForExtractTemplates();
     }
 
-    public void exec(Vector<File> files) {
+    public void exec(List<File> files) {
 
         try {
             for (File file : files) {

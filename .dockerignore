@@ -1,5 +1,8 @@
 # Build files
 build
+**/build
+.gradle
+**/.gradle
 diagnostic-output
 target
 
