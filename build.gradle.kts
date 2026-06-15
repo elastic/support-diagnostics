@@ -25,8 +25,8 @@ val log4jVersion = "2.25.4"
 
 dependencies {
     // Lombok
-    compileOnly("org.projectlombok:lombok:1.18.44")
-    annotationProcessor("org.projectlombok:lombok:1.18.44")
+    compileOnly("org.projectlombok:lombok:1.18.46")
+    annotationProcessor("org.projectlombok:lombok:1.18.46")
 
     // HTTP
     implementation("org.apache.httpcomponents:httpclient:4.5.14") {
@@ -74,8 +74,15 @@ dependencies {
 
     // Test
     testImplementation("org.junit.jupiter:junit-jupiter-engine:6.0.3")
-    testImplementation("org.junit.platform:junit-platform-launcher:1.14.4")
+    testImplementation("org.junit.platform:junit-platform-launcher:6.0.3")
     testImplementation("org.wiremock:wiremock:3.13.2")
+
+    // Testcontainers
+    testImplementation(platform("org.testcontainers:testcontainers-bom:1.21.3"))
+    testImplementation("org.testcontainers:junit-jupiter")
+    testImplementation("org.testcontainers:testcontainers")
+    // SLF4J 2.x binding so Testcontainers debug logs are visible (log4j-slf4j-impl targets 1.x)
+    testImplementation("org.apache.logging.log4j:log4j-slf4j2-impl:$log4jVersion")
 }
 
 // ---------------------------------------------------------------------------
@@ -178,11 +185,42 @@ tasks.named("build") {
 // ---------------------------------------------------------------------------
 tasks.withType<Test> {
     useJUnitPlatform()
+    jvmArgs("-Djava.net.preferIPv4Stack=true", "-Djava.security.egd=file:/dev/./urandom")
+    maxHeapSize = "512m"
+}
+
+tasks.named<Test>("test") {
+    useJUnitPlatform { excludeTags("e2e") }
+}
+
+tasks.register<Test>("e2eTest") {
+    description = "Runs end-to-end tests that require Docker (via Testcontainers)"
+    group = "verification"
+
+    testClassesDirs = sourceSets["test"].output.classesDirs
+    classpath = sourceSets["test"].runtimeClasspath
+
+    useJUnitPlatform { includeTags("e2e") }
+
+    // does not require running 'test', but if both run, then e2eTest runs second
+    shouldRunAfter(tasks["test"])
+
+    // passthru environment variables to help CI if needed, otherwise use code-level defaults
+    for (name in listOf("E2E_STARTUP_TIMEOUT_MINUTES", "ELASTIC_STACK_VERSION")) {
+        System.getenv(name)?.let { environment(name, it) }
+    }
+
+    maxHeapSize = "1g"
+
+    jvmArgs("-Djava.net.preferIPv4Stack=true", "-Djava.security.egd=file:/dev/./urandom")
+    // docker-java reads API version from the "api.version" system property (not env var).
+    // Docker Desktop 4.71+ requires >= 1.40; docker-java defaults to 1.32 without this.
+    jvmArgs("-Dapi.version=1.40")
 }
 
 tasks.withType<JavaCompile> {
     options.compilerArgs.addAll(listOf("-Xlint:deprecation", "-Xlint:unchecked"))
-    options.isFork = true
+    options.isFork = true // fork to guarantee that Lombok does not mess with the Gradle JVM
     options.encoding = "UTF-8"
 }
 

@@ -18,18 +18,26 @@ import org.apache.http.client.AuthCache;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.*;
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.HttpHostConnectException;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustAllStrategy;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.auth.BasicScheme;
-import org.apache.http.impl.client.*;
+import org.apache.http.impl.client.BasicAuthCache;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.ssl.SSLContextBuilder;
@@ -48,11 +56,10 @@ public class RestClient implements Closeable {
     private static final Logger logger = LogManager.getLogger(RestClient.class);
     private static final int maxTotal = 100, defaultMaxPerRoute = 10;
 
-    private CloseableHttpClient client;
-    private HttpHost httpHost;
-    private HttpClientContext httpContext;
-
-    private Map<String, String> extraHeaders;
+    private final CloseableHttpClient client;
+    private final HttpHost httpHost;
+    private final HttpClientContext httpContext;
+    private final Map<String, String> extraHeaders;
 
     public RestClient(CloseableHttpClient client, HttpHost httpHost, HttpClientContext context,
             Map<String, String> extraHeaders) {
@@ -85,11 +92,11 @@ public class RestClient implements Closeable {
         try {
             return client.execute(httpHost, httpRequest, httpContext);
         } catch (HttpHostConnectException e) {
-            logger.error("Host connection error.", e);
-            throw new RuntimeException("Host connection");
+            logger.error("Host connection error", e);
+            throw new RuntimeException("Host connection failed", e);
         } catch (Exception e) {
-            logger.error("Unexpected Execution Error", e);
-            throw new RuntimeException(e.getMessage());
+            logger.error("Unexpected execution error", e);
+            throw new RuntimeException("Unexpected error during HTTP execution", e);
         }
     }
 
@@ -103,16 +110,15 @@ public class RestClient implements Closeable {
             logger.debug(uri + SystemProperties.fileSeparator + payload);
             return execRequest(httpPost);
         } catch (UnsupportedEncodingException e) {
-            logger.error(Constants.CONSOLE, "Error with json body.", e);
-            throw new RuntimeException("Could not complete post request.");
+            logger.error(Constants.CONSOLE, "Error with JSON body", e);
+            throw new RuntimeException("Could not complete POST request", e);
         }
     }
 
     public HttpResponse execDelete(String uri) {
-        HttpDelete httpDelete = new HttpDelete(uri);
         logger.debug(uri);
 
-        return execRequest(httpDelete);
+        return execRequest(new HttpDelete(uri));
     }
 
     public void close() {
@@ -121,7 +127,7 @@ public class RestClient implements Closeable {
                 client.close();
             }
         } catch (Exception e) {
-            logger.error("Error occurred closing client connection.");
+            logger.error("Error occurred closing client connection", e);
         }
     }
 
@@ -212,18 +218,18 @@ public class RestClient implements Closeable {
 
             // We need to create a registry for socket factories
             // for both http and https or pooling will not work.
-            Registry registry = RegistryBuilder.create()
-                    .register("https", factory)
-                    .register("http", PlainConnectionSocketFactory.getSocketFactory()).build();
+            Registry<ConnectionSocketFactory> registry = RegistryBuilder.<ConnectionSocketFactory>create()
+                .register("https", factory)
+                .register("http", PlainConnectionSocketFactory.getSocketFactory())
+                .build();
             PoolingHttpClientConnectionManager mgr = new PoolingHttpClientConnectionManager(registry);
             mgr.setDefaultMaxPerRoute(defaultMaxPerRoute);
             mgr.setMaxTotal(maxTotal);
             clientBuilder.setConnectionManager(mgr);
 
             CloseableHttpClient httpClient = clientBuilder.build();
-            RestClient restClient = new RestClient(httpClient, httpHost, context, extraHeaders);
 
-            return restClient;
+            return new RestClient(httpClient, httpHost, context, extraHeaders);
         } catch (Exception e) {
             logger.error("Connection setup failed", e);
             throw new RuntimeException("Error establishing http connection for: " + host, e);

@@ -6,10 +6,10 @@
  */
 package co.elastic.support.monitoring;
 
-import co.elastic.support.diagnostics.commands.CheckElasticsearchVersion;
-import co.elastic.support.diagnostics.DiagnosticException;
-import co.elastic.support.rest.ElasticRestClientService;
 import co.elastic.support.Constants;
+import co.elastic.support.diagnostics.DiagnosticException;
+import co.elastic.support.diagnostics.commands.CheckElasticsearchVersion;
+import co.elastic.support.rest.ElasticRestClientService;
 import co.elastic.support.rest.RestClient;
 import co.elastic.support.util.ArchiveUtils;
 import co.elastic.support.util.JsonYamlUtils;
@@ -21,11 +21,12 @@ import org.apache.logging.log4j.Logger;
 import org.semver4j.Semver;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 public class MonitoringImportService extends ElasticRestClientService {
-    private Logger logger = LogManager.getLogger(MonitoringImportService.class);
+    private final Logger logger = LogManager.getLogger(MonitoringImportService.class);
 
     void execImport(MonitoringImportInputs inputs) throws DiagnosticException {
         Map<String, Object> configMap = JsonYamlUtils.readYamlFromClasspath(Constants.DIAG_CONFIG, true);
@@ -65,11 +66,9 @@ public class MonitoringImportService extends ElasticRestClientService {
         }
     }
 
-    private Vector<File> getDirectoryEntries(String dir) {
+    private List<File> getDirectoryEntries(String dir) {
         File targetDir = new File(dir);
-        Vector<File> files = new Vector<>();
-        files.addAll(FileUtils.listFiles(targetDir, null, true));
-        return files;
+        return new ArrayList<>(FileUtils.listFiles(targetDir, null, true));
     }
 
     private RestClient getClient(MonitoringImportInputs inputs, MonitoringImportConfig config){
