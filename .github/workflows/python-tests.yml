@@ -20,7 +20,7 @@ jobs:
         python-version: '3.12'
         cache: 'poetry'
     - name: Install nox
-      run:  pip install nox==2025.5.1
+      run:  pip install nox==2026.4.10
     - name: Run linting
       run: nox -s lint
     - name: Run tests
