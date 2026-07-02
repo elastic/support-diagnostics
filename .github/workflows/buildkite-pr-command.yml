@@ -1,0 +1,41 @@
+# Lets a maintainer run Buildkite CI on a pull request on demand -- including fork
+# PRs, which Buildkite won't build automatically -- by commenting "buildkite test this".
+# Only commenters with write access can trigger it; no fork code runs here (REST API only).
+# Requires a repo secret BUILDKITE_API_TOKEN scoped to `write_builds`.
+name: "Buildkite: build this PR on demand"
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+
+jobs:
+  buildkite-test-this:
+    if: >-
+      github.event.issue.pull_request != null &&
+      contains(github.event.comment.body, 'buildkite test this')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify commenter has write access
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          ACTOR: ${{ github.event.comment.user.login }}
+        run: |
+          level=$(gh api "repos/${REPO}/collaborators/${ACTOR}/permission" --jq .permission)
+          case "$level" in
+            admin|write|maintain) ;;
+            *) echo "::error::@${ACTOR} lacks write access (permission: ${level})"; exit 1 ;;
+          esac
+
+      - name: Trigger Buildkite build
+        env:
+          BUILDKITE_API_TOKEN: ${{ secrets.BUILDKITE_API_TOKEN }}
+          PR: ${{ github.event.issue.number }}
+        run: |
+          curl -fsS -X POST \
+            -H "Authorization: Bearer ${BUILDKITE_API_TOKEN}" \
+            "https://api.buildkite.com/v2/organizations/elastic/pipelines/support-diagnostics/builds" \
+            -d "{\"commit\":\"HEAD\",\"branch\":\"refs/pull/${PR}/head\",\"pull_request_id\":${PR},\"pull_request_base_branch\":\"main\"}"
