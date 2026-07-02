@@ -135,6 +135,14 @@ val distZip by tasks.registering(Zip::class) {
         exclude("share_ad_job_state/tests/**")
     }
 
+    // Gradle's Zip task does not preserve source file permissions, so the
+    // executable bit on shell scripts must be set explicitly.
+    filesMatching("*.sh") {
+        permissions {
+            unix("0755")
+        }
+    }
+
     // Root docs
     from(".") {
         include("LICENSE.txt", "NOTICE.txt", "README.md")
