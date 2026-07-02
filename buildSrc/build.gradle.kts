@@ -8,5 +8,5 @@ repositories {
 }
 
 dependencies {
-    implementation("com.github.jk1:gradle-license-report:3.1.2")
+    implementation("com.github.jk1:gradle-license-report:3.1.4")
 }
