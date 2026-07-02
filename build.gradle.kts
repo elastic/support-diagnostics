@@ -49,7 +49,7 @@ dependencies {
     implementation("com.beust:jcommander:1.82")
 
     // Commons
-    implementation("commons-io:commons-io:2.21.0")
+    implementation("commons-io:commons-io:2.22.0")
     implementation("org.apache.commons:commons-compress:1.28.0")
     implementation("org.apache.commons:commons-lang3:3.20.0")
 
@@ -57,7 +57,7 @@ dependencies {
     implementation("com.github.oshi:oshi-json:3.13.6")
 
     // SSH
-    implementation("com.github.mwiede:jsch:2.28.0")
+    implementation("com.github.mwiede:jsch:2.28.3")
 
     // Versioning
     implementation("org.semver4j:semver4j:6.0.0")
@@ -78,7 +78,7 @@ dependencies {
     testImplementation("org.wiremock:wiremock:3.13.2")
 
     // Testcontainers
-    testImplementation(platform("org.testcontainers:testcontainers-bom:1.21.3"))
+    testImplementation(platform("org.testcontainers:testcontainers-bom:1.21.4"))
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.testcontainers:testcontainers")
     // SLF4J 2.x binding so Testcontainers debug logs are visible (log4j-slf4j-impl targets 1.x)
