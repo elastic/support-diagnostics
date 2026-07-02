@@ -10,10 +10,13 @@ import co.elastic.support.diagnostics.ProcessProfile;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class CheckPlatformDetailsTest {
 
@@ -28,8 +31,7 @@ class CheckPlatformDetailsTest {
     // Helpers
     // -----------------------------------------------------------------------
 
-    private ProcessProfile makeNode(String name, String ip, String httpPublishAddr,
-                                    Set<String> boundAddresses) {
+    private ProcessProfile makeNode(String name, String ip, String httpPublishAddr, Set<String> boundAddresses) {
         ProcessProfile p = new ProcessProfile();
         p.name = name;
         p.ip = ip;
@@ -50,8 +52,7 @@ class CheckPlatformDetailsTest {
         // Simulate node whose ip matches what getNetworkInterfaces() would return
         // We can't mock the real NIC scan, so we exercise findLocalTargetNode with
         // a non-loopback host that equals the node ip directly.
-        ProcessProfile node = makeNode("NTG-PRO-ELA-01", "172.16.1.61", "172.16.1.61",
-                new java.util.HashSet<>());
+        ProcessProfile node = makeNode("NTG-PRO-ELA-01", "172.16.1.61", "172.16.1.61", new HashSet<>());
         // Non-loopback host that equals the node ip → added to localNetworkInterfaces
         ProcessProfile result = checker.findLocalTargetNode("172.16.1.61", List.of(node));
         assertNotNull(result);
@@ -64,10 +65,8 @@ class CheckPlatformDetailsTest {
 
     @Test
     void matchViaBoundAddresses_returnsCorrectNode() {
-        ProcessProfile node1 = makeNode("node-1", "10.0.0.1", "10.0.0.1",
-                new java.util.HashSet<>(Set.of("10.0.0.1")));
-        ProcessProfile node2 = makeNode("node-2", "10.0.0.2", "10.0.0.2",
-                new java.util.HashSet<>(Set.of("10.0.0.2")));
+        ProcessProfile node1 = makeNode("node-1", "10.0.0.1", "10.0.0.1", new HashSet<>(Set.of("10.0.0.1")));
+        ProcessProfile node2 = makeNode("node-2", "10.0.0.2", "10.0.0.2", new HashSet<>(Set.of("10.0.0.2")));
 
         ProcessProfile result = checker.findLocalTargetNode("10.0.0.2", List.of(node1, node2));
         assertEquals("node-2", result.name);
@@ -79,8 +78,7 @@ class CheckPlatformDetailsTest {
 
     @Test
     void emptyBoundAddresses_matchViaIpFallback() {
-        ProcessProfile node = makeNode("NTG-PRO-ELA-01", "172.16.1.61", "172.16.1.61",
-                new java.util.HashSet<>());
+        ProcessProfile node = makeNode("NTG-PRO-ELA-01", "172.16.1.61", "172.16.1.61", new HashSet<>());
 
         ProcessProfile result = checker.findLocalTargetNode("172.16.1.61", List.of(node));
         assertNotNull(result);
@@ -90,8 +88,7 @@ class CheckPlatformDetailsTest {
     @Test
     void emptyBoundAddresses_matchViaHttpPublishAddrFallback() {
         // ip and httpPublishAddr differ (NAT / publish_host override scenario)
-        ProcessProfile node = makeNode("NTG-PRO-ELA-01", "10.0.0.5", "172.16.1.61",
-                new java.util.HashSet<>());
+        ProcessProfile node = makeNode("NTG-PRO-ELA-01", "10.0.0.5", "172.16.1.61", new HashSet<>());
 
         // local address matches httpPublishAddr, not ip
         ProcessProfile result = checker.findLocalTargetNode("172.16.1.61", List.of(node));
@@ -105,18 +102,13 @@ class CheckPlatformDetailsTest {
 
     @Test
     void multipleNodes_emptyBoundAddresses_returnsCorrectOne() {
-        ProcessProfile ela01 = makeNode("NTG-PRO-ELA-01", "172.16.1.61", "172.16.1.61",
-                new java.util.HashSet<>());
-        ProcessProfile ela02 = makeNode("NTG-PRO-ELA-02", "172.16.1.62", "172.16.1.62",
-                new java.util.HashSet<>());
-        ProcessProfile ela03 = makeNode("NTG-PRO-ELA-03", "172.16.1.63", "172.16.1.63",
-                new java.util.HashSet<>());
-        ProcessProfile ela04 = makeNode("NTG-PRO-ELA-04", "172.16.1.64", "172.16.1.64",
-                new java.util.HashSet<>());
+        ProcessProfile ela01 = makeNode("NTG-PRO-ELA-01", "172.16.1.61", "172.16.1.61", new HashSet<>());
+        ProcessProfile ela02 = makeNode("NTG-PRO-ELA-02", "172.16.1.62", "172.16.1.62", new HashSet<>());
+        ProcessProfile ela03 = makeNode("NTG-PRO-ELA-03", "172.16.1.63", "172.16.1.63", new HashSet<>());
+        ProcessProfile ela04 = makeNode("NTG-PRO-ELA-04", "172.16.1.64", "172.16.1.64", new HashSet<>());
 
         // The local machine is NTG-PRO-ELA-01 (172.16.1.61)
-        ProcessProfile result = checker.findLocalTargetNode("172.16.1.61",
-                List.of(ela01, ela02, ela03, ela04));
+        ProcessProfile result = checker.findLocalTargetNode("172.16.1.61", List.of(ela01, ela02, ela03, ela04));
         assertNotNull(result);
         assertEquals("NTG-PRO-ELA-01", result.name);
     }
@@ -127,10 +119,8 @@ class CheckPlatformDetailsTest {
 
     @Test
     void noMatch_throwsRuntimeException() {
-        ProcessProfile node = makeNode("node-1", "10.0.0.1", "10.0.0.1",
-                new java.util.HashSet<>());
+        ProcessProfile node = makeNode("node-1", "10.0.0.1", "10.0.0.1", new HashSet<>());
 
-        assertThrows(RuntimeException.class,
-                () -> checker.findLocalTargetNode("192.168.99.99", List.of(node)));
+        assertThrows(RuntimeException.class, () -> checker.findLocalTargetNode("192.168.99.99", List.of(node)));
     }
 }
