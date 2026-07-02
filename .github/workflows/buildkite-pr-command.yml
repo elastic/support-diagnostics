@@ -30,12 +30,27 @@ jobs:
             *) echo "::error::@${ACTOR} lacks write access (permission: ${level})"; exit 1 ;;
           esac
 
+      - name: Resolve PR head commit
+        id: pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.issue.number }}
+        run: |
+          gh api "repos/${REPO}/pulls/${PR}" \
+            --jq '"sha=" + .head.sha, "repo=" + (.head.repo.ssh_url // "")' >>"$GITHUB_OUTPUT"
+
       - name: Trigger Buildkite build
         env:
           BUILDKITE_API_TOKEN: ${{ secrets.BUILDKITE_API_TOKEN }}
           PR: ${{ github.event.issue.number }}
+          SHA: ${{ steps.pr.outputs.sha }}
+          HEAD_REPO: ${{ steps.pr.outputs.repo }}
         run: |
+          # Passing the resolved SHA (and head repo) up front -- instead of the literal
+          # string "HEAD" -- lets Buildkite link the build to the PR immediately, rather
+          # than only once the build finishes and Buildkite resolves the commit itself.
           curl -fsS -X POST \
             -H "Authorization: Bearer ${BUILDKITE_API_TOKEN}" \
             "https://api.buildkite.com/v2/organizations/elastic/pipelines/support-diagnostics/builds" \
-            -d "{\"commit\":\"HEAD\",\"branch\":\"refs/pull/${PR}/head\",\"pull_request_id\":${PR},\"pull_request_base_branch\":\"main\"}"
+            -d "{\"commit\":\"${SHA}\",\"branch\":\"refs/pull/${PR}/head\",\"pull_request_id\":${PR},\"pull_request_base_branch\":\"main\",\"pull_request_repository\":\"${HEAD_REPO}\"}"
