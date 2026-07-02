@@ -26,6 +26,20 @@ This is a tool used by the Elastic Support team to collect the necessary data to
   - Main class: `co.elastic.support.diagnostics.DiagnosticApp`
   - Program arguments (example): `-o ~/tmp/diag-output -h localhost -u elastic --passwordText changeme`. Put whatever arguments you would like to run the application with as default.
 
+### Running Buildkite CI on a fork pull request
+
+Buildkite does not automatically build pull requests opened from forks, to
+avoid running untrusted code with CI credentials. If you are a maintainer and
+want to run the Buildkite pipeline against a fork PR, comment `buildkite test this`
+on the PR. This is handled by
+[`.github/workflows/buildkite-pr-command.yml`](.github/workflows/buildkite-pr-command.yml),
+which only triggers a build for commenters with write/maintain/admin access to
+this repository.
+
+Before commenting, review the PR diff -- particularly any changes under
+`.buildkite/`, `Dockerfile*`, or build scripts -- since the triggered build runs
+the pipeline as defined in the PR itself.
+
 ### Releasing to Maven Central
 
 In order to release the code to Maven Central, you must have a Sonatype account
