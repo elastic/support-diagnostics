@@ -17,7 +17,7 @@ idna = "3.15"
 [tool.poetry.group.dev.dependencies]
 coverage = {extras = ["toml"], version = "7.13.5"}
 pytest-cov = "7.0.0"
-black = "26.3.1"
+black = "26.5.1"
 nox = "2026.4.10"
 isort = "8.0.1"
 
