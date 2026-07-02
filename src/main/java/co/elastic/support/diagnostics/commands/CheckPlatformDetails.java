@@ -268,7 +268,14 @@ public class CheckPlatformDetails implements Command {
                             }
                         }
                         if (notLoopBack) {
-                            addr = addr.substring(0, addr.indexOf(":"));
+                            if (addr.startsWith("[")) {
+                                // IPv6 bracket notation: [address]:port → strip port and brackets
+                                int closingBracket = addr.indexOf("]");
+                                addr = addr.substring(1, closingBracket);
+                            } else {
+                                // IPv4: address:port → strip port
+                                addr = addr.substring(0, addr.indexOf(":"));
+                            }
                             diagNode.boundAddresses.add(addr);
                         }
                     }
@@ -345,6 +352,20 @@ public class CheckPlatformDetails implements Command {
                 // node
                 // send back the data object containing the required info.
                 if (node.boundAddresses.contains(localAddr)) {
+                    return node;
+                }
+            }
+        }
+
+        // Fallback: boundAddresses may be empty (field absent in older ES versions, or all-loopback)
+        // or may contain wildcards (0.0.0.0) that never match a specific IP.
+        // Try matching directly against the node's reported ip and httpPublishAddr.
+        for (String localAddr : localAddrs) {
+            for (ProcessProfile node : nodeAddrs) {
+                if (localAddr.equals(node.ip) || localAddr.equals(node.httpPublishAddr)) {
+                    logger.warn(Constants.CONSOLE,
+                            "Matched node '{}' via ip/httpPublishAddr fallback (boundAddresses did not match).",
+                            node.name);
                     return node;
                 }
             }
