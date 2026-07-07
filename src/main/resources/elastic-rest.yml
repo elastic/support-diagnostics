@@ -337,6 +337,11 @@ ssl_certs:
     ">= 6.2.0 < 7.0.0": "/_xpack/ssl/certificates"
     ">= 7.0.0": "/_ssl/certificates"
 
+streams_status:
+  tags: light
+  versions:
+    ">= 8.19.0 < 9.0.0 || >= 9.1.0": "/_streams/status"
+
 tasks:
   tags: light
   versions:

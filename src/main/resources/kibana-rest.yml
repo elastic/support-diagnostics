@@ -222,10 +222,6 @@ kibana_streams:
   versions:
     ">= 8.19.0 < 9.0.0 || >= 9.1.0": "/api/streams"
 
-kibana_streams_status:
-  versions:
-    ">= 8.19.0 < 9.0.0 || >= 9.1.0": "/api/streams/_status"
-
 kibana_synthetics_monitor_filters:
   versions:
     ">= 8.12.0": "/internal/synthetics/monitor/filters"
