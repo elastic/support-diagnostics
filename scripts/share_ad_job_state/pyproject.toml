@@ -12,7 +12,7 @@ elasticsearch = "^9.0.0"
 loguru = "^0.7.2"
 tqdm = "^4.66.5"
 urllib3 = "2.7.0"
-idna = "3.15"
+idna = "3.18"
 
 [tool.poetry.group.dev.dependencies]
 coverage = {extras = ["toml"], version = "7.15.0"}
