@@ -6,23 +6,27 @@
  */
 package co.elastic.support.util;
 
-
-import co.elastic.support.diagnostics.DiagnosticException;
 import co.elastic.support.Constants;
+import co.elastic.support.diagnostics.DiagnosticException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
-
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class SystemUtils {
 
@@ -132,22 +136,9 @@ public class SystemUtils {
     }
 
     public static String buildStringFromChar(int len, char seed){
-
         char[] charArray = new char[len];
         Arrays.fill(charArray, seed);
         return new String(charArray);
-
-    }
-
-    public static String getCurrentDate() {
-        //DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        return dtf.format(ZonedDateTime.now());
-    }
-
-    public static String getCurrentTime() {
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm");
-        return dtf.format(ZonedDateTime.now());
     }
 
    /**

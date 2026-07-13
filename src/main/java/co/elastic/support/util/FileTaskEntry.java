@@ -28,7 +28,6 @@ public class FileTaskEntry implements TaskEntry {
 
     @Override
     public String content() {
-        String contents = "";
         try {
             if(file.getName().endsWith(".gz")){
                 GZIPInputStream gzi = new GZIPInputStream( new FileInputStream(file));
