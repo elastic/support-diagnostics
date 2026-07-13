@@ -63,10 +63,10 @@ public class RestEntryConfig {
 
     @SuppressWarnings("unchecked")
     private RestEntry buildRestEntryForVersion(String name, Map<String, Object> entry) {
-        String subdir = (String) ObjectUtils.defaultIfNull(entry.get("subdir"), "");
-        String extension = (String) ObjectUtils.defaultIfNull(entry.get("extension"), ".json");
-        boolean retry = (boolean) ObjectUtils.defaultIfNull(entry.get("retry"), false);
-        boolean showErrors = (boolean) ObjectUtils.defaultIfNull(entry.get("showErrors"), true);
+        String subdir = (String) ObjectUtils.getIfNull(entry.get("subdir"), "");
+        String extension = (String) ObjectUtils.getIfNull(entry.get("extension"), ".json");
+        boolean retry = (boolean) ObjectUtils.getIfNull(entry.get("retry"), false);
+        boolean showErrors = (boolean) ObjectUtils.getIfNull(entry.get("showErrors"), true);
 
         Map<String, Object> versions = (Map<String, Object>) entry.get("versions");
 
@@ -78,14 +78,14 @@ public class RestEntryConfig {
                 } else if (urlVersion.getValue() instanceof Map) {
                     Map<String, Object> info = (Map<String, Object>) urlVersion.getValue();
 
-                    String url = (String) ObjectUtils.defaultIfNull(info.get("url"), null);
+                    String url = (String) ObjectUtils.getIfNull(info.get("url"), null);
 
                     if (url == null) {
                         throw new RuntimeException("Undefined URL for REST entry (route)");
                     }
 
-                    String pageableFieldName = (String) ObjectUtils.defaultIfNull(info.get("paginate"), null);
-                    boolean spaceAware = (boolean) ObjectUtils.defaultIfNull(info.get("spaceaware"), false);
+                    String pageableFieldName = (String) ObjectUtils.getIfNull(info.get("paginate"), null);
+                    boolean spaceAware = (boolean) ObjectUtils.getIfNull(info.get("spaceaware"), false);
 
                     return new RestEntry(name, subdir, extension, retry, url, showErrors, pageableFieldName, spaceAware);
                 }
