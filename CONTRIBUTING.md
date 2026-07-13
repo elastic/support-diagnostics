@@ -37,8 +37,8 @@ handled by
 [`.github/workflows/buildkite-pr-command.yml`](.github/workflows/buildkite-pr-command.yml),
 which only triggers a build for commenters with write/maintain/admin access to
 this repository, and refuses to build if the hash is missing, malformed, does
-not match the PR's current head commit, or names a commit created after the
-comment.
+not match the PR's current head commit, or names a commit that was **pushed to
+GitHub at/after the comment**.
 
 Fork PRs naturally must be checked before running builds.
 
