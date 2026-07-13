@@ -30,15 +30,17 @@ This is a tool used by the Elastic Support team to collect the necessary data to
 
 Buildkite does not automatically build pull requests opened from forks, to
 avoid running untrusted code with CI credentials. If you are a maintainer and
-want to run the Buildkite pipeline against a fork PR, comment `buildkite test this`
-on the PR. This is handled by
+want to run the Buildkite pipeline against a fork PR, comment
+`buildkite test this <commit-sha>` on the PR, naming the exact commit to build
+(a full or GitHub-UI-abbreviated SHA, at least 7 hex characters). This is
+handled by
 [`.github/workflows/buildkite-pr-command.yml`](.github/workflows/buildkite-pr-command.yml),
 which only triggers a build for commenters with write/maintain/admin access to
-this repository.
+this repository, and refuses to build if the hash is missing, malformed, does
+not match the PR's current head commit, or names a commit created after the
+comment.
 
-Before commenting, review the PR diff -- particularly any changes under
-`.buildkite/`, `Dockerfile*`, or build scripts -- since the triggered build runs
-the pipeline as defined in the PR itself.
+Fork PRs naturally must be checked before running builds.
 
 ### Releasing to Maven Central
 
