@@ -7,14 +7,10 @@
 package co.elastic.support.diagnostics;
 
 import co.elastic.support.BaseConfig;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.util.Map;
 
 public class DiagConfig extends BaseConfig {
-    private static Logger logger = LogManager.getLogger(DiagConfig.class);
-
     public int callRetries, pauseRetries, maxLogs, maxGcLogs;
 
     public DiagConfig(Map configuration) {
