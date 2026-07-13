@@ -18,7 +18,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Hashtable;
@@ -112,8 +111,6 @@ public class RemoteSystem extends SystemCommand {
         // Only there if if's been set, otherwise just prepending an empty string
         cmd = sudo + cmd;
 
-        final ByteArrayOutputStream out = new ByteArrayOutputStream();
-        final ByteArrayOutputStream errout = new ByteArrayOutputStream();
         StringBuffer sb = new StringBuffer();
 
         InputStream istream = null;
