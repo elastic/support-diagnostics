@@ -1,5 +1,7 @@
 # Lets a maintainer run Buildkite CI on a pull request on demand -- including fork
-# PRs, which Buildkite won't build automatically -- by commenting "buildkite test this".
+# PRs, which Buildkite won't build automatically -- by commenting
+# "buildkite test this <sha>", naming the exact commit (>=7 hex chars) to build.
+# The named commit must match the PR's current head and must predate the comment.
 # Only commenters with write access can trigger it; no fork code runs here (REST API only).
 # Requires a repo secret BUILDKITE_API_TOKEN scoped to `write_builds`.
 name: "Buildkite: build this PR on demand"
@@ -30,15 +32,48 @@ jobs:
             *) echo "::error::@${ACTOR} lacks write access (permission: ${level})"; exit 1 ;;
           esac
 
-      - name: Resolve PR head commit
+      - name: Resolve and validate requested commit
         id: pr
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
           PR: ${{ github.event.issue.number }}
+          COMMENT_BODY: ${{ github.event.comment.body }}
+          COMMENT_CREATED_AT: ${{ github.event.comment.created_at }}
         run: |
-          gh api "repos/${REPO}/pulls/${PR}" \
-            --jq '"sha=" + .head.sha, "repo=" + (.head.repo.ssh_url // "")' >>"$GITHUB_OUTPUT"
+          # The maintainer must name the commit explicitly: "buildkite test this <sha>".
+          # We build only that commit (matched against the current PR head).
+          if [[ "$COMMENT_BODY" =~ buildkite[[:space:]]+test[[:space:]]+this[[:space:]]+([0-9a-fA-F]{7,40}) ]]; then
+            REQUESTED="${BASH_REMATCH[1],,}"
+          else
+            echo "::error::Comment must be 'buildkite test this <sha>' with a commit hash of at least 7 hex characters."
+            exit 1
+          fi
+
+          # Resolve the PR head SHA, head repo SSH URL (for fork builds), and head repo full name.
+          read -r HEAD_SHA HEAD_REPO HEAD_REPO_FULL < <(
+            gh api "repos/${REPO}/pulls/${PR}" \
+              --jq '[.head.sha, (.head.repo.ssh_url // ""), (.head.repo.full_name // "")] | @tsv'
+          )
+
+          # The requested hash must identify the current PR head (abbreviated prefix allowed).
+          case "$HEAD_SHA" in
+            "$REQUESTED"*) ;;
+            *) echo "::error::Requested commit ${REQUESTED} does not match the current PR head ${HEAD_SHA}."; exit 1 ;;
+          esac
+
+          # The head commit must pre-date the comment (look it up in the head repo so fork
+          # commits resolve reliably). Refuse anything created at/after the request.
+          COMMIT_DATE=$(gh api "repos/${HEAD_REPO_FULL}/commits/${HEAD_SHA}" --jq '.commit.committer.date')
+          if [ "$(date -u -d "$COMMIT_DATE" +%s)" -ge "$(date -u -d "$COMMENT_CREATED_AT" +%s)" ]; then
+            echo "::error::Head commit ${HEAD_SHA} (${COMMIT_DATE}) is not earlier than the comment (${COMMENT_CREATED_AT})."
+            exit 1
+          fi
+
+          {
+            echo "sha=${HEAD_SHA}"
+            echo "repo=${HEAD_REPO}"
+          } >>"$GITHUB_OUTPUT"
 
       - name: Trigger Buildkite build
         env:
