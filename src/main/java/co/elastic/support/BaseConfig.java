@@ -12,7 +12,6 @@ import java.util.Map;
 
 public class BaseConfig {
 
-    public String diagnosticVersion;
     public int connectionTimeout;
     public int connectionRequestTimeout;
     public int socketTimeout;
@@ -27,7 +26,6 @@ public class BaseConfig {
 
     public Map<String, String> dockerGlobal;
     public Map<String, String> dockerContainer;
-    public Map<String, String> kubernates;
     public String dockerContainerIds;
     public String dockerExecutablePath;
 

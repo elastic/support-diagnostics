@@ -6,10 +6,9 @@
  */
 package co.elastic.support.monitoring;
 
-
-import co.elastic.support.util.SystemProperties;
 import co.elastic.support.BaseConfig;
 import co.elastic.support.Constants;
+import co.elastic.support.util.SystemProperties;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.semver4j.Semver;
@@ -18,16 +17,17 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class MonitoringExportConfig extends BaseConfig {
 
-    protected List<String> monitoringStats = new ArrayList<>();
     protected Map<String, String> queries = new LinkedHashMap<>();
     protected String monitoringStartUri;
     protected String monitoringUri;
     protected String monitoringScrollUri;
-    protected String monitoringScrollTtl;
     protected int  monitoringScrollSize;
     protected Semver semver;
 
@@ -56,26 +56,6 @@ public class MonitoringExportConfig extends BaseConfig {
         monitoringUri = getVersionedQuery("monitoring-uri");
         monitoringStartUri = getVersionedQuery("monitoring-start-scroll-uri");
         monitoringScrollUri = getVersionedQuery("monitoring-scroll-uri");
-    }
-
-    public String getMonitoringUri() {
-        return monitoringUri;
-    }
-
-    public String getMonitoringScrollUri() {
-        return monitoringScrollUri;
-    }
-
-    public String getMonitoringScrollTtl() {
-        return monitoringScrollTtl;
-    }
-
-    public int getMonitoringScrollSize() {
-        return monitoringScrollSize;
-    }
-
-    public List<String> getMonitoringStats() {
-        return monitoringStats;
     }
 
     public List<String> getStatsByType(String type){
@@ -117,11 +97,9 @@ public class MonitoringExportConfig extends BaseConfig {
             }
 
             buildQueries.put(entry, resultStringBuilder.toString());
-
         }
 
         return buildQueries;
-
     }
 
     private String getVersionedQuery(String query ){
@@ -136,8 +114,6 @@ public class MonitoringExportConfig extends BaseConfig {
         }
 
         return "";
-
     }
 
 }
-

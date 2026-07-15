@@ -6,15 +6,13 @@
  */
 package co.elastic.support.diagnostics.chain;
 
+import co.elastic.support.diagnostics.DiagConfig;
 import co.elastic.support.diagnostics.DiagnosticInputs;
 import co.elastic.support.diagnostics.ProcessProfile;
 import co.elastic.support.rest.RestEntry;
-import co.elastic.support.diagnostics.DiagConfig;
 import co.elastic.support.util.ResourceCache;
 import org.semver4j.Semver;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 public class DiagnosticContext {
@@ -30,13 +28,11 @@ public class DiagnosticContext {
    public String tempDir = "";
    public String diagVersion;
 
-   // public RestClient esRestClient;
    public DiagConfig diagsConfig;
    public DiagnosticInputs diagnosticInputs;
    public ProcessProfile targetNode;
    public Semver version;
 
-   public List<String> dockerContainers = new ArrayList<String>();
    public Map<String, RestEntry> elasticRestCalls;
    public Map<String, RestEntry> fullElasticRestCalls;
 

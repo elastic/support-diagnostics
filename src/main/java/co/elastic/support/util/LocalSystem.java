@@ -11,10 +11,11 @@ import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.*;
-
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.List;
-
 
 public class LocalSystem extends SystemCommand {
 
@@ -22,7 +23,6 @@ public class LocalSystem extends SystemCommand {
     private ProcessBuilder pb;
     private static final String[] wincCmds = {"cmd", "/c"};
     private static final String[] nixcCdms = {"/bin/sh", "-c"};
-    private String encoding = Constants.UTF_8;
 
     public LocalSystem(String osName) {
 
@@ -35,8 +35,6 @@ public class LocalSystem extends SystemCommand {
                 break;
             case Constants.winPlatform:
                 pb = new ProcessBuilder(wincCmds);
-                // Windows hack - wmmic uses UTF-16
-                encoding = Constants.UTF_16;
                 break;
             default:
                 pb = new ProcessBuilder(nixcCdms);

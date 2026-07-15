@@ -63,7 +63,6 @@ public class CollectDockerInfo implements Command {
     }
 
     public List<String> getDockerContainerIds(SystemCommand systemCommand, String idsCmd, String dockerPath) {
-
         try {
             idsCmd = idsCmd.replace("{{dockerPath}}", dockerPath);
             String output = systemCommand.runCommand(idsCmd);
@@ -71,21 +70,17 @@ public class CollectDockerInfo implements Command {
             // If there's content add it to the file list
             if (StringUtils.isNotEmpty(output.trim())) {
                 try {
-                    List<String> lines = IOUtils.readLines(new StringReader(output));
-                    return lines;
-
+                    return IOUtils.readLines(new StringReader(output));
                 } catch (Exception e) {
                     logger.error("Error getting directory listing.", e);
                 }
             }
-
         } catch (Exception e) {
             logger.error("Error obtaining Docker Container Id's");
         }
 
         // If anything happened just bypass processing and continue with the rest.
         return new ArrayList<String>();
-
     }
 
     private void runDockerCalls(String targetDir, Map<String, String> commandMap, SystemCommand sysCmd, String token,
@@ -127,11 +122,4 @@ public class CollectDockerInfo implements Command {
 
         return "docker";
     }
-
-    private String getKubectlPath(String dockerPath) {
-
-        return dockerPath.replace("docker", "kubectl");
-
-    }
-
 }
