@@ -73,8 +73,8 @@ dependencies {
     implementation("org.freemarker:freemarker:2.3.34")
 
     // Test
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:6.0.3")
-    testImplementation("org.junit.platform:junit-platform-launcher:6.0.3")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:6.1.2")
+    testImplementation("org.junit.platform:junit-platform-launcher:6.1.2")
     testImplementation("org.wiremock:wiremock:3.13.2")
 
     // Testcontainers
