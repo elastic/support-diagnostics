@@ -58,12 +58,9 @@ The application can be run from any directory on the machine. It does not requir
 
 This software is licensed under [Elastic License v2](https://www.elastic.co/licensing/elastic-license).
 
-## Performance and safety
+## Performance and safety 
 
-The Support Diagnostic tool can be run from any directory on the machine. It does not require installation to a specific location, and the only requirement is that the user has read access to the Elasticsearch artifacts, write access to the chosen output directory, and sufficient disk space for the generated archive.
-The calls issued by the Support Diagnostic tool are read-only. It issues only GET requests to Elasticsearch APIs — primarily `_cat` APIs (such as `/_cat/nodes`, `/_cat/shards`, `/_cat/indices`), cluster and node stats endpoints, and settings endpoints. It does not modify any cluster state, indices, or data. In `local` mode, it also retrieves log files and operating system information directly from disk, which has no impact on the cluster.
-On a healthy cluster, the overhead is negligible. On clusters with many indices, a small number of calls such as `/_cluster/state` and `/_stats` may take longer to respond, but they remain read-only and do not trigger any cluster operations such as shard movements or merges.
-You can safely run the diagnostic on a production cluster.
+For performance and safety guidance on capturing Elasticsearch support diagnostic bundles, review the official documentation at https://www.elastic.co/docs/troubleshoot/elasticsearch/diagnostic#diagnostic-performance-safety.
 
 ## Installation And Setup
 
