@@ -11,7 +11,7 @@ import co.elastic.support.BaseConfig;
 import java.util.Map;
 
 public class DiagConfig extends BaseConfig {
-    public int callRetries, pauseRetries, maxLogs, maxGcLogs;
+    public int callRetries, pauseRetries, maxLogs, maxGcLogs, maxSlowLogs;
 
     public DiagConfig(Map configuration) {
         super(configuration);
@@ -24,6 +24,7 @@ public class DiagConfig extends BaseConfig {
         Map<String, Integer> logSettings = (Map<String, Integer>) configuration.get("log-settings");
         maxGcLogs = logSettings.get("maxGcLogs");
         maxLogs = logSettings.get("maxLogs");
+        maxSlowLogs = logSettings.get("maxSlowLogs");
     }
 
     public Map<String, Map<String, String>> getSysCalls(String key){
