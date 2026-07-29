@@ -106,6 +106,7 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
     public final static String knownHostsDescription = "Known hosts file to search for target server. Default is ~/.ssh/known_hosts for Linux/Mac. Windows users should always set this explicitly.";
     public final static String sudoDescription = "Use sudo for remote commands? If not used, log retrieval and some system calls may fail.";
     public final static String remotePortDescription = "SSH port for the host being queried.";
+    public final static String includeTrendsDescription = "Collect a 7-day CPU/heap trend summary from monitoring data (.monitoring-es-*), if present. Adds one additional query against the monitored cluster.";
 
     // Input Fields
     @Parameter(names = {
@@ -133,6 +134,8 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
     public String knownHostsFile = "";
     @Parameter(names = { "--sudo" }, description = sudoDescription)
     public boolean isSudo = false;
+    @Parameter(names = { "--includeTrends" }, description = includeTrendsDescription)
+    public boolean includeTrends = false;
     @Parameter(names = { "--remotePort" }, description = remotePortDescription)
     public int remotePort = 22;
     // End Input Fields
