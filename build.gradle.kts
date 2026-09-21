@@ -25,8 +25,8 @@ val log4jVersion = "2.26.1"
 
 dependencies {
     // Lombok
-    compileOnly("org.projectlombok:lombok:1.18.46")
-    annotationProcessor("org.projectlombok:lombok:1.18.46")
+    compileOnly("org.projectlombok:lombok:1.18.48")
+    annotationProcessor("org.projectlombok:lombok:1.18.48")
 
     // HTTP
     implementation("org.apache.httpcomponents:httpclient:4.5.14") {
