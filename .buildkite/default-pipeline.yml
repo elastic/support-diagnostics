@@ -15,15 +15,15 @@ steps:
     depends_on: "gradle-test"
     if: build.branch == "main"
     plugins:
-      - elastic/vault-secrets#v0.1.0:
+      - elastic/vault-secrets#v0.1.1:
           path: 'kv/ci-shared/opex/oci-registry-creds-prod'
           field: "username"
           env_var: "DOCKER_REG_USER"
-      - elastic/vault-secrets#v0.1.0:
+      - elastic/vault-secrets#v0.1.1:
           path: 'kv/ci-shared/opex/oci-registry-creds-prod'
           field: "password"
           env_var: "DOCKER_REG_PASS"
-      - elastic/vault-secrets#v0.1.0:
+      - elastic/vault-secrets#v0.1.1:
           path: 'kv/ci-shared/opex/oci-registry-creds-prod'
           field: "hostname"
           env_var: "DOCKER_REG_HOSTNAME"
