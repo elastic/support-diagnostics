@@ -252,6 +252,11 @@ Elasticsearch, Kibana, and Logstash each have three distinct execution modes ava
    <td width="30%" align="left" valign="top">Option only - no value.</td>
  </tr>
 
+ <tr>
+   <td width="20%" align="left" valign="top">--includeTrends</td>
+   <td width="50%" align="left" valign="top">Collect a 7-day CPU/heap trend summary from monitoring data (.monitoring-es-*), broken down by node and by day, if monitoring is enabled on the target cluster. Adds one additional query against the monitored cluster. Default value is false.</td>
+   <td width="30%" align="left" valign="top">Option only - no value.</td>
+ </tr>
  </table>
 
 #### PKI Authentication Options
