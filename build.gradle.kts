@@ -70,7 +70,7 @@ dependencies {
     implementation("jline:jline:2.14.6")
 
     // Templating
-    implementation("org.freemarker:freemarker:2.3.34")
+    implementation("org.freemarker:freemarker:2.3.35")
 
     // Test
     testImplementation("org.junit.jupiter:junit-jupiter-engine:6.1.3")
