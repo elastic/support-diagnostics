@@ -36,7 +36,7 @@ dependencies {
     implementation("commons-codec:commons-codec:1.22.1")
 
     // JSON / Data
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.22.2")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.22.3")
     implementation("org.yaml:snakeyaml:2.6")
 
     // Logging
