@@ -80,14 +80,25 @@ jobs:
       - name: Trigger Buildkite build
         env:
           BUILDKITE_API_TOKEN: ${{ secrets.BUILDKITE_API_TOKEN }}
+          REPO: ${{ github.repository }}
           PR: ${{ github.event.issue.number }}
           SHA: ${{ steps.pr.outputs.sha }}
           HEAD_REPO: ${{ steps.pr.outputs.repo }}
         run: |
-          # Passing the resolved SHA (and head repo) up front -- instead of the literal
-          # string "HEAD" -- lets Buildkite link the build to the PR immediately, rather
-          # than only once the build finishes and Buildkite resolves the commit itself.
+          # Passing the resolved SHA up front -- instead of the literal string "HEAD" --
+          # lets Buildkite link the build to the PR immediately, rather than only once
+          # the build finishes and Buildkite resolves the commit itself.
+          #
+          # pull_request_repository is only included for same-repo PRs: Buildkite returns
+          # 404 when given a fork SSH URL (it has no pipeline configured for the fork),
+          # but it can still check out refs/pull/<PR>/head from its configured repo
+          # because GitHub creates that ref in the base repo for all PRs including forks.
+          if [[ "$HEAD_REPO" == *":${REPO}"* ]]; then
+            REPO_ARG=",\"pull_request_repository\":\"${HEAD_REPO}\""
+          else
+            REPO_ARG=""
+          fi
           curl -fsS -X POST \
             -H "Authorization: Bearer ${BUILDKITE_API_TOKEN}" \
             "https://api.buildkite.com/v2/organizations/elastic/pipelines/support-diagnostics/builds" \
-            -d "{\"commit\":\"${SHA}\",\"branch\":\"refs/pull/${PR}/head\",\"pull_request_id\":${PR},\"pull_request_base_branch\":\"main\",\"pull_request_repository\":\"${HEAD_REPO}\"}"
+            -d "{\"commit\":\"${SHA}\",\"branch\":\"refs/pull/${PR}/head\",\"pull_request_id\":${PR},\"pull_request_base_branch\":\"main\"${REPO_ARG}}"
