@@ -68,6 +68,7 @@ linuxOS:
     elastic: "ls -alt {{LOGPATH}} | grep -e '{{CLUSTERNAME}}.log' -e '{{CLUSTERNAME}}_server.json' | awk '{print $9}'"
     elastic-arc: "ls -alt {{LOGPATH}} | grep '{{CLUSTERNAME}}-.*-1.log.gz' | awk '{print $9}'"
     gc: "ls -alt {{LOGPATH}} |  awk '/gc/ {print $9}'"
+    slowlog: "ls -alt {{LOGPATH}} | grep 'slowlog.json' | awk '{print $9}'"
     kibana: "ls -alt /var/log/kibana/ |  awk '/.json|.log/ {print $9}'"
     kibana-default-path: "/var/log/kibana/"
 
@@ -88,6 +89,7 @@ macOS:
     elastic: "ls -alt {{LOGPATH}} | grep -e '{{CLUSTERNAME}}.log' -e '{{CLUSTERNAME}}_server.json' | awk '{print $9}'"
     elastic-arc: "ls -alt {{LOGPATH}} | grep '{{CLUSTERNAME}}-.*-1.log.gz' | awk '{print $9}'"
     gc: "ls -alt {{LOGPATH}} |  awk '/gc/ {print $9}'"
+    slowlog: "ls -alt {{LOGPATH}} | grep 'slowlog.json' | awk '{print $9}'"
     kibana: "ls -alt /var/log/kibana/ |  awk '/.json|.log/ {print $9}'"
     kibana-default-path: "/var/log/kibana/"
 
@@ -107,6 +109,7 @@ winOS:
     elastic: "dir /b  /l /o:-d /a:-d {{LOGPATH}}\\{{CLUSTERNAME}}.log"
     elastic-arc: "dir /b  /l /o:-d /a:-d {{LOGPATH}}\\{{CLUSTERNAME}}-*.log.gz"
     gc: "dir /l /b /o:-d /a:-d {{LOGPATH}}\\gc.log.*"
+    slowlog: "dir /b  /l /o:-d /a:-d {{LOGPATH}}\\*slowlog.json"
 
 docker-container-ids: "{{dockerPath}} ps -q"
 
