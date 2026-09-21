@@ -58,6 +58,10 @@ The application can be run from any directory on the machine. It does not requir
 
 This software is licensed under [Elastic License v2](https://www.elastic.co/licensing/elastic-license).
 
+## Performance and safety 
+
+For performance and safety guidance on capturing Elasticsearch support diagnostic bundles, review the official documentation at https://www.elastic.co/docs/troubleshoot/elasticsearch/diagnostic#diagnostic-performance-safety.
+
 ## Installation And Setup
 
 ### Run Requirements
