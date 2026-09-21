@@ -349,14 +349,14 @@ develop = ["aiohttp", "anyio", "furo", "httpx", "opentelemetry-api", "openteleme
 
 [[package]]
 name = "elasticsearch"
-version = "9.4.1"
+version = "9.5.1"
 description = "Python client for Elasticsearch"
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "elasticsearch-9.4.1-py3-none-any.whl", hash = "sha256:71ab71c3d1b20fd88c2922fb82c3277cce7ea03c160686e7b9368b265c2b4cac"},
-    {file = "elasticsearch-9.4.1.tar.gz", hash = "sha256:1d78fdfba97a903ec35a5eb5808a74e33392b7c620bd5f742d465a3a26c27d75"},
+    {file = "elasticsearch-9.5.1-py3-none-any.whl", hash = "sha256:a980d8888ae70c03f0a1db6b2c5e3e39bf4e235abea737f522d2fd1d2d20bb99"},
+    {file = "elasticsearch-9.5.1.tar.gz", hash = "sha256:98210cd96c256dd9936f58e1c762aba94da7db7d38d058bb0fbaf7e4b9567146"},
 ]
 
 [package.dependencies]
