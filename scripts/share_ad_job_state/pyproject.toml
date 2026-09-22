@@ -19,7 +19,7 @@ coverage = {extras = ["toml"], version = "7.16.1"}
 pytest-cov = "7.1.0"
 black = "26.5.1"
 nox = "2026.8.17"
-isort = "8.0.1"
+isort = "9.0.1"
 
 
 [build-system]
