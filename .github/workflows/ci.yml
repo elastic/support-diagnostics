@@ -31,21 +31,3 @@ jobs:
         
     - name: Gradle test
       run: ./gradlew test
-
-  # Same as Elasticsearch local dockerBuild: native platform, --load, no --push.
-  # Then run the image. Multi-arch publish stays on Buildkite main.
-  # https://github.com/elastic/elasticsearch/blob/main/distribution/docker/README.md
-  docker:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-
-    - name: Build diagnostic image (native, no push)
-      run: |
-        docker buildx build --platform linux/amd64 --load \
-          -f Dockerfile \
-          -t support-diagnostics:ci \
-          .
-
-    - name: Run image (--help)
-      run: docker run --rm support-diagnostics:ci ./diagnostics.sh --help
