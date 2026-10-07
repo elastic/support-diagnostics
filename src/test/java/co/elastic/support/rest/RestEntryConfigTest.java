@@ -63,6 +63,28 @@ class RestEntryConfigTest {
     }
 
     @Test
+    void buildEntryMap_catIndices_includesCreationDateFrom713() throws DiagnosticException {
+        Map<String, Object> raw = load(Constants.ES_REST);
+
+        String before = urlFor(raw, "7.12.0");
+        assertTrue(before.contains("expand_wildcards=all"), "7.12 should still expand wildcards");
+        assertFalse(before.contains("creation.date"), "creation.date is only valid from 7.13");
+
+        String atBoundary = urlFor(raw, "7.13.0");
+        assertTrue(atBoundary.contains("creation.date,creation.date.string"),
+                "7.13 should request creation date columns");
+        assertTrue(atBoundary.contains("expand_wildcards=all"), "7.13 should still expand wildcards");
+
+        String current = urlFor(raw, "9.3.0");
+        assertTrue(current.contains("creation.date,creation.date.string"),
+                "Current versions should request creation date columns");
+    }
+
+    private static String urlFor(Map<String, Object> raw, String version) {
+        return new RestEntryConfig(version).buildEntryMap(raw).get("cat_indices").getUrl();
+    }
+
+    @Test
     void buildEntryMap_modeFilter_excludesFullOnlyInLightMode() throws DiagnosticException {
         Map<String, Object> raw = load(Constants.ES_REST);
         Map<String, RestEntry> fullEntries = new RestEntryConfig("9.3.0", "full").buildEntryMap(raw);
