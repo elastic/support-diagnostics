@@ -170,8 +170,10 @@ public class KibanaGetDetails extends CheckPlatformDetails {
             diagNode.os = SystemUtils.parseOperatingSystemName(nodeOs);
 
             String httpPublishAddr = processInfo.path("kibana").path("transport_address").asText();
-            diagNode.httpPublishAddr = httpPublishAddr.substring(0, httpPublishAddr.indexOf(":"));
-            diagNode.httpPort = Integer.parseInt(httpPublishAddr.substring(httpPublishAddr.indexOf(":") + 1));
+            // IPv6 hosts such as "::" contain colons, so the port follows the last one
+            int portSeparator = httpPublishAddr.lastIndexOf(":");
+            diagNode.httpPublishAddr = httpPublishAddr.substring(0, portSeparator);
+            diagNode.httpPort = Integer.parseInt(httpPublishAddr.substring(portSeparator + 1));
 
             nodeNetworkInfo.add(diagNode);
         } catch (Exception e) {
