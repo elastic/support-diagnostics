@@ -18,7 +18,7 @@ import co.elastic.support.util.RemoteSystem;
 import co.elastic.support.util.SystemProperties;
 import co.elastic.support.util.SystemUtils;
 import co.elastic.support.util.SystemCommand;
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 
 import java.util.List;
 import java.util.ArrayList;
