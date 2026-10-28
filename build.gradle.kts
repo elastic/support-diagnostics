@@ -25,19 +25,19 @@ val log4jVersion = "2.26.1"
 
 dependencies {
     // Lombok
-    compileOnly("org.projectlombok:lombok:1.18.46")
-    annotationProcessor("org.projectlombok:lombok:1.18.46")
+    compileOnly("org.projectlombok:lombok:1.18.48")
+    annotationProcessor("org.projectlombok:lombok:1.18.48")
 
     // HTTP
     implementation("org.apache.httpcomponents:httpclient:4.5.14") {
         exclude(group = "commons-codec", module = "commons-codec")
         exclude(group = "commons-logging", module = "commons-logging")
     }
-    implementation("commons-codec:commons-codec:1.22.0")
+    implementation("commons-codec:commons-codec:1.22.1")
 
     // JSON / Data
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.21.3")
-    implementation("org.yaml:snakeyaml:2.6")
+    implementation("tools.jackson.core:jackson-databind:3.2.4")
+    implementation("org.yaml:snakeyaml:2.7")
 
     // Logging
     implementation("org.apache.logging.log4j:log4j-api:$log4jVersion")
@@ -57,7 +57,7 @@ dependencies {
     implementation("com.github.oshi:oshi-json:3.13.6")
 
     // SSH
-    implementation("com.github.mwiede:jsch:2.28.3")
+    implementation("com.github.mwiede:jsch:2.28.8")
 
     // Versioning
     implementation("org.semver4j:semver4j:6.0.0")
@@ -70,11 +70,11 @@ dependencies {
     implementation("jline:jline:2.14.6")
 
     // Templating
-    implementation("org.freemarker:freemarker:2.3.34")
+    implementation("org.freemarker:freemarker:2.3.35")
 
     // Test
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:6.0.3")
-    testImplementation("org.junit.platform:junit-platform-launcher:6.0.3")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:6.1.3")
+    testImplementation("org.junit.platform:junit-platform-launcher:6.1.3")
     testImplementation("org.wiremock:wiremock:3.13.2")
 
     // Testcontainers

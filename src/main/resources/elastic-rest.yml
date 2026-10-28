@@ -55,7 +55,8 @@ cat_indices:
     ">= 0.9.0 < 5.1.1": "/_cat/indices?v"
     ">= 5.1.1 < 6.0.0": "/_cat/indices?v&s=index"
     ">= 6.0.0 < 7.7.0": "/_cat/indices?v&s=index&h=health,status,index,uuid,pri,rep,docs.count,docs.deleted,store.size,pri.store.size,sth"
-    ">= 7.7.0": "/_cat/indices?v&s=index&h=health,status,index,uuid,pri,rep,docs.count,docs.deleted,store.size,pri.store.size,sth&expand_wildcards=all"
+    ">= 7.7.0 < 7.13.0": "/_cat/indices?v&s=index&h=health,status,index,uuid,pri,rep,docs.count,docs.deleted,store.size,pri.store.size,sth&expand_wildcards=all"
+    ">= 7.13.0": "/_cat/indices?v&s=index&h=health,status,index,uuid,pri,rep,docs.count,docs.deleted,store.size,pri.store.size,sth,creation.date,creation.date.string&expand_wildcards=all"
 
 cat_master:
   extension: ".txt"
@@ -230,7 +231,8 @@ indices_stats:
   retry: true
   versions:
     ">= 0.9.0 < 7.7.0": "/_stats?level=shards&human"
-    ">= 7.7.0": "/_stats?level=shards&human&expand_wildcards=all&ignore_unavailable=true"
+    ">= 7.7.0 < 9.6.0": "/_stats?level=shards&human&expand_wildcards=hidden,open&ignore_unavailable=true"
+    ">= 9.6.0": "/_stats?level=shards&human&expand_wildcards=hidden,open&ignore_unavailable=true&include_auto_calibration=true"
 
 internal_health:
   tags: light
@@ -308,7 +310,8 @@ repositories:
 segments:
   retry: true
   versions:
-    ">= 0.9.0": "/_segments?human"
+    ">= 0.9.0 < 9.6.0": "/_segments?human"
+    ">= 9.6.0": "/_segments?human&include_auto_calibration=true"
 
 settings:
   tags: light
@@ -336,6 +339,11 @@ ssl_certs:
   versions:
     ">= 6.2.0 < 7.0.0": "/_xpack/ssl/certificates"
     ">= 7.0.0": "/_ssl/certificates"
+
+streams_status:
+  tags: light
+  versions:
+    ">= 8.19.0 < 9.0.0 || >= 9.1.0": "/_streams/status"
 
 tasks:
   tags: light

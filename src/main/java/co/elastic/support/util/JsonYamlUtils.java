@@ -7,8 +7,10 @@
 package co.elastic.support.util;
 
 import co.elastic.support.diagnostics.DiagnosticException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +26,7 @@ public class JsonYamlUtils {
 
    private static final Logger logger = LoggerFactory.getLogger(JsonYamlUtils.class);
 
-   public static ObjectMapper mapper = new ObjectMapper();
+   public static ObjectMapper mapper = JsonMapper.builder().build();
 
    public static JsonNode createJsonNodeFromFileName(String dir, String fileName) {
       File jsonFile = FileUtils.getFile(dir, fileName);
@@ -41,8 +43,8 @@ public class JsonYamlUtils {
 
    public static JsonNode createJsonNodeFromString(String nodeString) {
       try {
-         return new ObjectMapper().readTree(nodeString);
-      } catch (IOException e) {
+         return mapper.readTree(nodeString);
+      } catch (JacksonException e) {
          logger.info("Error creating JSON node from input string: {}", nodeString);
          throw new RuntimeException(e);
       }

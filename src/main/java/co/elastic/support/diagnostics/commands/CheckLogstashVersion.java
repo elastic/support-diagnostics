@@ -15,7 +15,7 @@ import co.elastic.support.rest.RestEntryConfig;
 import co.elastic.support.rest.RestResult;
 import co.elastic.support.util.JsonYamlUtils;
 import co.elastic.support.util.SystemProperties;
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.semver4j.Semver;

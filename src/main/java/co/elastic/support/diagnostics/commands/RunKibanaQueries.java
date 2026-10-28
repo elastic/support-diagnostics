@@ -19,9 +19,10 @@ import co.elastic.support.util.ResourceCache;
 import co.elastic.support.util.SystemCommand;
 import co.elastic.support.util.SystemProperties;
 import co.elastic.support.util.SystemUtils;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -30,7 +31,6 @@ import org.apache.logging.log4j.Logger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Iterator;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -160,7 +160,7 @@ public class RunKibanaQueries extends BaseQuery {
         String url = getPageUrl(action, 1, 1, perPageField);
 
         // get the values needed to the pagination.
-        RestResult res = client.execQuery(url);
+        RestResult res = client.execQuery(url, action.getExtraHeaders());
 
         int totalPages = 0;
 
@@ -195,7 +195,10 @@ public class RunKibanaQueries extends BaseQuery {
             action.getExtension(),
             false,
             getPageUrl(action, page, perPage, perPageField),
-            false
+            false,
+            null,
+            false,
+            action.getExtraHeaders()
         );
     }
 
@@ -274,16 +277,18 @@ public class RunKibanaQueries extends BaseQuery {
                         // Not all the webhook need to have headers, so we need to be sure the data was set by the customer.
                         JsonNode headers = actions.get(i).get("config").get("headers");
                         if (!(headers == null || headers.isNull())) {
-                            Iterator<Map.Entry<String, JsonNode>> iter = actions.get(i).get("config").get("headers").fields();
-
-                            while (iter.hasNext()) {
-                                Map.Entry<String, JsonNode> entry = iter.next();
-                                String key = entry.getKey().toLowerCase();
+                            List<String> toRemove = new ArrayList<>();
+                            for (String name : headers.propertyNames()) {
+                                String key = name.toLowerCase();
 
                                 if (!key.equals("kbn-xsrf") && !key.equals("content-type")) {
-                                    iter.remove();
-                                    headerRemoved = true;
+                                    toRemove.add(name);
                                 }
+                            }
+
+                            if (!toRemove.isEmpty()) {
+                                ((ObjectNode) headers).remove(toRemove);
+                                headerRemoved = true;
                             }
                         }
                     }

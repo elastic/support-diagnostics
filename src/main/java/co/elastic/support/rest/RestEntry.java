@@ -8,6 +8,8 @@ package co.elastic.support.rest;
 
 import lombok.Getter;
 
+import java.util.Map;
+
 @Getter
 public class RestEntry {
     public static final String MISSING = "missing";
@@ -21,6 +23,7 @@ public class RestEntry {
     private final String pageableFieldName;
     private final boolean pageable;
     private final boolean spaceAware;
+    private final Map<String, String> extraHeaders;
 
     public RestEntry(String name, String subdir, String extension, boolean retry, String url, boolean showErrors) {
         this(name, subdir, extension, retry, url, showErrors, null, false);
@@ -36,6 +39,20 @@ public class RestEntry {
         String pageableFieldName,
         boolean spaceAware
     ) {
+        this(name, subdir, extension, retry, url, showErrors, pageableFieldName, spaceAware, null);
+    }
+
+    public RestEntry(
+        String name,
+        String subdir,
+        String extension,
+        boolean retry,
+        String url,
+        boolean showErrors,
+        String pageableFieldName,
+        boolean spaceAware,
+        Map<String, String> extraHeaders
+    ) {
         this.name = name;
         this.subdir = subdir;
         this.extension = extension;
@@ -45,9 +62,10 @@ public class RestEntry {
         this.pageableFieldName = pageableFieldName;
         this.pageable = pageableFieldName != null;
         this.spaceAware = spaceAware;
+        this.extraHeaders = extraHeaders == null ? Map.of() : Map.copyOf(extraHeaders);
     }
 
     public RestEntry copyWithNewUrl(String url, String subdir) {
-        return new RestEntry(name, subdir, extension, retry, url, showErrors, pageableFieldName, spaceAware);
+        return new RestEntry(name, subdir, extension, retry, url, showErrors, pageableFieldName, spaceAware, extraHeaders);
     }
 }
