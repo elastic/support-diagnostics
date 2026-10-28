@@ -13,9 +13,9 @@ import co.elastic.support.diagnostics.chain.DiagnosticContext;
 import co.elastic.support.rest.RestClient;
 import co.elastic.support.rest.RestResult;
 import co.elastic.support.util.SystemUtils;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
@@ -106,7 +106,7 @@ public class GenerateLogstashDiagnostics implements Command {
         }
     }
 
-    private Map<String, Object> getNodeInfo(final RestClient client) throws DiagnosticException, JsonProcessingException {
+    private Map<String, Object> getNodeInfo(final RestClient client) throws DiagnosticException {
         final RestResult response = client.execQuery("/_node?graph=true");
         if (!response.isValid()) {
             throw new DiagnosticException(response.formatStatusMessage("Could not retrieve the Logstash node information - unable to continue."));
@@ -115,13 +115,13 @@ public class GenerateLogstashDiagnostics implements Command {
         try {
             return MAPPER.readValue(response.toString(), new TypeReference<Map<String, Object>>() {
             });
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             logger.error("Error retrieving the Logstash node information.", e);
             throw e;
         }
     }
 
-    private Map<String, Object> getNodeStats(final RestClient client) throws DiagnosticException, JsonProcessingException {
+    private Map<String, Object> getNodeStats(final RestClient client) throws DiagnosticException {
         final RestResult response = client.execQuery("/_node/stats?vertices=true");
         if (!response.isValid()) {
             throw new DiagnosticException(response.formatStatusMessage("Could not retrieve the Logstash node stats - unable to continue."));
@@ -130,7 +130,7 @@ public class GenerateLogstashDiagnostics implements Command {
         try {
             return MAPPER.readValue(response.toString(), new TypeReference<Map<String, Object>>() {
             });
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             logger.error("Error retrieving the Logstash node stats.", e);
             throw e;
         }

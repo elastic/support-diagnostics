@@ -9,7 +9,7 @@ package co.elastic.support.scrub;
 import co.elastic.support.Constants;
 import co.elastic.support.diagnostics.DiagnosticException;
 import co.elastic.support.util.JsonYamlUtils;
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -87,7 +87,7 @@ public class ScrubProcessor {
 
         if (autoScrub.contains("nodeId") || autoScrub.contains("nodeName")) {
             JsonNode nodeEntries = nodesInfo.path("nodes");
-            Iterator<Map.Entry<String, JsonNode>> iterNode = nodeEntries.fields();
+            Iterator<Map.Entry<String, JsonNode>> iterNode = nodeEntries.properties().iterator();
             while (iterNode.hasNext()) {
                 Map.Entry<String, JsonNode> n = iterNode.next();
                 if (autoScrub.contains("nodeId")) {
