@@ -10,8 +10,9 @@ import co.elastic.support.Constants;
 import co.elastic.support.diagnostics.chain.Command;
 import co.elastic.support.diagnostics.chain.DiagnosticContext;
 import co.elastic.support.util.SystemProperties;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.SerializationFeature;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -30,8 +31,7 @@ public class GenerateManifest implements Command {
       logger.info(Constants.CONSOLE, "Writing legacy [manifest.json].");
 
       try {
-         ObjectMapper mapper = new ObjectMapper();
-         mapper.enable(SerializationFeature.INDENT_OUTPUT);
+         ObjectMapper mapper = JsonMapper.builder().enable(SerializationFeature.INDENT_OUTPUT).build();
 
          Map<String, Object> manifest = new HashMap<>();
 

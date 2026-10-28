@@ -10,7 +10,7 @@ import co.elastic.support.Constants;
 import co.elastic.support.rest.RestClient;
 import co.elastic.support.rest.RestResult;
 import co.elastic.support.util.JsonYamlUtils;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.node.ObjectNode;
 import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -117,7 +117,7 @@ public class MonitoringImportProcessor {
 
                     String altClusterName = sourceObject.path("cluster_settings").path("cluster").path("metadata").path("display_name").asText();
                     if (updateClusterName && StringUtils.isNotEmpty(altClusterName)) {
-                        sourceObject.with("cluster_settings").with("cluster").with("metadata").put("display_name", newClusterName);
+                        sourceObject.withObjectProperty("cluster_settings").withObjectProperty("cluster").withObjectProperty("metadata").put("display_name", newClusterName);
                     }
 
                     String sourceLine = JsonYamlUtils.mapper.writeValueAsString(sourceObject);

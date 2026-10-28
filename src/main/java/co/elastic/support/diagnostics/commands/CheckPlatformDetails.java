@@ -21,8 +21,8 @@ import co.elastic.support.diagnostics.chain.DiagnosticContext;
 import co.elastic.support.rest.RestClient;
 import co.elastic.support.rest.RestEntry;
 import co.elastic.support.util.SystemUtils;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ArrayNode;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -219,7 +219,7 @@ public class CheckPlatformDetails implements Command {
 
         try {
             JsonNode nodes = nodesInfo.path("nodes");
-            Iterator<Map.Entry<String, JsonNode>> iterNode = nodes.fields();
+            Iterator<Map.Entry<String, JsonNode>> iterNode = nodes.properties().iterator();
 
             while (iterNode.hasNext()) {
                 Map.Entry<String, JsonNode> n = iterNode.next();

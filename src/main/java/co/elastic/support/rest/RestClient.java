@@ -70,24 +70,44 @@ public class RestClient implements Closeable {
     }
 
     public RestResult execQuery(String url) {
-        return new RestResult(execGet(url), url);
+        return execQuery(url, Map.of());
+    }
+
+    public RestResult execQuery(String url, Map<String, String> requestHeaders) {
+        return new RestResult(execGet(url, requestHeaders), url);
     }
 
     public RestResult execQuery(String url, String fileName) {
-        return new RestResult(execGet(url), fileName, url);
+        return execQuery(url, fileName, Map.of());
+    }
+
+    public RestResult execQuery(String url, String fileName, Map<String, String> requestHeaders) {
+        return new RestResult(execGet(url, requestHeaders), fileName, url);
     }
 
     public HttpResponse execGet(String query) {
+        return execGet(query, Map.of());
+    }
+
+    public HttpResponse execGet(String query, Map<String, String> requestHeaders) {
         HttpGet httpGet = new HttpGet(query);
         logger.debug(query);
-        return execRequest(httpGet);
+        return execRequest(httpGet, requestHeaders);
     }
 
     private HttpResponse execRequest(HttpRequestBase httpRequest) {
+        return execRequest(httpRequest, Map.of());
+    }
+
+    private HttpResponse execRequest(HttpRequestBase httpRequest, Map<String, String> requestHeaders) {
         if (extraHeaders != null) {
             for (Map.Entry<String, String> entry : extraHeaders.entrySet()) {
                 httpRequest.addHeader(entry.getKey(), entry.getValue());
             }
+        }
+        // per-request headers take precedence over client-level headers
+        for (Map.Entry<String, String> entry : requestHeaders.entrySet()) {
+            httpRequest.setHeader(entry.getKey(), entry.getValue());
         }
         try {
             return client.execute(httpHost, httpRequest, httpContext);
