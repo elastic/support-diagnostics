@@ -13,6 +13,7 @@ import org.semver4j.Semver;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class RestEntryConfig {
 
@@ -74,7 +75,7 @@ public class RestEntryConfig {
             if (semver.satisfies(urlVersion.getKey())) {
                 if (urlVersion.getValue() instanceof String) {
                     return new RestEntry(name, subdir, extension, retry, (String) urlVersion.getValue(), showErrors);
-                    // We allow it to be String,String or String,Map(url,paginate,spaceaware)
+                    // We allow it to be String,String or String,Map(url,paginate,spaceaware,extra-headers)
                 } else if (urlVersion.getValue() instanceof Map) {
                     Map<String, Object> info = (Map<String, Object>) urlVersion.getValue();
 
@@ -87,7 +88,15 @@ public class RestEntryConfig {
                     String pageableFieldName = (String) ObjectUtils.getIfNull(info.get("paginate"), null);
                     boolean spaceAware = (boolean) ObjectUtils.getIfNull(info.get("spaceaware"), false);
 
-                    return new RestEntry(name, subdir, extension, retry, url, showErrors, pageableFieldName, spaceAware);
+                    Map<String, String> extraHeaders = Map.of();
+
+                    if (info.get("extra-headers") instanceof Map<?, ?> headers) {
+                        // YAML may parse unquoted values (e.g. 1) as numbers
+                        extraHeaders = headers.entrySet().stream()
+                            .collect(Collectors.toUnmodifiableMap(e -> String.valueOf(e.getKey()), e -> String.valueOf(e.getValue())));
+                    }
+
+                    return new RestEntry(name, subdir, extension, retry, url, showErrors, pageableFieldName, spaceAware, extraHeaders);
                 }
             }
         }
