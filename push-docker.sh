@@ -1,41 +1,39 @@
 #!/bin/bash
-
 #
 # Pushes Support Diagnostic images to hosted Docker.
 #
-# 1) Pushes the image tagged `latest` (which should have been built via
-# `$ docker compose build`).
-# 2) If a version was passed in:
-# 2a) Add that version as a tag to latest.
-# 2b) Push that newly tagged version to hosted Docker.
+# Same way as Elasticsearch: build linux/amd64 and linux/arm64 and
+# combine them with a Docker manifest (buildx --platform + --push).
+# https://github.com/elastic/elasticsearch/blob/main/distribution/docker/README.md
+# (section "Multi-architecture images").
 #
-# Example usages:
-# 1) Push latest
-# $ ./push-docker.sh
-# 2) Push latest and also tag as 9.1.1
-# $ ./push-docker.sh 9.1.1
+# Also tags :latest on that same manifest (ES unified release does the
+# combine; we retag latest here because this script is the release path).
+#
+# Usage:
+#   ./push-docker.sh           # version from gradle.properties
+#   ./push-docker.sh 9.4.2
 #
 
 IMAGE="docker.elastic.co/support/diagnostics"
 
 echo "$IMAGE"
 
-echo "Pushing latest"
-
-# NOTE: The pattern with ( set -x ; command ) makes it so that the command runs
-# in a sub-shell where the command is echo'd to the screen when run. We don't
-# want that mode permanently because the echo lines will duplicate in the console.
-( set -x ; docker push "$IMAGE:latest" )
-
-# If there is a version parameter passed in
 if [[ $# -eq 1 ]]; then
   VERSION=${1}
-
-  echo "Tagging version $VERSION"
-  ( set -x ; docker tag "$IMAGE:latest" "$IMAGE:$VERSION" )
-
-  echo "Pushing version $VERSION"
-  ( set -x ; docker push "$IMAGE:$VERSION" )
+else
+  VERSION=$(grep '^version=' gradle.properties | cut -d'=' -f2)
 fi
+
+echo "Pushing $VERSION and latest (linux/amd64,linux/arm64)"
+
+docker buildx create --use --name multiarch-builder --driver docker-container \
+  || docker buildx use multiarch-builder
+
+( set -x ; docker buildx build --platform linux/amd64,linux/arm64 --push \
+  -f Dockerfile \
+  -t "$IMAGE:$VERSION" \
+  -t "$IMAGE:latest" \
+  . )
 
 echo "All done!"
