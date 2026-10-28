@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.absent;
 import static com.github.tomakehurst.wiremock.client.WireMock.containing;
 import static com.github.tomakehurst.wiremock.client.WireMock.delete;
 import static com.github.tomakehurst.wiremock.client.WireMock.deleteRequestedFor;
@@ -191,6 +192,49 @@ class RestClientTest {
         }
 
         wm.verify(getRequestedFor(urlEqualTo("/_cat/health")).withHeader("X-Custom-Header", equalTo("custom-value")));
+    }
+
+    @Test
+    void execQuery_withRequestHeaders_sendsThemOnlyForThatRequest() {
+        wm.stubFor(get(urlEqualTo("/with")).willReturn(aResponse().withStatus(200).withBody("")));
+        wm.stubFor(get(urlEqualTo("/without")).willReturn(aResponse().withStatus(200).withBody("")));
+
+        restClient.execQuery("/with", Map.of("elastic-api-version", "1"));
+        restClient.execQuery("/without");
+
+        wm.verify(getRequestedFor(urlEqualTo("/with")).withHeader("elastic-api-version", equalTo("1")));
+        wm.verify(getRequestedFor(urlEqualTo("/without")).withHeader("elastic-api-version", absent()));
+    }
+
+    @Test
+    void execGet_requestHeaderOverridesClientHeader() {
+        wm.stubFor(get(urlEqualTo("/_cat/health")).willReturn(aResponse().withStatus(200).withBody("")));
+
+        try (
+            RestClient clientWithHeaders = RestClient.getClient(
+                "localhost",
+                wm.getPort(),
+                "http",
+                null,
+                null,
+                null,
+                0,
+                null,
+                null,
+                null,
+                null,
+                false,
+                Map.of("X-Custom-Header", "client"),
+                5000,
+                5000,
+                5000
+            )
+        ) {
+            HttpClientUtils.closeQuietly(clientWithHeaders.execGet("/_cat/health", Map.of("X-Custom-Header", "request")));
+        }
+
+        wm.verify(1, getRequestedFor(urlEqualTo("/_cat/health")).withHeader("X-Custom-Header", equalTo("request")));
+        wm.verify(0, getRequestedFor(urlEqualTo("/_cat/health")).withHeader("X-Custom-Header", equalTo("client")));
     }
 
     @Test

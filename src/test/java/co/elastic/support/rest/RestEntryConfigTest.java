@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -70,5 +71,37 @@ class RestEntryConfigTest {
 
         assertTrue(fullEntries.size() >= lightEntries.size(),
                 "Full mode should have >= entries compared to light mode");
+    }
+
+    @Test
+    void buildEntryMap_extraHeaders_areParsedAndStringified() {
+        Map<String, Object> config = Map.of(
+            "with_headers", Map.of("versions", Map.of(">= 8.0.0", Map.of("url", "/a", "extra-headers", Map.of("elastic-api-version", 1)))),
+            "no_headers", Map.of("versions", Map.of(">= 8.0.0", Map.of("url", "/b"))),
+            "plain", Map.of("versions", Map.of(">= 8.0.0", "/c"))
+        );
+        Map<String, RestEntry> entries = new RestEntryConfig("9.3.0").buildEntryMap(config);
+
+        assertEquals(Map.of("elastic-api-version", "1"), entries.get("with_headers").getExtraHeaders());
+        assertTrue(entries.get("no_headers").getExtraHeaders().isEmpty());
+        assertTrue(entries.get("plain").getExtraHeaders().isEmpty());
+    }
+
+    @Test
+    void buildEntryMap_kibana_prebuiltStatusHasApiVersionHeader() throws DiagnosticException {
+        Map<String, Object> raw = load(Constants.KIBANA_REST);
+        Map<String, RestEntry> entries = new RestEntryConfig("9.3.0").buildEntryMap(raw);
+
+        assertEquals(
+            Map.of("elastic-api-version", "1"),
+            entries.get("kibana_detection_engine_rules_prebuilt_status").getExtraHeaders()
+        );
+    }
+
+    @Test
+    void copyWithNewUrl_preservesExtraHeaders() {
+        RestEntry entry = new RestEntry("n", "", ".json", false, "/a", true, null, true, Map.of("h", "v"));
+
+        assertEquals(Map.of("h", "v"), entry.copyWithNewUrl("/s/x/a", "space_x").getExtraHeaders());
     }
 }

@@ -160,7 +160,7 @@ public class RunKibanaQueries extends BaseQuery {
         String url = getPageUrl(action, 1, 1, perPageField);
 
         // get the values needed to the pagination.
-        RestResult res = client.execQuery(url);
+        RestResult res = client.execQuery(url, action.getExtraHeaders());
 
         int totalPages = 0;
 
@@ -195,7 +195,10 @@ public class RunKibanaQueries extends BaseQuery {
             action.getExtension(),
             false,
             getPageUrl(action, page, perPage, perPageField),
-            false
+            false,
+            null,
+            false,
+            action.getExtraHeaders()
         );
     }
 
