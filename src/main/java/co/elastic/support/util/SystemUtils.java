@@ -73,13 +73,10 @@ public class SystemUtils {
         BufferedReader stdError = null;
 
         try {
-            Process p = Runtime.getRuntime().exec("hostname");
+            Process p = new ProcessBuilder("hostname").start();
 
-            stdInput = new BufferedReader(new
-                    InputStreamReader(p.getInputStream()));
-
-            stdError = new BufferedReader(new
-                    InputStreamReader(p.getErrorStream()));
+            stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            stdError = new BufferedReader(new InputStreamReader(p.getErrorStream()));
 
             s = stdInput.readLine();
 

@@ -50,9 +50,9 @@ public class RunLogstashQueries extends BaseQuery {
             context.targetNode = nodeProfile;
 
             JsonNode nodeData = JsonYamlUtils.createJsonNodeFromFileName(context.tempDir, "logstash_node.json");
-            nodeProfile.pid = nodeData.path("jvm").path("pid").asText();
+            nodeProfile.pid = nodeData.path("jvm").path("pid").asString();
 
-            nodeProfile.os = SystemUtils.parseOperatingSystemName(nodeData.path("os").path("name").asText());
+            nodeProfile.os = SystemUtils.parseOperatingSystemName(nodeData.path("os").path("name").asString());
             nodeProfile.javaPlatform = new JavaPlatform(nodeProfile.os);
             if (StringUtils.isEmpty(nodeProfile.pid) || nodeProfile.pid.equals("1")) {
                 context.dockerPresent = true;

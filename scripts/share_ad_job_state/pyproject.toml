@@ -11,7 +11,7 @@ python = "^3.12"
 elasticsearch = "^9.0.0"
 loguru = "^0.7.2"
 tqdm = "^4.66.5"
-urllib3 = "2.7.0"
+urllib3 = "2.8.0"
 idna = "3.20"
 
 [tool.poetry.group.dev.dependencies]

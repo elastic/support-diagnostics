@@ -9,16 +9,15 @@ package co.elastic.support.scrub;
 import co.elastic.support.Constants;
 import co.elastic.support.diagnostics.DiagnosticException;
 import co.elastic.support.util.JsonYamlUtils;
-import tools.jackson.databind.JsonNode;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import tools.jackson.databind.JsonNode;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -54,22 +53,23 @@ public class ScrubProcessor {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public ScrubProcessor() throws DiagnosticException {
         scrubConfig = JsonYamlUtils.readYamlFromClasspath("scrub.yml", false);
 
-        Collection auto = (Collection) scrubConfig.get("auto-scrub");
+        Collection<String> auto = (Collection<String>) scrubConfig.get("auto-scrub");
         if (auto != null) {
             autoScrub.addAll(auto);
         } else {
             logger.info(Constants.CONSOLE, "All autoscrub tokens disabled. Bypassing autoscrub processing");
         }
 
-        Collection<String> removeTokens = (Collection) scrubConfig.get("remove");
+        Collection<String> removeTokens = (Collection<String>) scrubConfig.get("remove");
         if (removeTokens != null) {
             remove.addAll(removeTokens);
         }
 
-        Collection<String> exclude = (Collection) scrubConfig.get("global-exclude");
+        Collection<String> exclude = (Collection<String>) scrubConfig.get("global-exclude");
         if (exclude != null) {
             globalExclude.addAll(exclude);
         }
@@ -81,21 +81,19 @@ public class ScrubProcessor {
     private void initAutoScrub(String nodes) {
         JsonNode nodesInfo = JsonYamlUtils.createJsonNodeFromString(nodes);
         if (autoScrub.contains("clusterName")) {
-            String clusterName = nodesInfo.path("cluster_name").asText();
+            String clusterName = nodesInfo.path("cluster_name").asString();
             clusterInfoCache.put(clusterName, generateToken(clusterName));
         }
 
         if (autoScrub.contains("nodeId") || autoScrub.contains("nodeName")) {
             JsonNode nodeEntries = nodesInfo.path("nodes");
-            Iterator<Map.Entry<String, JsonNode>> iterNode = nodeEntries.properties().iterator();
-            while (iterNode.hasNext()) {
-                Map.Entry<String, JsonNode> n = iterNode.next();
+            for (Map.Entry<String, JsonNode> n : nodeEntries.properties()) {
                 if (autoScrub.contains("nodeId")) {
                     clusterInfoCache.put(n.getKey(), generateToken(n.getKey()));
                 }
                 if (autoScrub.contains("nodeName")) {
                     JsonNode node = n.getValue();
-                    String nodeName = node.path("name").asText();
+                    String nodeName = node.path("name").asString();
                     clusterInfoCache.put(nodeName, generateToken(nodeName));
                 }
             }
@@ -112,8 +110,8 @@ public class ScrubProcessor {
 
         for (Map<String, Object> t : configTokens) {
             String tkn = (String) t.get("token");
-            List<String> inc = (List<String>) ObjectUtils.defaultIfNull(t.get("include"), new ArrayList<String>());
-            List<String> exc = (List<String>) ObjectUtils.defaultIfNull(t.get("exclude"), new ArrayList<String>());
+            List<String> inc = (List<String>) ObjectUtils.getIfNull(t.get("include"), List::of);
+            List<String> exc = (List<String>) ObjectUtils.getIfNull(t.get("exclude"), List::of);
             tokens.add(new ScrubTokenEntry(tkn, inc, exc));
         }
         if (tokens.isEmpty()) {

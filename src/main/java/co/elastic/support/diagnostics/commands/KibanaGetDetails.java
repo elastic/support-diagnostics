@@ -47,7 +47,7 @@ public class KibanaGetDetails extends CheckPlatformDetails {
         try {
             final JsonNode infoProcess = getStats(context);
 
-            context.clusterName = infoProcess.path("kibana").path("name").asText();
+            context.clusterName = infoProcess.path("kibana").path("name").asString();
 
             List<ProcessProfile> profiles = getNodeNetworkAndLogInfo(infoProcess);
 
@@ -156,20 +156,20 @@ public class KibanaGetDetails extends CheckPlatformDetails {
 
         try {
             ProcessProfile diagNode = new ProcessProfile();
-            diagNode.name = processInfo.path("kibana").path("name").asText();
-            diagNode.pid = processInfo.path("process").path("pid").asText();
+            diagNode.name = processInfo.path("kibana").path("name").asString();
+            diagNode.pid = processInfo.path("process").path("pid").asString();
 
             if (diagNode.pid.equals("1")) {
                 diagNode.isDocker = true;
             }
 
-            diagNode.networkHost = processInfo.path("kibana").path("host").asText();
-            diagNode.host = processInfo.path("kibana").path("host").asText();
+            diagNode.networkHost = processInfo.path("kibana").path("host").asString();
+            diagNode.host = processInfo.path("kibana").path("host").asString();
 
-            String nodeOs = processInfo.path("os").path("platform").asText().toLowerCase();
+            String nodeOs = processInfo.path("os").path("platform").asString().toLowerCase();
             diagNode.os = SystemUtils.parseOperatingSystemName(nodeOs);
 
-            String httpPublishAddr = processInfo.path("kibana").path("transport_address").asText();
+            String httpPublishAddr = processInfo.path("kibana").path("transport_address").asString();
             // IPv6 hosts such as "::" contain colons, so the port follows the last one
             int portSeparator = httpPublishAddr.lastIndexOf(":");
             diagNode.httpPublishAddr = httpPublishAddr.substring(0, portSeparator);

@@ -7,11 +7,10 @@
 package co.elastic.support.scrub;
 
 import co.elastic.support.BaseInputs;
-import co.elastic.support.util.ResourceCache;
+import co.elastic.support.Constants;
 import co.elastic.support.util.SystemProperties;
 import co.elastic.support.util.TextIOManager;
 import com.beust.jcommander.Parameter;
-import co.elastic.support.Constants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,6 +18,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.File;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 public class ScrubInputs extends BaseInputs {
 
@@ -76,10 +76,7 @@ public class ScrubInputs extends BaseInputs {
     public List<String> parseInputs(TextIOManager textIOManager, String[] args) {
         List<String> errors = super.parseInputs(textIOManager, args);
 
-        List valid = validateScrubInput(scrub);
-        if (valid != null) {
-            errors.addAll(valid);
-        }
+        Optional.ofNullable(validateScrubInput(scrub)).ifPresent(errors::addAll);
 
         return errors;
     }

@@ -95,7 +95,7 @@ public  class CollectLogs implements Command {
     protected List<String> extractFilesFromList(String output, List<String> fileList, int entries) {
 
         // Just in case, since NPE"s are a drag
-        output = ObjectUtils.defaultIfNull(output, "");
+        output = ObjectUtils.getIfNull(output, () -> "");
 
         // If there's content add it to the file list
         if (StringUtils.isNotEmpty(output.trim())) {

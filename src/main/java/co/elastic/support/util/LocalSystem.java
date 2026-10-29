@@ -20,7 +20,7 @@ import java.util.List;
 public class LocalSystem extends SystemCommand {
 
     Logger logger = LogManager.getLogger(LocalSystem.class);
-    private ProcessBuilder pb;
+    private final ProcessBuilder pb;
     private static final String[] wincCmds = {"cmd", "/c"};
     private static final String[] nixcCdms = {"/bin/sh", "-c"};
 
@@ -45,11 +45,10 @@ public class LocalSystem extends SystemCommand {
     }
 
     public String runCommand(String cmd) {
-
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
 
         try {
-            List current = pb.command();
+            List<String> current = pb.command();
             if (current.size() == 2) {
                 current.add(cmd);
             } else {
@@ -62,7 +61,7 @@ public class LocalSystem extends SystemCommand {
                     new BufferedReader(new InputStreamReader(pr.getInputStream()));
             String line;
             while ((line = reader.readLine()) != null) {
-                sb.append(line + SystemProperties.lineSeparator);
+                sb.append(line).append(SystemProperties.lineSeparator);
             }
             pr.waitFor();
 
