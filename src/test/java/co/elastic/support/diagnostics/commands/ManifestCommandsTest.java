@@ -37,7 +37,7 @@ class ManifestCommandsTest {
         String raw = Files.readString(dir.resolve("manifest.json"));
         assertTrue(raw.contains("\n"), "INDENT_OUTPUT should pretty-print");
         JsonNode json = JsonYamlUtils.createJsonNodeFromString(raw);
-        assertEquals("test-runner", json.path("runner").asText());
+        assertEquals("test-runner", json.path("runner").asString());
         assertTrue(json.has("collectionDate"));
     }
 
@@ -48,9 +48,9 @@ class ManifestCommandsTest {
         String raw = Files.readString(dir.resolve("diagnostic_manifest.json"));
         assertTrue(raw.contains("\n"), "INDENT_OUTPUT should pretty-print");
         JsonNode json = JsonYamlUtils.createJsonNodeFromString(raw);
-        assertEquals("kibana", json.path("product").asText());
-        assertEquals("kibana_diagnostic", json.path("type").asText());
-        assertEquals("9.9.9", json.path("diagnostic").asText());
-        assertEquals("test-runner", json.path("runner").asText());
+        assertEquals("kibana", json.path("product").asString());
+        assertEquals("kibana_diagnostic", json.path("type").asString());
+        assertEquals("9.9.9", json.path("diagnostic").asString());
+        assertEquals("test-runner", json.path("runner").asString());
     }
 }

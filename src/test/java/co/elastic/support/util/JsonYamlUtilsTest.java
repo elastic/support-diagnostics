@@ -35,8 +35,8 @@ class JsonYamlUtilsTest {
         JsonNode node = JsonYamlUtils.createJsonNodeFromString("{\"a\":{\"b\":\"c\"},\"n\":5,\"arr\":[1,2]}");
 
         assertTrue(node.isObject());
-        assertEquals("c", node.path("a").path("b").asText());
-        assertEquals("5", node.path("n").asText());
+        assertEquals("c", node.path("a").path("b").asString());
+        assertEquals("5", node.path("n").asString());
         assertTrue(node.path("arr").isArray());
         assertEquals(2, node.path("arr").size());
     }
@@ -52,7 +52,7 @@ class JsonYamlUtilsTest {
 
         JsonNode node = JsonYamlUtils.createJsonNodeFromFileName(dir.toString(), "x.json");
 
-        assertEquals("prod", node.path("cluster_name").asText());
+        assertEquals("prod", node.path("cluster_name").asString());
     }
 
     @Test
@@ -62,20 +62,20 @@ class JsonYamlUtilsTest {
     }
 
     @Test
-    void path_onMissingField_asTextIsEmpty() {
+    void path_onMissingField_asStringIsEmpty() {
         JsonNode node = JsonYamlUtils.createJsonNodeFromString("{\"a\":1}");
 
         assertTrue(node.path("nope").path("deeper").isMissingNode());
-        assertEquals("", node.path("nope").path("deeper").asText());
+        assertEquals("", node.path("nope").path("deeper").asString());
     }
 
     @Test
-    void asText_onExplicitNull_isNotNullReference() {
+    void asString_onExplicitNull_isNotNullReference() {
         JsonNode node = JsonYamlUtils.createJsonNodeFromString("{\"a\":null}");
 
         assertTrue(node.path("a").isNull());
         // Callers pass this through StringUtils / equals, so it must never be a Java null
-        assertEquals(false, node.path("a").asText() == null);
+        assertEquals(false, node.path("a").asString() == null);
     }
 
     @Test
@@ -100,8 +100,8 @@ class JsonYamlUtilsTest {
 
         String json = JsonYamlUtils.mapper.writeValueAsString(source);
         JsonNode reparsed = JsonYamlUtils.createJsonNodeFromString(json);
-        assertEquals("new", reparsed.path("cluster_name").asText());
-        assertEquals("new", reparsed.path("cluster_settings").path("cluster").path("metadata").path("display_name").asText());
+        assertEquals("new", reparsed.path("cluster_name").asString());
+        assertEquals("new", reparsed.path("cluster_settings").path("cluster").path("metadata").path("display_name").asString());
         assertFalse(json.contains("\n"), "default mapper output is compact (one line per document for bulk ingest)");
     }
 
@@ -111,7 +111,7 @@ class JsonYamlUtilsTest {
 
         root.withObjectProperty("a").withObjectProperty("b").put("c", "d");
 
-        assertEquals("d", root.path("a").path("b").path("c").asText());
+        assertEquals("d", root.path("a").path("b").path("c").asString());
     }
 
     @Test

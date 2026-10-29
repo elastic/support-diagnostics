@@ -7,8 +7,8 @@
 package co.elastic.support;
 
 import co.elastic.support.diagnostics.DiagnosticException;
-import co.elastic.support.util.SystemProperties;
 import co.elastic.support.util.ArchiveUtils;
+import co.elastic.support.util.SystemProperties;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.Appender;
@@ -40,15 +40,15 @@ public abstract class BaseService {
     protected void createFileAppender(String logDir, String logFile) {
         Appender diagAppender = FileAppender.newBuilder()
                 .setConfiguration(logConfig)
-                .withFileName(logDir + SystemProperties.fileSeparator + logFile)
-                .withAppend(false)
-                .withLocking(false)
+                .setFileName(logDir + SystemProperties.fileSeparator + logFile)
+                .setAppend(false)
+                .setLocking(false)
                 .setName("packaged")
                 .setIgnoreExceptions(false)
                 .setLayout(
                         PatternLayout.newBuilder()
-                                .withConfiguration(logConfig)
-                                .withPattern("%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n")
+                                .setConfiguration(logConfig)
+                                .setPattern("%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n")
                                 .build())
                 .build();
 

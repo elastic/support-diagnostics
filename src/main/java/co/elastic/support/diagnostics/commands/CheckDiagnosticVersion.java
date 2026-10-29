@@ -77,7 +77,7 @@ public class CheckDiagnosticVersion implements Command {
                     context.diagsConfig.diagLatestRelease), context.diagsConfig.diagLatestRelease);
             JsonNode rootNode = JsonYamlUtils.createJsonNodeFromString(restResult.toString());
             // newer tags are prefixed with `v`, so remove it
-            String ver = rootNode.path("tag_name").asText().replaceAll("^v", "");
+            String ver = rootNode.path("tag_name").asString().replaceAll("^v", "");
 
             Semver diagVer = new Semver(context.diagVersion);
             String rule = ">= " + ver;
@@ -95,7 +95,7 @@ public class CheckDiagnosticVersion implements Command {
                     attachments = (ArrayNode)asset;
                     asset = attachments.get(0);
                 }
-                String downloadUrl = asset.path("browser_download_url").asText();
+                String downloadUrl = asset.path("browser_download_url").asString();
                 if(StringUtils.isEmpty(downloadUrl)){
                     downloadUrl = context.diagsConfig.diagLatestRelease;
                 }

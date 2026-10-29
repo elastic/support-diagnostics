@@ -7,16 +7,15 @@
 package co.elastic.support.rest;
 
 import co.elastic.support.BaseInputs;
-import co.elastic.support.util.ResourceCache;
+import co.elastic.support.Constants;
 import co.elastic.support.util.SystemProperties;
 import co.elastic.support.util.TextIOManager;
 import com.beust.jcommander.Parameter;
-import co.elastic.support.Constants;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import java.util.Collections;
+
 import java.util.List;
 
 public abstract class ElasticRestClientInputs extends BaseInputs {
@@ -100,44 +99,36 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
     }
 
     @Override
-    public List<String> parseInputs(TextIOManager textIOManager, String args[]){
+    public List<String> parseInputs(TextIOManager textIOManager, String[] args){
         List<String> errors = super.parseInputs(textIOManager, args);
         scheme = isSsl ? "https": "http";
 
-        errors.addAll(ObjectUtils.defaultIfNull(validateHost(host), emptyList));
-        errors.addAll(ObjectUtils.defaultIfNull(validateProxyHost(proxyHost), emptyList));
-        errors.addAll(ObjectUtils.defaultIfNull(textIOManager.validateFile(pkiKeystore), emptyList));
+        errors.addAll(ObjectUtils.getIfNull(validateHost(host), List::of));
+        errors.addAll(ObjectUtils.getIfNull(validateProxyHost(proxyHost), List::of));
+        errors.addAll(ObjectUtils.getIfNull(TextIOManager.validateFile(pkiKeystore), List::of));
         if(StringUtils.isNotEmpty(pkiKeystore)){
-            errors.addAll(ObjectUtils.defaultIfNull(validateAuthType(pkiLoginAuth), emptyList));
+            errors.addAll(ObjectUtils.getIfNull(validateAuthType(pkiLoginAuth), List::of));
         }
-        errors.addAll(ObjectUtils.defaultIfNull(validatePort(port), emptyList));
-        errors.addAll(ObjectUtils.defaultIfNull(validatePort(proxyPort), emptyList));
+        errors.addAll(ObjectUtils.getIfNull(validatePort(port), List::of));
+        errors.addAll(ObjectUtils.getIfNull(validatePort(proxyPort), List::of));
 
         // If we got this far, get the passwords.
-        if(isPassword){
-            password = textIOManager.standardPasswordReader
-                    .read(passwordDescription);
+        if (isPassword) {
+            password = textIOManager.standardPasswordReader.read(passwordDescription);
         }
 
-        if(StringUtils.isNotEmpty(pkiKeystore)){
-            if(isPkiPass){
-                pkiKeystorePass = textIOManager.standardPasswordReader
-                        .read(pkiKeystorePasswordDescription);
-            }
+        if (StringUtils.isNotEmpty(pkiKeystore) && isPkiPass) {
+            pkiKeystorePass = textIOManager.standardPasswordReader.read(pkiKeystorePasswordDescription);
         }
 
-        if(StringUtils.isNotEmpty(proxyUser)){
-            if(isProxyPass){
-                proxyPassword = textIOManager.standardPasswordReader
-                        .read(proxyPasswordDescription);
-            }
+        if (StringUtils.isNotEmpty(proxyUser) && isProxyPass) {
+            proxyPassword = textIOManager.standardPasswordReader.read(proxyPasswordDescription);
         }
 
         return errors;
     }
 
     protected void runHttpInteractive(TextIOManager textIOManager){
-
         if(runningInDocker){
             host = textIOManager.textIO.newStringInputReader()
                     .withMinLength(1)
@@ -230,15 +221,15 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
     public List<String> validateHost(String hostString) {
 
         if(StringUtils.isEmpty(hostString)){
-            return Collections.singletonList("Host is required.");
+            return List.of("Host is required.");
         }
 
         if(runningInDocker && Constants.localAddressList.contains(host)){
-            return Collections.singletonList("Local addresses are not permitted when running in a Docker container. Please use an assigned host name or IP address.");
+            return List.of("Local addresses are not permitted when running in a Docker container. Please use an assigned host name or IP address.");
         }
 
         if (hostString.toLowerCase().matches("((http|https?)://)?.*:(\\d{4,5})")) {
-            return Collections.singletonList("Should only contain a host name or IP Address, not a full URL");
+            return List.of("Should only contain a host name or IP Address, not a full URL");
         }
         return null;
     }
@@ -247,7 +238,7 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
 
         if(StringUtils.isNotEmpty(hostString)){
             if (hostString.toLowerCase().matches("(://)?.*:(\\d{4,5})")) {
-                return Collections.singletonList("Enter port separately");
+                return List.of("Enter port separately");
             }
         }
 
@@ -256,7 +247,7 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
 
     public List<String> validateAuthType(String val){
         if( val.equals(pkiLoginAuth) && !isSsl){
-            return Collections.singletonList("TLS must be enabled to use PKI Authentication.");
+            return List.of("TLS must be enabled to use PKI Authentication.");
         }
         return null;
     }
