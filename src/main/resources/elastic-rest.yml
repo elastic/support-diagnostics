@@ -1,5 +1,5 @@
 # The new settings format:
-# At the top level the label descring the query that will also be used as the
+# At the top level the label describing the query that will also be used as the
 #   file name for its output.
 #   Below the query label are the following attributes:
 #     * extension - the file extension to be used for output. Optional, defaults to .json.
