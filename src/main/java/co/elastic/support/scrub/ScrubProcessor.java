@@ -81,7 +81,7 @@ public class ScrubProcessor {
     private void initAutoScrub(String nodes) {
         JsonNode nodesInfo = JsonYamlUtils.createJsonNodeFromString(nodes);
         if (autoScrub.contains("clusterName")) {
-            String clusterName = nodesInfo.path("cluster_name").asText();
+            String clusterName = nodesInfo.path("cluster_name").asString();
             clusterInfoCache.put(clusterName, generateToken(clusterName));
         }
 
@@ -95,7 +95,7 @@ public class ScrubProcessor {
                 }
                 if (autoScrub.contains("nodeName")) {
                     JsonNode node = n.getValue();
-                    String nodeName = node.path("name").asText();
+                    String nodeName = node.path("name").asString();
                     clusterInfoCache.put(nodeName, generateToken(nodeName));
                 }
             }

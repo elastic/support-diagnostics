@@ -102,7 +102,7 @@ public class CheckLogstashVersion implements Command {
         }
         String result = res.toString();
         JsonNode root = JsonYamlUtils.createJsonNodeFromString(result);
-        String version = root.path("version").asText();
+        String version = root.path("version").asString();
 
         logger.info(Constants.CONSOLE, String.format("Logstash Version is :%s", version));
 

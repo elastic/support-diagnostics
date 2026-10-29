@@ -88,7 +88,7 @@ public class CheckElasticsearchVersion implements Command {
         }
         String result = res.toString();
         JsonNode root = JsonYamlUtils.createJsonNodeFromString(result);
-        String version = root.path("version").path("number").asText();
+        String version = root.path("version").path("number").asString();
         // Workaround for the semver issue with pre-release versions
         // https://github.com/semver4j/semver4j/issues/307
         return new Semver(version).withClearedPreRelease();

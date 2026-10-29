@@ -52,7 +52,7 @@ public class CheckPlatformDetails implements Command {
                 infoNodes = JsonYamlUtils.createJsonNodeFromString(result.toString());
             }
 
-            context.clusterName = infoNodes.path("cluster_name").asText();
+            context.clusterName = infoNodes.path("cluster_name").asString();
 
             List<ProcessProfile> nodeProfiles = getNodeNetworkAndLogInfo(infoNodes);
 
@@ -81,7 +81,7 @@ public class CheckPlatformDetails implements Command {
              * mod = mod.substring(1, (mod.length() - 1));
              * currentMaster = JsonYamlUtils.createJsonNodeFromString(mod);
              * }
-             * String currentMasterId = currentMaster.path("id").asText();
+             * String currentMasterId = currentMaster.path("id").asString();
              * ProcessProfile masterNode = findMasterNode(currentMasterId, nodeProfiles);
              *
              * // If the master node has an http listener configured then we'll use that for
@@ -228,9 +228,9 @@ public class CheckPlatformDetails implements Command {
                 ProcessProfile diagNode = new ProcessProfile();
 
                 diagNode.id = key;
-                diagNode.name = node.path("name").asText();
-                diagNode.pid = node.path("process").path("id").asText();
-                diagNode.jvmPid = node.path("jvm").path("pid").asText();
+                diagNode.name = node.path("name").asString();
+                diagNode.pid = node.path("process").path("id").asString();
+                diagNode.jvmPid = node.path("jvm").path("pid").asString();
 
                 if (diagNode.pid.equals("1") || diagNode.jvmPid.equals("1")) {
                     diagNode.isDocker = true;
@@ -240,15 +240,15 @@ public class CheckPlatformDetails implements Command {
                 JsonNode path = settings.path("path");
                 JsonNode logs = path.path("logs");
 
-                diagNode.logDir = node.path("settings").path("path").path("logs").asText();
-                diagNode.networkHost = node.path("settings").path("network").path("host").asText();
-                diagNode.host = (node.path("host").asText());
-                diagNode.ip = (node.path("ip").asText());
-                String nodeOs = node.path("os").path("name").asText().toLowerCase();
+                diagNode.logDir = node.path("settings").path("path").path("logs").asString();
+                diagNode.networkHost = node.path("settings").path("network").path("host").asString();
+                diagNode.host = (node.path("host").asString());
+                diagNode.ip = (node.path("ip").asString());
+                String nodeOs = node.path("os").path("name").asString().toLowerCase();
                 diagNode.os = SystemUtils.parseOperatingSystemName(nodeOs);
                 diagNode.javaPlatform = new JavaPlatform(diagNode.os);
 
-                String httpPublishAddr = node.path("http").path("publish_address").asText();
+                String httpPublishAddr = node.path("http").path("publish_address").asString();
                 diagNode.httpPublishAddr = httpPublishAddr.substring(0, httpPublishAddr.indexOf(":"));
                 diagNode.httpPort = Integer.parseInt(httpPublishAddr.substring(httpPublishAddr.indexOf(":") + 1));
 
@@ -259,7 +259,7 @@ public class CheckPlatformDetails implements Command {
                     diagNode.isHttp = true;
                     ArrayNode boundAddresses = (ArrayNode) bnds;
                     for (JsonNode bnd : boundAddresses) {
-                        String addr = bnd.asText();
+                        String addr = bnd.asString();
                         // See if the bound address is a loopback. If so, we don't need it
                         boolean notLoopBack = true;
                         for (String loopback : Constants.localAddressList) {

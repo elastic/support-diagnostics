@@ -102,7 +102,7 @@ public class CheckKibanaVersion implements Command {
         }
         String result = res.toString();
         JsonNode root = JsonYamlUtils.createJsonNodeFromString(result);
-        String version = root.path("kibana").path("version").asText();
+        String version = root.path("kibana").path("version").asString();
 
         logger.info(Constants.CONSOLE, String.format("Kibana Version is :%s", version));
 

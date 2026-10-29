@@ -182,16 +182,16 @@ public class MonitoringExportService extends ElasticRestClientService {
             for (JsonNode hit : hits) {
                 Map<String, String> display = new HashMap<>();
 
-                String clusterUuid = hit.path("_source").path("cluster_uuid").asText();
+                String clusterUuid = hit.path("_source").path("cluster_uuid").asString();
                 if (StringUtils.isEmpty(clusterUuid)) {
-                    clusterUuid = hit.path("fields").path("cluster_uuid").path(0).asText();
+                    clusterUuid = hit.path("fields").path("cluster_uuid").path(0).asString();
                 }
-                String clusterName = hit.path("_source").path("cluster_name").asText();
+                String clusterName = hit.path("_source").path("cluster_name").asString();
                 if (StringUtils.isEmpty(clusterName)) {
-                    clusterName = hit.path("_source").path("elasticsearch").path("cluster").path("name").asText();
+                    clusterName = hit.path("_source").path("elasticsearch").path("cluster").path("name").asString();
                 }
                 String displayName = hit.path("_source").path("cluster_settings").path("cluster").path("metadata")
-                        .path("display_name").asText();
+                        .path("display_name").asString();
                 if (StringUtils.isEmpty(displayName)) {
                     displayName = "none";
                 }
@@ -294,7 +294,7 @@ public class MonitoringExportService extends ElasticRestClientService {
                     processedHits += hitsNode.size();
                     logger.info(Constants.CONSOLE, "{} of {} processed.", processedHits, totalHits);
 
-                    scrollId = resultNode.path("_scroll_id").asText();
+                    scrollId = resultNode.path("_scroll_id").asString();
                     String scrollQuery = SCROLL_ID.replace("{{scrollId}}", scrollId);
                     RestResult scrollResult = new RestResult(client.execPost(monitoringScrollUri, scrollQuery),
                             monitoringScrollUri);

@@ -92,7 +92,7 @@ public class MonitoringImportProcessor {
                 // Pre-fetching to determine source version
                 contents = br.readLine();
                 ObjectNode sourceObject = JsonYamlUtils.mapper.readValue(contents, ObjectNode.class);
-                if (StringUtils.isEmpty(sourceObject.path("type").asText())) {
+                if (StringUtils.isEmpty(sourceObject.path("type").asString())) {
                     indexName = indexName.replace("{{version}}", "8");
                     logger.info(Constants.CONSOLE, "Targeting {} because no type field is found", indexName);
                     inputMeta.put("_index", indexName);
@@ -109,13 +109,13 @@ public class MonitoringImportProcessor {
                 while (contents != null) {
                     // If clustername is present and they changed it, update
                     sourceObject = JsonYamlUtils.mapper.readValue(contents, ObjectNode.class);
-                    String clusterName = sourceObject.path("cluster_name").asText();
+                    String clusterName = sourceObject.path("cluster_name").asString();
 
                     if (updateClusterName && StringUtils.isNotEmpty(clusterName)) {
                         sourceObject.put("cluster_name", newClusterName);
                     }
 
-                    String altClusterName = sourceObject.path("cluster_settings").path("cluster").path("metadata").path("display_name").asText();
+                    String altClusterName = sourceObject.path("cluster_settings").path("cluster").path("metadata").path("display_name").asString();
                     if (updateClusterName && StringUtils.isNotEmpty(altClusterName)) {
                         sourceObject.withObjectProperty("cluster_settings").withObjectProperty("cluster").withObjectProperty("metadata").put("display_name", newClusterName);
                     }
