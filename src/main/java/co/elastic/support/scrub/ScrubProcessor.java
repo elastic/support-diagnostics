@@ -112,8 +112,8 @@ public class ScrubProcessor {
 
         for (Map<String, Object> t : configTokens) {
             String tkn = (String) t.get("token");
-            List<String> inc = (List<String>) ObjectUtils.defaultIfNull(t.get("include"), new ArrayList<String>());
-            List<String> exc = (List<String>) ObjectUtils.defaultIfNull(t.get("exclude"), new ArrayList<String>());
+            List<String> inc = (List<String>) ObjectUtils.getIfNull(t.get("include"), () -> new ArrayList<String>());
+            List<String> exc = (List<String>) ObjectUtils.getIfNull(t.get("exclude"), () -> new ArrayList<String>());
             tokens.add(new ScrubTokenEntry(tkn, inc, exc));
         }
         if (tokens.isEmpty()) {

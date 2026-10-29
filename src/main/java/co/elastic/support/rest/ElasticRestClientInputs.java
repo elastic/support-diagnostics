@@ -104,14 +104,14 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
         List<String> errors = super.parseInputs(textIOManager, args);
         scheme = isSsl ? "https": "http";
 
-        errors.addAll(ObjectUtils.defaultIfNull(validateHost(host), emptyList));
-        errors.addAll(ObjectUtils.defaultIfNull(validateProxyHost(proxyHost), emptyList));
-        errors.addAll(ObjectUtils.defaultIfNull(textIOManager.validateFile(pkiKeystore), emptyList));
+        errors.addAll(ObjectUtils.getIfNull(validateHost(host), () -> emptyList));
+        errors.addAll(ObjectUtils.getIfNull(validateProxyHost(proxyHost), () -> emptyList));
+        errors.addAll(ObjectUtils.getIfNull(textIOManager.validateFile(pkiKeystore), () -> emptyList));
         if(StringUtils.isNotEmpty(pkiKeystore)){
-            errors.addAll(ObjectUtils.defaultIfNull(validateAuthType(pkiLoginAuth), emptyList));
+            errors.addAll(ObjectUtils.getIfNull(validateAuthType(pkiLoginAuth), () -> emptyList));
         }
-        errors.addAll(ObjectUtils.defaultIfNull(validatePort(port), emptyList));
-        errors.addAll(ObjectUtils.defaultIfNull(validatePort(proxyPort), emptyList));
+        errors.addAll(ObjectUtils.getIfNull(validatePort(port), () -> emptyList));
+        errors.addAll(ObjectUtils.getIfNull(validatePort(proxyPort), () -> emptyList));
 
         // If we got this far, get the passwords.
         if(isPassword){

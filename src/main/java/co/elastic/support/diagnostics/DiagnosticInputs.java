@@ -241,13 +241,13 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
     public List<String> parseInputs(TextIOManager textIOManager, String[] args) {
         List<String> errors = super.parseInputs(textIOManager, args);
 
-        errors.addAll(ObjectUtils.defaultIfNull(validateDiagType(diagType), emptyList));
-        errors.addAll(ObjectUtils.defaultIfNull(validateMode(mode), emptyList));
-        errors.addAll(ObjectUtils.defaultIfNull(setDefaultPortForDiagType(diagType), emptyList));
-        errors.addAll(ObjectUtils.defaultIfNull(validateRemoteUser(remoteUser), emptyList));
-        errors.addAll(ObjectUtils.defaultIfNull(validatePort(remotePort), emptyList));
-        errors.addAll(ObjectUtils.defaultIfNull(TextIOManager.validateFile(keyfile), emptyList));
-        errors.addAll(ObjectUtils.defaultIfNull(TextIOManager.validateFile(knownHostsFile), emptyList));
+        errors.addAll(ObjectUtils.getIfNull(validateDiagType(diagType), () -> emptyList));
+        errors.addAll(ObjectUtils.getIfNull(validateMode(mode), () -> emptyList));
+        errors.addAll(ObjectUtils.getIfNull(setDefaultPortForDiagType(diagType), () -> emptyList));
+        errors.addAll(ObjectUtils.getIfNull(validateRemoteUser(remoteUser), () -> emptyList));
+        errors.addAll(ObjectUtils.getIfNull(validatePort(remotePort), () -> emptyList));
+        errors.addAll(ObjectUtils.getIfNull(TextIOManager.validateFile(keyfile), () -> emptyList));
+        errors.addAll(ObjectUtils.getIfNull(TextIOManager.validateFile(knownHostsFile), () -> emptyList));
 
         if (isRemotePass) {
             remotePassword = textIOManager.standardPasswordReader

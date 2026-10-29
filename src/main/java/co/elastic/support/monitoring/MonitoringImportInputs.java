@@ -73,9 +73,9 @@ public class MonitoringImportInputs extends ElasticRestClientInputs {
     public List<String> parseInputs(TextIOManager textIOManager, String[] args){
         List<String> errors = super.parseInputs(textIOManager, args);
 
-        errors.addAll(ObjectUtils.defaultIfNull(validateId(clusterName), emptyList));
-        errors.addAll(ObjectUtils.defaultIfNull(validateId(targetSuffix), emptyList));
-        errors.addAll(ObjectUtils.defaultIfNull(validateRequiredFile(input), emptyList));
+        errors.addAll(ObjectUtils.getIfNull(validateId(clusterName), () -> emptyList));
+        errors.addAll(ObjectUtils.getIfNull(validateId(targetSuffix), () -> emptyList));
+        errors.addAll(ObjectUtils.getIfNull(validateRequiredFile(input), () -> emptyList));
 
         return errors;
     }

@@ -69,7 +69,7 @@ public abstract class BaseInputs {
 
         List<String> errors = new ArrayList<>();
 
-        errors.addAll(ObjectUtils.defaultIfNull(validateDir(outputDir), emptyList));
+        errors.addAll(ObjectUtils.getIfNull(validateDir(outputDir), () -> emptyList));
 
         return errors;
     }

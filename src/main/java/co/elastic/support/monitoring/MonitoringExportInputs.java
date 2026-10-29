@@ -103,9 +103,9 @@ public class MonitoringExportInputs extends ElasticRestClientInputs {
         List<String> errors = super.parseInputs(textIOManager, args);
 
         if (!listClusters) {
-            errors.addAll(ObjectUtils.defaultIfNull(validateCluster(clusterId), emptyList));
-            errors.addAll(ObjectUtils.defaultIfNull(validateInterval(interval), emptyList));
-            errors.addAll(ObjectUtils.defaultIfNull(validateTimeWindow(), emptyList));
+            errors.addAll(ObjectUtils.getIfNull(validateCluster(clusterId), () -> emptyList));
+            errors.addAll(ObjectUtils.getIfNull(validateInterval(interval), () -> emptyList));
+            errors.addAll(ObjectUtils.getIfNull(validateTimeWindow(), () -> emptyList));
         }
 
         return errors;
