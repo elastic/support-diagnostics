@@ -7,9 +7,9 @@
 package co.elastic.support.diagnostics.commands;
 
 import co.elastic.support.diagnostics.ProcessProfile;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import co.elastic.support.util.JsonYamlUtils;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
 
 import java.util.List;
 
@@ -20,7 +20,7 @@ class KibanaGetDetailsTest {
     private final KibanaGetDetails details = new KibanaGetDetails();
 
     private JsonNode stats(String transportAddress) throws Exception {
-        return new ObjectMapper().readTree(
+        return JsonYamlUtils.createJsonNodeFromString(
                 "{\"kibana\":{\"name\":\"kibana-1\",\"host\":\"kibana-1\",\"transport_address\":\""
                         + transportAddress + "\"},"
                         + "\"process\":{\"pid\":1234},\"os\":{\"platform\":\"linux\"}}");
