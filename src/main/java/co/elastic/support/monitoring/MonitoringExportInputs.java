@@ -6,11 +6,11 @@
  */
 package co.elastic.support.monitoring;
 
+import co.elastic.support.Constants;
+import co.elastic.support.rest.ElasticRestClientInputs;
 import co.elastic.support.util.SystemProperties;
 import co.elastic.support.util.TextIOManager;
 import com.beust.jcommander.Parameter;
-import co.elastic.support.Constants;
-import co.elastic.support.rest.ElasticRestClientInputs;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -19,7 +19,6 @@ import org.apache.logging.log4j.Logger;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
 import java.util.List;
 
 public class MonitoringExportInputs extends ElasticRestClientInputs {
@@ -103,9 +102,9 @@ public class MonitoringExportInputs extends ElasticRestClientInputs {
         List<String> errors = super.parseInputs(textIOManager, args);
 
         if (!listClusters) {
-            errors.addAll(ObjectUtils.getIfNull(validateCluster(clusterId), () -> emptyList));
-            errors.addAll(ObjectUtils.getIfNull(validateInterval(interval), () -> emptyList));
-            errors.addAll(ObjectUtils.getIfNull(validateTimeWindow(), () -> emptyList));
+            errors.addAll(ObjectUtils.getIfNull(validateCluster(clusterId), List::of));
+            errors.addAll(ObjectUtils.getIfNull(validateInterval(interval), List::of));
+            errors.addAll(ObjectUtils.getIfNull(validateTimeWindow(), List::of));
         }
 
         return errors;
@@ -130,22 +129,22 @@ public class MonitoringExportInputs extends ElasticRestClientInputs {
             queryStartDate = (DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").format(start) + ":00.000Z").replace(" ", "T");
 
         } catch (Exception e) {
-            return Collections.singletonList("Invalid Date or Time format. Please enter the date in format YYYY-MM-dd HH:mm");
+            return List.of("Invalid Date or Time format. Please enter the date in format YYYY-MM-dd HH:mm");
         }
 
         return null;
     }
 
     public List<String> validateCluster(String val){
-        if(StringUtils.isEmpty(val)){
-            return Collections.singletonList("Cluster id is required to extract monitoring data.");
+        if (StringUtils.isEmpty(val)){
+            return List.of("Cluster id is required to extract monitoring data.");
         }
         return null;
     }
 
     public List<String> validateInterval(int val){
         if(val <1 || val > 12){
-            return Collections.singletonList("Interval must be 1-12.");
+            return List.of("Interval must be 1-12.");
         }
         return null;
     }

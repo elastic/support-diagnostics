@@ -10,12 +10,12 @@ import co.elastic.support.Constants;
 import co.elastic.support.rest.RestClient;
 import co.elastic.support.rest.RestResult;
 import co.elastic.support.util.JsonYamlUtils;
-import tools.jackson.databind.node.ObjectNode;
 import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import tools.jackson.databind.node.ObjectNode;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -86,7 +86,7 @@ public class MonitoringImportProcessor {
             String contents;
             int batch = 0;
             Map<String, String> inputMeta = new LinkedHashMap<>();
-            Map<String, Map> inputAction = new LinkedHashMap();
+            Map<String, Map<?, ?>> inputAction = new LinkedHashMap<>();
 
             try {
                 // Pre-fetching to determine source version
@@ -122,8 +122,8 @@ public class MonitoringImportProcessor {
 
                     String sourceLine = JsonYamlUtils.mapper.writeValueAsString(sourceObject);
 
-                    batchBuilder.append(actionLine + "\n");
-                    batchBuilder.append(sourceLine + "\n");
+                    batchBuilder.append(actionLine).append("\n");
+                    batchBuilder.append(sourceLine).append("\n");
 
                     // See if we need to
                     if (batch >= config.bulkSize) {
@@ -148,7 +148,7 @@ public class MonitoringImportProcessor {
 
             } catch (Throwable t) {
                 // If something goes wrong just log it and keep boing.
-                logger.error(Constants.CONSOLE, "Error processing JSON event for {}.", t);
+                logger.error(Constants.CONSOLE, "Error processing JSON event for {}.", file.getName(), t);
             }
         } catch (Throwable t) {
             logger.error(Constants.CONSOLE, "Error processing entry - stream related error,", t);
@@ -192,11 +192,7 @@ public class MonitoringImportProcessor {
     }
 
     private boolean templateExists(String template) {
-        RestResult result = client.execQuery("/_template/" + template);
-        if (result.getStatus() != 200) {
-            return false;
-        }
-        return true;
+        return client.execQuery("/_template/" + template).getStatus() == 200;
     }
 
 }

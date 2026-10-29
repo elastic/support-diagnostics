@@ -6,9 +6,9 @@
  */
 package co.elastic.support.monitoring;
 
-import co.elastic.support.diagnostics.commands.CheckElasticsearchVersion;
 import co.elastic.support.Constants;
 import co.elastic.support.diagnostics.DiagnosticException;
+import co.elastic.support.diagnostics.commands.CheckElasticsearchVersion;
 import co.elastic.support.rest.ElasticRestClientService;
 import co.elastic.support.rest.RestClient;
 import co.elastic.support.rest.RestEntry;
@@ -17,12 +17,12 @@ import co.elastic.support.rest.RestResult;
 import co.elastic.support.util.JsonYamlUtils;
 import co.elastic.support.util.SystemProperties;
 import co.elastic.support.util.SystemUtils;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.node.ArrayNode;
-import tools.jackson.databind.node.ObjectNode;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -83,7 +83,7 @@ public class MonitoringExportService extends ElasticRestClientService {
             config.semver = CheckElasticsearchVersion.getElasticsearchVersion(client);
             String version = config.semver.getVersion();
             RestEntryConfig builder = new RestEntryConfig(version);
-            Map restCalls = JsonYamlUtils.readYamlFromClasspath(Constants.MONITORING_REST, true);
+            Map<String, Object> restCalls = JsonYamlUtils.readYamlFromClasspath(Constants.MONITORING_REST, true);
             Map<String, RestEntry> versionedRestCalls = builder.buildEntryMap(restCalls);
             monitoringUri = versionedRestCalls.get("monitoring-uri").getUrl();
 

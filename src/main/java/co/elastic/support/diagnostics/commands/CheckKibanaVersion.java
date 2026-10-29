@@ -15,11 +15,11 @@ import co.elastic.support.rest.RestEntryConfig;
 import co.elastic.support.rest.RestResult;
 import co.elastic.support.util.JsonYamlUtils;
 import co.elastic.support.util.SystemProperties;
-import tools.jackson.databind.JsonNode;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.semver4j.Semver;
 import org.semver4j.SemverException;
+import tools.jackson.databind.JsonNode;
 
 import java.util.Map;
 
@@ -68,7 +68,7 @@ public class CheckKibanaVersion implements Command {
             context.version = getKibanaVersion(restClient);
             String version = context.version.getVersion();
             RestEntryConfig builder = new RestEntryConfig(version);
-            Map restCalls = JsonYamlUtils.readYamlFromClasspath(Constants.KIBANA_REST, true);
+            Map<String, Object> restCalls = JsonYamlUtils.readYamlFromClasspath(Constants.KIBANA_REST, true);
 
             // logger.info(Constants.CONSOLE, restCalls);
             logger.info(Constants.CONSOLE, "Run basic queries for Kibana: {}", restCalls);
