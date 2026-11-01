@@ -84,6 +84,12 @@ public  class CollectLogs implements Command {
             logListing = sysCmd.runCommand(logStatement).trim();
             fileList = extractFilesFromList(logListing, fileList, 3);
 
+            logStatement = logCalls.get("slowlog");
+            logStatement = logStatement.replace("{{CLUSTERNAME}}", clusterName);
+            logStatement = logStatement.replace("{{LOGPATH}}", logDir);
+            logListing = sysCmd.runCommand(logStatement).trim();
+            fileList = extractFilesFromList(logListing, fileList, 2);
+
             sysCmd.copyLogs(fileList, logDir, targetDir );
 
         } catch (Exception e) {
