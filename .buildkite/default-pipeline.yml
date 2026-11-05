@@ -11,6 +11,8 @@ steps:
       imagePrefix: "core-ubuntu-2204"
       machineType: "n2-standard-2"
 
+  # Multi-arch the same way as Elasticsearch: two platforms, one Docker
+  # manifest. https://github.com/elastic/elasticsearch/blob/main/distribution/docker/README.md
   - label: ":docker: Build and Push Docker Image"
     depends_on: "gradle-test"
     if: build.branch == "main"
@@ -31,7 +33,7 @@ steps:
       - VERSION=$(grep '^version=' gradle.properties | cut -d'=' -f2)
       - set +x && echo "$$DOCKER_REG_PASS" | docker login -u "$$DOCKER_REG_USER" --password-stdin "$$DOCKER_REG_HOSTNAME"
       - docker buildx create --use --name multiarch-builder --driver docker-container || docker buildx use multiarch-builder
-      - docker buildx build --platform linux/amd64,linux/arm64 --push -t "docker.elastic.co/support/diagnostics:$${VERSION}" .
+      - docker buildx build --platform linux/amd64,linux/arm64 --push -f Dockerfile -t "docker.elastic.co/support/diagnostics:$${VERSION}" -t "docker.elastic.co/support/diagnostics:latest" .
     agents:
       provider: "gcp"
       imagePrefix: "core-ubuntu-2204"
