@@ -1,16 +1,17 @@
 # The new settings format:
-# At the top level the label descring the query that will also be used as the
+# At the top level the label describing the query that will also be used as the
 #   file name for its output.
 #   Below the query label are the following attributes:
 #     * extension - the file extension to be used for output. Optional, defaults to .json.
 #     * subdir - some api's are now grouped in a subdirectory of the output directory to lessen clutter. Optional, defaults to root dir.
 #     * retry - whether if a query fails it will be retried for the configured number of attempts. Optional, defaults to false.
 #     * versions - it can be:
-#       * A map constituted of "semver rules" and its associated "url/api" to run (`">= 7.0.0" : "/api/someendpoint/"`)
+#       * A map constituted of "semver rules" and its associated "url/api" to run (`">= 7.0.0" : "/api/endpoint/"`)
 #       * A map constituted of "semver rules" and its associated structure:
 #         * url - required field representing the API to be used
-#         * spaceaware - optional boolean option representing the fact the field is space aware. IF set, the API will be scraped for each space
+#         * spaceaware - optional boolean option representing the fact the field is space aware. If set, the API will be scraped for each space
 #         * paginate - optional string option representing the pagination field name. If set, the API will be paginated using the field name
+#          * extra-headers - optional key-value pairs representing HTTP headers.  If set, the header values will be added when
 #
 #   The "semver rules" within "versions" must resolve EXACTLY TO ONE "url/api"
 #   NPM mode is the only one used: https://github.com/vdurmont/semver4j
@@ -48,6 +49,13 @@ kibana_alerts_health:
       url: "/api/alerting/_health"
       spaceaware: true
 
+kibana_cases_analytics:
+  versions:
+    ">= 9.5.0":
+      url: "/internal/cases/_analyticsV2/state"
+      extra-headers:
+        x-elastic-internal-origin: "kibana"
+
 kibana_data_views:
   versions:
     ">= 8.0.0":
@@ -59,20 +67,28 @@ kibana_data_views:
 # https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/common/detection_engine/rule_monitoring/api/detection_engine_health/README.md
 kibana_detection_engine_health_cluster:
   versions:
-    ">= 8.8.2":
+    ">= 8.8.2 < 9.0.0":
       url: "/internal/detection_engine/health/_cluster"
       extra-headers:
         elastic-api-version: "1"
+    ">= 9.0.0":
+      url: "/internal/detection_engine/health/_cluster"
+      extra-headers:
+        x-elastic-internal-origin: "kibana"
 
 # Calculates health of Detection Engine and returns a health snapshot.
 # Scope: all detection rules in the current/default Kibana space.
 # https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/common/detection_engine/rule_monitoring/api/detection_engine_health/README.md
 kibana_detection_engine_health_space:
   versions:
-    ">= 8.8.2":
+    ">= 8.8.2 < 9.0.0":
       url: "/internal/detection_engine/health/_space"
       extra-headers:
         elastic-api-version: "1"
+    ">= 9.0.0":
+      url: "/internal/detection_engine/health/_space"
+      extra-headers:
+        x-elastic-internal-origin: "kibana"
 
 kibana_detection_engine_privileges:
   versions:
@@ -92,10 +108,23 @@ kibana_detection_engine_rules_prebuilt_status:
   versions:
     ">= 7.10.0 < 7.15.0": "/api/detection_engine/prepackaged"
     ">= 7.15.0 < 8.9.0": "/api/detection_engine/rules/prepackaged/_status"
-    ">= 8.9.0":
+    ">= 8.9.0 < 9.0.0":
       url: "/internal/detection_engine/prebuilt_rules/status"
       extra-headers:
         elastic-api-version: "1"
+    ">= 9.0.0":
+      url: "/internal/detection_engine/prebuilt_rules/status"
+      extra-headers:
+        x-elastic-internal-origin: "kibana"
+
+kibana_entity_store_status:
+  versions:
+    ">= 8.19.0 < 9.0.0":
+      url: "/api/entity_store/status?include_components=true"
+      spaceaware: true
+    ">= 9.0.0":
+      url: "/api/security/entity_store/status?include_components=true"
+      spaceaware: true
 
 kibana_fleet_agents:
   versions:
@@ -149,7 +178,11 @@ kibana_fleet_settings:
 
 kibana_reporting_diagnose_browser:
   versions:
-    ">= 8.16.0": "/internal/reporting/diagnose/browser"
+    ">= 8.16.0 < 9.0.0": "/internal/reporting/diagnose/browser"
+    ">= 9.0.0":
+      url: "/internal/reporting/diagnose/browser"
+      extra-headers:
+        x-elastic-internal-origin: "kibana"
 
 kibana_roles:
   versions:
@@ -162,6 +195,8 @@ kibana_security_endpoint_host_isolation:
       url: "/api/exception_lists/items/_find?list_id=endpoint_host_isolation_exceptions&namespace_type=agnostic"
       paginate: per_page
       spaceaware: true
+      extra-headers:
+        x-elastic-internal-origin: "kibana"
 
 kibana_security_endpoint_event_filters:
   versions:
@@ -169,6 +204,8 @@ kibana_security_endpoint_event_filters:
       url: "/api/exception_lists/items/_find?list_id=endpoint_event_filters&namespace_type=agnostic"
       paginate: per_page
       spaceaware: true
+      extra-headers:
+        x-elastic-internal-origin: "kibana"
 
 kibana_security_endpoint_exception_items:
   versions:
@@ -216,6 +253,14 @@ kibana_spaces:
   versions:
     ">= 6.5.0": "/api/spaces/space"
 
+kibana_stack_monitoring_health:
+  versions:
+    ">= 8.3.1 < 9.0.0": "/api/monitoring/v1/_health"
+    ">= 9.0.0":
+      url: "/api/monitoring/v1/_health"
+      extra-headers:
+        x-elastic-internal-origin: "kibana"
+
 kibana_stats:
   versions:
     ">= 6.5.0": "/api/stats"
@@ -260,7 +305,11 @@ kibana_upgrade_assistant:
 
 kibana_uptime_locations:
   versions:
-    ">= 8.12.0": "/internal/uptime/service/locations"
+    ">= 8.12.0 < 9.0.0": "/internal/uptime/service/locations"
+    ">= 9.0.0":
+      url: "/internal/uptime/service/locations"
+      extra-headers:
+        x-elastic-internal-origin: "kibana"
 
 kibana_uptime_settings:
   versions:
@@ -270,9 +319,28 @@ kibana_uptime_settings:
 
 kibana_user:
   versions:
-    ">= 7.6.0": "/internal/security/me"
     ">= 5.0.0 < 7.6.0": "/api/security/v1/me"
+    ">= 7.6.0 < 9.0.0": "/internal/security/me"
+    ">= 9.0.0":
+      url: "/internal/security/me"
+      extra-headers:
+        x-elastic-internal-origin: "kibana"
 
-kibana_stack_monitoring_health:
+kibana_workflows:
   versions:
-    ">= 8.3.1": "/api/monitoring/v1/_health"
+    ">= 9.5.0":
+      url: "/api/workflows"
+      spaceaware: true
+      paginate: size
+
+kibana_workflows_connectors:
+  versions:
+    ">= 9.5.0":
+      url: "/api/workflows/connectors"
+      spaceaware: true
+
+kibana_workflows_stats:
+  versions:
+    ">= 9.5.0":
+      url: "/api/workflows/stats"
+      spaceaware: true

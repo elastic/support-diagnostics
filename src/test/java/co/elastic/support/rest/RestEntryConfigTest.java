@@ -110,13 +110,19 @@ class RestEntryConfigTest {
     }
 
     @Test
-    void buildEntryMap_kibana_prebuiltStatusHasApiVersionHeader() throws DiagnosticException {
+    void buildEntryMap_kibana_prebuiltStatusHasVersionSpecificHeaders() throws DiagnosticException {
         Map<String, Object> raw = load(Constants.KIBANA_REST);
-        Map<String, RestEntry> entries = new RestEntryConfig("9.3.0").buildEntryMap(raw);
 
+        Map<String, RestEntry> v8 = new RestEntryConfig("8.15.0").buildEntryMap(raw);
         assertEquals(
             Map.of("elastic-api-version", "1"),
-            entries.get("kibana_detection_engine_rules_prebuilt_status").getExtraHeaders()
+            v8.get("kibana_detection_engine_rules_prebuilt_status").getExtraHeaders()
+        );
+
+        Map<String, RestEntry> v9 = new RestEntryConfig("9.3.0").buildEntryMap(raw);
+        assertEquals(
+            Map.of("x-elastic-internal-origin", "kibana"),
+            v9.get("kibana_detection_engine_rules_prebuilt_status").getExtraHeaders()
         );
     }
 
