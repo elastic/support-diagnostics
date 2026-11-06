@@ -16,7 +16,7 @@
 # $ ./push-docker.sh 9.1.1
 #
 
-IMAGE="docker.elastic.co/support/diagnostics"
+IMAGE="docker.elastic.co/support-public/diagnostics"
 
 echo "$IMAGE"
 

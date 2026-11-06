@@ -31,7 +31,7 @@ steps:
       - VERSION=$(grep '^version=' gradle.properties | cut -d'=' -f2)
       - set +x && echo "$$DOCKER_REG_PASS" | docker login -u "$$DOCKER_REG_USER" --password-stdin "$$DOCKER_REG_HOSTNAME"
       - docker buildx create --use --name multiarch-builder --driver docker-container || docker buildx use multiarch-builder
-      - docker buildx build --platform linux/amd64,linux/arm64 --push -t "docker.elastic.co/support/diagnostics:$${VERSION}" .
+      - docker buildx build --platform linux/amd64,linux/arm64 --push -t "docker.elastic.co/support-public/diagnostics:$${VERSION}" .
     agents:
       provider: "gcp"
       imagePrefix: "core-ubuntu-2204"
