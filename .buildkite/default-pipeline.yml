@@ -11,8 +11,15 @@ steps:
       imagePrefix: "core-ubuntu-2204"
       machineType: "n2-standard-2"
 
-  - label: ":docker: Build and Push Docker Image"
+  - block: ":docker: Push Docker Image?"
+    key: "docker-push-approval"
+    prompt: "Build and push the multi-arch image to docker.elastic.co/support-public/diagnostics?"
+    if: build.branch == "main"
     depends_on: "gradle-test"
+    blocked_state: passed
+
+  - label: ":docker: Build and Push Docker Image"
+    depends_on: "docker-push-approval"
     if: build.branch == "main"
     plugins:
       - elastic/vault-secrets#v0.1.1:
