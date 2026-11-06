@@ -48,7 +48,7 @@ public abstract class BaseService {
                 .setLayout(
                         PatternLayout.newBuilder()
                                 .setConfiguration(logConfig)
-                                .setPattern("%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n")
+                                .setPattern("%d{yyyy-MM-dd'T'HH:mm:ss.SSS'Z'}{UTC} [%t] %-5level %logger{36} - %msg%n")
                                 .build())
                 .build();
 
