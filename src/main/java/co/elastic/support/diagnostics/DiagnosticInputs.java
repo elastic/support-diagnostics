@@ -6,18 +6,17 @@
  */
 package co.elastic.support.diagnostics;
 
+import co.elastic.support.Constants;
+import co.elastic.support.rest.ElasticRestClientInputs;
 import co.elastic.support.util.SystemProperties;
 import co.elastic.support.util.TextIOManager;
 import com.beust.jcommander.Parameter;
-import co.elastic.support.Constants;
-import co.elastic.support.rest.ElasticRestClientInputs;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 public class DiagnosticInputs extends ElasticRestClientInputs {
@@ -241,22 +240,20 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
     public List<String> parseInputs(TextIOManager textIOManager, String[] args) {
         List<String> errors = super.parseInputs(textIOManager, args);
 
-        errors.addAll(ObjectUtils.defaultIfNull(validateDiagType(diagType), emptyList));
-        errors.addAll(ObjectUtils.defaultIfNull(validateMode(mode), emptyList));
-        errors.addAll(ObjectUtils.defaultIfNull(setDefaultPortForDiagType(diagType), emptyList));
-        errors.addAll(ObjectUtils.defaultIfNull(validateRemoteUser(remoteUser), emptyList));
-        errors.addAll(ObjectUtils.defaultIfNull(validatePort(remotePort), emptyList));
-        errors.addAll(ObjectUtils.defaultIfNull(TextIOManager.validateFile(keyfile), emptyList));
-        errors.addAll(ObjectUtils.defaultIfNull(TextIOManager.validateFile(knownHostsFile), emptyList));
+        errors.addAll(ObjectUtils.getIfNull(validateDiagType(diagType), List::of));
+        errors.addAll(ObjectUtils.getIfNull(validateMode(mode), List::of));
+        errors.addAll(ObjectUtils.getIfNull(setDefaultPortForDiagType(diagType), List::of));
+        errors.addAll(ObjectUtils.getIfNull(validateRemoteUser(remoteUser), List::of));
+        errors.addAll(ObjectUtils.getIfNull(validatePort(remotePort), List::of));
+        errors.addAll(ObjectUtils.getIfNull(TextIOManager.validateFile(keyfile), List::of));
+        errors.addAll(ObjectUtils.getIfNull(TextIOManager.validateFile(knownHostsFile), List::of));
 
         if (isRemotePass) {
-            remotePassword = textIOManager.standardPasswordReader
-                    .read(remotePasswordDescription);
+            remotePassword = textIOManager.standardPasswordReader.read(remotePasswordDescription);
         }
 
         if (isKeyFilePass) {
-            keyfilePassword = textIOManager.standardPasswordReader
-                    .read(sshKeyFIlePassphraseDescription);
+            keyfilePassword = textIOManager.standardPasswordReader.read(sshKeyFIlePassphraseDescription);
         }
 
         return errors;
@@ -288,26 +285,21 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
     public List<String> validateDiagType(String val) {
         List<String> types = Arrays.asList(diagnosticTypeValues);
         if (!types.contains(val)) {
-            return Collections
-                    .singletonList(val + " was not a valid diagnostic type. Enter --help to see valid choices");
+            return List.of(val + " was not a valid diagnostic type. Enter --help to see valid choices");
         }
 
         if (runningInDocker && val.contains("local")) {
-            return Collections.singletonList(
-                    val + " cannot be run from within a Docker container. Please use api or remote options.");
+            return List.of(val + " cannot be run from within a Docker container. Please use api or remote options.");
         }
 
         return null;
     }
 
     public List<String> validateMode(String mode) {
-        switch (mode) {
-            case "light":
-            case "full":
-                return null;
-        }
-
-        return Collections.singletonList("Invalid mode [" + mode + "] must be either [light] or [full]");
+        return switch (mode) {
+            case "light", "full" -> null;
+            default -> List.of("Invalid mode [" + mode + "] must be either [light] or [full]");
+        };
     }
 
     public List<String> validateRemoteUser(String val) {
@@ -315,7 +307,7 @@ public class DiagnosticInputs extends ElasticRestClientInputs {
         // it is a Logstash diag.
         if (diagType.contains("remote")) {
             if (StringUtils.isEmpty(val)) {
-                return Collections.singletonList("For remote execution a user account must be specified");
+                return List.of("For remote execution a user account must be specified");
             }
         }
         return null;

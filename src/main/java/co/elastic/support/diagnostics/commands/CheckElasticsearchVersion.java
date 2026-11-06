@@ -17,10 +17,10 @@ import co.elastic.support.rest.RestEntryConfig;
 import co.elastic.support.rest.RestResult;
 import co.elastic.support.util.JsonYamlUtils;
 import co.elastic.support.util.SystemProperties;
-import tools.jackson.databind.JsonNode;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.semver4j.Semver;
+import tools.jackson.databind.JsonNode;
 
 import java.util.Map;
 
@@ -67,7 +67,7 @@ public class CheckElasticsearchVersion implements Command {
             context.version = getElasticsearchVersion(restClient);
             String version = context.version.getVersion();
             RestEntryConfig builder = new RestEntryConfig(version, inputs.mode);
-            Map restCalls = JsonYamlUtils.readYamlFromClasspath(Constants.ES_REST, true);
+            Map<String, Object> restCalls = JsonYamlUtils.readYamlFromClasspath(Constants.ES_REST, true);
 
             context.elasticRestCalls = builder.buildEntryMap(restCalls);
             // For Elasticsearch, we use some API calls based
@@ -88,7 +88,7 @@ public class CheckElasticsearchVersion implements Command {
         }
         String result = res.toString();
         JsonNode root = JsonYamlUtils.createJsonNodeFromString(result);
-        String version = root.path("version").path("number").asText();
+        String version = root.path("version").path("number").asString();
         // Workaround for the semver issue with pre-release versions
         // https://github.com/semver4j/semver4j/issues/307
         return new Semver(version).withClearedPreRelease();

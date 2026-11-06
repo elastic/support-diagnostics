@@ -10,12 +10,12 @@ import co.elastic.support.Constants;
 import co.elastic.support.rest.RestClient;
 import co.elastic.support.rest.RestResult;
 import co.elastic.support.util.JsonYamlUtils;
-import tools.jackson.databind.node.ObjectNode;
 import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import tools.jackson.databind.node.ObjectNode;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -86,13 +86,13 @@ public class MonitoringImportProcessor {
             String contents;
             int batch = 0;
             Map<String, String> inputMeta = new LinkedHashMap<>();
-            Map<String, Map> inputAction = new LinkedHashMap();
+            Map<String, Map<?, ?>> inputAction = new LinkedHashMap<>();
 
             try {
                 // Pre-fetching to determine source version
                 contents = br.readLine();
                 ObjectNode sourceObject = JsonYamlUtils.mapper.readValue(contents, ObjectNode.class);
-                if (StringUtils.isEmpty(sourceObject.path("type").asText())) {
+                if (StringUtils.isEmpty(sourceObject.path("type").asString())) {
                     indexName = indexName.replace("{{version}}", "8");
                     logger.info(Constants.CONSOLE, "Targeting {} because no type field is found", indexName);
                     inputMeta.put("_index", indexName);
@@ -109,21 +109,21 @@ public class MonitoringImportProcessor {
                 while (contents != null) {
                     // If clustername is present and they changed it, update
                     sourceObject = JsonYamlUtils.mapper.readValue(contents, ObjectNode.class);
-                    String clusterName = sourceObject.path("cluster_name").asText();
+                    String clusterName = sourceObject.path("cluster_name").asString();
 
                     if (updateClusterName && StringUtils.isNotEmpty(clusterName)) {
                         sourceObject.put("cluster_name", newClusterName);
                     }
 
-                    String altClusterName = sourceObject.path("cluster_settings").path("cluster").path("metadata").path("display_name").asText();
+                    String altClusterName = sourceObject.path("cluster_settings").path("cluster").path("metadata").path("display_name").asString();
                     if (updateClusterName && StringUtils.isNotEmpty(altClusterName)) {
                         sourceObject.withObjectProperty("cluster_settings").withObjectProperty("cluster").withObjectProperty("metadata").put("display_name", newClusterName);
                     }
 
                     String sourceLine = JsonYamlUtils.mapper.writeValueAsString(sourceObject);
 
-                    batchBuilder.append(actionLine + "\n");
-                    batchBuilder.append(sourceLine + "\n");
+                    batchBuilder.append(actionLine).append("\n");
+                    batchBuilder.append(sourceLine).append("\n");
 
                     // See if we need to
                     if (batch >= config.bulkSize) {
@@ -148,7 +148,7 @@ public class MonitoringImportProcessor {
 
             } catch (Throwable t) {
                 // If something goes wrong just log it and keep boing.
-                logger.error(Constants.CONSOLE, "Error processing JSON event for {}.", t);
+                logger.error(Constants.CONSOLE, "Error processing JSON event for {}.", file.getName(), t);
             }
         } catch (Throwable t) {
             logger.error(Constants.CONSOLE, "Error processing entry - stream related error,", t);
@@ -192,11 +192,7 @@ public class MonitoringImportProcessor {
     }
 
     private boolean templateExists(String template) {
-        RestResult result = client.execQuery("/_template/" + template);
-        if (result.getStatus() != 200) {
-            return false;
-        }
-        return true;
+        return client.execQuery("/_template/" + template).getStatus() == 200;
     }
 
 }

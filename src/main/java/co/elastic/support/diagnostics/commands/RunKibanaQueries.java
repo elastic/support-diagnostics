@@ -55,8 +55,8 @@ public class RunKibanaQueries extends BaseQuery {
         ProcessProfile profile = new ProcessProfile();
         context.targetNode = profile;
         JsonNode kibanaData = JsonYamlUtils.createJsonNodeFromFileName(tempDir, fileName);
-        profile.pid = kibanaData.path("process").path("pid").asText();
-        profile.os = SystemUtils.parseOperatingSystemName(kibanaData.path("os").path("platform").asText());
+        profile.pid = kibanaData.path("process").path("pid").asString();
+        profile.os = SystemUtils.parseOperatingSystemName(kibanaData.path("os").path("platform").asString());
 
         return profile;
     }
@@ -81,7 +81,7 @@ public class RunKibanaQueries extends BaseQuery {
         for (JsonNode node : arrayNode) {
             JsonNode idNode = node.path("id");
             if(!idNode.isMissingNode()) {
-                spacesIds.add(idNode.asText());
+                spacesIds.add(idNode.asString());
             }
         }
         return spacesIds;

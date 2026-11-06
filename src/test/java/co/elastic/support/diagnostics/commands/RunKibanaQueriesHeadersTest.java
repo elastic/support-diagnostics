@@ -42,7 +42,7 @@ class RunKibanaQueriesHeadersTest {
         assertTrue(headers.has("Content-Type"));
         assertFalse(headers.has("Authorization"));
         assertFalse(headers.has("X-Api-Key"));
-        assertEquals("http://x", result.get(0).path("config").path("url").asText());
+        assertEquals("http://x", result.get(0).path("config").path("url").asString());
     }
 
     @Test

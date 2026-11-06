@@ -6,9 +6,9 @@
  */
 package co.elastic.support.monitoring;
 
-import co.elastic.support.diagnostics.commands.CheckElasticsearchVersion;
 import co.elastic.support.Constants;
 import co.elastic.support.diagnostics.DiagnosticException;
+import co.elastic.support.diagnostics.commands.CheckElasticsearchVersion;
 import co.elastic.support.rest.ElasticRestClientService;
 import co.elastic.support.rest.RestClient;
 import co.elastic.support.rest.RestEntry;
@@ -17,12 +17,12 @@ import co.elastic.support.rest.RestResult;
 import co.elastic.support.util.JsonYamlUtils;
 import co.elastic.support.util.SystemProperties;
 import co.elastic.support.util.SystemUtils;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.node.ArrayNode;
-import tools.jackson.databind.node.ObjectNode;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -83,7 +83,7 @@ public class MonitoringExportService extends ElasticRestClientService {
             config.semver = CheckElasticsearchVersion.getElasticsearchVersion(client);
             String version = config.semver.getVersion();
             RestEntryConfig builder = new RestEntryConfig(version);
-            Map restCalls = JsonYamlUtils.readYamlFromClasspath(Constants.MONITORING_REST, true);
+            Map<String, Object> restCalls = JsonYamlUtils.readYamlFromClasspath(Constants.MONITORING_REST, true);
             Map<String, RestEntry> versionedRestCalls = builder.buildEntryMap(restCalls);
             monitoringUri = versionedRestCalls.get("monitoring-uri").getUrl();
 
@@ -182,16 +182,16 @@ public class MonitoringExportService extends ElasticRestClientService {
             for (JsonNode hit : hits) {
                 Map<String, String> display = new HashMap<>();
 
-                String clusterUuid = hit.path("_source").path("cluster_uuid").asText();
+                String clusterUuid = hit.path("_source").path("cluster_uuid").asString();
                 if (StringUtils.isEmpty(clusterUuid)) {
-                    clusterUuid = hit.path("fields").path("cluster_uuid").path(0).asText();
+                    clusterUuid = hit.path("fields").path("cluster_uuid").path(0).asString();
                 }
-                String clusterName = hit.path("_source").path("cluster_name").asText();
+                String clusterName = hit.path("_source").path("cluster_name").asString();
                 if (StringUtils.isEmpty(clusterName)) {
-                    clusterName = hit.path("_source").path("elasticsearch").path("cluster").path("name").asText();
+                    clusterName = hit.path("_source").path("elasticsearch").path("cluster").path("name").asString();
                 }
                 String displayName = hit.path("_source").path("cluster_settings").path("cluster").path("metadata")
-                        .path("display_name").asText();
+                        .path("display_name").asString();
                 if (StringUtils.isEmpty(displayName)) {
                     displayName = "none";
                 }
@@ -294,7 +294,7 @@ public class MonitoringExportService extends ElasticRestClientService {
                     processedHits += hitsNode.size();
                     logger.info(Constants.CONSOLE, "{} of {} processed.", processedHits, totalHits);
 
-                    scrollId = resultNode.path("_scroll_id").asText();
+                    scrollId = resultNode.path("_scroll_id").asString();
                     String scrollQuery = SCROLL_ID.replace("{{scrollId}}", scrollId);
                     RestResult scrollResult = new RestResult(client.execPost(monitoringScrollUri, scrollQuery),
                             monitoringScrollUri);

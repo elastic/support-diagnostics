@@ -15,11 +15,11 @@ import co.elastic.support.rest.RestEntryConfig;
 import co.elastic.support.rest.RestResult;
 import co.elastic.support.util.JsonYamlUtils;
 import co.elastic.support.util.SystemProperties;
-import tools.jackson.databind.JsonNode;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.semver4j.Semver;
 import org.semver4j.SemverException;
+import tools.jackson.databind.JsonNode;
 
 import java.util.Map;
 
@@ -68,7 +68,7 @@ public class CheckLogstashVersion implements Command {
             context.version = getLogstashVersion(restClient);
             String version = context.version.getVersion();
             RestEntryConfig builder = new RestEntryConfig(version);
-            Map restCalls = JsonYamlUtils.readYamlFromClasspath(Constants.LS_REST, true);
+            Map<String, Object> restCalls = JsonYamlUtils.readYamlFromClasspath(Constants.LS_REST, true);
 
             // logger.info(Constants.CONSOLE, restCalls);
             logger.info(Constants.CONSOLE, "Run basic queries for Logstash: {}", restCalls);
@@ -102,7 +102,7 @@ public class CheckLogstashVersion implements Command {
         }
         String result = res.toString();
         JsonNode root = JsonYamlUtils.createJsonNodeFromString(result);
-        String version = root.path("version").asText();
+        String version = root.path("version").asString();
 
         logger.info(Constants.CONSOLE, String.format("Logstash Version is :%s", version));
 

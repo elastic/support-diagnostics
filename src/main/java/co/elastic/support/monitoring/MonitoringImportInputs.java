@@ -6,25 +6,19 @@
  */
 package co.elastic.support.monitoring;
 
+import co.elastic.support.rest.ElasticRestClientInputs;
 import co.elastic.support.util.TextIOManager;
 import com.beust.jcommander.Parameter;
-import co.elastic.support.rest.ElasticRestClientInputs;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.beryx.textio.StringInputReader;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
 import java.util.List;
 
 public class MonitoringImportInputs extends ElasticRestClientInputs {
-
-    private static final Logger logger = LogManager.getLogger(MonitoringImportInputs.class);
-
     // Start Input Fields
 
     @Parameter(names = {"--clustername"}, description = "Overrides the name of the imported cluster.")
@@ -73,9 +67,9 @@ public class MonitoringImportInputs extends ElasticRestClientInputs {
     public List<String> parseInputs(TextIOManager textIOManager, String[] args){
         List<String> errors = super.parseInputs(textIOManager, args);
 
-        errors.addAll(ObjectUtils.defaultIfNull(validateId(clusterName), emptyList));
-        errors.addAll(ObjectUtils.defaultIfNull(validateId(targetSuffix), emptyList));
-        errors.addAll(ObjectUtils.defaultIfNull(validateRequiredFile(input), emptyList));
+        errors.addAll(ObjectUtils.getIfNull(validateId(clusterName), List::of));
+        errors.addAll(ObjectUtils.getIfNull(validateId(targetSuffix), List::of));
+        errors.addAll(ObjectUtils.getIfNull(validateRequiredFile(input), List::of));
 
         return errors;
     }
@@ -85,7 +79,7 @@ public class MonitoringImportInputs extends ElasticRestClientInputs {
             return null;
         }
         if(val.contains(" ")){
-            return Collections.singletonList("Spaces not permitted in name.");
+            return List.of("Spaces not permitted in name.");
         }
         return null;
     }

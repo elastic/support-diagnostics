@@ -9,4 +9,4 @@
 # to create the output files.
 #
 
-docker run --network host -it -v ${PWD}/diagnostic-output:/diagnostic-output docker.elastic.co/support/diagnostics:latest sh
+docker run --network host -it -v ${PWD}/diagnostic-output:/diagnostic-output docker.elastic.co/support-public/diagnostics:latest sh
