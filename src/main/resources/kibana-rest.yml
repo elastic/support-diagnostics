@@ -302,9 +302,19 @@ kibana_uptime_settings:
 
 kibana_user:
   versions:
-    ">= 7.6.0": "/internal/security/me"
     ">= 5.0.0 < 7.6.0": "/api/security/v1/me"
+    ">= 7.6.0 < 8.11.0": "/internal/security/me"
+    ">= 8.11.0":
+      url: "/internal/security/me"
+      extra-headers:
+        elastic-api-version: "1"
+        x-elastic-internal-origin: "1"
 
 kibana_stack_monitoring_health:
   versions:
-    ">= 8.3.1": "/api/monitoring/v1/_health"
+    ">= 8.3.1 < 8.15.0": "/api/monitoring/v1/_health"
+    ">= 8.15.0":
+      url: "/api/monitoring/v1/_health"
+      extra-headers:
+        elastic-api-version: "1"
+        x-elastic-internal-origin: "1"
