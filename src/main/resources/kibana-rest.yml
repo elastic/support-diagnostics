@@ -63,6 +63,7 @@ kibana_detection_engine_health_cluster:
       url: "/internal/detection_engine/health/_cluster"
       extra-headers:
         elastic-api-version: "1"
+        x-elastic-internal-origin: "1"
 
 # Calculates health of Detection Engine and returns a health snapshot.
 # Scope: all detection rules in the current/default Kibana space.
@@ -73,6 +74,7 @@ kibana_detection_engine_health_space:
       url: "/internal/detection_engine/health/_space"
       extra-headers:
         elastic-api-version: "1"
+        x-elastic-internal-origin: "1"
 
 kibana_detection_engine_privileges:
   versions:
