@@ -142,8 +142,14 @@ kibana_fleet_agent_status:
 
 kibana_fleet_agents_current_upgrades:
   versions:
-    ">= 8.3.0":
-      url: "/api/fleet/agents/current_upgrades"
+    ">= 8.3.0 < 8.5.0": "/api/fleet/agents/current_upgrades"
+    ">= 8.5.0 < 8.11.0":
+      url: "/api/fleet/agents/action_status"
+      paginate: perPage
+      spaceaware: true
+    ">= 8.11.0":
+      url: "/api/fleet/agents/action_status"
+      paginate: perPage
       spaceaware: true
       extra-headers:
         elastic-api-version: "2023-10-31"
