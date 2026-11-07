@@ -258,7 +258,11 @@ kibana_streams:
 
 kibana_synthetics_monitor_filters:
   versions:
-    ">= 8.12.0": "/internal/synthetics/monitor/filters"
+    ">= 8.9.0":
+      url: "/internal/synthetics/monitor/filters"
+      extra-headers:
+        elastic-api-version: "1"
+        x-elastic-internal-origin: "1"
 
 # Disabled pending review
 #kibana_synthetics_monitors:
@@ -283,7 +287,12 @@ kibana_upgrade_assistant:
 
 kibana_uptime_locations:
   versions:
-    ">= 8.12.0": "/internal/uptime/service/locations"
+    ">= 8.0.0 < 8.11.0": "/internal/uptime/service/locations"
+    ">= 8.11.0":
+      url: "/internal/uptime/service/locations"
+      extra-headers:
+        elastic-api-version: "1"
+        x-elastic-internal-origin: "1"
 
 kibana_uptime_settings:
   versions:
