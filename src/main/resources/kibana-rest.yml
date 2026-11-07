@@ -164,9 +164,15 @@ kibana_fleet_settings:
       url: "/api/fleet/settings"
       spaceaware: true
 
+# until 8.9.x this was /api/reporting/diagnose/browser and from 8.16.0 it migrated from POST to GET
 kibana_reporting_diagnose_browser:
   versions:
-    ">= 8.16.0": "/internal/reporting/diagnose/browser"
+    ">= 8.16.0":
+      url: "/internal/reporting/diagnose/browser"
+      spaceaware: true
+      extra-headers:
+        elastic-api-version: "2023-10-31"
+        x-elastic-internal-origin: "1"
 
 kibana_roles:
   versions:
