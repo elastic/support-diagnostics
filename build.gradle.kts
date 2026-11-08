@@ -33,7 +33,7 @@ dependencies {
         exclude(group = "commons-codec", module = "commons-codec")
         exclude(group = "commons-logging", module = "commons-logging")
     }
-    implementation("commons-codec:commons-codec:1.22.1")
+    implementation("commons-codec:commons-codec:1.23.0")
 
     // JSON / Data
     implementation("tools.jackson.core:jackson-databind:3.2.4")
