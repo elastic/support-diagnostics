@@ -36,7 +36,7 @@ dependencies {
     implementation("commons-codec:commons-codec:1.22.1")
 
     // JSON / Data
-    implementation("tools.jackson.core:jackson-databind:3.2.4")
+    implementation("tools.jackson.core:jackson-databind:3.3.0")
     implementation("org.yaml:snakeyaml:2.7")
 
     // Logging
