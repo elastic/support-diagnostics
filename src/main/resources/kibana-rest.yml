@@ -230,7 +230,10 @@ kibana_security_packages:
     ">= 7.10.0 < 9.0.0":
       url: "/api/fleet/epm/packages?experimental=true&category=security"
       spaceaware: true
-    ">= 9.0.0":
+    ">= 9.0.0 < 9.1.0":
+      url: "/api/fleet/epm/packages?prerelease=true&category=security"
+      spaceaware: true
+    ">= 9.1.0":
       url: "/api/fleet/epm/packages?withPackagePoliciesCount=true&category=security"
       spaceaware: true
 
