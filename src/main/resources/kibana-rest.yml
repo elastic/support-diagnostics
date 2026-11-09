@@ -124,10 +124,13 @@ kibana_fleet_agent_policies:
 
 kibana_fleet_packages:
   versions:
-    ">= 7.11.0 < 9.0.0":
+    ">= 7.8.0 < 9.0.0":
       url: "/api/fleet/epm/packages?experimental=true"
       spaceaware: true
-    ">= 9.0.0":
+    ">= 9.0.0 < 9.1.0":
+      url: "/api/fleet/epm/packages?prerelease=true"
+      spaceaware: true
+    ">= 9.1.0":
       url: "/api/fleet/epm/packages?withPackagePoliciesCount=true"
       spaceaware: true
 
