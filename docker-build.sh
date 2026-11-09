@@ -8,7 +8,7 @@
 # Multi-arch output stays in the builder. To publish, use ./push-docker.sh.
 #
 
-IMAGE="docker.elastic.co/support/diagnostics"
+IMAGE="docker.elastic.co/support-public/diagnostics"
 
 docker buildx create --use --name multiarch-builder --driver docker-container \
   || docker buildx use multiarch-builder
