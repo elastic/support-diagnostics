@@ -92,9 +92,9 @@ kibana_detection_engine_rules_installed:
 # Scope: current/default Kibana space.
 kibana_detection_engine_rules_prepackaged_status:
   versions:
-    ">= 7.10.0 < 8.9.0": "/api/detection_engine/rules/prepackaged/_status"
-    ">= 8.9.0":
-      url: "/internal/detection_engine/prebuilt_rules/status"
+    ">= 7.10.0 < 8.11.0": "/api/detection_engine/rules/prepackaged/_status"
+    ">= 8.11.0":
+      url: "/api/detection_engine/rules/prepackaged/_status"
       extra-headers:
         elastic-api-version: "1"
         x-elastic-internal-origin: "1"
