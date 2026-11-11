@@ -81,6 +81,19 @@ class RestEntryConfigTest {
                 "Current versions should request creation date columns");
     }
 
+    @Test
+    void buildEntryMap_catCount_onlyCalledWhenCountIsUnavailable() throws DiagnosticException {
+        Map<String, Object> raw = load(Constants.ES_REST);
+
+        Map<String, RestEntry> legacy = new RestEntryConfig("1.7.6").buildEntryMap(raw);
+        assertTrue(legacy.containsKey("cat_count"), "cat_count should be called before 2.0.0");
+        assertFalse(legacy.containsKey("count"), "count is only available from 2.0.0");
+
+        Map<String, RestEntry> current = new RestEntryConfig("8.19.0").buildEntryMap(raw);
+        assertFalse(current.containsKey("cat_count"), "cat_count is derived from count from 2.0.0");
+        assertTrue(current.containsKey("count"), "count should be called from 2.0.0");
+    }
+
     private static String urlFor(Map<String, Object> raw, String version) {
         return new RestEntryConfig(version).buildEntryMap(raw).get("cat_indices").getUrl();
     }
