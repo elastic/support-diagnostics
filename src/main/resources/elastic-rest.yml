@@ -34,7 +34,7 @@ cat_count:
   extension: ".txt"
   subdir: "cat"
   versions:
-    ">= 0.9.0": "/_cat/count"
+    ">= 0.9.0 < 2.0.0": "/_cat/count"
 
 cat_fielddata:
   extension: ".txt"
