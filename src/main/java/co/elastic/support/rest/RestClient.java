@@ -48,6 +48,7 @@ import javax.net.ssl.SSLContext;
 import java.io.Closeable;
 import java.io.FileInputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.util.Map;
 
@@ -177,8 +178,8 @@ public class RestClient implements Closeable {
 
             // Create AuthCache instance
             AuthCache authCache = new BasicAuthCache();
-            // Generate BASIC scheme object and add it to the local auth cache
-            BasicScheme basicAuth = new BasicScheme();
+            // No-arg BasicScheme encodes as US-ASCII and replaces ü/ß. Elasticsearch expects UTF-8.
+            BasicScheme basicAuth = new BasicScheme(StandardCharsets.UTF_8);
 
             clientBuilder.setDefaultRequestConfig(RequestConfig.custom()
                     .setCookieSpec(CookieSpecs.STANDARD)
