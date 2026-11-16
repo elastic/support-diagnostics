@@ -24,8 +24,10 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -354,6 +356,75 @@ class RestClientTest {
         }
 
         wm.verify(getRequestedFor(urlEqualTo("/_cat/health")).withHeader("Authorization", containing("Basic")));
+    }
+
+    @Test
+    void getClient_withAsciiCredentials_sendsSameBasicHeaderAsUtf8() {
+        wm.stubFor(get(urlEqualTo("/_cat/health")).willReturn(aResponse().withStatus(200).withBody("green")));
+
+        try (
+            RestClient authClient = RestClient.getClient(
+                "localhost",
+                wm.getPort(),
+                "http",
+                "elastic",
+                "changeme",
+                null,
+                0,
+                null,
+                null,
+                null,
+                null,
+                false,
+                null,
+                5000,
+                5000,
+                5000
+            )
+        ) {
+            HttpClientUtils.closeQuietly(authClient.execGet("/_cat/health"));
+        }
+
+        wm.verify(getRequestedFor(urlEqualTo("/_cat/health")).withHeader(
+            "Authorization",
+            equalTo(utf8BasicAuthorization("elastic", "changeme"))));
+    }
+
+    @Test
+    void getClient_withUnicodePassword_sendsUtf8BasicAuthorization() {
+        wm.stubFor(get(urlEqualTo("/_security/_authenticate")).willReturn(aResponse().withStatus(200).withBody("{}")));
+
+        try (
+            RestClient authClient = RestClient.getClient(
+                "localhost",
+                wm.getPort(),
+                "http",
+                "elastic",
+                "grüße",
+                null,
+                0,
+                null,
+                null,
+                null,
+                null,
+                false,
+                null,
+                5000,
+                5000,
+                5000
+            )
+        ) {
+            HttpClientUtils.closeQuietly(authClient.execGet("/_security/_authenticate"));
+        }
+
+        wm.verify(getRequestedFor(urlEqualTo("/_security/_authenticate")).withHeader(
+            "Authorization",
+            equalTo(utf8BasicAuthorization("elastic", "grüße"))));
+    }
+
+    private static String utf8BasicAuthorization(String user, String password) {
+        byte[] token = (user + ":" + password).getBytes(StandardCharsets.UTF_8);
+        return "Basic " + Base64.getEncoder().encodeToString(token);
     }
 
     @Test
