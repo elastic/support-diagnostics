@@ -14,6 +14,7 @@ import co.elastic.support.diagnostics.commands.CheckKibanaVersion;
 import co.elastic.support.diagnostics.commands.CheckPlatformDetails;
 import co.elastic.support.diagnostics.commands.CheckUserAuthLevel;
 import co.elastic.support.diagnostics.commands.CollectDockerInfo;
+import co.elastic.support.diagnostics.commands.CollectMonitoringTrends;
 import co.elastic.support.diagnostics.commands.CollectKibanaLogs;
 import co.elastic.support.diagnostics.commands.CollectLogs;
 import co.elastic.support.diagnostics.commands.CollectSystemCalls;
@@ -39,6 +40,7 @@ public class DiagnosticChainExec {
                 // Removed temporarily due to issues with finding and accessing cloud master
                 // new CheckPlatformDetails().execute(context);
                 new RunClusterQueries().execute(context);
+                new CollectMonitoringTrends().execute(context);
                 break;
 
             case Constants.local:
@@ -46,6 +48,7 @@ public class DiagnosticChainExec {
                 new CheckUserAuthLevel().execute(context);
                 new CheckPlatformDetails().execute(context);
                 new RunClusterQueries().execute(context);
+                new CollectMonitoringTrends().execute(context);
                 if (context.runSystemCalls) {
                     new CollectSystemCalls().execute(context);
                     new CollectLogs().execute(context);
@@ -61,6 +64,7 @@ public class DiagnosticChainExec {
                 new CheckUserAuthLevel().execute(context);
                 new CheckPlatformDetails().execute(context);
                 new RunClusterQueries().execute(context);
+                new CollectMonitoringTrends().execute(context);
                 if (context.runSystemCalls) {
                     new CollectSystemCalls().execute(context);
                     new CollectLogs().execute(context);
