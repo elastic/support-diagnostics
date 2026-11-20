@@ -48,6 +48,13 @@ kibana_alerts_health:
       url: "/api/alerting/_health"
       spaceaware: true
 
+kibana_cases_templates:
+  versions:
+    ">= 9.5.0":
+      url: "/api/cases/templates"
+      spaceaware: true
+      paginate: perPage
+
 kibana_data_views:
   versions:
     ">= 8.0.0":
