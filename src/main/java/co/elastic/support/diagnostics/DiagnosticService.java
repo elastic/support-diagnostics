@@ -45,7 +45,7 @@ public class DiagnosticService extends ElasticRestClientService {
                         inputs.pkiKeystore,
                         inputs.pkiKeystorePass,
                         inputs.skipVerification,
-                        config.extraHeaders,
+                        inputs.requestHeaders(config.extraHeaders),
                         config.connectionTimeout,
                         config.connectionRequestTimeout,
                         config.socketTimeout)) {
@@ -96,7 +96,7 @@ public class DiagnosticService extends ElasticRestClientService {
                         "Identified Docker installations - bypassed log collection and some system calls.");
             }
 
-            checkAuthLevel(context.diagnosticInputs.user, context.isAuthorized);
+            checkAuthLevel(context.diagnosticInputs, context.isAuthorized);
         } finally {
             if (context.includeLogs) {
                 closeLogs();
