@@ -15,8 +15,11 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public abstract class ElasticRestClientInputs extends BaseInputs {
 
@@ -24,6 +27,7 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
     public static final String portDescription = "Listening port. Defaults to 9200:";
     public static final String userDescription = "Elasticsearch user account:";
     public static final String passwordDescription = "Elasticsearch user password:";
+    public static final String apiKeyDescription = "Elasticsearch API key (the base64 'encoded' value, or 'id:api_key'):";
     public static final String pkiKeystoreDescription = "Path/filename for PKI keystore with client certificate:";
     public static final String pkiKeystorePasswordDescription = "PKI keystore password if required:";
     public static final String proxyHostDescription = "Proxy server host name or IP Address:";
@@ -35,6 +39,7 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
 
     public final static String  userLoginAuth = "Username/Password:";
     public final static String  pkiLoginAuth = "PKI:";
+    public final static String  apiKeyLoginAuth = "API key:";
 
     public static final String useOptionOnly = " No value required, only the option.";
     // The basics - where's the cluster
@@ -61,6 +66,13 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
     // Not shown in the the help display due to security risks - allow input via command line arguments in plain text.
     @Parameter(names = {"--passwordText"}, hidden = true)
     public String password = "";
+    // API key auth - same convention as user auth. Sent as "Authorization: ApiKey <key>".
+    // Indicates we need to prompt for a masked input
+    @Parameter(names = {"--apiKey"}, description = "Prompt for an Elasticsearch API key to authenticate with instead of user/password. Do not enter a value.")
+    public boolean isApiKey = false;
+    // Not shown in the the help display due to security risks - allow input via command line arguments in plain text.
+    @Parameter(names = {"--apiKeyText"}, hidden = true)
+    public String apiKey = "";
     // PKI auth - same convention as user auth.
     @Parameter(names = {"--pkiKeystore"}, description = pkiKeystoreDescription)
     public String pkiKeystore = "";
@@ -112,7 +124,20 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
         errors.addAll(ObjectUtils.getIfNull(validatePort(port), List::of));
         errors.addAll(ObjectUtils.getIfNull(validatePort(proxyPort), List::of));
 
+        // An API key replaces user/password. It may be combined with a PKI keystore, since
+        // that carries the client certificate for TLS while the key authenticates the request.
+        boolean apiKeyRequested = isApiKey || StringUtils.isNotEmpty(apiKey);
+        List<String> combinationErrors = apiKeyRequested ? validateApiKeyCombination() : null;
+        errors.addAll(ObjectUtils.getIfNull(combinationErrors, List::of));
+
         // If we got this far, get the passwords.
+        if (isApiKey && StringUtils.isEmpty(apiKey) && combinationErrors == null) {
+            apiKey = textIOManager.standardPasswordReader.read(apiKeyDescription);
+        }
+        if (apiKeyRequested && combinationErrors == null) {
+            errors.addAll(ObjectUtils.getIfNull(validateApiKeyFormat(apiKey), List::of));
+        }
+
         if (isPassword) {
             password = textIOManager.standardPasswordReader.read(passwordDescription);
         }
@@ -171,7 +196,7 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
         if(isSecured){
 
             String authType = textIOManager.textIO.newStringInputReader()
-                    .withNumberedPossibleValues(userLoginAuth, pkiLoginAuth)
+                    .withNumberedPossibleValues(userLoginAuth, apiKeyLoginAuth, pkiLoginAuth)
                     .withDefaultValue(userLoginAuth)
                     .read(SystemProperties.lineSeparator + "Type of authentication to use:");
 
@@ -187,6 +212,10 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
 
                 password = textIOManager.standardPasswordReader
                         .read(SystemProperties.lineSeparator + passwordDescription);
+            }
+            else if(authType.equals(apiKeyLoginAuth)){
+                apiKey = textIOManager.standardPasswordReader
+                        .read(SystemProperties.lineSeparator + apiKeyDescription);
             }
             else{
                 pkiKeystore = textIOManager.standardFileReader
@@ -245,6 +274,64 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
         return null;
     }
 
+    public List<String> validateApiKeyCombination(){
+        if(StringUtils.isNotEmpty(user) || isPassword || StringUtils.isNotEmpty(password)){
+            return List.of("An API key cannot be combined with a user/password. Use one or the other.");
+        }
+        return null;
+    }
+
+    public List<String> validateApiKeyFormat(String key){
+        if(StringUtils.isBlank(key)){
+            return List.of("The API key is empty.");
+        }
+        if(StringUtils.containsWhitespace(stripApiKeyPrefix(key))){
+            return List.of("The API key must not contain whitespace or line breaks.");
+        }
+        return null;
+    }
+
+    public boolean usesApiKey(){
+        return StringUtils.isNotBlank(apiKey);
+    }
+
+    private static String stripApiKeyPrefix(String key){
+        return key.trim().replaceFirst("(?i)^apikey\\s+", "").trim();
+    }
+
+    /**
+     * The value for the Authorization header. Accepts either the base64 "encoded"
+     * value returned by the create API key API, or the raw "id:api_key" pair, which
+     * is encoded here. Base64 never contains a colon, so the two can't be confused.
+     * A leading "ApiKey " (any case) is tolerated.
+     */
+    public static String apiKeyHeaderValue(String key){
+        String value = stripApiKeyPrefix(key);
+        if(value.contains(":")){
+            value = Base64.getEncoder().encodeToString(value.getBytes(StandardCharsets.UTF_8));
+        }
+        return "ApiKey " + value;
+    }
+
+    /**
+     * The headers every request must carry: the configured extra headers plus,
+     * when an API key was supplied, the Authorization header. Always pass this
+     * (not the raw config headers) to RestClient.getClient. A configured
+     * Authorization header (any case) is replaced rather than sent twice.
+     */
+    public Map<String, String> requestHeaders(Map<String, String> configHeaders){
+        if(!usesApiKey()){
+            return configHeaders;
+        }
+        Map<String, String> headers = new HashMap<>();
+        if(configHeaders != null){
+            headers.putAll(configHeaders);
+        }
+        headers.keySet().removeIf(name -> "Authorization".equalsIgnoreCase(name));
+        headers.put("Authorization", apiKeyHeaderValue(apiKey));
+        return headers;
+    }
+
     public List<String> validateAuthType(String val){
         if( val.equals(pkiLoginAuth) && !isSsl){
             return List.of("TLS must be enabled to use PKI Authentication.");
@@ -264,6 +351,7 @@ public abstract class ElasticRestClientInputs extends BaseInputs {
                 ", proxyPort=" + proxyPort +
                 ", user='" + user + '\'' +
                 ", isPassword=" + isPassword +
+                ", isApiKey=" + isApiKey +
                 ", pkiKeystore='" + pkiKeystore + '\'' +
                 ", isPkiPass=" + isPkiPass +
                 ", pkiKeystorePass='" + pkiKeystorePass + '\'' +

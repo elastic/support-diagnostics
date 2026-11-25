@@ -18,6 +18,18 @@ public class ElasticRestClientService extends BaseService {
 
     private static final Logger logger = LogManager.getLogger(ElasticRestClientInputs.class);
 
+     protected void checkAuthLevel(ElasticRestClientInputs inputs, boolean isAuth){
+        if(inputs.usesApiKey()){
+            if(!isAuth){
+                logger.info(Constants.CONSOLE, SystemProperties.lineSeparator);
+                logger.info(Constants.CONSOLE, "The API key entered does not appear to have the cluster 'all' privilege plus 'monitor' and 'view_index_metadata' on all indices.");
+                logger.info(Constants.CONSOLE, "Some of the calls may not have completed successfully. Use a key with those privileges (for example one created with the superuser role) to collect everything.");
+            }
+            return;
+        }
+        checkAuthLevel(inputs.user, isAuth);
+    }
+
      protected void checkAuthLevel(String user, boolean isAuth){
 
         if(StringUtils.isNotEmpty(user) && !isAuth){

@@ -231,6 +231,12 @@ Elasticsearch, Kibana, and Logstash each have three distinct execution modes ava
  </tr>
 
  <tr>
+   <td width="20%" align="left" valign="top">--apiKey</td>
+   <td width="50%" align="left" valign="top">Prompts (masked) for an API key to authenticate with instead of user/password. Accepts the base64 <code>encoded</code> value returned by the create API key API, or the <code>id:api_key</code> pair. Sent as <code>Authorization: ApiKey ...</code> on requests to Elasticsearch and Kibana (the <code>api</code>, <code>local</code>, <code>remote</code> and <code>kibana-*</code> types) and by the monitoring export and import tools. Logstash's own API has no API key authentication, so use it only where a proxy in front of Logstash accepts one. Cannot be combined with <code>-u</code> or <code>-p</code>; it can be combined with a PKI keystore. For a complete diagnostic the key needs cluster <code>all</code> plus <code>monitor</code> and <code>view_index_metadata</code> on all indices (the superuser role has these). For the Elasticsearch types the tool warns if the key lacks them; Kibana runs do not check. A plain text value can be passed with <code>--apiKeyText</code> for automation, with the same history caveat as <code>--passwordText</code>.</td>
+   <td width="30%" align="left" valign="top">Option only - no value.</td>
+ </tr>
+
+ <tr>
    <td width="20%" align="left" valign="top">--mode</td>
    <td width="50%" align="left" valign="top">Designates whether to collect a minimal or full set of data. Enter light or full. Defaults to full.</td>
    <td width="30%" align="left" valign="top">--mode light</td>
@@ -260,7 +266,7 @@ Elasticsearch, Kibana, and Logstash each have three distinct execution modes ava
 
 #### PKI Authentication Options
 
-If you use a PKI store to authenticate to your Elasticsearch cluster you may use these options in lieu of login/password Basic authentication.
+If you use an API key, see `--apiKey` above. If you use a PKI store to authenticate to your Elasticsearch cluster you may use these options in lieu of login/password Basic authentication.
 
  <table>
  <thead>
@@ -446,6 +452,12 @@ Executing against a Cloud, ECE, or ECK cluster. Note that in this case we use 92
 
 ```$xslt
 ./diagnostics.sh --host 2775abprd8230d55d11e5edc86752260dd.us-east-1.aws.found.io -u elastic -p --port 9243 --ssl --type api --noVerify
+```
+
+Executing against a Cloud cluster with an API key instead of a user/password. The same option works for `--type kibana-api`.
+
+```$xslt
+./diagnostics.sh --host 2775abprd8230d55d11e5edc86752260dd.us-east-1.aws.found.io --port 9243 --ssl --type api --apiKey
 ```
 
 #### Customizing What Is Collected

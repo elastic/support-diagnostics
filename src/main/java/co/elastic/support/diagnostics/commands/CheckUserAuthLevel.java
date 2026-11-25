@@ -17,14 +17,23 @@ import co.elastic.support.util.JsonYamlUtils;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.semver4j.Semver;
 
 import java.util.List;
 import java.util.Map;
 
 public class CheckUserAuthLevel implements Command {
+    private static final Logger logger = LogManager.getLogger(CheckUserAuthLevel.class);
+
     @Override
     public void execute(DiagnosticContext context) {
+        if (context.diagnosticInputs.usesApiKey()) {
+            checkApiKey(context);
+            return;
+        }
+
         final String inputUsername = context.diagnosticInputs.user;
 
         // No user, it's not secured so no auth level or built-in admin role.
@@ -55,6 +64,34 @@ public class CheckUserAuthLevel implements Command {
         }
 
         context.isAuthorized = hasAuthorization;
+    }
+
+    /**
+     * An API key has no user name to look up, so ask the cluster what the key itself may do.
+     * Cluster "all" plus monitor/view_index_metadata on every index is what the superuser role
+     * gives and is what a complete diagnostic needs. Only a definite "no" produces a warning:
+     * if the check itself cannot be answered (security disabled, endpoint missing) the run
+     * carries on without a misleading message.
+     */
+    private void checkApiKey(DiagnosticContext context) {
+        RestClient restClient = context.resourceCache.getRestClient(Constants.restInputHost);
+        RestResult result = new RestResult(restClient.execPost(HAS_PRIVILEGES_URL, HAS_PRIVILEGES_BODY), HAS_PRIVILEGES_URL);
+
+        if (result.getStatus() != 200) {
+            logger.debug("Could not verify the API key privileges, status {}", result.getStatus());
+            context.isAuthorized = true;
+            return;
+        }
+        context.isAuthorized = hasAllRequestedPrivileges(result.toString());
+    }
+
+    static final String HAS_PRIVILEGES_URL = "/_security/user/_has_privileges";
+    static final String HAS_PRIVILEGES_BODY =
+            "{\"cluster\":[\"all\"],\"index\":[{\"names\":[\"*\"],\"privileges\":[\"monitor\",\"view_index_metadata\"]}]}";
+
+    public static boolean hasAllRequestedPrivileges(String json) {
+        JsonNode node = JsonYamlUtils.createJsonNodeFromString(json);
+        return node.path("has_all_requested").asBoolean(false);
     }
 
     public boolean checkForAuth(int major, String user, JsonNode userNode) {
