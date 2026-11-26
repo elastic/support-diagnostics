@@ -307,6 +307,10 @@ repositories:
   versions:
     ">= 2.0.0": "/_snapshot"
 
+resolve_index:
+  versions:
+    ">= 7.9.0": "/_resolve/index/*?expand_wildcards=all"
+
 segments:
   retry: true
   versions:
